@@ -187,7 +187,12 @@ class UserRequestRepositoryImplTest {
         override fun getUserRequests(): Flow<List<UserRequestEntity>> = requestsFlow
 
         override suspend fun upsertUserRequests(requests: List<UserRequestEntity>) {
-            requestsFlow.value = requests
+            val updated = requestsFlow.value.toMutableList()
+            requests.forEach { req ->
+                updated.removeAll { it.id == req.id }
+                updated.add(req)
+            }
+            requestsFlow.value = updated
         }
 
         override suspend fun clearUserRequests() {

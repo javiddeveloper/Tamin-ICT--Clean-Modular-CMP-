@@ -64,6 +64,21 @@ internal class AuthRemoteDataSourceImpl(
         }
     }
 
+    override suspend fun debugClientCredentialsLogin(
+        clientId: String,
+        clientSecret: String,
+    ): TokenResponseDto {
+        // Uses the same ACCOUNT override as the PKCE flow (Developer Options ->
+        // "سرویس احراز هویت") rather than its own URL field, so switching that one entry to a
+        // pilot/test environment routes both login methods there together.
+        val url = "${developerOptionsRepository.getEffectiveBaseUrl(BaseUrlKey.ACCOUNT)}server/token"
+        return userApiService.debugClientCredentialsLogin(
+            url = url,
+            clientId = clientId,
+            clientSecret = clientSecret
+        )
+    }
+
     override suspend fun signOut(token: String): String {
         logger.d { "signOut called with token: ${token.take(10)}..." }
         return try {

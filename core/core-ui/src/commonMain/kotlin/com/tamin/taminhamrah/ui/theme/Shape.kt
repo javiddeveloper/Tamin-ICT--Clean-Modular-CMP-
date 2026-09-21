@@ -117,11 +117,15 @@ object IconSize {
     val stepperConnectorWidth = 44.dp
     /** Segment height for [com.tamin.taminhamrah.ui.components.TaminHeroStepProgress] on hero headers. */
     val heroStepSegmentHeight = 4.dp
+    /** Visual box for [com.tamin.taminhamrah.ui.components.TaminCheckBox]. */
+    val checkbox = 20.dp
+    val checkboxCheck = 14.dp
 }
 
 object Thickness {
     val border = 1.dp
     val medium = 2.dp
+    val chartBar = 3.dp
 }
 
 /** Decorative wash behind [com.tamin.taminhamrah.ui.components.TaminTopAppBar] hero content. */
@@ -129,6 +133,15 @@ object HeaderDecoration {
     val circleSize = 190.dp
     val circleXOffset = 450.dp
     val circleYOffset = (-150).dp
+}
+
+object ChartDimens {
+    val barChartHeight = 180.dp
+    val barWidth = 32.dp
+    val barGap = 6.dp
+    val barCorner = 10.dp
+    val legendDot = 8.dp
+    val yAxisLabelWidth = 40.dp
 }
 
 /**
@@ -153,11 +166,25 @@ object ShimmerSize {
     val subtitleHeight = 12.dp
     val badgeWidth = 56.dp
     val badgeHeight = 24.dp
+
+    /** A whole card standing in for one the list has not loaded yet. */
+    val cardHeight = 120.dp
+
+    /** One row of a list inside a sheet. */
+    val rowHeight = 56.dp
+    val uploadCardHeight = 120.dp
+    val bannerHeight = 56.dp
+    val rateChipHeight = 48.dp
+    val wageValueHeight = 28.dp
+    val sliderTrackHeight = 4.dp
+    val stepperButtonSize = 40.dp
 }
 
 /** Scrollable list area inside modal option sheets (city / branch pickers). */
 object SheetDimens {
     val listMaxHeight = 300.dp
+    /** Max height for long copy inside a modal sheet before the sticky footer. */
+    val contentMaxHeight = 440.dp
 }
 
 /**
@@ -195,9 +222,6 @@ object CampaignDimens {
     val ctaChevronSize = 13.dp
 
     val dotsTopGap = Spacing.smPlus
-    val dotGap = 5.dp
-    val dotSize = 5.dp
-    val dotActiveWidth = 18.dp
 
     // The two aria-hidden decoration circles every card carries, resolved from the design's
     // negative offsets to a center and a radius.

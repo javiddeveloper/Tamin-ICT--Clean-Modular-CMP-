@@ -18,6 +18,8 @@ val TaminTeal300 = Color(0xFF1FA6AD)
 // ---- Purple accent (AI assistant / featured banner) ----
 val TaminPurple900 = Color(0xFF3B1E86)
 val TaminPurple700 = Color(0xFF5B2FC4)
+/** The middle stop of the AI assistant gradient. */
+val TaminNeonBlue = Color(0xFF3F5BD9)
 val TaminPurple500 = Color(0xFF6D4BE0)
 val TaminPurple300 = Color(0xFFA78BFA)
 
@@ -40,9 +42,14 @@ val TaminCardAmberStart = Color(0xFFF4A83D)
 val TaminCardAmberMid = Color(0xFFE08A00)
 val TaminCardAmberEnd = Color(0xFFB96B00)
 
-// Coverage badge on the insurance card footer.
+// Coverage badge on the insurance card footer: a mint disc with a deep-green tick when covered,
+// and its counterpart when not — a soft rose disc with a deep-red cross. The same light-disc,
+// dark-glyph pairing, so a refusal reads as a status on the card's gradient rather than as a
+// saturated red alarm stamped on top of it.
 val TaminCoverageBadgeBg = Color(0xFF4BE3A0)
 val TaminCoverageBadgeFg = Color(0xFF0B5F4F)
+val TaminCoverageRejectedBadgeBg = Color(0xFFFF8F8F)
+val TaminCoverageRejectedBadgeFg = Color(0xFF7A1212)
 
 // ---- Semantic accents ----
 val TaminGreen = Color(0xFF03AD5F)       // success / active dot
@@ -110,6 +117,27 @@ val TaminDarkGreenBg = Color(0x2910B981)     // rgba(16,185,129,.16)
 val TaminDarkMint = Color(0xFF6FCB8C)
 val TaminDarkMintBg = Color(0x293DA35D)
 val TaminDarkTealBg = Color(0x245BD8D4)      // rgba(91,216,212,.14)
+
+/**
+ * One step above [TaminDarkBgSurface]: the inner panel a card holds — a sub-chart, a legend strip,
+ * a pill. In light theme that separation is made by tinting *down* from white; in dark there is
+ * nothing below the surface to tint toward, so it lifts instead.
+ */
+val TaminDarkSurfaceRaised = Color(0xFF1A2338)
+
+/** What a raised card casts on the dark page — the ground itself, not a colored bloom. */
+val TaminDarkShadow = Color(0x66000000)
+
+// ---- «کلیه سوابق» — Dark mode ----
+// The panels lift off the page rather than tinting blue: a pale blue card on a dark ground reads as
+// a leftover from the light theme, not as a card. The rules invert from ink-at-alpha to
+// white-at-alpha for the same reason — ink on a dark page is invisible.
+val TaminDarkHistoryPanel = TaminDarkSurfaceRaised
+val TaminDarkHistoryBarTrack = Color(0x0FFFFFFF)
+val TaminDarkHistoryGridLine = Color(0x14FFFFFF)
+val TaminDarkHistoryGridMidLine = Color(0x0FFFFFFF)
+val TaminDarkHistoryGridBaseline = Color(0x2EFFFFFF)
+val TaminDarkHistoryCellRing = Color(0xB3FFFFFF)
 val TaminDarkBlueBorder = Color(0x476396FF)  // rgba(99,150,255,.28)
 val TaminDarkPurpleBg = Color(0x297C4BC0)
 
@@ -307,11 +335,19 @@ val TaminCostsOperationsInk = Color(0xFFFFFFFF)
  * everything on it is a wash of white at a set strength rather than a surface color.
  */
 val TaminInsuranceCardInk = Color(0xFFFFFFFF)
-val TaminInsuranceCardInkMuted = TaminInsuranceCardInk.copy(alpha = 0.75f)
+
+/**
+ * The card's secondary ink. A mint-tinted off-white (`#EAF9F6` in the design), not white at a
+ * lower alpha: the card's own gradient runs teal → blue, and a translucent white takes on the
+ * blue underneath it, so the subtitle drifts cool while the same line stays mint on the teal end.
+ */
+val TaminInsuranceCardInkMuted = Color(0xFFEAF9F6)
 
 /** The translucent chips and pills the card sets on its own gradient. */
 val TaminInsuranceCardChipBg = TaminInsuranceCardInk.copy(alpha = 0.13f)
-val TaminInsuranceCardTrackBg = TaminInsuranceCardInk.copy(alpha = 0.08f)
+
+/** `border-top: 1px solid #ffffff26` above the coverage line. */
+val TaminInsuranceCardDivider = TaminInsuranceCardInk.copy(alpha = 0.15f)
 
 /* ---- Ink on accent surfaces ------------------------------------------------------------------ */
 
@@ -327,6 +363,13 @@ val TaminOnAccentInkSoft = TaminOnAccentInk.copy(alpha = 0.90f)
 val TaminOnAccentInkMuted = TaminOnAccentInk.copy(alpha = 0.80f)
 /** Dimmed white for inactive hero step segments (current-only highlight). */
 val TaminOnAccentInkFaint = TaminOnAccentInk.copy(alpha = 0.35f)
+
+/**
+ * Hero step segments the wizard has already been through, when it tracks how far the user has got
+ * rather than lighting only the current one. Reads between [TaminOnAccentInk] and
+ * [TaminOnAccentInkFaint], so all three states stay distinguishable in one strip.
+ */
+val TaminOnAccentInkReached = TaminOnAccentInk.copy(alpha = 0.62f)
 
 /** Translucent fills and hairlines the same surfaces set on themselves. */
 val TaminOnAccentFill = TaminOnAccentInk.copy(alpha = 0.10f)
@@ -360,7 +403,6 @@ val CampaignStudentEnd = Color(0xFF22B8D6)
 val CampaignStudentShadow = Color(0x474B2E86)       // rgba(75,46,134,.28)
 
 /** The idle page dot under the carousel; the active one is `blueText`. */
-val CampaignDotIdle = Color(0xFFD7E0EC)
 
 /** The two aria-hidden decoration circles every campaign card carries. */
 val CampaignGlowCore = TaminOnAccentInk.copy(alpha = 0.22f)
@@ -371,4 +413,192 @@ val CampaignBadgeFill = TaminOnAccentInk.copy(alpha = 0.18f)
 val CampaignBadgeBorder = TaminOnAccentInk.copy(alpha = 0.26f)
 val CampaignBodyInk = TaminOnAccentInk.copy(alpha = 0.82f)
 val CampaignCaptionInk = TaminOnAccentInk.copy(alpha = 0.55f)
+
+
+// ─── خلاصهٔ سابقه — the home page's history summary card ──────────────────────────────────
+// Straight off the design file (`Tamin Man App` home). Its blues are a shade of their own rather
+// than the brand primaries, so they are named here instead of borrowed from a token that would
+// drag the card along the next time the primary palette moves.
+
+val HistoryCardBorder = Color(0xFFE9EEF6)
+val HistoryCardShadow = Color(0x12173D7E)      // 0 12px 30px rgba(23,61,126,.07)
+val HistoryCardDivider = Color(0xFFEEF1F6)
+val HistoryCardGlow = Color(0x215C8EF6)        // rgba(92,142,246,.13)
+val HistoryYearPillBorder = Color(0xFFD7E6FF)
+val HistoryIconStart = Color(0xFF3B6FE8)
+val HistoryIconEnd = Color(0xFF1FB6D8)
+val HistoryFigure = Color(0xFF2C67D8)
+val HistoryMonthStart = Color(0xFF5C8EF6)
+val HistoryMonthEnd = Color(0xFF2C67D8)
+val HistoryMonthCurrentStart = Color(0xFF3F79EA)
+val HistoryMonthCurrentEnd = Color(0xFF1E51B8)
+val HistoryUnpaidBg = Color(0xFFFFF7E6)
+val HistoryUnpaidBorder = Color(0xFFE9BE62)
+val HistoryUnpaidStripe = Color(0xFFF1C572)
+val HistoryUnpaidStripeSoft = Color(0xFFFBE6BE)
+val HistoryUpcomingBg = Color(0xFFF7F9FC)
+val HistoryUpcomingBorder = Color(0xFFDCE3EE)
+val HistoryProgressTrack = Color(0xFFEDF1F8)
+val HistoryWarningBorder = Color(0xFFF3DFB4)
+val HistoryWarningText = Color(0xFF8A5406)
+
+// The same card in dark: the blues carry over — they are the card's identity — while every
+// surface, border and paper-coloured fill is restated against the dark page.
+val HistoryDarkCardGlow = Color(0x2E5C8EF6)
+val HistoryDarkCardShadow = Color(0x33000000)
+val HistoryDarkUnpaidBg = Color(0x29F59E0B)
+val HistoryDarkUnpaidBorder = Color(0x8AF59E0B)
+val HistoryDarkUnpaidStripe = Color(0x66F59E0B)
+val HistoryDarkUnpaidStripeSoft = Color(0x2EF59E0B)
+val HistoryDarkUpcomingBg = Color(0x0DFFFFFF)
+val HistoryDarkUpcomingBorder = Color(0x1FFFFFFF)
+val HistoryDarkProgressTrack = Color(0x14FFFFFF)
+val HistoryDarkWarningText = Color(0xFFFBBF24)
+
+// ─── «کلیه سوابق» ─────────────────────────────────────────────────────────────
+// The insurance-history page paints a fixed dark hero and a bar chart whose fills carry meaning,
+// so these do not vary by theme — they are the design's own palette, named here rather than typed
+// into a composable. Values taken from the design source, not sampled from a screenshot.
+
+/** Hero gradient, top to bottom. */
+val TaminHistoryHeroTop = Color(0xFF173D7E)
+val TaminHistoryHeroMid = Color(0xFF1B4790)
+val TaminHistoryHeroBottom = Color(0xFF1F4FA3)
+
+/**
+ * The bloom washed over a hero's top corner — white at 14%, fading to nothing.
+ *
+ * Fixed rather than themed, like the rest of the head it sits on: both themes paint the head dark,
+ * so a light-theme variant of this would be a wash over a colour that never appears.
+ */
+val TaminHistoryHeroGlowCore = Color(0x24FFFFFF)
+
+/** The faint 34dp grid ruled over the hero. */
+val TaminHistoryHeroGrid = Color(0x1278B4FF)
+
+/** The day-count orb: highlight, body, base — and the halo bloomed behind it. */
+val TaminHistoryOrbHighlight = Color(0xFF7FC0FF)
+val TaminHistoryOrbBody = Color(0xFF3B82F6)
+val TaminHistoryOrbBase = Color(0xFF1D4FB0)
+val TaminHistoryOrbGlow = Color(0x803B82F6)
+
+/** Year chips on the hero: the selected one is solid white, the rest are translucent glass. */
+val TaminHistoryChipSelectedStart = Color(0xFFFFFFFF)
+val TaminHistoryChipSelectedEnd = Color(0xFFFFFFFF)
+val TaminHistoryChipSelectedText = Color(0xFF173D7E)
+val TaminHistoryChipBg = Color(0x1FFFFFFF)
+val TaminHistoryChipBorder = Color(0x33FFFFFF)
+val TaminHistoryChipSelectedBorder = Color(0xFFFFFFFF)
+val TaminHistoryChipText = Color(0xE6FFFFFF)
+val TaminHistoryChipTextDisabled = Color(0x66FFFFFF)
+
+/**
+ * The sweep across a year chip that has not arrived yet.
+ *
+ * Its own token rather than the shimmer's default grey: these chips sit on the hero's blue, where
+ * a surface-coloured placeholder reads as a solid light box rather than as glass waiting to fill.
+ * [TaminHistoryChipBg] is the trough, and this is the crest passing over it.
+ */
+val TaminHistoryChipShimmer = Color(0x59FFFFFF)
+val TaminHistoryHeroCaption = Color(0xA8FFFFFF)
+val TaminHistoryHeroChipBg = Color(0x1AFFFFFF)
+val TaminHistoryHeroChipBorder = Color(0x2EFFFFFF)
+
+/** Duration card tokens. */
+val TaminHistoryDurationCardBgStart = Color(0xFFF4F8FF)
+val TaminHistoryDurationCardBgEnd = Color(0xFFFFFFFF)
+val TaminHistoryDurationCardBorder = Color(0xFFDCE7FB)
+val TaminHistoryDurationStripeStart = Color(0xFF1F4FA3)
+val TaminHistoryDurationStripeEnd = Color(0xFF2DBE85)
+val TaminHistoryDurationNavBg = Color(0xFFEFF4FF)
+val TaminHistoryDurationNavBorder = Color(0xFFDCE7FB)
+val TaminHistoryDurationNavIcon = Color(0xFF1F4FA3)
+
+/** The three figures, largest to smallest, and the unit that follows each. */
+val TaminHistoryDurationFigureMajor = Color(0xFF1F4FA3)
+val TaminHistoryDurationFigureMinor = Color(0xFF173D7E)
+val TaminHistoryDurationFigureLeast = Color(0xFF475569)
+val TaminHistoryDurationUnit = Color(0xFF64748B)
+
+/** The card's own drop shadow. */
+val TaminHistoryDurationShadow = Color(0x24173D7E)
+
+/** Sub-chart container and card accents. */
+val TaminHistorySubChartBgStart = Color(0xFFFAFBFE)
+val TaminHistorySubChartBgEnd = Color(0xFFF5F8FC)
+val TaminHistorySubChartBorder = Color(0xFFEEF2F8)
+val TaminHistoryIndicatorStart = Color(0xFF2DBE85)
+val TaminHistoryIndicatorEnd = Color(0xFF0E7C82)
+val TaminHistoryLegendBg = Color(0xFFF7F9FC)
+val TaminHistoryInfoBg = Color(0xFFEAF7F7)
+val TaminHistoryInfoIcon = Color(0xFF0E7C82)
+val TaminHistoryInfoText = Color(0xFF64748B)
+
+/**
+ * Chart bars.
+ *
+ * Full cover is green (#6FE0A8 -> #1D9E68), partial cover is amber (#FFCE6A -> #E1901A).
+ */
+val TaminHistoryBarTrack = Color(0x070F172A)
+
+// The chart's own rules and cells, light: ink at alpha over a white panel.
+val TaminHistoryGridLine = Color(0x120F172A)
+val TaminHistoryGridMidLine = Color(0x0D0F172A)
+val TaminHistoryGridBaseline = Color(0x240F172A)
+val TaminHistoryCellRing = Color(0x800F172A)
+val TaminHistoryBarEmpty = Color(0xFFE7ECF3)
+val TaminHistoryBarFullTop = Color(0xFF6FE0A8)
+val TaminHistoryBarFullBottom = Color(0xFF1D9E68)
+val TaminHistoryBarFullSelectedTop = Color(0xFF3FCB8E)
+val TaminHistoryBarFullSelectedBottom = Color(0xFF0A7A4C)
+val TaminHistoryBarPartialYearTop = Color(0xFFFFCE6A)
+val TaminHistoryBarPartialYearBottom = Color(0xFFE1901A)
+val TaminHistoryBarPartialMonthTop = Color(0xFFFFCE6A)
+val TaminHistoryBarPartialMonthBottom = Color(0xFFE1901A)
+val TaminHistoryBarPartialSelectedTop = Color(0xFFFFB524)
+val TaminHistoryBarPartialSelectedBottom = Color(0xFFB96C08)
+val TaminHistoryBarSelectedTop = Color(0xFF3FCB8E)
+val TaminHistoryBarSelectedBottom = Color(0xFF0A7A4C)
+val TaminHistoryBarGlow = Color(0x3D1F4FA3)
+
+/** The cap marking a month worked at two employers at once. */
+val TaminHistoryConcurrentTop = Color(0xFF5FD8D2)
+val TaminHistoryConcurrentBottom = Color(0xFF0E7C82)
+
+/** The «۳۱ روز» bubble over a selected bar, and the page's filled button. */
+val TaminHistoryPillBg = Color(0xFF173D7E)
+val TaminHistoryButtonStart = Color(0xFF3B6FD4)
+val TaminHistoryButtonEnd = Color(0xFF173D7E)
+
+/** A month with nothing recorded, which is greyer than ordinary muted text. */
+val TaminHistoryZeroText = Color(0xFFC3CDDC)
+
+/** «سال ناقص» — its own amber, a shade off the app's ordinary orange. */
+val TaminHistoryPartialYearText = Color(0xFFB4711A)
+val TaminHistoryPartialYearBg = Color(0xFFFDF3E3)
+
+/** Teal that stays legible on a dark surface — the design's own lighter teal. */
+val TaminDarkTeal = Color(0xFF5BD8D4)
+
+/**
+ * The secondary line on a picked row — a day count under a selected year or month.
+ *
+ * White at 72%, which is the design's own value. It sits on the filled row's gradient, so it is
+ * fixed rather than themed for the same reason the gradient is.
+ */
+val TaminHistoryPickedRowSub = Color(0xB8FFFFFF)
+
+/** Season markers in the year sheet: spring, summer, autumn, winter. */
+val TaminHistorySeasonSpring = Color(0xFF22A06B)
+val TaminHistorySeasonSummer = Color(0xFFE08A21)
+val TaminHistorySeasonAutumn = Color(0xFF8C7CF6)
+val TaminHistorySeasonWinter = Color(0xFF1F4FA3)
+
+/** Palette for workshop split timeline rows in the chart card. */
+val TaminHistoryWorkshopPalette = listOf(
+    Color(0xFF0E9E90),
+    Color(0xFF7C5CE0),
+    Color(0xFFD9557C),
+    Color(0xFF7A9E1F),
+)
 

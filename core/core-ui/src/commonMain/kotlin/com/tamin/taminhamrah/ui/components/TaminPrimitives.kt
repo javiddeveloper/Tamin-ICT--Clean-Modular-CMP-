@@ -17,29 +17,41 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.LinearGradientShader
+import androidx.compose.ui.graphics.Shader
+import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isUnspecified
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -47,6 +59,11 @@ import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
+import kotlin.jvm.JvmName
+import kotlin.math.PI
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.sin
 
 /**
  * Design-system building blocks shared across the app. Everything here takes primitives
@@ -75,9 +92,109 @@ fun startToEndGradient(colors: List<Color>): Brush {
 }
 
 /**
+ * A CSS `linear-gradient(<angle>deg, …)` as a Compose [Brush].
+ *
+ * CSS measures the angle from "to top", turning clockwise, and runs the gradient along a line
+ * through the box center whose length is `|W·sin a| + |H·cos a|` — long enough that the first and
+ * last stops land exactly on the corners. `Brush.linearGradient` takes two fixed points instead,
+ * which cannot be resolved until the box is measured, so this is a [ShaderBrush]: it is handed the
+ * real size at paint time and reconstructs the line from it.
+ *
+ * That matters for the app's heroes and cards. Every gradient in the design is angled — the hero
+ * bars are `160deg`, near vertical, and the insurance cards are `120deg` — so painting them with
+ * [Brush.horizontalGradient] puts the dark stop on an edge instead of at the top, and the whole
+ * surface reads as the wrong color even though both stops are right.
+ *
+ * Deliberately *not* direction-aware: a CSS angle is a physical direction, and the design's own
+ * right-to-left pages use these same angles unmirrored.
+ */
+// Both overloads erase to (Float, List) on the JVM, so the explicit-stops one is renamed
+// there. Kotlin call sites — every one of them — still see one overloaded name.
+@JvmName("cssAngleGradientStops")
+fun cssAngleGradient(angleDeg: Float, colorStops: List<Pair<Float, Color>>): Brush =
+    CssAngleGradient(angleDeg, colorStops)
+
+/**
+ * A [data class][CssAngleGradient], not an anonymous [ShaderBrush], so two brushes built from the
+ * same angle and stops compare equal.
+ *
+ * These are rebuilt on every composition — the stops come from [LocalTaminColors] — and land on a
+ * `background` parameter. An anonymous object compares by identity, so every one of those would
+ * read as a changed argument and recompose the card or bar it paints, once per frame while the
+ * carousel is being swiped. `Brush.linearGradient` returns an `@Immutable` value for the same
+ * reason; this keeps that property.
+ */
+@Immutable
+private data class CssAngleGradient(
+    private val angleDeg: Float,
+    private val colorStops: List<Pair<Float, Color>>,
+) : ShaderBrush() {
+    override fun createShader(size: Size): Shader {
+        val radians = angleDeg * (PI.toFloat() / 180f)
+        val dx = sin(radians)
+        val dy = -cos(radians)
+        val half = (abs(size.width * dx) + abs(size.height * dy)) / 2f
+        val centreX = size.width / 2f
+        val centreY = size.height / 2f
+        return LinearGradientShader(
+            from = Offset(centreX - half * dx, centreY - half * dy),
+            to = Offset(centreX + half * dx, centreY + half * dy),
+            colors = colorStops.map { it.second },
+            colorStops = colorStops.map { it.first },
+        )
+    }
+}
+
+/** [cssAngleGradient] for stops spread evenly, the common case. */
+fun cssAngleGradient(angleDeg: Float, colors: List<Color>): Brush = cssAngleGradient(
+    angleDeg = angleDeg,
+    colorStops = colors.mapIndexed { index, color ->
+        index / (colors.size - 1).coerceAtLeast(1).toFloat() to color
+    },
+)
+
+/**
+ * A CSS `linear-gradient(<angle>deg, …)` as a [Brush], for a box of [width] by [height] pixels.
+ *
+ * CSS measures the angle from "to top", turning clockwise, and runs the gradient along a line
+ * through the box center whose length is `|W·sin a| + |H·cos a|` — long enough that the first and
+ * last stops land exactly on the corners. [Brush.linearGradient] takes two points instead, so the
+ * line has to be reconstructed from the angle and the box.
+ *
+ * Pixel coordinates, so the result never mirrors under a right-to-left layout: a design that
+ * states an angle means that angle on screen. Callers that want the gradient to follow the
+ * reading direction want [startToEndGradient] instead.
+ *
+ * [stops] are `offset to color` pairs in the order CSS lists them.
+ */
+fun angledLinearGradient(
+    angleDeg: Float,
+    stops: List<Pair<Float, Color>>,
+    width: Float,
+    height: Float,
+): Brush {
+    val radians = angleDeg * (PI.toFloat() / 180f)
+    val dx = sin(radians)
+    val dy = -cos(radians)
+    val half = (abs(width * dx) + abs(height * dy)) / 2f
+    val centre = Offset(width / 2f, height / 2f)
+    return Brush.linearGradient(
+        colorStops = stops.toTypedArray(),
+        start = Offset(centre.x - half * dx, centre.y - half * dy),
+        end = Offset(centre.x + half * dx, centre.y + half * dy),
+    )
+}
+
+/**
  * Numeric text. Amounts, national IDs and tracking codes are always laid out
  * left-to-right, matching the `dir="ltr"` the design puts on every number even inside an
  * otherwise right-to-left page.
+ *
+ * **Digits and punctuation only.** This flips the whole paragraph, not just the digits, so a
+ * Persian word anywhere in [text] is laid out relative to a left-to-right paragraph and lands on
+ * the far side of its own number — «۱۲ روز» prints as «روز ۱۲». A number *with a unit* is two
+ * pieces: a [NumericText] for the figure and an ordinary `Text` for the word beside it, the way
+ * `WageText` does it. A whole sentence that merely contains numbers is an ordinary `Text`.
  */
 @Composable
 fun NumericText(
@@ -85,9 +202,45 @@ fun NumericText(
     style: TextStyle,
     color: Color,
     modifier: Modifier = Modifier,
+    /**
+     * When set, a figure too wide for its space steps its font down toward this size instead of
+     * drawing past its bounds. Unspecified — the default — keeps the size fixed.
+     */
+    minFontSize: TextUnit = TextUnit.Unspecified,
 ) {
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-        Text(text = text, style = style, color = color, modifier = modifier)
+        // A number is one token: ۱۷ broken across two lines reads as ۱ and ۷, and ۱۷ clipped to its
+        // first digit reads as ۱ — both are a different number, and the second is worse because
+        // nothing about it looks wrong. So it never wraps, and it is allowed to draw past its
+        // bounds rather than lose a digit; the caller sizes the space (see Modifier.scaleOnCollapse),
+        // or asks for [minFontSize] so the figure shrinks into it instead.
+        // The same style resolution Text does, which BasicText leaves to its caller.
+        val resolved = LocalTextStyle.current.merge(style)
+        if (minFontSize.isUnspecified || resolved.fontSize.isUnspecified) {
+            Text(
+                text = text,
+                style = style,
+                color = color,
+                modifier = modifier,
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Visible,
+            )
+        } else {
+            BasicText(
+                text = text,
+                style = resolved.merge(TextStyle(color = color)),
+                modifier = modifier,
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Visible,
+                autoSize = TextAutoSize.StepBased(
+                    // Shrinking is all this is for: a floor above the style's own size would grow it.
+                    minFontSize = if (minFontSize > resolved.fontSize) resolved.fontSize else minFontSize,
+                    maxFontSize = resolved.fontSize,
+                ),
+            )
+        }
     }
 }
 
@@ -133,7 +286,9 @@ fun StatusPill(
         Text(
             text = text,
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = fontWeight),
-            color = contentColor
+            color = contentColor,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }
@@ -222,6 +377,9 @@ fun StatTile(
                     else -> MaterialTheme.typography.titleMedium
                 },
                 color = contentColor,
+                // A tile is a third of a row, and a total runs to nine digits: it shrinks to stay on
+                // one line inside the tile rather than spilling past its edges.
+                minFontSize = MaterialTheme.typography.labelSmall.fontSize,
             )
         }
     }
@@ -500,6 +658,8 @@ fun TaminOutlinedButton(
     disabledContentColor: Color = LocalTaminColors.current.textMuted,
     textStyle: TextStyle = MaterialTheme.typography.titleMedium,
     iconPosition: IconPosition? = null,
+    /** The glyph's size. Defaults to the medium icon every existing caller draws. */
+    iconSize: Dp = IconSize.medium,
 ) {
     val currentBorderColor = if (enabled) borderColor else disabledBorderColor
     val currentContainerColor = if (enabled) containerColor else disabledContainerColor
@@ -534,7 +694,7 @@ fun TaminOutlinedButton(
                 imageVector = icon,
                 contentDescription = null,
                 tint = currentContentColor,
-                modifier = Modifier.size(IconSize.medium).then(iconModifier),
+                modifier = Modifier.size(iconSize).then(iconModifier),
             )
         }
 
@@ -549,7 +709,7 @@ fun TaminOutlinedButton(
                 imageVector = icon,
                 contentDescription = null,
                 tint = currentContentColor,
-                modifier = Modifier.size(IconSize.medium).then(iconModifier),
+                modifier = Modifier.size(iconSize).then(iconModifier),
             )
         }
     }

@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -34,25 +35,35 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachment
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopDocumentType
+import com.tamin.taminhamrah.ui.components.toast.LocalToaster
+import com.tamin.taminhamrah.ui.components.toast.warning
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.ui.components.InputRestriction
 import com.tamin.taminhamrah.ui.components.LoadingButton
@@ -64,6 +75,9 @@ import com.tamin.taminhamrah.ui.components.animatedErrorBorder
 import com.tamin.taminhamrah.ui.components.document.TaminDocumentUploadCard
 import com.tamin.taminhamrah.ui.components.document.TaminDocumentUploadState
 import com.tamin.taminhamrah.ui.components.taminSurface
+import com.tamin.taminhamrah.ui.paging.OnLoadMore
+import com.tamin.taminhamrah.ui.paging.PagingFooter
+import com.tamin.taminhamrah.ui.paging.rememberDebouncedQuery
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -81,6 +95,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.error_image_duplicate
 import taminx.core.core_ui.ic_info
 import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.ic_tamin_chevron_back
@@ -100,7 +115,7 @@ import kotlin.time.Duration.Companion.milliseconds
 /**
  * The parts every کارگاه form is assembled from.
  *
- * The design draws all three — ثبت اعتراض, ماده ۱۶ and نام‌نویسی — from one template: a stepper, a
+ * The design draws all three — ثبت اعتراض, ماده ۱۶ and نامنویسی — from one template: a stepper, a
  * titled section, collapsible review groups, an upload box, amber notes, tick-boxes, an error line
  * and a sticky footer. Each is a piece here, so a form is a list of them rather than a re-drawing.
  */
@@ -247,6 +262,14 @@ fun WorkshopReviewGroup(
     onToggle: () -> Unit,
     modifier: Modifier = Modifier,
     onEdit: (() -> Unit)? = null,
+    /** A tinted glyph ahead of the title. Null, the default, draws the title alone. */
+    icon: ImageVector? = null,
+    iconTint: Color = Color.Unspecified,
+    iconBackground: Color = Color.Unspecified,
+    /** One muted line under the title — the group at a glance. Null, the default, draws none. */
+    preview: String? = null,
+    /** The «N مورد» beside the title. True, the default, keeps it. */
+    showCount: Boolean = true,
 ) {
     val colors = LocalTaminColors.current
     val rotation by animateFloatAsState(
@@ -268,22 +291,54 @@ fun WorkshopReviewGroup(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.ExtraBold,
-                color = colors.textPrimary,
-                modifier = Modifier.weight(1f),
-            )
-            Text(
-                text = stringResource(
-                    Res.string.ws_form_group_count,
-                    rows.size.toString().toPersianDigits(),
-                ),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                color = colors.textMuted,
-            )
+            if (icon != null) {
+                Box(
+                    modifier = Modifier
+                        .size(IconSize.badge)
+                        .clip(RoundedCornerShape(CornerRadius.md))
+                        .background(iconBackground),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = iconTint,
+                        modifier = Modifier.size(IconSize.small),
+                    )
+                }
+            }
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .then(if (preview != null) Modifier.padding(vertical = Spacing.sm) else Modifier),
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = colors.textPrimary,
+                )
+                if (preview != null) {
+                    Text(
+                        text = preview,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colors.textMuted,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+            if (showCount) {
+                Text(
+                    text = stringResource(
+                        Res.string.ws_form_group_count,
+                        rows.size.toString().toPersianDigits(),
+                    ),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.textMuted,
+                )
+            }
             Icon(
                 imageVector = vectorResource(Res.drawable.ic_tamin_chevron_down),
                 contentDescription = null,
@@ -354,6 +409,29 @@ fun WorkshopReviewGroup(
 }
 
 /**
+ * Whether the picked file with [fingerprint] is already one of these attachments — the old app's
+ * «تصویر تکراری انتخاب شده است». By content, since a picker names the same photo differently each
+ * time; [fingerprints] maps each attachment's guid to the file it was picked from.
+ */
+internal fun List<WorkshopAttachment>.holdsFile(
+    fingerprint: String,
+    fingerprints: Map<String, String>,
+): Boolean = any { fingerprints[it.guid] == fingerprint }
+
+/** Length plus content hash: two different photos agreeing on both is not a practical case. */
+internal fun ByteArray.fingerprint(): String = "$size:${contentHashCode()}"
+
+/** Keeps a panel's fingerprints across a configuration change, flattened to guid, fingerprint, … */
+private val FingerprintsSaver = listSaver<SnapshotStateMap<String, String>, String>(
+    save = { map -> map.flatMap { (guid, fingerprint) -> listOf(guid, fingerprint) } },
+    restore = { flat ->
+        mutableStateMapOf<String, String>().apply {
+            flat.chunked(2).forEach { (guid, fingerprint) -> put(guid, fingerprint) }
+        }
+    },
+)
+
+/**
  * The files attached so far, the control that adds another, and the sheet that names its type.
  *
  * The rows are core-ui's [TaminDocumentUploadCard] — the same card the occurrence report uses —
@@ -386,12 +464,45 @@ fun WorkshopDocumentsPanel(
      * points at the field to fill in.
      */
     isError: Boolean = false,
+    /**
+     * Lets a PDF be picked as well as an image. False — the default — keeps the image picker every
+     * existing form was built against; only درخواست مفاصاحساب files PDFs.
+     */
+    acceptsPdf: Boolean = false,
+    /**
+     * Asks for the type before opening the picker. True — the default — is how every existing form
+     * behaves; a panel with a single type it never needs to ask about passes false and the picker
+     * opens straight away under that type.
+     */
+    asksForType: Boolean = true,
 ) {
     val colors = LocalTaminColors.current
     val scope = rememberCoroutineScope()
     var isTypeSheetOpen by remember { mutableStateOf(false) }
     // Never cleared: a canceled pick hands back a null file, which is what the callback tests.
     var pendingType by remember { mutableStateOf<WorkshopDocumentType?>(null) }
+
+    // Which picked file each attachment came from, by guid. Kept here rather than on the
+    // attachment because only the panel ever holds the bytes; a document read back from the
+    // service has no entry, so it never counts as a duplicate.
+    // ponytail: forgotten when a multi-step form leaves its documents step and comes back; hoist
+    // the map into the form page if a repeat pick across steps ever matters.
+    val fingerprints = rememberSaveable(saver = FingerprintsSaver) { mutableStateMapOf() }
+    var pendingFingerprint by rememberSaveable { mutableStateOf<String?>(null) }
+    var countAtHandOff by rememberSaveable { mutableStateOf(0) }
+    // The file handed on is the newest attachment once the list grows past where it was; a failed
+    // upload adds nothing, and the next pick replaces what is pending.
+    LaunchedEffect(attachments) {
+        val fingerprint = pendingFingerprint ?: return@LaunchedEffect
+        if (attachments.size <= countAtHandOff) return@LaunchedEffect
+        fingerprints[attachments.last().guid] = fingerprint
+        pendingFingerprint = null
+    }
+    // The picker answers after the pick, so it reads the list as it is then, not as it was when
+    // the launcher was built.
+    val currentAttachments by rememberUpdatedState(attachments)
+    val toaster = LocalToaster.current
+    val duplicateMessage = stringResource(Res.string.error_image_duplicate)
 
     // The wave outlives the upload by [WAVE_TAIL_MILLIS], the way step 6 of the occurrence report
     // does it — a fast upload otherwise flashes the card and is gone before it reads as progress.
@@ -413,10 +524,23 @@ fun WorkshopDocumentsPanel(
         if (hasLanded) attachments.dropLast(1) else attachments
     }
 
-    val filePicker = rememberFilePickerLauncher(type = FileKitType.Image) { file ->
+    val filePicker = rememberFilePickerLauncher(
+        type = if (acceptsPdf) PdfOrImageFiles else FileKitType.Image,
+    ) { file ->
         val type = pendingType
         if (file == null || type == null) return@rememberFilePickerLauncher
-        scope.launch { onAdd(file.name, file.readBytes(), type.code) }
+        scope.launch {
+            val bytes = file.readBytes()
+            val fingerprint = bytes.fingerprint()
+            // The same image twice is refused before it is uploaded, as the old app did.
+            if (currentAttachments.holdsFile(fingerprint, fingerprints)) {
+                toaster.warning(duplicateMessage)
+                return@launch
+            }
+            pendingFingerprint = fingerprint
+            countAtHandOff = currentAttachments.size
+            onAdd(file.name, bytes, type.code)
+        }
     }
 
     Column(
@@ -436,8 +560,10 @@ fun WorkshopDocumentsPanel(
                 fontWeight = FontWeight.Bold,
                 color = colors.textPrimary,
             )
-            val shape = remember { RoundedCornerShape(CornerRadius.max) }
-            NumericText(
+            // A plain Text, in the page's own direction: «۰ از ۱۰» is a sentence, not a number, and
+            // NumericText's forced LTR would reorder «از» between the two digit runs so the badge
+            // read «از ۱۰ ۰».
+            Text(
                 text = stringResource(
                     Res.string.ws_form_docs_count,
                     attachments.size.toString().toPersianDigits(),
@@ -445,10 +571,11 @@ fun WorkshopDocumentsPanel(
                 ),
                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                 color = colors.blueText,
+                maxLines = 1,
                 modifier = Modifier
-                    .clip(shape)
+                    .clip(DocsBadgeShape)
                     .background(colors.blueBg)
-                    .border(Thickness.border, colors.blueBorder, shape)
+                    .border(Thickness.border, colors.blueBorder, DocsBadgeShape)
                     .padding(
                         horizontal = DocCountHorizontalPadding,
                         vertical = WorkshopDimens.countBadgeVerticalPadding,
@@ -462,7 +589,9 @@ fun WorkshopDocumentsPanel(
                 state = TaminDocumentUploadState.Uploaded,
                 statusText = stringResource(Res.string.ws_form_file_size, attachment.size),
                 onDeleteClick = { onRemove(index) },
-                modifier = Modifier.padding(top = Spacing.cardGap),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = Spacing.cardGap),
             )
         }
 
@@ -471,22 +600,33 @@ fun WorkshopDocumentsPanel(
             TaminDocumentUploadCard(
                 title = waving?.label?.let { stringResource(it) }.orEmpty(),
                 state = TaminDocumentUploadState.Uploading,
-                modifier = Modifier.padding(top = Spacing.cardGap),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = Spacing.cardGap),
             )
         }
 
         if (attachments.size < capacity && !isWaving) {
             TaminPrimaryButton(
                 text = stringResource(Res.string.ws_form_add_doc),
-                onClick = { isTypeSheetOpen = true },
+                onClick = {
+                    val presetType = types.firstOrNull()?.takeIf { !asksForType }
+                    if (presetType == null) {
+                        isTypeSheetOpen = true
+                    } else {
+                        pendingType = presetType
+                        filePicker.launch()
+                    }
+                },
                 icon = Icons.Default.Add,
                 iconAtStart = true,
                 background = colors.successGradient,
                 height = WorkshopDimens.panelButtonHeight,
-                shape = RoundedCornerShape(CornerRadius.chip),
+                shape = BannerShape,
                 textStyle = MaterialTheme.typography.labelLarge
                     .copy(fontWeight = FontWeight.ExtraBold),
                 modifier = Modifier
+                    .fillMaxWidth()
                     .padding(top = Spacing.cardGap)
                     .animatedErrorBorder(
                         isError = isError,
@@ -521,17 +661,19 @@ fun WorkshopDocumentsPanel(
 /** How long the upload wave keeps playing after the file has actually landed. */
 private const val WAVE_TAIL_MILLIS = 1600L
 
+/** What [WorkshopDocumentsPanel] offers once it accepts PDFs: the PDF, and the images it always took. */
+private val PdfOrImageFiles = FileKitType.File(extensions = setOf("pdf", "jpg", "jpeg", "png"))
+
 /** A rule the user must know before submitting, in the design's amber. */
 @Composable
 fun WorkshopFormNote(text: String, modifier: Modifier = Modifier) {
     val colors = LocalTaminColors.current
-    val shape = remember { RoundedCornerShape(CornerRadius.chip) }
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(shape)
+            .clip(NoteShape)
             .background(colors.orangeBg)
-            .border(Thickness.border, colors.orangeText.copy(alpha = NoteBorderAlpha), shape)
+            .border(Thickness.border, colors.orangeText.copy(alpha = NoteBorderAlpha), NoteShape)
             .padding(horizontal = NoteHorizontalPadding, vertical = NoteVerticalPadding),
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
@@ -559,13 +701,11 @@ fun WorkshopFormCheck(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    val cardShape = remember { RoundedCornerShape(CornerRadius.xl) }
-    val boxShape = remember { RoundedCornerShape(CheckBoxCorner) }
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(cardShape)
+            .clip(CheckCardShape)
             .taminSurface(CornerRadius.xl)
             .clickable(onClick = onToggle)
             .padding(horizontal = CheckHorizontalPadding, vertical = CheckVerticalPadding),
@@ -574,14 +714,14 @@ fun WorkshopFormCheck(
         Box(
             modifier = Modifier
                 .size(CheckBoxSize)
-                .clip(boxShape)
+                .clip(CheckBoxShape)
                 .then(
                     if (isChecked) {
-                        Modifier.background(colors.buttonGradient, boxShape)
+                        Modifier.background(colors.buttonGradient, CheckBoxShape)
                     } else {
                         Modifier
                             .background(colors.bgSurface)
-                            .border(CheckBoxBorder, colors.outerBorder, boxShape)
+                            .border(CheckBoxBorder, colors.outerBorder, CheckBoxShape)
                     },
                 ),
             contentAlignment = Alignment.Center,
@@ -638,7 +778,6 @@ fun WorkshopFormTextArea(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    val shape = remember { RoundedCornerShape(TextAreaCorner) }
     val textStyle = MaterialTheme.typography.labelLarge.copy(
         color = colors.textPrimary,
         lineHeight = TextAreaLineHeight,
@@ -648,29 +787,31 @@ fun WorkshopFormTextArea(
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold,
             color = colors.textSecondary,
-            modifier = Modifier.padding(bottom = Spacing.tabSelector),
+            modifier = Modifier.padding(bottom = WorkshopDimens.fieldLabelGap),
         )
         BasicTextField(
             value = value,
             onValueChange = onValueChange,
             textStyle = textStyle,
-            cursorBrush = remember(colors.blueText) { SolidColor(colors.blueText) },
+            cursorBrush = SolidColor(colors.blueText),
             modifier = Modifier
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = TextAreaHeight)
-                .clip(shape)
-                .background(colors.bgSurface)
-                .border(Thickness.border, colors.border, shape)
-                .padding(horizontal = TextAreaPadding, vertical = TextAreaPadding),
-            decorationBox = { field ->
-                Box {
-                    if (value.isEmpty()) {
-                        Text(text = placeholder, style = textStyle, color = colors.textMuted)
-                    }
-                    field()
+                .clip(TextAreaShape)
+                .background(colors.bgPage)
+                .border(Thickness.border, colors.border, TextAreaShape)
+                .padding(TextAreaPadding),
+            decorationBox = { innerTextField ->
+                if (value.isEmpty()) {
+                    Text(
+                        text = placeholder,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = colors.textMuted,
+                        lineHeight = TextAreaLineHeight,
+                    )
                 }
+                innerTextField()
             },
         )
     }
@@ -690,8 +831,18 @@ fun WorkshopFormFooter(
     onPrev: (() -> Unit)? = null,
     /** While true the forward action shows the app's spinner and refuses further taps. */
     isBusy: Boolean = false,
+    /** The forward button's glyph. Null, the default, is the chevron every form points on with. */
+    nextIcon: ImageVector? = null,
+    /** The forward button's fill. Null, the default, is the app's primary gradient. */
+    nextBackground: Brush? = null,
+    /**
+     * Shows [isBusy] as a shimmer passing over the forward button instead of the spinner. False —
+     * the default — keeps the spinner every existing form shows.
+     */
+    shimmerWhileBusy: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
+    val chevron = vectorResource(Res.drawable.ic_tamin_chevron_forward)
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -717,7 +868,7 @@ fun WorkshopFormFooter(
                 text = stringResource(Res.string.ws_form_prev),
                 onClick = onPrev,
                 icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                shape = RoundedCornerShape(FooterButtonCorner),
+                shape = FooterButtonShape,
                 height = FooterButtonHeight,
                 borderWidth = FooterButtonBorder,
                 borderColor = colors.blueBorder,
@@ -734,17 +885,19 @@ fun WorkshopFormFooter(
             isLoading = isBusy,
             enabled = !isBusy,
             // Points the way on: autoMirrored, so under RTL it draws "‹" as the design has it.
-            icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
+            icon = nextIcon ?: chevron,
             iconPosition = LoadingButtonIconPosition.TRAILING,
+            background = nextBackground,
             height = FooterButtonHeight,
-            shape = RoundedCornerShape(FooterButtonCorner),
+            shape = FooterButtonShape,
+            shimmerWhileLoading = shimmerWhileBusy,
             modifier = Modifier.weight(NextButtonWeight),
         )
     }
 }
 
 /** The dashed rule the design puts above a card's footer control. */
-private fun Modifier.dashedTopRule(color: Color): Modifier =
+internal fun Modifier.dashedTopRule(color: Color): Modifier =
     drawBehind {
         drawLine(
             color = color,
@@ -851,7 +1004,7 @@ fun WorkshopDocumentTypeSheet(
                     color = colors.textPrimary,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(CornerRadius.md))
+                        .clip(DocTypeItemShape)
                         .clickable { onSelect(type) }
                         .background(colors.chipBg)
                         .padding(horizontal = Spacing.lg, vertical = Spacing.md),
@@ -865,7 +1018,7 @@ fun WorkshopDocumentTypeSheet(
  * A searchable list of values a field is chosen from — a city, a job.
  *
  * Searched rather than scrolled: both lookups run to thousands of rows, and the service is asked
- * again as the query changes rather than every row being pulled down once.
+ * again once typing pauses rather than every row being pulled down once.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -878,9 +1031,22 @@ fun <T> WorkshopLookupSheet(
     onDismiss: () -> Unit,
     onSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
+    canLoadMore: Boolean = false,
+    isLoadingMore: Boolean = false,
+    onLoadMore: (() -> Unit)? = null,
     label: (T) -> String = { it.toString() },
 ) {
     val colors = LocalTaminColors.current
+    val listState = rememberLazyListState()
+    var text by rememberDebouncedQuery(query, onQueryChange)
+
+    if (onLoadMore != null) {
+        listState.OnLoadMore(
+            enabled = canLoadMore && !isLoadingMore,
+            onLoadMore = onLoadMore,
+        )
+    }
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
@@ -905,8 +1071,8 @@ fun <T> WorkshopLookupSheet(
             )
             WorkshopTextField(
                 label = title,
-                value = query,
-                onValueChange = onQueryChange,
+                value = text,
+                onValueChange = { text = it },
                 keyboardType = KeyboardType.Text,
                 inputRestriction = InputRestriction.None,
             )
@@ -920,8 +1086,19 @@ fun <T> WorkshopLookupSheet(
                     )
                 }
             }
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-                items(options.size) { index ->
+            LazyColumn(
+                state = listState,
+                verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+            ) {
+                items(
+                    count = options.size,
+                    key = { index ->
+                        val item = options[index]
+                        (item as? com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.PickedOption)?.code
+                            ?: (item as? WorkshopDocumentType)?.code
+                            ?: index
+                    },
+                ) { index ->
                     val option = options[index]
                     Text(
                         text = label(option),
@@ -929,11 +1106,17 @@ fun <T> WorkshopLookupSheet(
                         color = colors.textPrimary,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(CornerRadius.md))
+                            .clip(OptionItemShape)
                             .clickable { onSelect(option) }
                             .background(colors.chipBg)
                             .padding(horizontal = Spacing.lg, vertical = Spacing.md),
                     )
+                }
+
+                if (isLoadingMore) {
+                    item(key = "lookup_sheet_loading_more") {
+                        PagingFooter(isLoadingNextPage = true, error = null, onRetry = {})
+                    }
                 }
             }
         }
@@ -942,33 +1125,58 @@ fun <T> WorkshopLookupSheet(
 
 /** Something the user needs to know before starting, in the design's blue. */
 @Composable
-fun WorkshopFormBanner(text: String, modifier: Modifier = Modifier) {
+fun WorkshopFormBanner(
+    text: String,
+    modifier: Modifier = Modifier,
+    /** The blue information box, the default, or the green one that says nothing more is needed. */
+    tone: WorkshopBannerTone = WorkshopBannerTone.INFO,
+    /** Drawn in place of the tone's icon — a status pill, say. Null, the default, keeps the icon. */
+    leading: (@Composable () -> Unit)? = null,
+) {
     val colors = LocalTaminColors.current
-    val shape = remember { RoundedCornerShape(CornerRadius.chip) }
+    val isSuccess = tone == WorkshopBannerTone.SUCCESS
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(shape)
-            .background(colors.blueBg)
-            .border(Thickness.border, colors.blueBorder, shape)
+            .clip(BannerShape)
+            .background(if (isSuccess) colors.greenBg else colors.blueBg)
+            .border(Thickness.border, if (isSuccess) colors.greenBorder else colors.blueBorder, BannerShape)
             .padding(horizontal = NoteHorizontalPadding, vertical = NoteVerticalPadding),
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        verticalAlignment = if (leading != null) Alignment.CenterVertically else Alignment.Top,
     ) {
-        Icon(
-            imageVector = vectorResource(Res.drawable.ic_info),
-            contentDescription = null,
-            tint = colors.blueText,
-            modifier = Modifier.size(IconSize.small),
-        )
+        if (leading != null) {
+            leading()
+        } else {
+            Icon(
+                imageVector = vectorResource(if (isSuccess) Res.drawable.ic_tamin_check else Res.drawable.ic_info),
+                contentDescription = null,
+                tint = if (isSuccess) colors.greenText else colors.blueText,
+                modifier = Modifier.size(IconSize.small),
+            )
+        }
         Text(
             text = text,
             style = MaterialTheme.typography.labelSmall,
-            color = colors.textSecondary,
+            color = if (isSuccess) colors.greenText else colors.textSecondary,
             lineHeight = NoteLineHeight,
         )
     }
 }
 
+/** How a [WorkshopFormBanner] reads. */
+enum class WorkshopBannerTone { INFO, SUCCESS }
+
 /** A lookup waits as four row-shaped blocks — about a sheet's worth before it scrolls. */
 private const val LookupShimmerRows = 4
 private val LookupShimmerRowHeight = 44.dp
+
+private val DocsBadgeShape = RoundedCornerShape(CornerRadius.max)
+private val NoteShape = RoundedCornerShape(CornerRadius.chip)
+private val CheckCardShape = RoundedCornerShape(CornerRadius.xl)
+private val CheckBoxShape = RoundedCornerShape(CheckBoxCorner)
+private val TextAreaShape = RoundedCornerShape(TextAreaCorner)
+private val FooterButtonShape = RoundedCornerShape(FooterButtonCorner)
+private val DocTypeItemShape = RoundedCornerShape(CornerRadius.md)
+private val OptionItemShape = RoundedCornerShape(CornerRadius.md)
+private val BannerShape = RoundedCornerShape(CornerRadius.chip)

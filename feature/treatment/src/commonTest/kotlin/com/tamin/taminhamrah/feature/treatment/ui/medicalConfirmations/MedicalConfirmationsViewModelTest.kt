@@ -20,6 +20,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MedicalConfirmationsViewModelTest {
@@ -108,6 +109,33 @@ class MedicalConfirmationsViewModelTest {
             while (state.viewerPdf != null) state = awaitItem()
             assertNull(state.viewerPdf)
         }
+    }
+
+    /**
+     * A failed download says so twice: the banner explains, and [viewerDownloadFailed] lets the
+     * viewer close itself instead of sitting on an empty page.
+     */
+    @Test
+    fun testDownloadPdf_whenRepositoryFails_reportsTheFailureToTheViewer() = runTest(testDispatcher) {
+        repository.shouldThrowError = true
+
+        viewModel.sendIntent(ConfirmationsIntent.DownloadPdf("1"))
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertNotNull(state.error)
+        assertTrue(state.viewerDownloadFailed)
+        assertNull(state.viewerPdf)
+    }
+
+    @Test
+    fun testSendToInbox_whenRepositoryFails_emitsErrorInsteadOfAConfirmation() = runTest(testDispatcher) {
+        repository.shouldThrowError = true
+
+        viewModel.sendIntent(ConfirmationsIntent.SendToInbox("1"))
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertNotNull(viewModel.uiState.value.error)
     }
 
     @Test

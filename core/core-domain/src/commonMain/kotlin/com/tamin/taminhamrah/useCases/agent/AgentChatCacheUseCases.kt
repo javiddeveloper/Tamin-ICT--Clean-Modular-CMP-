@@ -92,6 +92,6 @@ class UpdateAgentSessionUseCase(
     suspend fun title(sessionId: String, title: String) =
         repository.updateSessionTitle(sessionId, title)
 
-    suspend fun lastEntity(sessionId: String, lastEntity: String?) =
-        repository.updateSessionLastEntity(sessionId, lastEntity)
+    suspend fun context(sessionId: String, lastEntity: String?, state: String?, history: String?) =
+        repository.updateSessionContext(sessionId, lastEntity, state, history)
 }

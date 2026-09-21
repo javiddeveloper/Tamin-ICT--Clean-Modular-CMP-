@@ -11,7 +11,12 @@ import com.tamin.taminhamrah.apiService.VersionHistoryApiServiceImpl
 import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSource
 import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSource
-import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSourceFakeImpl
+import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.paymentSource.FakePaymentGatewayRemoteDataSource
+import com.tamin.taminhamrah.dataSource.paymentSource.PaymentGatewayRemoteDataSource
+import com.tamin.taminhamrah.dataSource.paymentSource.PaymentGatewayRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.paymentSource.PaymentGatewayRemoteDataSourceSelector
+import com.tamin.taminhamrah.repository.DeveloperOptionsRepository
 import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSource
 import com.tamin.taminhamrah.dataSource.authSource.AuthRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.calculateWagePension.CalculateWagePensionRemoteDataSource
@@ -20,6 +25,8 @@ import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSource
 import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSource
 import com.tamin.taminhamrah.dataSource.contracts.ContractsRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.contractAffair.ContractAffairRemoteDataSource
+import com.tamin.taminhamrah.dataSource.contractAffair.ContractAffairRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.employerInfo.EmployerInfoRemoteDataSource
 import com.tamin.taminhamrah.dataSource.employerInfo.EmployerInfoRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.historyObjection.HistoryObjectionRemoteDataSource
@@ -60,8 +67,14 @@ import com.tamin.taminhamrah.repository.AgentRepository
 import com.tamin.taminhamrah.repository.agentRepository.AgentRepositoryImpl
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
+import com.tamin.taminhamrah.dataSource.fractionContract.FractionContractRemoteDataSource
+import com.tamin.taminhamrah.dataSource.fractionContract.FractionContractRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.inquiryEducation.InquiryEducationRemoteDataSource
 import com.tamin.taminhamrah.dataSource.inquiryEducation.InquiryEducationRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.workersPayment.WorkersPaymentRemoteDataSource
+import com.tamin.taminhamrah.dataSource.workersPayment.WorkersPaymentRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.weddingPresent.WeddingPresentRemoteDataSource
+import com.tamin.taminhamrah.dataSource.weddingPresent.WeddingPresentRemoteDataSourceImpl
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
@@ -121,7 +134,8 @@ val remoteModule = module {
         WorkShopsRemoteDataSourceImpl(
             apiService = get(),
             queryBuilder = get(),
-            errorParser = get()
+            errorParser = get(),
+            developerOptionsRepository = get()
         )
     }
 
@@ -195,6 +209,14 @@ val remoteModule = module {
         )
     }
 
+    single<ContractAffairRemoteDataSource> {
+        ContractAffairRemoteDataSourceImpl(
+            contractAffairApiService = get(named("contractAffairApiService")),
+            apiQueryBuilder = get(),
+            errorParser = get()
+        )
+    }
+
     single<ContactUsRemoteDataSource> {
         ContactUsRemoteDataSourceImpl()
     }
@@ -208,14 +230,10 @@ val remoteModule = module {
     }
 
     single<AgentRemoteDataSource> {
-        // Fake agent responses while the real API is being finished.
-        // Swap to the AgentRemoteDataSourceImpl below to hit the live service:
-        //   AgentRemoteDataSourceImpl(
-        //       agentApiService = get(named("agentApiService")),
-        //       errorParser = get(),
-        //       json = get()
-        //   )
-        AgentRemoteDataSourceFakeImpl(
+        // The live assistant. AgentRemoteDataSourceFakeImpl serves local fixtures for offline work.
+        AgentRemoteDataSourceImpl(
+            agentApiService = get(named("agentApiService")),
+            errorParser = get(),
             json = get()
         )
     }
@@ -240,6 +258,13 @@ val remoteModule = module {
         OrotezProtezRemoteDataSourceImpl(
             orotezProtezApiService = get(),
             apiQueryBuilder = get(),
+            errorParser = get()
+        )
+    }
+
+    single<WorkersPaymentRemoteDataSource> {
+        WorkersPaymentRemoteDataSourceImpl(
+            apiService = get(),
             errorParser = get()
         )
     }
@@ -278,6 +303,40 @@ val remoteModule = module {
         InquiryEducationRemoteDataSourceImpl(
             inquiryEducationApiService = get(),
             errorParser = get()
+        )
+    }
+
+    single<FractionContractRemoteDataSource> {
+        FractionContractRemoteDataSourceImpl(
+            fractionContractApiService = get(),
+            errorParser = get()
+        )
+    }
+
+    single<WeddingPresentRemoteDataSource> {
+        WeddingPresentRemoteDataSourceImpl(
+            weddingPresentApiService = get(),
+            errorParser = get()
+        )
+    }
+
+    /**
+     * The payment gateway, wrapped so Developer Options can put a fake in front of it.
+     *
+     * Both fakes are built eagerly and cost nothing until a mode selects one; building them here
+     * rather than inside the selector keeps the selector free of construction logic and makes the
+     * two mock behaviours visible in the module, which is where a developer looks for them.
+     * The selector answers with the real gateway in release builds regardless of what is stored.
+     */
+    single<PaymentGatewayRemoteDataSource> {
+        PaymentGatewayRemoteDataSourceSelector(
+            real = PaymentGatewayRemoteDataSourceImpl(
+                apiService = get(),
+                errorParser = get()
+            ),
+            successFake = FakePaymentGatewayRemoteDataSource(succeeds = true),
+            failureFake = FakePaymentGatewayRemoteDataSource(succeeds = false),
+            developerOptionsRepository = get<DeveloperOptionsRepository>()
         )
     }
 }

@@ -29,6 +29,7 @@ class FakeAddDependentRemoteDataSource : AddDependentRemoteDataSource {
     var educationCodeResult: String = ""
     var uploadImageResult: UploadImageResponseDTO = UploadImageResponseDTO()
     var addNewDependentResult: GeneralResponseDTO = GeneralResponseDTO()
+    var refreshDependentsResult: GeneralResponseDTO = GeneralResponseDTO()
 
     var shouldThrowError: Exception? = null
     var lastFamilyRelationshipsFilter: List<ApiFilterDN>? = null
@@ -85,6 +86,11 @@ class FakeAddDependentRemoteDataSource : AddDependentRemoteDataSource {
     override suspend fun addNewDependent(request: RequestAddDependentDTO): GeneralResponseDTO {
         shouldThrowError?.let { throw it }
         return addNewDependentResult
+    }
+
+    override suspend fun refreshDependents(): GeneralResponseDTO {
+        shouldThrowError?.let { throw it }
+        return refreshDependentsResult
     }
 }
 
@@ -202,12 +208,39 @@ class AddDependentRepositoryImplTest {
     }
 
     @Test
+    fun refreshDependents_emitsMappedGeneralResultDN() = runTest {
+        remoteDataSource.refreshDependentsResult = GeneralResponseDTO(
+            isSuccess = true,
+            message = "بروزرسانی شد",
+            code = 200
+        )
+
+        val item = repository.refreshDependents().first()
+
+        assertEquals(true, item.isSuccess)
+        assertEquals("بروزرسانی شد", item.message)
+        assertEquals(200, item.code)
+    }
+
+    @Test
     fun getActiveBranches_onError_emitsError() = runTest {
         val expectedError = RuntimeException("Network Failure")
         remoteDataSource.shouldThrowError = expectedError
 
         val actualError = assertFailsWith<RuntimeException> {
             repository.getActiveBranches().first()
+        }
+
+        assertEquals(expectedError.message, actualError.message)
+    }
+
+    @Test
+    fun refreshDependents_onError_emitsError() = runTest {
+        val expectedError = RuntimeException("Refresh failed")
+        remoteDataSource.shouldThrowError = expectedError
+
+        val actualError = assertFailsWith<RuntimeException> {
+            repository.refreshDependents().first()
         }
 
         assertEquals(expectedError.message, actualError.message)

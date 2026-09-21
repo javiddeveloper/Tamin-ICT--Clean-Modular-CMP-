@@ -41,7 +41,6 @@ import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDN
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
-import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
 import com.tamin.taminhamrah.model.user.CurrentUserDN
@@ -475,25 +474,30 @@ private class FakeTestCityProvinceRepo : CityProvinceRepository {
 }
 
 private class FakeTestContractsRepo : ContractsRepository {
-    override fun getBranches(cityCode: String): Flow<List<BranchDN>> = flowOf(
-        listOf(
-            BranchDN(
-                code = "123",
-                name = "شعبه ۱",
-                branchAddress = "تهران",
-                cityCode = cityCode,
-                minCode = null,
-                maxCode = null,
-            )
-        )
+    override fun getBranches(cityCode: String, page: Int): Flow<PagedListDN<BranchDN>> = flowOf(
+        PagedListDN(
+            items = listOf(
+                BranchDN(
+                    code = "123",
+                    name = "شعبه ۱",
+                    branchAddress = "تهران",
+                    cityCode = cityCode,
+                    minCode = null,
+                    maxCode = null,
+                ),
+            ),
+            total = 1,
+        ),
     )
 
-    override fun getContracts(query: ApiQueryParamDN?): Flow<List<ContractDN>> = flowOf(emptyList())
-    override fun getContractsByPremiumType(premiumTypeCode: String): Flow<List<ContractDN>> = flowOf(emptyList())
-    override fun getStudentInsuranceContracts(): Flow<List<ContractDN>> = flowOf(emptyList())
+    override fun getContracts(page: Int): Flow<PagedListDN<ContractDN>> = flowOf(PagedListDN())
+    override fun getContractsByPremiumType(premiumTypeCode: String, page: Int): Flow<PagedListDN<ContractDN>> =
+        flowOf(PagedListDN())
+    override fun getStudentInsuranceContracts(page: Int): Flow<PagedListDN<ContractDN>> = flowOf(PagedListDN())
     override fun getRegistrationInfo(): Flow<RegistrationInfoDN> = flowOf(RegistrationInfoDN(null, true, null, null, null))
     override fun getSpcPremiumRates(): Flow<List<PremiumRateDN>> = flowOf(emptyList())
-    override fun getFreeJobWages(): Flow<List<FreeJobDN>> = flowOf(emptyList())
+    override fun getFreeJobWages(page: Int, searchQuery: String?): Flow<PagedListDN<FreeJobDN>> =
+        flowOf(PagedListDN())
     override fun getFreelancePremiumRange(params: FreelancePremiumRangeParams): Flow<FreelancePremiumRangeDN> = flowOf(FreelancePremiumRangeDN(0L, 0L, 0, 0L))
     override fun getOptionalPremiumRange(): Flow<FreelancePremiumRangeDN> = flowOf(FreelancePremiumRangeDN(0L, 0L, 0, 0L))
     override fun checkRedCrossStatus(): Flow<String> = flowOf("ok")
@@ -504,6 +508,10 @@ private class FakeTestContractsRepo : ContractsRepository {
     override fun makeContract(params: FreelanceMakeContractParams): Flow<FreelanceContractResultDN> = flowOf(FreelanceContractResultDN(null, null))
     override fun makeFreelanceContractByGuardian(params: FreelanceContractByGuardianParams): Flow<FreelanceContractResultDN> = flowOf(FreelanceContractResultDN(null, null))
     override fun makeOptionalContractByGuardian(params: OptionalContractByGuardianParams): Flow<FreelanceContractResultDN> = flowOf(FreelanceContractResultDN(null, null))
+    override fun updateFreelanceContract(params: FreelanceMakeContractParams): Flow<Unit> = flowOf(Unit)
+    override fun updateOptionalContract(premium: Long): Flow<Unit> = flowOf(Unit)
+    override fun updateFreelanceContractByGuardian(params: FreelanceContractByGuardianParams): Flow<Unit> = flowOf(Unit)
+    override fun updateOptionalContractByGuardian(params: OptionalContractByGuardianParams): Flow<Unit> = flowOf(Unit)
     override fun getInsurancePayment(params: InsurancePaymentParamsDN): Flow<InsurancePaymentDN> = flowOf(InsurancePaymentDN(null, null, null, null))
     override fun checkInsurancePaymentStatus(systemType: String): Flow<Any?> = flowOf(null)
     override fun uploadImage(request: UploadImageRequestDN): Flow<String> = flowOf("img1")

@@ -11,6 +11,15 @@ import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationResultDN
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDTO
 import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
 import com.tamin.taminhamrah.model.util.PagedListDN
+import com.tamin.taminhamrah.model.workshop.AssignerContractDTO
+import com.tamin.taminhamrah.model.workshop.AssignerContractDN
+import com.tamin.taminhamrah.model.workshop.AssignerPartyDTO
+import com.tamin.taminhamrah.model.workshop.AssignerPartyDN
+import com.tamin.taminhamrah.model.workshop.BaseDocumentDN
+import com.tamin.taminhamrah.model.workshop.BaseDocumentKind
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseDTO
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseDN
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseDocumentDTO
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenPhotoDTO
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenRequestInfoDN
@@ -59,6 +68,12 @@ import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetStatus
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDN
 import com.tamin.taminhamrah.model.workshop.WorkShopDebtDTO
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDTO
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionType
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionStatus
+import com.tamin.taminhamrah.model.workshop.SmsMessageDN
+import com.tamin.taminhamrah.model.workshop.SmsMessageDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDN
 import com.tamin.taminhamrah.model.workshop.WorkshopDebtInquiryDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopDemandDocDN
@@ -117,6 +132,7 @@ fun EmployerWorkshopDTO.toDomain(): WorkshopSummaryDN = WorkshopSummaryDN(
     branchOfficeCode = branch?.code ?: brhCode.orEmpty(),
     branchOfficeName = branch?.organizationName ?: branchTitle.orEmpty(),
     characterCode = character?.characterCode.orEmpty(),
+    legalNationalId = legalWorkshop?.nationalId.orEmpty(),
     characterDescription = character?.characterDesc.orEmpty(),
     workshopTypeDescription = workshopType?.workshopTypeDesc.orEmpty(),
     statusCode = workshopStatus?.workshopStatusCode.orEmpty(),
@@ -124,7 +140,7 @@ fun EmployerWorkshopDTO.toDomain(): WorkshopSummaryDN = WorkshopSummaryDN(
     branchTitle = branchTitle.orEmpty()
 )
 
-// ---------------------------------------------- خدمات غیرحضوری کارفرما (employerEservicesAgreement)
+// ---------------------------------------------- خدمات غیرحضوری کارفرما (employerServicesAgreement)
 
 fun EmployerCommitmentInfoDTO.toDomain(): EmployerContactInfoDN = EmployerContactInfoDN(
     firstName = firstName.orEmpty(),
@@ -188,6 +204,52 @@ fun WorkshopContractDTO.toDomain(): WorkshopContractDN = WorkshopContractDN(
     workshopId = workshop?.workshopId.orEmpty(),
     branchCode = workshop?.branchCode.orEmpty(),
     workshopName = workshop?.workshopName.orEmpty(),
+)
+
+// ---------------------------------------------------------------------------- واگذارندگان
+
+fun AssignerContractDTO.toDomain(): AssignerContractDN = AssignerContractDN(
+    contractRow = contractRow.orEmpty(),
+    contractSequence = contractSequence.orEmpty(),
+    // The پیمان's own branch, as the old app reads it for درخواست مفاصاحساب; the پیمانکار's when the
+    // service sent none, so the request id is never left a key short.
+    branchCode = (branch?.code ?: employer?.branch?.code).orEmpty(),
+    contractNumber = contractNumber.orEmpty(),
+    contractDate = contractDate.orEmpty(),
+    contractEndDate = contractEndDate.orEmpty(),
+    contractSubject = contractSubject.orEmpty(),
+    // Two sides, never folded together: `assigner` is the signed-in employer's own کارگاه and
+    // `employer` is the پیمانکار. Swapping them puts the user's own workshop on every card and
+    // sends the bases call looking for the wrong contract.
+    assigner = assigner?.toDomain() ?: AssignerPartyDN(),
+    employer = employer?.toDomain() ?: AssignerPartyDN(),
+)
+
+fun AssignerPartyDTO.toDomain(): AssignerPartyDN = AssignerPartyDN(
+    workshopId = workshopId.orEmpty(),
+    workshopName = workshopName.orEmpty(),
+    nationalId = nationalId.orEmpty(),
+    address = address.orEmpty(),
+    branchCode = branch?.code.orEmpty(),
+    branchName = branch?.organizationName.orEmpty(),
+)
+
+fun ComputationalBaseDTO.toDomain(): ComputationalBaseDN = ComputationalBaseDN(
+    letterNumber = letterNumber.orEmpty(),
+    sendDate = sendDate,
+    amount = amount,
+    startDate = startDate,
+    endDate = endDate,
+    documents = documents.orEmpty().map { it.toDomain() },
+    statusCode = status.orEmpty(),
+    finalOrderNumber = finalOrderNumber.orEmpty(),
+    estimatedOrderNumber = estimatedOrderNumber.orEmpty(),
+)
+
+fun ComputationalBaseDocumentDTO.toDomain(): BaseDocumentDN = BaseDocumentDN(
+    documentId = documentId.orEmpty(),
+    kind = BaseDocumentKind.fromType(documentType),
+    categoryCode = documentCode.orEmpty(),
 )
 
 // ------------------------------------------------------------------------ برگ پرداخت‌ها
@@ -261,31 +323,49 @@ fun DebitPaymentPreCheckDTO.toDomain(): DebitPaymentPreCheckDN = DebitPaymentPre
 private const val PAYMENT_ALLOWED = "1"
 
 /**
- * The payment page the user is sent to.
- *
- * The service answers with a ticket and a URL, and the page is addressed by ticket alone. When the
- * ticket field is empty the ticket is the last segment of the URL — which is the same fallback the
+ * The service answers with a ticket and a URL, and the payment page is addressed by ticket alone.
+ * When the ticket field is empty the ticket is the last segment of the URL — the same fallback the
  * old client used, and the reason a payment still worked when only one of the two arrived.
  */
-private const val TFH_PAYMENT_PAGE = "https://tfh.tamin.ir/view/#/payment/"
-
-fun DebitPaymentDTO.toDomain(): DebitPaymentDN {
-    val ticket = paymentTicket?.takeIf { it.isNotBlank() }
-        ?: paymentUrl?.trimEnd('/')?.substringAfterLast('/')?.takeIf { it.isNotBlank() }
-    return DebitPaymentDN(
-        succeeded = succeed == true,
-        message = responseMessage.orEmpty(),
-        paymentPageUrl = ticket?.let { TFH_PAYMENT_PAGE + it }.orEmpty(),
-    )
-}
+//private const val TFH_PAYMENT_PAGE = "https://tfh.tamin.ir/view/#/payment/"
+//
+//fun DebitPaymentDTO.toDomain(): DebitPaymentDN {
+//    val ticket = paymentTicket?.takeIf { it.isNotBlank() }
+//        ?: paymentUrl?.trimEnd('/')?.substringAfterLast('/')?.takeIf { it.isNotBlank() }
+//    return DebitPaymentDN(
+//        succeeded = succeed == true,
+//        message = responseMessage.orEmpty(),
+//        paymentPageUrl = ticket?.let { TFH_PAYMENT_PAGE + it }.orEmpty(),
+//        ticket = ticket.orEmpty(),
+//    )
+//}
+fun DebitPaymentDTO.toDomain(): DebitPaymentDN = DebitPaymentDN(
+    succeeded = succeed == true,
+    message = responseMessage.orEmpty(),
+    paymentTicket = paymentTicket?.takeIf { it.isNotBlank() }
+        ?: paymentUrl?.trimEnd('/')?.substringAfterLast('/').orEmpty(),
+)
 
 fun DebitPaymentRequestDN.toDto(): DebitPaymentRequestDTO = DebitPaymentRequestDTO(
     branchCode = branchCode,
     workshopId = workshopId,
     debitNumber = debitNumber,
+    // Empty rather than absent when the debt has none: the old client coalesces the service's
+    // null before building its request, so the key is always on the wire.
     agreementRow = agreementRow,
-    deposit = deposit.toString(),
+    // "1"/"0", not "true"/"false".
+    deposit = if (deposit) DEPOSIT_YES else DEPOSIT_NO,
+    // Only a حقوقی workshop has one. Blank is not the same as absent here: the service expects
+    // the key present and null, so an empty id becomes null rather than "".
+    nationalId = legalNationalId.takeIf { characterCode == CHARACTER_LEGAL && it.isNotBlank() },
+    nationalType = characterCode,
 )
+
+private const val DEPOSIT_YES = "1"
+private const val DEPOSIT_NO = "0"
+
+/** `02` حقوقی — the only character that carries a national id of its own. */
+private const val CHARACTER_LEGAL = "02"
 
 /**
  * The wire value of `objectionType` on `objection-save` — a Persian label, not a code. The same
@@ -396,7 +476,7 @@ fun ArticleSixteenWorkshopInfoDTO.toDomain(): ArticleSixteenWorkshopInfoDN = Art
 
 fun ArticleSixteenRequestInfoDTO.toDomain(): ArticleSixteenRequestInfoDN = ArticleSixteenRequestInfoDN(
     defectDescription = defectDescription.orEmpty(),
-    documents = objectionPhotos.mapNotNull { it.toDomainOrNull() },
+    documents = objectionPhotos.orEmpty().mapNotNull { it.toDomainOrNull() },
 )
 
 /** A document with no guid cannot be addressed, so it is dropped rather than carried as blank. */
@@ -482,6 +562,25 @@ fun NewMemberRegistrationDN.toDto(): NewMemberRegistrationDTO = NewMemberRegistr
 
 fun NewMemberRegistrationResultDTO.toDomain(): NewMemberRegistrationResultDN =
     NewMemberRegistrationResultDN(personalId = id)
+
+
+fun WorkShopObjectionDTO.toDomain(): WorkShopObjectionDN = WorkShopObjectionDN(
+    seqNo = seqNo,
+    workshopId = workshopId.orEmpty(),
+    debitNumber = debitNumber.orEmpty(),
+    branchCode = branchCode.orEmpty(),
+    objectionType = WorkShopObjectionType.fromCode(objectionType),
+    objectionDate = objectionDate.orEmpty(),
+    objectionDescription = objectionDesc.orEmpty(),
+    status = WorkShopObjectionStatus.fromCode(status),
+    voteTypeDescription = voteType?.description.orEmpty(),
+)
+
+fun SmsMessageDTO.toDomain(): SmsMessageDN = SmsMessageDN(
+    id = id,
+    description = smsDescription.takeUnless { it.isNullOrEmpty() || it.equals("null", ignoreCase = true) }.orEmpty(),
+    status = WorkShopObjectionStatus.fromCode(status),
+)
 
 
 fun LegalRepresentativeWorkshopDTO.toDomain(): LegalRepresentativeWorkshopDN {

@@ -10,4 +10,4 @@ import androidx.compose.ui.platform.ClipEntry
  * shared way to build one from a string. So the one line that differs lives here, per platform,
  * rather than pushing every caller into platform code.
  */
-internal expect fun plainTextClipEntry(text: String): ClipEntry
+expect fun plainTextClipEntry(text: String): ClipEntry

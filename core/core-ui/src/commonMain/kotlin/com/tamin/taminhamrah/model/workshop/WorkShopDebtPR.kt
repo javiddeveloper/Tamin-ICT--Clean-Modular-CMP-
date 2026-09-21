@@ -5,14 +5,15 @@ import androidx.compose.runtime.Immutable
 /**
  * One بدهی row, shown by both the payable list and the objectionable list.
  *
- * [debitNumber] stays raw because it addresses documents, PDFs and the payment call;
- * [debitNumberLabel] is the same value as the row prints it.
+ * [debitNumber] and [agreementRow] stay raw because they address documents, PDFs and the payment
+ * call; the `…Label` twin of each is the same value as the row prints it.
  */
 @Immutable
 data class WorkShopDebtPR(
     val debitNumber: String = "",
     val debitNumberLabel: String = "",
     val agreementRow: String = "",
+    val agreementRowLabel: String = "",
     val notifyDate: String = "",
     val customerCode: String = "",
     val amount: String = "",

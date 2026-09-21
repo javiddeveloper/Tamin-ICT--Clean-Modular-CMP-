@@ -11,7 +11,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed interface UserRequestRoute {
     @Serializable
-    data object List : UserRequestRoute
+    data class List(
+        val refCode: String? = null,
+        val requestTypeId: String? = null,
+    ) : UserRequestRoute
 
     @Serializable
     data class Detail(
@@ -23,8 +26,11 @@ sealed interface UserRequestRoute {
     ) : UserRequestRoute
 }
 
-fun NavController.navigateToUserRequests() {
-    navigate(UserRequestRoute.List)
+fun NavController.navigateToUserRequests(
+    refCode: String? = null,
+    requestTypeId: String? = null,
+) {
+    navigate(UserRequestRoute.List(refCode = refCode, requestTypeId = requestTypeId))
 }
 
 fun NavController.navigateToUserRequestDetail(
@@ -48,8 +54,11 @@ fun NavController.navigateToUserRequestDetail(
 fun NavGraphBuilder.userRequestGraph(
     navController: NavController,
 ) {
-    composable<UserRequestRoute.List> {
+    composable<UserRequestRoute.List> { backStackEntry ->
+        val route: UserRequestRoute.List = backStackEntry.toRoute()
         UserRequestsScreen(
+            refCodeFilter = route.refCode,
+            requestTypeIdFilter = route.requestTypeId,
             onBackClick = { navController.popBackStack() },
             onNavigateToDetail = { requestId, refCode, requestTypeId, title, referenceId ->
                 navController.navigateToUserRequestDetail(

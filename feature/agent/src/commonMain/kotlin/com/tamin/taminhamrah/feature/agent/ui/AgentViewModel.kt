@@ -7,6 +7,7 @@ import com.tamin.taminhamrah.feature.agent.audio.VoicePlayer
 import com.tamin.taminhamrah.feature.agent.audio.VoiceRecorder
 import com.tamin.taminhamrah.feature.agent.audio.deleteFile
 import com.tamin.taminhamrah.feature.agent.audio.readFileBytes
+import com.tamin.taminhamrah.feature.agent.markdown.MarkdownParser
 import com.tamin.taminhamrah.feature.agent.service.AgentActionDispatcher
 import com.tamin.taminhamrah.feature.agent.service.base.AgentServiceResult
 import com.tamin.taminhamrah.feature.agent.service.base.AgentSessionContext
@@ -35,6 +36,7 @@ import com.tamin.taminhamrah.model.agent.AgentCachedMessageDN
 import com.tamin.taminhamrah.model.agent.AgentSessionDN
 import com.tamin.taminhamrah.model.agent.CachedSender
 import com.tamin.taminhamrah.model.agent.CachedStatus
+import com.tamin.taminhamrah.useCases.agent.CancelAgentRequestUseCase
 import com.tamin.taminhamrah.useCases.agent.CheckChatAllowedUseCase
 import com.tamin.taminhamrah.useCases.agent.DeletePendingAgentMessagesUseCase
 import com.tamin.taminhamrah.useCases.agent.GetCachedMessagesUseCase
@@ -49,7 +51,15 @@ import com.tamin.taminhamrah.useCases.agent.StartAgentSessionUseCase
 import com.tamin.taminhamrah.useCases.agent.UpdateAgentSessionUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.agent_offline_error
+import taminx.core.core_ui.agent_request_failed
+import taminx.core.core_ui.agent_service_unavailable
+import taminx.core.core_ui.deep_link_feature_unavailable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -76,6 +86,7 @@ import java.util.UUID
 class AgentViewModel(
     private val sendAgentPromptUseCase: SendAgentPromptUseCase,
     private val checkChatAllowedUseCase: CheckChatAllowedUseCase,
+    private val cancelAgentRequestUseCase: CancelAgentRequestUseCase,
     private val actionDispatcher: AgentActionDispatcher,
     private val featureManager: FeatureManager,
     private val voiceRecorder: VoiceRecorder,
@@ -102,8 +113,17 @@ class AgentViewModel(
     /** Local conversation id used for cache rows — distinct from the server session id. */
     private var cacheSessionId: String? = null
 
+    /**
+     * Sent as `sessionId` when there is no cached conversation (identity unknown), so the server
+     * still sees one id per conversation. Replaced whenever a new conversation starts.
+     */
+    private var uncachedSessionId: String = newSessionId()
+
     /** National code scoping cached conversations; resolved lazily once per VM. */
     private var cachedNationalCode: String? = null
+
+    /** The coroutine collecting the prompt in flight, so cancelling really stops it. */
+    private var generationJob: Job? = null
 
     /** Bubbles whose reveal animation already played, so recycling never replays it. */
     private val completedTypingIds = mutableSetOf<String>()
@@ -192,7 +212,7 @@ class AgentViewModel(
         val isAgentEnabled = featureManager.isFeatureEnabled(FeatureFlag.AGENT)
         if (!isAgentEnabled) {
             val message = featureManager.getDisabledMessage(FeatureFlag.AGENT)
-                ?: "The AI assistant service is currently unavailable."
+                ?: getString(Res.string.agent_service_unavailable)
             emit(PartialState.NotAllowed(message))
             emit(PartialState.CheckingPermission(false))
             return@flow
@@ -204,10 +224,14 @@ class AgentViewModel(
             onSuccess = { data ->
                 emit(PartialState.OfflineChanged(false))
                 if (data.canStartChat) {
-                    emit(PartialState.ChatAllowedReceived(chatToken = data.chatToken))
+                    emit(PartialState.ChatAllowedReceived(canSendVoice = data.canSendVoice))
                 } else {
-                    // A real "no" from the server — this one does block the screen.
+                    // A real "no" from the server — this one does block the screen. The use case
+                    // has cached the refusal, which also hides the assistant's entry point, and a
+                    // refused user gets no conversation row.
                     emit(PartialState.NotAllowed(data.errorMessage))
+                    emit(PartialState.CheckingPermission(false))
+                    return@flow
                 }
             },
             onFailure = {
@@ -244,11 +268,12 @@ class AgentViewModel(
         val currentState = uiState.value
         if (currentState.isGenerating) return@flow
         if (currentState.isOffline) {
-            sendEvent(AgentEvent.ShowError("برای گفتگو با دستیار به اینترنت نیاز دارید."))
+            sendEvent(AgentEvent.ShowError(getString(Res.string.agent_offline_error)))
             return@flow
         }
 
         emit(PartialState.Loading(true))
+        generationJob = currentCoroutineContext()[Job]
 
         if (!isRetry && addUserBubble) {
             // Append the user's message to the chat
@@ -262,11 +287,14 @@ class AgentViewModel(
             sendEvent(AgentEvent.ScrollToBottom)
         }
 
+        // Like the native app, the server's memory of the chat is keyed on the local conversation
+        // id, which is sent from the very first prompt; the id in the answer is not used.
         val request = AgentRequest(
             prompt = message,
-            sessionId = currentState.sessionId,
+            sessionId = cacheSessionId ?: uncachedSessionId,
             lastEntity = currentState.lastEntity,
-            chatToken = currentState.chatToken,
+            state = currentState.conversationState,
+            history = currentState.conversationHistory,
             voiceBytes = voiceBytes,
             voiceFileName = voiceFileName
         )
@@ -296,14 +324,18 @@ class AgentViewModel(
 
                 is AgentPollingState.Done -> {
                     val response = pollingState.response
-                    // Update session context
-                    emit(PartialState.SessionUpdated(
-                        sessionId = response.sessionId,
-                        lastEntity = response.lastEntity
-                    ))
+                    // An answer without context keeps the previous one (native app behaviour).
+                    val context = PartialState.SessionUpdated(
+                        lastEntity = response.lastEntity ?: currentState.lastEntity,
+                        state = response.state ?: currentState.conversationState,
+                        history = response.history ?: currentState.conversationHistory,
+                    )
+                    emit(context)
                     // Persist the context so a resumed conversation keeps its thread.
                     cacheSessionId?.let { id ->
-                        runCatching { updateAgentSessionUseCase.lastEntity(id, response.lastEntity) }
+                        runCatching {
+                            updateAgentSessionUseCase.context(id, context.lastEntity, context.state, context.history)
+                        }
                     }
 
                     // Determine the pipeline steps with friendly Persian names
@@ -375,6 +407,9 @@ class AgentViewModel(
                             is ChatBubbleContent.KeyValue -> {
                                 (content.items.size * 150L) + 500L
                             }
+                            is ChatBubbleContent.Markdown -> {
+                                MarkdownParser.parse(content.text).size * MARKDOWN_BLOCK_REVEAL_MS + 300L
+                            }
                             is ChatBubbleContent.SuggestedPrompts -> {
                                 500L
                             }
@@ -389,13 +424,14 @@ class AgentViewModel(
 
                 is AgentPollingState.Failed -> {
                     emit(PartialState.ProcessingStateUpdated(null))
+                    val message = pollingState.message ?: getString(Res.string.agent_request_failed)
                     val errorItem = ChatItem(
                         id = UUID.randomUUID().toString(),
                         sender = ChatSender.Agent,
-                        content = ChatBubbleContent.ServiceError(pollingState.message, canRetryPrompt = true)
+                        content = ChatBubbleContent.ServiceError(message, canRetryPrompt = true)
                     )
                     emit(PartialState.NewChatItems(listOf(errorItem)))
-                    sendEvent(AgentEvent.ShowError(pollingState.message))
+                    sendEvent(AgentEvent.ShowError(message))
                 }
 
                 is AgentPollingState.Cancelled -> {
@@ -406,15 +442,26 @@ class AgentViewModel(
         }
 
         emit(PartialState.Loading(false))
+        generationJob = null
     }
 
+    /**
+     * Stops the prompt in flight for real: the polling coroutine is cancelled, so no late answer
+     * lands in the chat, and the server is told to drop the request.
+     */
     private fun handleCancelGeneration(): Flow<PartialState> = flow {
+        val requestId = uiState.value.currentRequestId
+        generationJob?.cancel()
+        generationJob = null
         emit(PartialState.GenerationCancelled)
         emit(PartialState.ProcessingStateUpdated(null))
         emit(PartialState.Loading(false))
+        requestId?.let { runCatching { cancelAgentRequestUseCase(it) } }
     }
 
     private fun handleRetryClick(): Flow<PartialState> {
+        // A failed permission check left the chat offline; check again before resending.
+        if (uiState.value.isOffline) return handleCheckPermission()
         val lastUserMessage = uiState.value.chatItems.lastOrNull { it.sender == ChatSender.User }
         val textMessage = (lastUserMessage?.content as? ChatBubbleContent.Text)?.message
         if (!textMessage.isNullOrBlank()) {
@@ -433,7 +480,8 @@ class AgentViewModel(
     private fun handleStartNewSession(): Flow<PartialState> = flow {
         sessionContext.clear()
         completedTypingIds.clear()
-        emit(PartialState.SessionUpdated(sessionId = null, lastEntity = null))
+        uncachedSessionId = newSessionId()
+        emit(PartialState.SessionUpdated(lastEntity = null))
         emit(PartialState.ChatItemsReplaced(emptyList()))
         emit(PartialState.HistoryVisibilityChanged(false))
         // Open a brand-new conversation; the previous one stays in history if it was used.
@@ -507,7 +555,7 @@ class AgentViewModel(
 
     /** Creates a new conversation row and makes it the active one. @return its id. */
     private suspend fun startFreshSession(nationalCode: String): String {
-        val id = UUID.randomUUID().toString()
+        val id = newSessionId()
         val now = currentTimeMillis()
         cacheSessionId = id
         runCatching {
@@ -567,7 +615,7 @@ class AgentViewModel(
         val session = runCatching { getAgentSessionUseCase(sessionId) }.getOrNull()
         emit(PartialState.ChatItemsReplaced(items))
         // Restore the server conversation context so the reopened chat keeps its thread.
-        emit(PartialState.SessionUpdated(sessionId = null, lastEntity = session?.lastEntity))
+        emit(PartialState.SessionUpdated(session?.lastEntity, session?.state, session?.history))
         emit(PartialState.ActiveSessionChanged(sessionId))
         emit(PartialState.HistoryVisibilityChanged(false))
         sendEvent(AgentEvent.ScrollToBottom)
@@ -578,7 +626,8 @@ class AgentViewModel(
         // Deleting the conversation on screen leaves the user on a fresh empty one.
         if (sessionId == cacheSessionId) {
             emit(PartialState.ChatItemsReplaced(emptyList()))
-            emit(PartialState.SessionUpdated(sessionId = null, lastEntity = null))
+            uncachedSessionId = newSessionId()
+            emit(PartialState.SessionUpdated(lastEntity = null))
             resolveNationalCode()?.let { code ->
                 emit(PartialState.ActiveSessionChanged(startFreshSession(code)))
             }
@@ -627,6 +676,9 @@ class AgentViewModel(
             }
         }
     }
+
+    /** The native app's conversation id shape, which the server has always received. */
+    private fun newSessionId() = "category_${UUID.randomUUID()}"
 
     private suspend fun resolveNationalCode(): String? {
         cachedNationalCode?.let { return it }
@@ -839,12 +891,9 @@ class AgentViewModel(
             is AgentServiceResult.Success -> result.bubbles
 
             is AgentServiceResult.FeatureDisabled ->
-                listOf(ChatBubbleContent.ServiceError(result.message))
+                listOf(ChatBubbleContent.ServiceError(result.message ?: getString(Res.string.deep_link_feature_unavailable)))
 
-            is AgentServiceResult.NoHandler -> {
-                // If the entity has a plain text message, render it as a text bubble
-                entity.message?.let { listOf(ChatBubbleContent.Text(it)) } ?: emptyList()
-            }
+            is AgentServiceResult.NoHandler -> emptyList()
 
             is AgentServiceResult.Error ->
                 listOf(ChatBubbleContent.ServiceError(result.message, actionKey = entity.action, payload = entity.payload))
@@ -874,8 +923,7 @@ class AgentViewModel(
             currentState.copy(
                 isCheckingPermission = false,
                 isNotAllowed = false,
-                chatToken = partialState.chatToken,
-                sessionId = partialState.sessionId
+                canSendVoice = partialState.canSendVoice,
             )
 
         is PartialState.PendingReceived ->
@@ -903,8 +951,9 @@ class AgentViewModel(
 
         is PartialState.SessionUpdated ->
             currentState.copy(
-                sessionId = partialState.sessionId,
-                lastEntity = partialState.lastEntity
+                lastEntity = partialState.lastEntity,
+                conversationState = partialState.state,
+                conversationHistory = partialState.history,
             )
 
         is PartialState.InputModeChanged ->
@@ -954,12 +1003,15 @@ class AgentViewModel(
 
     override fun onCleared() {
         isRecordingActive.value = false
-        voiceRecorder.stop()
+        // Nobody will send a recording left behind, so it is dropped without waiting for its file.
+        voiceRecorder.cancel()
         voicePlayer.release()
         super.onCleared()
     }
 
     private companion object {
+        /** Roughly how long each markdown block takes to appear; see MarkdownContent. */
+        const val MARKDOWN_BLOCK_REVEAL_MS = 110L
         const val DEFAULT_SESSION_TITLE = "گفتگوی جدید"
         const val SESSION_TITLE_MAX_LENGTH = 60
     }

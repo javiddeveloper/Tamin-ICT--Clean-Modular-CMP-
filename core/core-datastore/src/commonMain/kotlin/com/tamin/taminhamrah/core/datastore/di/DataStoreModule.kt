@@ -1,6 +1,8 @@
 package com.tamin.taminhamrah.core.datastore.di
 
 import com.russhwolf.settings.Settings
+import com.tamin.taminhamrah.core.datastore.agent.AgentAccessStoreImpl
+import com.tamin.taminhamrah.repository.AgentAccessStore
 import com.tamin.taminhamrah.repository.UserPreferencesRepository
 import com.tamin.taminhamrah.core.datastore.UserPreferencesRepositoryImpl
 import com.tamin.taminhamrah.repository.TokenStoreManager
@@ -16,7 +18,8 @@ import org.koin.dsl.module
 val datastoreModule = module {
     single<Settings> { Settings() }
     singleOf(::UserPreferencesRepositoryImpl) bind UserPreferencesRepository::class
-    singleOf(::TokenStoreManagerImpl) bind TokenStoreManager::class
+    single<TokenStoreManager> { TokenStoreManagerImpl(get()) }
     singleOf(::InMemoryBiometricSessionState) bind BiometricSessionState::class
     single<DeveloperOptionsRepository> { DeveloperOptionsRepositoryImpl(get()) }
+    single<AgentAccessStore> { AgentAccessStoreImpl(get()) }
 }

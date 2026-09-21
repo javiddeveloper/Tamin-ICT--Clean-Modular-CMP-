@@ -56,6 +56,30 @@ class MakeContractUseCaseTest : BaseUseCaseTest() {
         assertFalse(repository.makeFreelanceContractCalled)
     }
 
+    @Test
+    fun `invoke propagates repository failure for freelance submit`() = runTest {
+        val params = sampleParams()
+        repository.shouldThrowError = true
+        repository.error = RuntimeException("submit failed")
+
+        useCase(isOptionalInsurance = false, params = params).test {
+            val error = awaitError()
+            assertEquals("submit failed", error.message)
+        }
+    }
+
+    @Test
+    fun `invoke propagates repository failure for optional submit`() = runTest {
+        val params = sampleParams()
+        repository.shouldThrowError = true
+        repository.error = RuntimeException("optional submit failed")
+
+        useCase(isOptionalInsurance = true, params = params).test {
+            val error = awaitError()
+            assertEquals("optional submit failed", error.message)
+        }
+    }
+
     private fun sampleParams() = FreelanceMakeContractParams(
         monthlyPremium = 25_989_368L,
         request = FreelanceMakeContractRequestDN(

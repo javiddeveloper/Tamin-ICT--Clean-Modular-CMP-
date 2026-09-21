@@ -114,7 +114,7 @@ internal fun Step3JobDetailsStep(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = padding.calculateTopPadding())
+                    .padding(padding)
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = Spacing.lg),
             ) {
@@ -222,7 +222,6 @@ internal fun Step3JobDetailsStep(
                 )
 
                 Spacer(modifier = Modifier.height(Spacing.lg))
-                Spacer(modifier = Modifier.height(padding.calculateBottomPadding()))
             }
         }
     }

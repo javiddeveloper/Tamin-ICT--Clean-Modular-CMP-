@@ -36,7 +36,10 @@ data class WorkshopsUiState(
     val isSearchOpen: Boolean = false,
     val isFilterSheetOpen: Boolean = false,
 
-    // Cascading Branch Selection (استان → شهر → شعبه)
+    /** رسیدگی به بدهی ماده ۱۶ is asking whether the workshop has any debt to open on. */
+    val isCheckingDebts: Boolean = false,
+    /** «لیست بدهی برای این کارگاه یافت نشد» — the answer when it has none. */
+    val isNoDebtDialogOpen: Boolean = false,
 ) {
     val hasActiveFilter: Boolean
         get() = statusFilter != null || appliedSearch.isNotEmpty
@@ -65,7 +68,9 @@ data class WorkshopsUiState(
         data class SearchOpenChanged(val isOpen: Boolean) : PartialState
         data class FilterSheetOpenChanged(val isOpen: Boolean) : PartialState
 
-        // Cascading Branch Selection
+        // رسیدگی به بدهی ماده ۱۶
+        data class CheckingDebtsChanged(val isChecking: Boolean) : PartialState
+        data class NoDebtDialogChanged(val isOpen: Boolean) : PartialState
     }
 }
 
@@ -108,14 +113,24 @@ sealed interface WorkshopsIntent {
     data object DetailDismissed : WorkshopsIntent
     data class ActionSelected(val action: WorkshopAction, val workshop: WorkshopPR) : WorkshopsIntent
     data class AvailableActionsResolved(val actions: ImmutableList<WorkshopAction>) : WorkshopsIntent
+    data object NoDebtDialogDismissed : WorkshopsIntent
 }
 
 sealed interface WorkshopsEvent {
+    /**
+     * Carries the whole workshop identity rather than a widening list of positional strings: the
+     * payment call needs two more fields than the destination's own route does, and six adjacent
+     * `String` parameters are one transposition away from paying the wrong workshop.
+     */
     data class Navigate(
         val action: WorkshopAction,
         val workshopId: String,
         val branchCode: String,
         val workshopName: String,
+        /** `01` حقیقی / `02` حقوقی — reaches `pay-normal-debit` as `nationalType`. */
+        val characterCode: String,
+        /** The حقوقی workshop's national id; blank for a حقیقی one. */
+        val legalNationalId: String,
     ) : WorkshopsEvent
 
     data class ShowMessage(val message: StringResource) : WorkshopsEvent

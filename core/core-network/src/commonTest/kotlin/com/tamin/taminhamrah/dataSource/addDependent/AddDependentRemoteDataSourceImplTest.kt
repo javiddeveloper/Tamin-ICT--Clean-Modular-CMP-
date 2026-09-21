@@ -35,6 +35,7 @@ class FakeAddDependentApiService : AddDependentApiService {
     var educationCodeResult: BaseDTO<String> = BaseDTO(status = 200, family = "OK", reason = "OK", data = "OK")
     var uploadImageResult: UploadImageResponseDTO = UploadImageResponseDTO()
     var addNewDependentResult: BaseDTO<GeneralResponseDTO> = BaseDTO(status = 200, family = "OK", reason = "OK", data = GeneralResponseDTO())
+    var refreshDependentsResult: BaseDTO<GeneralResponseDTO> = BaseDTO(status = 200, family = "OK", reason = "OK", data = GeneralResponseDTO())
 
     var shouldThrowException: Exception? = null
     var lastFamilyRelationshipsParameters: Map<String, String>? = null
@@ -87,6 +88,11 @@ class FakeAddDependentApiService : AddDependentApiService {
     override suspend fun addNewDependent(request: RequestAddDependentDTO): BaseDTO<GeneralResponseDTO> {
         shouldThrowException?.let { throw it }
         return addNewDependentResult
+    }
+
+    override suspend fun refreshDependents(): BaseDTO<GeneralResponseDTO> {
+        shouldThrowException?.let { throw it }
+        return refreshDependentsResult
     }
 }
 
@@ -206,6 +212,16 @@ class AddDependentRemoteDataSourceImplTest {
         fakeApiService.addNewDependentResult = BaseDTO(status = 200, family = "OK", reason = "OK", data = expectedResponse)
 
         val result = dataSource.addNewDependent(RequestAddDependentDTO())
+
+        assertEquals(expectedResponse, result)
+    }
+
+    @Test
+    fun refreshDependents_success_returnsGeneralResponse() = runTest {
+        val expectedResponse = GeneralResponseDTO(isSuccess = true, message = "بروزرسانی شد")
+        fakeApiService.refreshDependentsResult = BaseDTO(status = 200, family = "OK", reason = "OK", data = expectedResponse)
+
+        val result = dataSource.refreshDependents()
 
         assertEquals(expectedResponse, result)
     }

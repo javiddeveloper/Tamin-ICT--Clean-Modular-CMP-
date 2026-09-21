@@ -4,8 +4,6 @@ import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
 import com.tamin.taminhamrah.model.workshop.ContractRowPR
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.StringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_rows_tab_with_agreement
@@ -80,16 +78,11 @@ data class ContractRowsUiState(
      * can do itself. Cleared as soon as the user picks a tab deliberately.
      */
     val didAutoSwitchTab: Boolean = false,
-    /** کارگاه‌های شما — the quick-pick rows, fetched the first time the sheet opens. */
-    val myWorkshops: ImmutableList<WorkshopPR> = persistentListOf(),
     /**
-     * How many workshops the employer actually holds, against how many the quick-pick lists.
-     *
-     * The sheet asks for one page, so an employer with more than fits never sees the rest. The two
-     * fields still reach any workshop by number, so the cap is stated rather than paged away —
-     * a silent partial list is the part that misleads.
+     * کارگاه‌های شما — the quick-pick rows, fetched the first time the sheet opens and paged in as
+     * its list is scrolled. A list that silently stops at one-page reads as complete.
      */
-    val myWorkshopsTotal: Int = 0,
+    val myWorkshops: PagedListState<WorkshopPR> = PagedListState(),
 ) {
     sealed interface PartialState {
         data class TabChanged(val tab: ContractRowTab) : PartialState
@@ -123,10 +116,8 @@ data class ContractRowsUiState(
         data class WorkshopIdErrorChanged(val isVisible: Boolean) : PartialState
         data class BranchCodeErrorChanged(val isVisible: Boolean) : PartialState
         data class AutoSwitchedTab(val tab: ContractRowTab) : PartialState
-        data class MyWorkshopsLoaded(
-            val workshops: ImmutableList<WorkshopPR>,
-            val total: Int,
-        ) : PartialState
+        data object MyWorkshopsLoadingMore : PartialState
+        data class MyWorkshopsLoaded(val workshops: PagedListState<WorkshopPR>) : PartialState
     }
 }
 
@@ -148,6 +139,9 @@ sealed interface ContractRowsIntent {
     data class DraftWorkshopIdChanged(val value: String) : ContractRowsIntent
     data class DraftBranchCodeChanged(val value: String) : ContractRowsIntent
     data class QuickPicked(val workshopId: String, val branchCode: String) : ContractRowsIntent
+
+    /** کارگاه‌های شما was scrolled to its end. */
+    data object LoadMoreMyWorkshops : ContractRowsIntent
     data object ApplyPicker : ContractRowsIntent
     data object ClearPicker : ContractRowsIntent
 }

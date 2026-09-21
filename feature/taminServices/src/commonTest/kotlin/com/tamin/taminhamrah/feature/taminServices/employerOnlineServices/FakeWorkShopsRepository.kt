@@ -55,7 +55,7 @@ class FakeWorkShopsRepository : WorkShopsRepository {
      * "load more" through the ViewModel's [com.tamin.taminhamrah.paging.Paginator], not just assert on
      * a canned single response.
      *
-     * When unfiltered, [PagedListDN.total] on [agreements] is honoured as-is (a test may set it above
+     * When unfiltered, [PagedListDN.total] on [agreements] is honored as-is (a test may set it above
      * `items.size` to simulate more server-side rows than were stubbed); a filtered query reports the
      * filtered count instead, matching what a real search would answer.
      */
@@ -72,12 +72,16 @@ class FakeWorkShopsRepository : WorkShopsRepository {
 
         val fromIndex = (query.page * query.pageSize).coerceIn(0, filtered.size)
         val toIndex = (fromIndex + query.pageSize).coerceIn(fromIndex, filtered.size)
-
         return PagedListDN(
             items = filtered.subList(fromIndex, toIndex),
             total = if (isFiltered) filtered.size else agreements.total,
         )
     }
+
+    override suspend fun getContractRowsWithAgreement(query: ContractRowQuery): PagedListDN<EmployerAgreementDN> =
+        PagedListDN()
+
+    override suspend fun getContractRowsWithoutAgreement(query: ContractRowQuery): PagedListDN<WorkshopContractDN> = PagedListDN()
 
     override suspend fun requestEmployerAgreementTicket(mobile: String, email: String): String {
         lastTicketRequest = mobile to email
@@ -106,8 +110,6 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         failIf(Call.CONTRACT_ROWS)
         return contractRows.page(page)
     }
-
-    /** Slices [items] into [WORKSHOP_PAGE_SIZE] windows like a real service would, keeping [total] as set. */
     private fun <T> PagedListDN<T>.page(page: Int): PagedListDN<T> {
         val fromIndex = (page * WORKSHOP_PAGE_SIZE).coerceIn(0, items.size)
         val toIndex = (fromIndex + WORKSHOP_PAGE_SIZE).coerceIn(fromIndex, items.size)
@@ -124,36 +126,109 @@ class FakeWorkShopsRepository : WorkShopsRepository {
 
     private fun notUsed(): Nothing = error("not used by EmployerOnlineServicesViewModel tests")
 
+    override suspend fun confirmPaymentTicket(ticket: String) = notUsed()
     override suspend fun getPaymentSheets(query: PaymentSheetQuery): PagedListDN<PaymentSheetDN> = notUsed()
+    override suspend fun getAssignerContracts(query: AssignerContractQuery): PagedListDN<AssignerContractDN> = notUsed()
+    override suspend fun getComputationalBases(query: ComputationalBaseQuery): PagedListDN<ComputationalBaseDN> = notUsed()
+    override suspend fun getComputationalBasePdf(documentId: String): PdfDownloadDN = notUsed()
+    override suspend fun getSettlementSubjects(): List<SettlementSubjectDN> = notUsed()
+    override suspend fun uploadSettlementPdf(fileName: String, bytes: ByteArray): String = notUsed()
+    override suspend fun submitSettlementRequest(request: SettlementRequestDN): String = notUsed()
+    override suspend fun getSettlementCertificate(workshopId: String, branchCode: String, contractRow: String, contractNumber: String): SettlementCertificateDN? = notUsed()
     override suspend fun getDebitReasons(page: Int): PagedListDN<DebitReasonDN> = notUsed()
-    override suspend fun getWorkshopDebits(workshopId: String, branchCode: String, page: Int): PagedListDN<WorkShopDebtDN> = notUsed()
-    override suspend fun getDemandDocuments(debitNumber: String, branchCode: String, page: Int): PagedListDN<WorkshopDemandDocDN> = notUsed()
-    override suspend fun getDebitTurnoverPdf(debitNumber: String, branchCode: String): PdfDownloadDN = notUsed()
-    override suspend fun checkDebitPayment(debitNumber: String, branchCode: String): DebitPaymentPreCheckDN = notUsed()
-    override suspend fun payWorkshopDebit(request: DebitPaymentRequestDN): DebitPaymentDN = notUsed()
-    override suspend fun getWorkshopDebtInquiry(workshopId: String, branchCode: String): WorkshopDebtInquiryDN = notUsed()
-    override suspend fun getObjectionableDebits(workshopId: String, branchCode: String, page: Int): PagedListDN<WorkShopDebtDN> = notUsed()
+    override suspend fun getWorkshopDebits(
+        workshopId: String,
+        branchCode: String,
+        page: Int
+    ): PagedListDN<WorkShopDebtDN> = notUsed()
+
+    override suspend fun getDemandDocuments(
+        debitNumber: String,
+        branchCode: String,
+        page: Int
+    ): PagedListDN<WorkshopDemandDocDN> = notUsed()
+
+    override suspend fun getDebitTurnoverPdf(
+        debitNumber: String,
+        branchCode: String
+    ): PdfDownloadDN = notUsed()
+
+    override suspend fun checkDebitPayment(
+        debitNumber: String,
+        branchCode: String
+    ): DebitPaymentPreCheckDN = notUsed()
+
+    override suspend fun payWorkshopDebit(request: DebitPaymentRequestDN): DebitPaymentDN =
+        notUsed()
+
+    override suspend fun getWorkshopDebtInquiry(
+        workshopId: String,
+        branchCode: String
+    ): WorkshopDebtInquiryDN = notUsed()
+
+    override suspend fun getObjectionableDebits(
+        workshopId: String,
+        branchCode: String,
+        page: Int
+    ): PagedListDN<WorkShopDebtDN> = notUsed()
+
     override suspend fun getObjectionElapsedDays(orderRecipeDate: String): Int = notUsed()
-    override suspend fun saveDebitObjection(request: DebitObjectionRequestDN): DebitObjectionResultDN = notUsed()
+    override suspend fun saveDebitObjection(request: DebitObjectionRequestDN): DebitObjectionResultDN =
+        notUsed()
+
     override suspend fun getDebitObjectionPdf(seqNo: Long): PdfDownloadDN = notUsed()
-    override suspend fun getRecentlyAddedMembers(query: WorkshopNewMemberQuery): PagedListDN<WorkshopNewMemberDN> = notUsed()
+    override suspend fun getRecentlyAddedMembers(query: WorkshopNewMemberQuery): PagedListDN<WorkshopNewMemberDN> =
+        notUsed()
+
     override suspend fun confirmRecentlyAddedMember(requestId: Long): String = notUsed()
     override suspend fun deleteRecentlyAddedMember(personalId: Long) = notUsed()
     override suspend fun checkNewMemberIsNew(nationalId: String): Boolean = notUsed()
-    override suspend fun createNewMemberRegistration(request: NewMemberRegistrationDN): NewMemberRegistrationResultDN = notUsed()
-    override suspend fun getArticleSixteenDebts(query: ArticleSixteenDebtQuery): PagedListDN<WorkshopsDebtListModelDN> = notUsed()
-    override suspend fun getArticleSixteenWorkshopInfo(workshopId: String, branchCode: String): ArticleSixteenWorkshopInfoDN = notUsed()
-    override suspend fun getArticleSixteenRequestInfo(objectionNumber: Long): ArticleSixteenRequestInfoDN = notUsed()
-    override suspend fun saveArticleSixteenRequest(request: ArticleSixteenSaveRequestDN): ArticleSixteenSaveResultDN = notUsed()
-    override suspend fun getArticleSixteenReportPdf(seqNo: Long): PdfDownloadDN = notUsed()
-    override suspend fun getWorkshopMembers(query: WorkshopMemberQuery): PagedListDN<WorkshopMemberDN> = notUsed()
-    override suspend fun getWorkshopStackHolders(query: WorkshopStackHolderQuery): PagedListDN<WorkshopStackHolderDN> = notUsed()
+    override suspend fun createNewMemberRegistration(request: NewMemberRegistrationDN): NewMemberRegistrationResultDN =
+        notUsed()
 
-    override fun getLegalRepresentativeWorkshops(): Flow<LegalRepresentativeWorkshopListDN?> = notUsed()
-    override fun getLegalRepresentatives(workshopId: String, branchCode: String): Flow<LegalRepresentativeListDN?> = notUsed()
-    override fun getLegalRepresentativeWorkshopContracts(workshopId: String, branchCode: String): Flow<LegalRepresentativeContractListDN?> = notUsed()
+    override suspend fun getArticleSixteenDebts(query: ArticleSixteenDebtQuery): PagedListDN<WorkshopsDebtListModelDN> =
+        notUsed()
+
+    override suspend fun getArticleSixteenWorkshopInfo(
+        workshopId: String,
+        branchCode: String
+    ): ArticleSixteenWorkshopInfoDN = notUsed()
+
+    override suspend fun getArticleSixteenRequestInfo(objectionNumber: Long): ArticleSixteenRequestInfoDN =
+        notUsed()
+
+    override suspend fun saveArticleSixteenRequest(request: ArticleSixteenSaveRequestDN): ArticleSixteenSaveResultDN =
+        notUsed()
+
+    override suspend fun getArticleSixteenReportPdf(seqNo: Long): PdfDownloadDN = notUsed()
+    override suspend fun getWorkshopMembers(query: WorkshopMemberQuery): PagedListDN<WorkshopMemberDN> =
+        notUsed()
+
+    override suspend fun getWorkshopStackHolders(query: WorkshopStackHolderQuery): PagedListDN<WorkshopStackHolderDN> =
+        notUsed()
+
+    override fun getLegalRepresentativeWorkshops(): Flow<LegalRepresentativeWorkshopListDN?> =
+        notUsed()
+
+    override fun getLegalRepresentatives(
+        workshopId: String,
+        branchCode: String
+    ): Flow<LegalRepresentativeListDN?> = notUsed()
+
+    override fun getLegalRepresentativeWorkshopContracts(
+        workshopId: String,
+        branchCode: String
+    ): Flow<LegalRepresentativeContractListDN?> = notUsed()
+
     override suspend fun requestLegalRepresentativeTicket(nationalCode: String?) = notUsed()
     override suspend fun verifyLegalRepresentativeTicket(ticket: String) = notUsed()
-    override suspend fun submitLegalRepresentative(ticket: String, request: LegalRepresentativeRequestDN) = notUsed()
+    override suspend fun submitLegalRepresentative(
+        ticket: String,
+        request: LegalRepresentativeRequestDN
+    ) = notUsed()
+
     override suspend fun deleteLegalRepresentative(ticket: String, stakeId: Long) = notUsed()
+
+    override suspend fun getWorkShopObjections(query: WorkShopObjectionQuery): PagedListDN<WorkShopObjectionDN> = notUsed()
+    override suspend fun getWorkShopObjectionSms(seqNo: Long, page: Int): PagedListDN<SmsMessageDN> = notUsed()
 }

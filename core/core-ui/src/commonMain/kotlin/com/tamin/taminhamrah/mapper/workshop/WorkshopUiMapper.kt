@@ -4,6 +4,16 @@ import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeContra
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorkshopDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtPR
+import com.tamin.taminhamrah.model.workshop.AssignerContractDN
+import com.tamin.taminhamrah.model.workshop.AssignerContractPR
+import com.tamin.taminhamrah.model.workshop.AssignerPartyDN
+import com.tamin.taminhamrah.model.workshop.AssignerPartyPR
+import com.tamin.taminhamrah.model.workshop.BaseDocumentCategory
+import com.tamin.taminhamrah.model.workshop.BaseDocumentDN
+import com.tamin.taminhamrah.model.workshop.BaseDocumentPR
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseDN
+import com.tamin.taminhamrah.model.workshop.ComputationalBasePR
+import com.tamin.taminhamrah.model.workshop.ComputationalBaseStatus
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoDN
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenWorkshopInfoPR
 import com.tamin.taminhamrah.model.workshop.ContractRowPR
@@ -39,11 +49,25 @@ import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderPR
 import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDN
 import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractPR
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
+import com.tamin.taminhamrah.model.workshop.WorkShopObjectionPR
+import com.tamin.taminhamrah.model.workshop.SettlementCertificateDN
+import com.tamin.taminhamrah.model.workshop.SettlementCertificatePR
+import com.tamin.taminhamrah.model.workshop.SettlementSubjectDN
+import com.tamin.taminhamrah.model.workshop.SmsMessageDN
+import com.tamin.taminhamrah.model.workshop.SmsMessagePR
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminOptionSheetItem
 import com.tamin.taminhamrah.ui.orDash
 import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.util.toPersianDigits
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.toJalaliDateLabel
+import kotlinx.collections.immutable.toImmutableList
+
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.article_42
+import taminx.core.core_ui.article_43
+import taminx.core.core_ui.article_44
 
 /**
  * Domain → presentation for کارگاه‌های کارفرما.
@@ -60,6 +84,10 @@ fun EmployerAgreementDN.toPresentation(): WorkshopPR = with(workshop) {
     WorkshopPR(
         workshopId = workshopId,
         branchCode = branchCode,
+        // Raw, like the two identity fields above: these travel into a request body, where a
+        // dash or a Persian digit would be wrong.
+        characterCode = characterCode,
+        legalNationalId = legalNationalId,
         hasIdentity = hasIdentity,
         name = name.orDash(),
         codeLabel = workshopId.orDashDigits(),
@@ -105,6 +133,93 @@ fun WorkshopContractDN.toContractRow(): ContractRowPR = ContractRowPR(
     rowLabel = contractRow.orDashDigits(),
     workshopCodeLabel = workshopId.orDashDigits(),
     commitmentDate = startDate.orDashDate(),
+)
+
+// ---------------------------------------------------------------------------- واگذارندگان
+
+/**
+ * One پیمان, and the card the list draws it as.
+ *
+ * The card is built from the **پیمانکار** side, never the واگذارنده: the واگذارنده is the
+ * signed-in employer themselves, so a card built from it would show the user their own workshop
+ * on every row.
+ *
+ * [ContractRowPR.mobile] and [ContractRowPR.email] stay blank rather than dashed. This endpoint
+ * sends no contact columns at all — dashing them would draw two permanent «—» tiles and claim the
+ * service answered "none", when it was never asked. The card drops the whole row when both are
+ * blank, which is what the design does too.
+ */
+fun AssignerContractDN.toPresentation(): AssignerContractPR = AssignerContractPR(
+    card = ContractRowPR(
+        workshopId = employer.workshopId,
+        branchCode = employer.branchCode,
+        name = employer.workshopName.orDash(),
+        rowLabel = contractRow.orDashDigits(),
+        workshopCodeLabel = employer.workshopId.orDashDigits(),
+        commitmentDate = contractDate.orDashDate(),
+        // Blank, not dashed — the card drops the tile rather than drawing a dash across it.
+        address = employer.address,
+    ),
+    // Raw ASCII: these two are query values, not labels. Persian digits here would address a
+    // contract the service has never heard of.
+    contractRow = contractRow,
+    contractSequence = contractSequence,
+    branchCode = branchCode,
+    contractNumber = contractNumber.orDashDigits(),
+    rawContractNumber = contractNumber,
+    sequenceLabel = contractSequence.orDashDigits(),
+    contractDate = contractDate.orDashDate(),
+    contractSubject = contractSubject.orDash(),
+    // Ended only once its end date is behind today. A blank or unparseable date reads as still in
+    // force: a پیمان is shown as ended only when the service says when it ended.
+    isFinished = (PersianDateFormatter.daysSince(contractEndDate) ?: 0) > 0,
+    assigner = assigner.toPresentation(),
+    employer = employer.toPresentation(),
+)
+
+fun AssignerPartyDN.toPresentation(): AssignerPartyPR = AssignerPartyPR(
+    workshopName = workshopName.orDash(),
+    workshopCode = workshopId.orDashDigits(),
+    nationalId = nationalId.orDashDigits(),
+    branchName = branchName.orDash(),
+    address = address.orDash(),
+)
+
+/**
+ * A موضوع کار as the picker lists it. The sheet's own option row is the whole of what it needs — a
+ * code to file under and the wording to show — so no model of its own is added for it.
+ */
+fun SettlementSubjectDN.toPresentation(): TaminOptionSheetItem = TaminOptionSheetItem(
+    id = code,
+    label = description.orDash(),
+)
+
+fun SettlementCertificateDN.toPresentation(): SettlementCertificatePR = SettlementCertificatePR(
+    number = number.orDashDigits(),
+    date = date.orDashDate(),
+)
+
+fun ComputationalBaseDN.toPresentation(): ComputationalBasePR = ComputationalBasePR(
+    letterNumber = letterNumber.orDashDigits(),
+    sendDate = sendDate.orDashTimestamp(),
+    amount = amount.orDashAmount(),
+    amountRials = amount,
+    // Blank rather than dashed: a base with no period drops that line instead of printing «— تا —».
+    periodStart = PersianDateFormatter.formatTimestamp(startDate),
+    periodEnd = PersianDateFormatter.formatTimestamp(endDate),
+    // Zero is a real answer here and prints as ۰, unlike an amount: the row says «۰ سند» and the
+    // detail screen's documents section is then legitimately empty.
+    documentCount = documents.size.toString().toPersianDigits(),
+    documents = documents.map { it.toPresentation() }.toImmutableList(),
+    status = ComputationalBaseStatus.fromCode(statusCode),
+    finalOrderNumber = finalOrderNumber.orDashDigits(),
+    estimatedOrderNumber = estimatedOrderNumber.orDashDigits(),
+)
+
+fun BaseDocumentDN.toPresentation(): BaseDocumentPR = BaseDocumentPR(
+    documentId = documentId,
+    kind = kind,
+    category = BaseDocumentCategory.fromCode(categoryCode),
 )
 
 // ---------------------------------------------- خدمات غیرحضوری کارفرما (employerEservicesAgreement)
@@ -182,7 +297,8 @@ fun DebitReasonDN.toPresentation(): DebitReasonPR = DebitReasonPR(
 fun WorkShopDebtDN.toPresentation(): WorkShopDebtPR = WorkShopDebtPR(
     debitNumber = debitNumber,
     debitNumberLabel = debitNumber.orDashDigits(),
-    agreementRow = agreementRow.orDashDigits(),
+    agreementRow = agreementRow,
+    agreementRowLabel = agreementRow.orDashDigits(),
     notifyDate = orderRecipeDate.orDashDate(),
     customerCode = customerCode.orDashDigits(),
     amount = debitAmount.orDashAmount(),
@@ -200,9 +316,9 @@ fun WorkshopDemandDocDN.toPresentation(): WorkshopDemandDocPR = WorkshopDemandDo
     docNumber = docNumber,
     docNumberLabel = docNumber.orDashDigits(),
     docDate = docDate.orDashDate(),
-    docType = docTypeDescription.orDash(),
-    step = debitStepDescription.orDash(),
-    state = debitStateDescription.orDash(),
+    docType = docTypeDescription.orDashProse(),
+    step = debitStepDescription.orDashProse(),
+    state = debitStateDescription.orDashProse(),
     isViewable = isViewable,
 )
 
@@ -252,11 +368,18 @@ fun WorkshopsDebtListModelDN.toPresentation(): ArticleSixteenDebtPR = ArticleSix
     executiveNotifyDateLabel = executiveNotifyDate.orDashDate(),
     status = status,
     seqNo = seqNo,
+    proceedingType = when (kindDoc.trim()) {
+        "1" -> Res.string.article_42
+        "2" -> Res.string.article_43
+        "3" -> Res.string.article_44
+        else -> null
+    },
 )
 
 fun ArticleSixteenWorkshopInfoDN.toPresentation(): ArticleSixteenWorkshopInfoPR = ArticleSixteenWorkshopInfoPR(
     workshopId = workshopId.orDashDigits(),
     workshopName = workshopName.orDash(),
+    branchCode = branchCode.orDashDigits(),
     employerName = employerName.orDash(),
     character = character.orDash(),
     address = address.orDash(),
@@ -274,7 +397,10 @@ fun WorkshopMemberDN.toPresentation(): WorkshopMemberPR = WorkshopMemberPR(
     relationType = relationTypeDescription.orDash(),
     leavingWorkStatus = leavingWorkStatus.orDash(),
     leavingWorkDate = leavingWorkDate.orDashDate(),
-    isEmployed = leavingWorkDate == null,
+    // Blank, not null: the service sends `leavingWorkDate` nullable but the domain model
+    // flattens it with `orEmpty()`, so a null-check here is always false and marked every
+    // member as having left.
+    isEmployed = leavingWorkDate.isBlank(),
 )
 
 fun WorkshopStackHolderDN.toPresentation(): WorkshopStackHolderPR = WorkshopStackHolderPR(
@@ -285,9 +411,49 @@ fun WorkshopStackHolderDN.toPresentation(): WorkshopStackHolderPR = WorkshopStac
     stackType = stackType.orDash(),
 )
 
+fun WorkShopObjectionDN.toPresentation(): WorkShopObjectionPR = WorkShopObjectionPR(
+    seqNo = seqNo,
+    workshopId = workshopId.orDashDigits(),
+    debitNumber = debitNumber.orDashDigits(),
+    objectionNumber = (seqNo?.toString() ?: "").orDashDigits(),
+    objectionDate = objectionDate.orDashDate(),
+    objectionDescription = objectionDescription.orDash(),
+    voteTypeDescription = voteTypeDescription.orDash(),
+    objectionType = objectionType,
+    status = status,
+)
+
+fun SmsMessageDN.toPresentation(): SmsMessagePR = SmsMessagePR(
+    id = id,
+    description = description.orDash(),
+    status = status,
+)
+
 // ------------------------------------------------------------------ formatting
 
 /** Digits the user reads are Persian; a value the service omitted is the design's dash. */
+/**
+ * A description as the reader expects to see it, or a dash.
+ *
+ * Service descriptions arrive with round brackets — «محاسبه (اعلام نشده)» — and a bracket is
+ * bidi-neutral: in a right-to-left run it is drawn with its mirror glyph, so the one the service
+ * opens with reaches the screen as a closing bracket and the value reads «محاسبه )اعلام نشده(».
+ * Swapping the pair cancels that. It is the reordering-safe half of the problem: both brackets are
+ * bidi class ON and both mirror, so each keeps the position the algorithm gives it and only the
+ * glyph changes.
+ *
+ * Stated here, at the presentation edge, so the domain keeps the service's own spelling.
+ */
+private fun String.orDashProse(): String = ifBlank { null }?.swapBrackets().orDash()
+
+private fun String.swapBrackets(): String = map { character ->
+    when (character) {
+        '(' -> ')'
+        ')' -> '('
+        else -> character
+    }
+}.joinToString("")
+
 private fun String.orDashDigits(): String = ifBlank { null }?.toPersianDigits().orDash()
 
 /** Compact Jalali (`14050131`) renders as `۱۴۰۵/۰۱/۳۱`; an absent date is a dash. */
@@ -303,6 +469,15 @@ private fun Long?.orDashTimestamp(): String = PersianDateFormatter.formatTimesta
  * zero are different answers, and the dash is the one that does not claim a figure.
  */
 private fun Long?.orDashAmount(): String = this?.let { "${it.toPriceFormat()} ریال" }.orDash()
+
+/**
+ * «جمع کارکرد اعلامی» — the bases' amounts added up, printed the way each row prints its own.
+ *
+ * A base the service sent no amount for adds nothing; when none of them has one the total is a gap,
+ * not ۰ ریال.
+ */
+fun List<ComputationalBasePR>.declaredTotal(): String =
+    mapNotNull { it.amountRials }.takeIf { it.isNotEmpty() }?.sum().orDashAmount()
 
 fun LegalRepresentativeWorkshopDN.toPresentation(): LegalRepresentativeWorkshopPR {
     return LegalRepresentativeWorkshopPR(

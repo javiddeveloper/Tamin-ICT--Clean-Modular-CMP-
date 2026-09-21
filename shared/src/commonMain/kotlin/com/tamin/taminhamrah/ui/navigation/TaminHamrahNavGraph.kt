@@ -1,82 +1,80 @@
 package com.tamin.taminhamrah.ui.navigation
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
-import androidx.compose.ui.layout.layout
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.tamin.taminhamrah.feature.FeatureManager
+import com.tamin.taminhamrah.deeplink.DeepLinkDispatcher
+import com.tamin.taminhamrah.deeplink.DeepLinkKey
+import com.tamin.taminhamrah.deeplink.DeepLinkResolution
+import com.tamin.taminhamrah.deeplink.DeepLinkSource
+import com.tamin.taminhamrah.deeplink.ResolveDeepLinkUseCase
 import com.tamin.taminhamrah.feature.addDependent.AddDependentRoute
 import com.tamin.taminhamrah.feature.addDependent.addDependentGraph
-import com.tamin.taminhamrah.feature.agent.AgentDestination
 import com.tamin.taminhamrah.feature.agent.agentScreen
 import com.tamin.taminhamrah.feature.agent.navigateToAgent
+import com.tamin.taminhamrah.feature.calculateWagePension.calculateWagePensionScreen
 import com.tamin.taminhamrah.feature.cartable.CartableRoute
 import com.tamin.taminhamrah.feature.cartable.cartableGraph
 import com.tamin.taminhamrah.feature.changemobile.changeMobileScreen
 import com.tamin.taminhamrah.feature.changemobile.navigateToChangeMobile
+import com.tamin.taminhamrah.feature.contractaffair.CONTRACT_AFFAIRS_REFRESH_KEY
+import com.tamin.taminhamrah.feature.contractaffair.ContractPremiumPaymentRoute
+import com.tamin.taminhamrah.feature.contractaffair.contractAffairsScreen
+import com.tamin.taminhamrah.feature.contractaffair.contractPaymentCalcDetailScreen
+import com.tamin.taminhamrah.feature.contractaffair.contractPaymentHistoryScreen
+import com.tamin.taminhamrah.feature.contractaffair.contractPremiumPaymentScreen
+import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentCalcDetail
+import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPaymentHistory
+import com.tamin.taminhamrah.feature.contractaffair.navigateToContractPremiumPayment
+import com.tamin.taminhamrah.feature.contracts.contractFlowScreen
 import com.tamin.taminhamrah.feature.contracts.contractsScreen
+import com.tamin.taminhamrah.feature.contracts.flow.resolveContractTypeForEdit
+import com.tamin.taminhamrah.feature.contracts.navigateToContractFlow
 import com.tamin.taminhamrah.feature.contracts.navigateToContracts
 import com.tamin.taminhamrah.feature.deferredInstallment.deferredInstallmentScreen
 import com.tamin.taminhamrah.feature.deferredInstallment.navigateToDeferredInstallment
+import com.tamin.taminhamrah.feature.developerOptions.DebugLoginRoute
 import com.tamin.taminhamrah.feature.developerOptions.DeveloperOptionsRoute
+import com.tamin.taminhamrah.feature.developerOptions.TokenManagerRoute
+import com.tamin.taminhamrah.feature.developerOptions.debugLoginScreen
 import com.tamin.taminhamrah.feature.developerOptions.developerOptionsScreen
+import com.tamin.taminhamrah.feature.developerOptions.tokenManagerScreen
+import com.tamin.taminhamrah.feature.fractionContract.fractionContractScreen
 import com.tamin.taminhamrah.feature.girlSurvivor.girlSurvivorScreen
 import com.tamin.taminhamrah.feature.healthProfile.healthProfileScreen
 import com.tamin.taminhamrah.feature.healthProfile.navigateToHealthProfile
@@ -88,7 +86,10 @@ import com.tamin.taminhamrah.feature.inquiryEducation.inquiryEducationScreen
 import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
 import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
 import com.tamin.taminhamrah.feature.orotezprotez.orotezProtezScreen
-import com.tamin.taminhamrah.feature.pensionInquiry.calculatePensionScreen
+import com.tamin.taminhamrah.feature.payment.PaymentRoute
+import com.tamin.taminhamrah.feature.payment.navigateToPayment
+import com.tamin.taminhamrah.feature.payment.paymentGraph
+import com.tamin.taminhamrah.feature.payment.paymentSandboxScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.deservedTreatmentScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.disabilityPensionScreen
 import com.tamin.taminhamrah.feature.pensionInquiry.edictScreen
@@ -105,69 +106,67 @@ import com.tamin.taminhamrah.feature.pregnancyPay.pregnancyPayScreen
 import com.tamin.taminhamrah.feature.profile.ProfileRoute
 import com.tamin.taminhamrah.feature.profile.profileGraph
 import com.tamin.taminhamrah.feature.requestPaymentForIllDays.requestPaymentForIllDaysScreen
+import com.tamin.taminhamrah.feature.retirementPension.retirementPensionScreen
 import com.tamin.taminhamrah.feature.security.SecurityRoute
 import com.tamin.taminhamrah.feature.security.securityScreen
 import com.tamin.taminhamrah.feature.settings.SettingsRoute
 import com.tamin.taminhamrah.feature.settings.settingsScreen
-import com.tamin.taminhamrah.feature.contracts.contractFlowScreen
+import com.tamin.taminhamrah.feature.stories.navigateToStoryViewer
+import com.tamin.taminhamrah.feature.stories.storyViewerScreen
 import com.tamin.taminhamrah.feature.taminServices.TaminServicesRoute
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServicesScreen
 import com.tamin.taminhamrah.feature.taminServices.inspectionScreen
 import com.tamin.taminhamrah.feature.taminServices.occurrenceScreen
-import com.tamin.taminhamrah.feature.taminServices.employerOnlineServicesScreen
 import com.tamin.taminhamrah.feature.taminServices.sendInsuranceHistoryToInstitutionsScreen
 import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
+import com.tamin.taminhamrah.feature.taminServices.workersPaymentInfoScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
 import com.tamin.taminhamrah.feature.treatment.treatmentGraph
 import com.tamin.taminhamrah.feature.userRequest.UserRequestRoute
+import com.tamin.taminhamrah.feature.userRequest.navigateToUserRequestDetail
 import com.tamin.taminhamrah.feature.userRequest.userRequestGraph
+import com.tamin.taminhamrah.feature.weddingPresent.navigateToWeddingPresentCalculate
+import com.tamin.taminhamrah.feature.weddingPresent.weddingPresentCalculateScreen
+import com.tamin.taminhamrah.feature.weddingPresent.weddingPresentScreen
 import com.tamin.taminhamrah.feature.workshops.completeEmployerInfoScreen
+import com.tamin.taminhamrah.feature.workshops.debtObjectionStatusScreen
 import com.tamin.taminhamrah.feature.workshops.navigateToWorkshops
 import com.tamin.taminhamrah.feature.workshops.workshopsScreen
-import com.tamin.taminhamrah.mapper.campaign.toPresentation
 import com.tamin.taminhamrah.model.common.FeatureFlag
-import com.tamin.taminhamrah.model.common.FeatureStatus
-import com.tamin.taminhamrah.model.common.MenuServiceStatusDN
 import com.tamin.taminhamrah.openUrl
 import com.tamin.taminhamrah.ui.blur.AppBarScrim
 import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
 import com.tamin.taminhamrah.ui.blur.NavigationBarItemContent
 import com.tamin.taminhamrah.ui.blur.TopBarScrim
 import com.tamin.taminhamrah.ui.blur.safeHazeSource
-import com.tamin.taminhamrah.ui.components.CampaignCarousel
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import com.tamin.taminhamrah.ui.contract.CustomNavigationBarItem
-import com.tamin.taminhamrah.ui.home.HomeViewModel
-import com.tamin.taminhamrah.ui.home.contract.HomeEvent
-import com.tamin.taminhamrah.ui.home.contract.HomeIntent
-import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.deeplink.DeepLinkHandler
+import com.tamin.taminhamrah.ui.deeplink.LocalDeepLinkHandler
+import com.tamin.taminhamrah.ui.home.HomeScreen
+import com.tamin.taminhamrah.useCases.agent.ObserveAgentAvailabilityUseCase
 import com.tamin.taminhamrah.util.AppConfig
 import dev.chrisbanes.haze.HazeState
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
-import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.error_load_menu_failed
+import taminx.core.core_ui.deep_link_feature_unavailable
 import taminx.core.core_ui.ic_home_menu
 import taminx.core.core_ui.ic_profile_menu
 import taminx.core.core_ui.ic_services_menu
 import taminx.core.core_ui.ic_treatment_menu
+import taminx.core.core_ui.invalid_deep_link
 import taminx.core.core_ui.login_required_desc
 import taminx.core.core_ui.login_to_tamin_man
 import taminx.core.core_ui.please_login_to_your_account
-import taminx.core.core_ui.retry
-import taminx.core.core_ui.select_group
 import taminx.core.core_ui.tab_agent
 import taminx.core.core_ui.tab_home
 import taminx.core.core_ui.tab_profile
 import taminx.core.core_ui.tab_services
 import taminx.core.core_ui.tab_treatment
-import taminx.core.core_ui.tamin_man_services
-import taminx.core.core_ui.user_type_employer
-import taminx.core.core_ui.user_type_insured
-import taminx.core.core_ui.user_type_pensioner
 
 private enum class BottomTab { HOME, SERVICES, TREATMENT, PROFILE, OTHER }
 
@@ -179,6 +178,9 @@ private fun NavDestination?.toBottomTab(): BottomTab = when {
     hasRoute<ProfileRoute.Main>() -> BottomTab.PROFILE
     else -> BottomTab.OTHER
 }
+
+/** The orb opens the assistant through the deep link gate, so the flag is re-checked on tap. */
+private val AGENT_DEEP_LINK = "@" + DeepLinkKey.AGENT.key
 
 @Composable
 internal fun TaminHamrahNavGraph(
@@ -197,11 +199,9 @@ internal fun TaminHamrahNavGraph(
     val isProfileSelected = currentDestination?.hasRoute<ProfileRoute.Main>() == true
     val isHomeSelected = currentDestination?.hasRoute<Route.Home>() == true
 
-    // بررسی Feature Flag سراسری Agent برای کنترل نمایش FAB
-    val featureManager: FeatureManager = koinInject()
-    val isAgentEnabled by featureManager
-        .getFeatureStatus(FeatureFlag.AGENT)
-        .map { it is FeatureStatus.Enabled }
+    // The assistant's entry point needs both the AGENT menu flag and the server's chat permission.
+    val observeAgentAvailability: ObserveAgentAvailabilityUseCase = koinInject()
+    val isAgentEnabled by remember(observeAgentAvailability) { observeAgentAvailability() }
         .collectAsState(initial = false)
     val currentTab = currentDestination.toBottomTab()
     val isBottomBarVisible = currentTab != BottomTab.OTHER
@@ -257,13 +257,52 @@ internal fun TaminHamrahNavGraph(
                 }
             }
         ),
-
-        )
-
+    )
 
     val hazeState = remember { HazeState(initialBlurEnabled = true) }
     val snackbarHostState = remember { SnackbarHostState() }
     val snackbarScope = rememberCoroutineScope()
+
+    // Every link — from the OS, a story or the assistant — is resolved here, through the one gate
+    // that reads the feature flag. [beforeOpen] runs only once the link is known to open something,
+    // so a blocked link leaves the caller's screen where it was.
+    val deepLinkDispatcher: DeepLinkDispatcher = koinInject()
+    val resolveDeepLink: ResolveDeepLinkUseCase = koinInject()
+    val deepLinkHandler = remember(deepLinkDispatcher) {
+        DeepLinkHandler { uri, source, onOpened -> deepLinkDispatcher.submit(uri, source, onOpened) }
+    }
+    // A menu tap on a service with no screen yet says so instead of doing nothing.
+    val openService: (FeatureFlag) -> Unit = { flag ->
+        if (!navController.navigateToFeature(flag)) {
+            snackbarScope.launch { snackbarHostState.showSnackbar(getString(Res.string.deep_link_feature_unavailable)) }
+        }
+    }
+    val openDeepLink: suspend (String, DeepLinkSource, () -> Unit) -> Unit = { uri, source, beforeOpen ->
+        when (val resolution = resolveDeepLink(uri, source)) {
+            is DeepLinkResolution.OpenFeature -> {
+                resolution.notice?.let { snackbarHostState.showSnackbar(it) }
+                if (!navController.navigateToDeepLink(resolution.key, resolution.args, beforeOpen)) {
+                    snackbarHostState.showSnackbar(getString(Res.string.deep_link_feature_unavailable))
+                }
+            }
+            is DeepLinkResolution.OpenWeb -> {
+                beforeOpen()
+                openUrl(resolution.url)
+            }
+            is DeepLinkResolution.Blocked -> snackbarHostState.showSnackbar(
+                resolution.message ?: getString(Res.string.deep_link_feature_unavailable)
+            )
+            is DeepLinkResolution.SendPrompt,
+            DeepLinkResolution.Invalid -> snackbarHostState.showSnackbar(getString(Res.string.invalid_deep_link))
+        }
+    }
+    // Links wait in the dispatcher until there is a signed-in session to open them in.
+    LaunchedEffect(isLoggedIn) {
+        if (isLoggedIn) {
+            deepLinkDispatcher.links.collect { link -> openDeepLink(link.uri, link.source, link.onOpened) }
+        }
+    }
+
     Scaffold(
         contentWindowInsets = WindowInsets(0),
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -271,10 +310,10 @@ internal fun TaminHamrahNavGraph(
             AnimatedVisibility(
                 visible = isBottomBarVisible,
                 enter = fadeIn(
-                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300),
+                    animationSpec = tween(durationMillis = 300),
                 ),
                 exit = fadeOut(
-                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300),
+                    animationSpec = tween(durationMillis = 300),
                 ),
             ) {
                 Box(
@@ -293,15 +332,13 @@ internal fun TaminHamrahNavGraph(
                         trailingButton = if (isAgentEnabled) {
                             {
                                 AgentOrbButton(
-                                    onClick = { navController.navigateToAgent() },
+                                    onClick = { deepLinkHandler.open(AGENT_DEEP_LINK, DeepLinkSource.APP_CONTENT) },
                                     contentDescription = agentLabel,
                                 )
                             }
                         } else null,
                     ) {
-
                         navigationItems.forEach { navigationItem ->
-
                             val containerColor: Brush =
                                 if (navigationItem.isSelected) Brush.linearGradient(
                                     listOf(
@@ -349,6 +386,7 @@ internal fun TaminHamrahNavGraph(
             }
         }
     ) { paddingValues ->
+      CompositionLocalProvider(LocalDeepLinkHandler provides deepLinkHandler) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -362,10 +400,33 @@ internal fun TaminHamrahNavGraph(
             ) {
                 composableWithFadeTransitions<Route.Home> {
                     HomeScreen(
-                        onNavigateToService = { flag -> navController.navigateToFeature(flag) },
+                        onNavigateToService = openService,
                         onNavigateToWeb = { url -> openUrl(url) },
                         onShowMessage = { message ->
                             snackbarScope.launch { snackbarHostState.showSnackbar(message) }
+                        },
+                        onOpenStory = { index -> navController.navigateToStoryViewer(index) },
+                        onNavigateToAllServices = {
+                            navController.navigate(TaminServicesRoute) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        onNavigateToAgent = { navController.navigateToAgent() },
+                        onNavigateToUserRequests = { refCode ->
+                            navController.navigate(UserRequestRoute.List(refCode = refCode))
+                        },
+                        onNavigateToUserRequestDetail = { requestId, refCode, requestTypeId, title, referenceId ->
+                            navController.navigateToUserRequestDetail(
+                                requestId = requestId,
+                                refCode = refCode,
+                                requestTypeId = requestTypeId,
+                                title = title,
+                                referenceId = referenceId,
+                            )
                         },
                     )
                 }
@@ -409,7 +470,7 @@ internal fun TaminHamrahNavGraph(
                         navController.navigate(SettingsRoute)
                     },
                     onNavigateToUserRequests = {
-                        navController.navigate(UserRequestRoute.List)
+                        navController.navigate(UserRequestRoute.List())
                     },
 
                     onOpenUrl = { url -> openUrl(url) },
@@ -436,7 +497,7 @@ internal fun TaminHamrahNavGraph(
                 )
 
                 taminServicesScreen(
-                    onNavigateToService = { flag -> navController.navigateToFeature(flag) },
+                    onNavigateToService = openService,
                     onOpenUrl = { url -> openUrl(url) },
                     onBackClicked = { navController.popBackStack() }
                 )
@@ -461,8 +522,16 @@ internal fun TaminHamrahNavGraph(
                     onBack = { navController.popBackStack() },
                     onDone = { navController.popBackStack() },
                 )
+                workersPaymentInfoScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenUrl = { url -> openUrl(url) },
+                    onNavigateToPayment = { request ->
+                        navController.navigateToPayment(request)
+                    },
+                )
 
-                calculatePensionScreen(onBack = { navController.popBackStack() })
+                calculateWagePensionScreen(onBack = { navController.popBackStack() })
+                retirementPensionScreen(onBack = { navController.popBackStack() })
                 prescriptionScreen(onBack = { navController.popBackStack() })
                 deservedTreatmentScreen(onBack = { navController.popBackStack() })
                 payrollScreen(onBack = { navController.popBackStack() })
@@ -481,24 +550,107 @@ internal fun TaminHamrahNavGraph(
                 deferredInstallmentScreen(onBack = { navController.popBackStack() })
                 girlSurvivorScreen(onBack = { navController.popBackStack() })
                 inquiryEducationScreen(onBack = { navController.popBackStack() })
+                fractionContractScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToPremiumPayment = { contractNumber, premiumTypeCode, insuranceType ->
+                        navController.navigateToContractPremiumPayment(
+                            contractNumber,
+                            premiumTypeCode,
+                            insuranceType,
+                        )
+                    },
+                )
+                weddingPresentScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToCalculate = { navController.navigateToWeddingPresentCalculate() },
+                )
+                weddingPresentCalculateScreen(onBack = { navController.popBackStack() })
+
+                // The shared payment flow. Any feature that has been handed a gateway ticket
+                // enters it with navController.navigateToPayment(request); finishing pops back to
+                // whichever screen started the payment.
+                paymentGraph(
+                    navController = navController,
+                    onFinished = { navController.popBackStack() },
+                )
+
+                storyViewerScreen(onClose = { navController.popBackStack() })
                 pensionSurvivorScreen(
                     navController = navController,
                     onBack = { navController.popBackStack() })
-                disabilityPensionScreen(onBack = { navController.popBackStack() })
+                disabilityPensionScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToAddDependent = { navController.navigate(AddDependentRoute) },
+                )
 
-                historyScreen()
+                historyScreen(
+                    navController = navController,
+                    onBack = { navController.popBackStack() })
                 historyJobInfoScreen(onBack = { navController.popBackStack() })
 
                 contractsScreen(
                     onBack = { navController.popBackStack() },
-                    onNavigateToService = { flag ->
-                        navController.navigateToFeature(flag)
-                    },
+                    onNavigateToService = openService,
                     onOpenUrl = { url -> openUrl(url) }
                 )
 
-                workshopsScreen(navController, onOpenUrl = { url -> openUrl(url) })
+                contractAffairsScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToService = openService,
+                    onOpenUrl =  { url -> openUrl(url) },
+                    onNavigateToPaymentHistory = { contractNumber, insuranceType ->
+                        navController.navigateToContractPaymentHistory(
+                            contractNumber,
+                            insuranceType
+                        )
+                    },
+                    onNavigateToPremiumPayment = { contractNumber, premiumTypeCode, insuranceType ->
+                        navController.navigateToContractPremiumPayment(
+                            contractNumber,
+                            premiumTypeCode,
+                            insuranceType,
+                        )
+                    },
+                    onNavigateToEditContract = { premiumTypeCode, freeJobCode, contractNumber ->
+                        val type = resolveContractTypeForEdit(premiumTypeCode, freeJobCode)
+                            ?: return@contractAffairsScreen
+                        navController.navigateToContractFlow(
+                            type = type,
+                            editContractNumber = contractNumber,
+                        )
+                    },
+                )
+
+                contractPaymentHistoryScreen(onBack = { navController.popBackStack() })
+
+                contractPremiumPaymentScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToPaymentDetails = { premiumTypeCode, startDate, endDate ->
+                        navController.navigateToContractPaymentCalcDetail(
+                            premiumTypeCode,
+                            startDate,
+                            endDate,
+                        )
+                    },
+                    onNavigateToPayment = { request ->
+                        navController.navigateToPayment(request) {
+                            popUpTo<ContractPremiumPaymentRoute> {
+                                inclusive = true
+                            }
+                        }
+                    },
+                )
+
+                contractPaymentCalcDetailScreen(onBack = { navController.popBackStack() })
+
+                workshopsScreen(
+                    navController,
+                    // The debt payment runs in the app's own payment flow, which owns the gateway
+                    // address; the feature only hands over the ticket the service issued.
+                    onStartPayment = { request -> navController.navigateToPayment(request) },
+                )
                 completeEmployerInfoScreen(navController)
+                debtObjectionStatusScreen(navController)
 
                 myInboxScreen(onNavigateBack = { navController.popBackStack() })
 
@@ -506,32 +658,33 @@ internal fun TaminHamrahNavGraph(
 
                 userRequestGraph(navController = navController)
 
-                contractFlowScreen(onBack = { navController.popBackStack() })
-
-                // Maps the assistant's destination ids to real routes. Ids come from
-                // AgentDestination; anything unmapped is ignored rather than crashing.
-                agentScreen(
-                    onNavigateToDestination = { destination ->
-                        when (destination) {
-                            AgentDestination.DISABILITY_PENSION -> navController.navigateToDisabilityPension()
-                            AgentDestination.DEFERRED_INSTALLMENT -> navController.navigateToDeferredInstallment()
-                            AgentDestination.CONTRACTS -> navController.navigateToContracts()
-                            AgentDestination.WORKSHOPS -> navController.navigateToWorkshops()
-                            AgentDestination.PRESCRIPTION -> navController.navigateToPrescription()
-                            AgentDestination.DESERVED_TREATMENT -> navController.navigateToDeservedTreatment()
-                            AgentDestination.PENSION_SURVIVOR -> navController.navigateToPensionSurvivor()
-                            // Remaining AgentDestination ids have no screen in this app yet.
-                            // Until they do, the assistant must not offer a button for them —
-                            // see DeepLinkAgentService.
-                            else -> Unit
-                        }
-                    }
+                contractFlowScreen(
+                    onBack = { navController.popBackStack() },
+                    onEditSuccess = {
+                        navController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set(CONTRACT_AFFAIRS_REFRESH_KEY, true)
+                        navController.popBackStack()
+                    },
                 )
+
+                agentScreen(onNavigateBack = { navController.popBackStack() })
 
                 securityScreen(onNavigateBack = { navController.popBackStack() })
 
                 if (AppConfig.isDebug) {
-                    developerOptionsScreen(onNavigateBack = { navController.popBackStack() })
+                    developerOptionsScreen(
+                        onNavigateBack = { navController.popBackStack() },
+                        onNavigateToDebugLogin = { navController.navigate(DebugLoginRoute) },
+                        onNavigateToTokenManager = { navController.navigate(TokenManagerRoute) },
+                        onStartTestPayment = { navController.navigate(PaymentRoute.Sandbox) }
+                    )
+                    paymentSandboxScreen(
+                        navController = navController,
+                        onNavigateBack = { navController.popBackStack() }
+                    )
+                    debugLoginScreen(onNavigateBack = { navController.popBackStack() })
+                    tokenManagerScreen(onNavigateBack = { navController.popBackStack() })
                 }
 
                 orotezProtezScreen(onBack = { navController.popBackStack() })
@@ -555,10 +708,10 @@ internal fun TaminHamrahNavGraph(
             AnimatedVisibility(
                 visible = isBottomBarVisible,
                 enter = fadeIn(
-                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300)
+                    animationSpec = tween(durationMillis = 300)
                 ),
                 exit = fadeOut(
-                    animationSpec = androidx.compose.animation.core.tween(durationMillis = 300)
+                    animationSpec = tween(durationMillis = 300)
                 ),
                 modifier = Modifier.align(Alignment.TopCenter)
             ) {
@@ -574,6 +727,7 @@ internal fun TaminHamrahNavGraph(
                 }
             }
         }
+      }
     }
 
     if (showLoginBottomSheet) {
@@ -602,243 +756,3 @@ internal fun TaminHamrahNavGraph(
         )
     }
 }
-
-/** What the placeholder home column insets its content by; the carousel needs to know it. */
-private val HomeContentPadding = 16.dp
-
-/**
- * Measures the content [inset] wider than the column allows, so a full-bleed child can reach the
- * screen edge from inside a padded, center-aligned column. Placement is symmetric, which is what
- * cancels the padding — the parent's own width is fixed, so nothing else moves.
- *
- * Local to this screen on purpose: it exists only because the placeholder home column pads all of
- * its children, and it goes away with the placeholder.
- */
-private fun Modifier.ignoreHorizontalPadding(inset: Dp) = layout { measurable, constraints ->
-    val width = constraints.maxWidth + inset.roundToPx() * 2
-    val placeable = measurable.measure(
-        constraints.copy(minWidth = width, maxWidth = width)
-    )
-    layout(placeable.width, placeable.height) { placeable.place(0, 0) }
-}
-
-@Composable
-fun HomeScreen(
-    onNavigateToService: (FeatureFlag) -> Unit,
-    onNavigateToWeb: (String) -> Unit,
-    // No default: a disabled feature says why through this, and a caller that omitted it used to
-    // drop the message silently — the tap then did nothing at all.
-    onShowMessage: (String) -> Unit,
-    viewModel: HomeViewModel = koinViewModel()
-) {
-    val uiState by viewModel.uiState.collectAsState()
-
-    LaunchedEffect(viewModel) {
-        viewModel.events.collect { event ->
-            when (event) {
-                is HomeEvent.NavigateToService -> onNavigateToService(event.flag)
-                is HomeEvent.NavigateToWeb -> onNavigateToWeb(event.url)
-                is HomeEvent.ShowMessage -> onShowMessage(event.message)
-            }
-        }
-    }
-
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.TopCenter
-    ) {
-        if (uiState.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = HomeContentPadding)
-                // Top padding for content breathing room
-                .padding(top = 16.dp)
-                // Bottom padding so last item scrolls fully above the floating blur bar
-                .windowInsetsPadding(WindowInsets.navigationBars)
-                .padding(bottom = 80.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                stringResource(Res.string.tamin_man_services),
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(vertical = 16.dp)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            val userTypes = listOf(
-                1 to stringResource(Res.string.user_type_insured),
-                2 to stringResource(Res.string.user_type_pensioner),
-                3 to stringResource(Res.string.user_type_employer)
-            )
-            val availableTypes = remember(uiState.menuItems) {
-                val typesInData =
-                    uiState.menuItems.flatMap { it.showRole.filterNotNull() }.toSet()
-                userTypes.filter { it.first in typesInData }.ifEmpty { userTypes }
-            }
-            var selectedType by remember(availableTypes) {
-                mutableStateOf(availableTypes.firstOrNull()?.first ?: 1)
-            }
-            var expanded by remember { mutableStateOf(false) }
-
-            Box(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp)
-            ) {
-                OutlinedButton(
-                    onClick = { expanded = true },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.small
-                ) {
-                    Text(
-                        text = availableTypes.find { it.first == selectedType }?.second
-                            ?: stringResource(Res.string.select_group),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Spacer(Modifier.weight(1f))
-                    Icon(
-                        Icons.Default.ArrowDropDown,
-                        contentDescription = null
-                    )
-                }
-
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false },
-                    modifier = Modifier.fillMaxWidth(0.9f)
-                ) {
-                    availableTypes.forEach { (id, name) ->
-                        DropdownMenuItem(
-                            text = { Text(name) },
-                            onClick = {
-                                selectedType = id
-                                expanded = false
-                            }
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // The same for every role: campaigns are not filtered by the picker above.
-            //
-            // Full-bleed on purpose. A pager clips along its scroll axis, so leaving it inside this
-            // column's 16dp inset would cut the peeking neighbor down from 34 to 18 and leave the
-            // cards' merged shadow with a hard vertical edge 16dp in from the screen.
-            CampaignCarousel(
-                campaigns = uiState.campaigns.toPresentation(),
-                onCampaignClick = { flag ->
-                    viewModel.sendIntent(HomeIntent.OnCampaignClick(flag))
-                },
-                modifier = Modifier
-                    .ignoreHorizontalPadding(HomeContentPadding)
-                    .padding(top = Spacing.xlg),
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            val servicesToShow = uiState.menuItems.filter { it.showRole.contains(selectedType) }
-
-            servicesToShow.forEach { service ->
-                val isDisabled = service.status == MenuServiceStatusDN.DISABLED ||
-                    service.status == MenuServiceStatusDN.TEMPORARY_DISABLED ||
-                    service.status == MenuServiceStatusDN.COMPLETELY_DISABLED
-
-                val cardAlpha = if (isDisabled) 0.5f else 1.0f
-
-                Card(
-                    onClick = {
-                        if (!isDisabled) {
-                            viewModel.sendIntent(HomeIntent.OnServiceClick(service))
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp, horizontal = 8.dp)
-                        .alpha(cardAlpha),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                ) {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Start
-                        ) {
-                            // Icon could be added here based on service.icon
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .background(
-                                        MaterialTheme.colorScheme.primaryContainer,
-                                        MaterialTheme.shapes.small
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Home, // Placeholder
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                            }
-
-                            Spacer(Modifier.width(16.dp))
-
-                            Column {
-                                Text(
-                                    service.name ?: "",
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                                if (!service.subtitle.isNullOrEmpty()) {
-                                    Text(
-                                        service.subtitle!!,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-                        }
-
-                        // Show message if present and service is not just ACTIVE
-                        if (!service.message.isNullOrEmpty() && service.status != MenuServiceStatusDN.ACTIVE) {
-                            val msgColor =
-                                if (service.status == MenuServiceStatusDN.ENABLED_WITH_ERROR)
-                                    MaterialTheme.colorScheme.error
-                                else
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-
-                            Text(
-                                text = service.message!!,
-                                style = MaterialTheme.typography.labelMedium,
-                                color = msgColor,
-                                modifier = Modifier.padding(
-                                    start = 72.dp,
-                                    end = 16.dp,
-                                    bottom = 12.dp
-                                )
-                            )
-                        }
-                    }
-                }
-            }
-
-            if (uiState.menuItems.isEmpty() && !uiState.isLoading) {
-                Text(
-                    stringResource(Res.string.error_load_menu_failed),
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(top = 32.dp)
-                )
-                Button(
-                    onClick = { viewModel.sendIntent(HomeIntent.LoadMenu) },
-                    modifier = Modifier.padding(top = 16.dp)
-                ) {
-                    Text(stringResource(Res.string.retry))
-                }
-            }
-        }
-    }
-}
-

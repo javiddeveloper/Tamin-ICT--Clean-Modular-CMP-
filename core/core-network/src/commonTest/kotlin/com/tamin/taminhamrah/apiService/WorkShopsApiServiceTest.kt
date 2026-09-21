@@ -1,6 +1,5 @@
 package com.tamin.taminhamrah.apiService
 
-import com.tamin.taminhamrah.model.workshop.EmployerAgreementByWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.EmployerAgreementDTO
 import com.tamin.taminhamrah.model.workshop.EmployerCommitmentInfoDTO
 import com.tamin.taminhamrah.model.workshop.PaymentSheetDTO
@@ -10,7 +9,10 @@ import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDTO
 import com.tamin.taminhamrah.tools.extractMessage
 import com.tamin.taminhamrah.util.ApiTestUtils
 import com.tamin.taminhamrah.util.WorkshopTestData
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.jsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -194,5 +196,40 @@ class WorkShopsApiServiceTest : BaseApiTest() {
         val response = apiService.requestEmployerAgreementTicket(filter = "[]")
 
         assertEquals("کد تایید ارسال شد", response.extractMessage())
+    }
+
+    // ------------------------------------------------------------- درخواست مفاصاحساب
+
+    @Test
+    fun `settlement subjects deserialize their code and description`() = runTest {
+        val ktorfit = createMockKtorfit(
+            ApiTestUtils.createJsonResponse(
+                dataJson = """
+                    {"total": 2, "list": [
+                      {"code": "01", "description": "پیمان‌های عمرانی", "status": "1"},
+                      {"code": "04", "description": "حمل و نقل"}
+                    ]}
+                """.trimIndent(),
+            )
+        )
+        val apiService = ktorfit.createWorkShopsApiService()
+
+        val subjects = assertNotNull(apiService.getSettlementSubjects(emptyMap()).data).list.orEmpty()
+
+        assertEquals(listOf("01", "04"), subjects.map { it.code })
+        assertEquals("حمل و نقل", subjects[1].description)
+    }
+
+    /** The id arrives as a bare string in `data`, which the JsonElement payload has to hold. */
+    @Test
+    fun `settlement pdf upload answers with its id as a bare string`() = runTest {
+        val ktorfit = createMockKtorfit(ApiTestUtils.createJsonResponse(dataJson = "\"7f3c9a\""))
+        val apiService = ktorfit.createWorkShopsApiService()
+
+        val response = apiService.uploadSettlementPdf(
+            MultiPartFormDataContent(formData { append("file", byteArrayOf(1, 2, 3)) }),
+        )
+
+        assertEquals("7f3c9a", response.data?.jsonPrimitive?.content)
     }
 }

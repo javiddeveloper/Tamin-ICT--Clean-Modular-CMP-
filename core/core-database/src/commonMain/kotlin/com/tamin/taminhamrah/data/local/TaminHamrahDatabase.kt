@@ -10,6 +10,7 @@ import com.tamin.taminhamrah.data.local.dao.BranchDao
 import com.tamin.taminhamrah.data.local.dao.CityProvinceDao
 import com.tamin.taminhamrah.data.local.dao.ContractDao
 import com.tamin.taminhamrah.data.local.dao.MenuDao
+import com.tamin.taminhamrah.data.local.dao.HistoryCacheDao
 import com.tamin.taminhamrah.data.local.dao.HistoryJobInfoDao
 import com.tamin.taminhamrah.data.local.dao.PersonalInboxDao
 import com.tamin.taminhamrah.data.local.dao.PersonalDao
@@ -24,6 +25,8 @@ import com.tamin.taminhamrah.data.local.entity.BranchEntity
 import com.tamin.taminhamrah.data.local.entity.CityEntity
 import com.tamin.taminhamrah.data.local.entity.ContractEntity
 import com.tamin.taminhamrah.data.local.entity.HistoryJobInfoEntity
+import com.tamin.taminhamrah.data.local.entity.HistoryWageRowEntity
+import com.tamin.taminhamrah.data.local.entity.HistoryYearEntity
 import com.tamin.taminhamrah.data.local.entity.IdentityInfoEntity
 import com.tamin.taminhamrah.data.local.entity.MenuEntity
 import com.tamin.taminhamrah.data.local.entity.PersonalInboxItemEntity
@@ -53,6 +56,8 @@ import com.tamin.taminhamrah.data.local.entity.AgentMessageEntity
 import com.tamin.taminhamrah.data.local.entity.VersionHistoryEntity
 import com.tamin.taminhamrah.data.local.dao.AgentChatDao
 import com.tamin.taminhamrah.data.local.dao.VersionHistoryDao
+import com.tamin.taminhamrah.data.local.dao.HomeContentDao
+import com.tamin.taminhamrah.data.local.entity.HomeContentEntity
 import androidx.room.TypeConverters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -90,8 +95,11 @@ import kotlinx.coroutines.IO
         AgentMessageEntity::class,
         VersionHistoryEntity::class,
         HistoryJobInfoEntity::class,
+        HistoryYearEntity::class,
+        HistoryWageRowEntity::class,
+        HomeContentEntity::class,
     ],
-    version = 2,
+    version = 4,
 )
 @ConstructedBy(TaminXDatabaseConstructor::class)
 @TypeConverters(TaminHamrahConverters::class)
@@ -112,10 +120,15 @@ expect abstract class TaminXDatabase : RoomDatabase {
     abstract fun agentChatDao(): AgentChatDao
     abstract fun versionHistoryDao(): VersionHistoryDao
     abstract fun historyJobInfoDao(): HistoryJobInfoDao
+
+    abstract fun historyCacheDao(): HistoryCacheDao
+    abstract fun homeContentDao(): HomeContentDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT")
-expect object TaminXDatabaseConstructor : RoomDatabaseConstructor<TaminXDatabase>
+expect object TaminXDatabaseConstructor : RoomDatabaseConstructor<TaminXDatabase> {
+    override fun initialize(): TaminXDatabase
+}
 
 fun getRoomDatabase(builder: RoomDatabase.Builder<TaminXDatabase>): TaminXDatabase {
     return builder

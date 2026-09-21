@@ -28,12 +28,13 @@ data class AgentUiState(
     val processingState: AgentProcessingState? = null,
     /** Current request ID — used for cancellation */
     val currentRequestId: String? = null,
-    /** Session ID */
-    val sessionId: String? = null,
     /** Last entity — used for next message context */
     val lastEntity: String? = null,
-    /** Chat token */
-    val chatToken: String? = null,
+    /** The server's conversation state and history, replayed with the next prompt. */
+    val conversationState: String? = null,
+    val conversationHistory: String? = null,
+    /** Whether the server lets this user send voice prompts. */
+    val canSendVoice: Boolean = false,
     /** Current input mode */
     val inputMode: InputMode = InputMode.Text,
     /** Live recording state — non-null while the mic is recording. */
@@ -69,17 +70,15 @@ data class AgentUiState(
         data class ActiveSessionChanged(val sessionId: String?) : PartialState
         /** Replaces the whole conversation, e.g. when opening one from history. */
         data class ChatItemsReplaced(val items: List<ChatItem>) : PartialState
-        data class ChatAllowedReceived(
-            val chatToken: String?,
-            val sessionId: String? = null
-        ) : PartialState
+        data class ChatAllowedReceived(val canSendVoice: Boolean) : PartialState
         data class PendingReceived(val requestId: String, val etaSeconds: Int) : PartialState
         data class ProcessingStateUpdated(val state: AgentProcessingState?) : PartialState
         data class NewChatItems(val items: List<ChatItem>) : PartialState
         data class UpdateChatItem(val item: ChatItem) : PartialState
         data class SessionUpdated(
-            val sessionId: String?,
-            val lastEntity: String?
+            val lastEntity: String?,
+            val state: String? = null,
+            val history: String? = null,
         ) : PartialState
         data class InputModeChanged(val mode: InputMode) : PartialState
         object GenerationCancelled : PartialState

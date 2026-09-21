@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class TendencyInfoDTO(
-    @SerialName("relationWithTamin") val baseTendency: BaseTendency? = null,
+    @SerialName("baseTendency") val baseTendency: BaseTendency? = null,
 )

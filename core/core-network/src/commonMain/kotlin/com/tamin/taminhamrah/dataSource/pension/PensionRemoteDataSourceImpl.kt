@@ -6,10 +6,17 @@ import com.tamin.taminhamrah.model.pension.PensionIdDTO
 import com.tamin.taminhamrah.model.pension.PensionInquiryDTO
 import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDTO
 import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDTO
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilityFinalConfirmRequest
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveDocumentRequest
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoRequest
+import com.tamin.taminhamrah.model.pension.disabilityRequest.DisabilitySaveInfoResponseDTO
+import com.tamin.taminhamrah.model.pension.disabilityRequest.medicalCommission.RegisteredMedicalCommissionDTO
 import com.tamin.taminhamrah.model.pension.fish.PayRollDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentCertificateDTO
 import com.tamin.taminhamrah.model.pension.installment.DeferredInstallmentRequest
 import com.tamin.taminhamrah.model.pension.retirement.RetirementPersonalDTO
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestCreatedDTO
+import com.tamin.taminhamrah.model.pension.retirement.RetirementRequestFormDTO
 import com.tamin.taminhamrah.model.pension.retirementInfo.RetirementRequestDTO
 import com.tamin.taminhamrah.model.pension.sendRetirementDocument.RetirementSaveDocumentRequest
 import com.tamin.taminhamrah.model.personal.age.AgeDTO
@@ -17,6 +24,7 @@ import com.tamin.taminhamrah.model.personal.disabilityRequest.disabilityRequestP
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
 import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
@@ -25,6 +33,7 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
+import com.tamin.taminhamrah.tools.readPdfChannel
 import com.tamin.taminhamrah.tools.safeCall
 
 class PensionRemoteDataSourceImpl(
@@ -48,10 +57,10 @@ class PensionRemoteDataSourceImpl(
 
     override suspend fun getEdictPensioner(
         query: ApiQueryParamDN
-    ): EdictPensionerDTO? = errorParser.safeCall("getEdictPensioner") {
+    ): EdictPensionerDTO = errorParser.safeCall("getEdictPensioner") {
         val filterJson = apiQueryBuilder.buildFilterJson(query.filters)
         val response = pensionApiService.getEdictPensioner(mapOf("filter" to filterJson))
-        response?.extractData()
+        response.extractData()
     }
 
     override suspend fun sendRequestDeferredInstallmentCertificate(
@@ -79,8 +88,14 @@ class PensionRemoteDataSourceImpl(
     override suspend fun getUserAge(
         filter: List<ApiFilterDN>
     ): AgeDTO = errorParser.safeCall("getUserAge") {
-        val filterJson = apiQueryBuilder.buildFilterJson(filter)
-        val response = pensionApiService.getUserAge(mapOf("birthDate" to filterJson))
+        // `birthDate` is a bare epoch, not a filter array — the endpoint takes the value itself
+        // (legacy: `@Query("birthDate") birthDate: Long?`). Encoding the filter JSON here sent
+        // `birthDate=[]` and the service answered with no age at all.
+        val birthDate = filter
+            .firstOrNull { it.property == FilterProperty.BIRTH_DATE }
+            ?.value
+            .orEmpty()
+        val response = pensionApiService.getUserAge(mapOf("birthDate" to birthDate))
         response.extractData()
     }
 
@@ -116,6 +131,14 @@ class PensionRemoteDataSourceImpl(
         response.extractData()
     }
 
+    override suspend fun createRetirementRequest(
+        authenticationsCode: Long,
+        form: RetirementRequestFormDTO
+    ): RetirementRequestCreatedDTO = errorParser.safeCall("createRetirementRequest") {
+        val response = pensionApiService.createRetirementRequest(authenticationsCode, form)
+        response.extractData()
+    }
+
     override suspend fun checkRetirementStatus(): RetirementStatusDTO =
         errorParser.safeCall("checkRetirementStatus") {
             val response = pensionApiService.checkRetirementStatus()
@@ -134,7 +157,7 @@ class PensionRemoteDataSourceImpl(
         request: RetirementSaveDocumentRequest
     ): String? = errorParser.safeCall("sendRetirementDocument") {
         val response = pensionApiService.sendRetirementDocument(requestId, request)
-        response?.extractData()
+        response.extractData()
     }
 
     override suspend fun getAuthenticationCode(): AuthenticationTicketDTO =
@@ -145,7 +168,7 @@ class PensionRemoteDataSourceImpl(
 
     override suspend fun sendEdictPensionerToMyInbox(
         filter: List<ApiFilterDN>
-    ): String? = errorParser.safeCall("sendEdictPensionerToMyInbox") {
+    ): String = errorParser.safeCall("sendEdictPensionerToMyInbox") {
         val filterJson = apiQueryBuilder.buildFilterJson(filter)
         val response =
             pensionApiService.sendEdictPensionerToMyInbox(mapOf("filter" to filterJson))
@@ -181,5 +204,43 @@ class PensionRemoteDataSourceImpl(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
             )
         }
+    }
+
+    override suspend fun saveDisabilityUserInfo(
+        body: DisabilitySaveInfoRequest
+    ): DisabilitySaveInfoResponseDTO = errorParser.safeCall("saveDisabilityUserInfo", ErrorUri.UNKNOWN) {
+        pensionApiService.saveDisabilityUserInfo(body).extractData()
+    }
+
+    override suspend fun finalConfirmDisabilityRequest(
+        requestId: Long,
+        body: DisabilityFinalConfirmRequest
+    ): DisabilitySaveInfoResponseDTO = errorParser.safeCall("finalConfirmDisabilityRequest", ErrorUri.UNKNOWN) {
+        pensionApiService.finalConfirmDisabilityRequest(requestId, body).extractData()
+    }
+
+    override suspend fun saveDocumentDisability(
+        requestId: Long,
+        body: DisabilitySaveDocumentRequest
+    ): String? = errorParser.safeCall("saveDocumentDisability", ErrorUri.UNKNOWN) {
+        pensionApiService.saveDocumentDisability(requestId, body).extractMessage()
+    }
+
+    override suspend fun getMedicalCommissionPdf(
+        lastWorkshop: String
+    ): PdfDownloadDTO = errorParser.safeCall("getMedicalCommissionPdf", ErrorUri.UNKNOWN) {
+        val response = pensionApiService.getMedicalCommissionPdf(lastWorkshop)
+        PdfDownloadDTO(
+            pdf = InputStreamDTO(
+                pdf = response.readPdfChannel()
+            )
+        )
+    }
+
+    override suspend fun getRegisteredMedicalCommission(
+        query: ApiQueryParamDN
+    ): ListData<RegisteredMedicalCommissionDTO> = errorParser.safeCall("getRegisteredMedicalCommission") {
+        val response = pensionApiService.getRegisteredMedicalCommission(apiQueryBuilder.buildQuery(query))
+        response.extractData()
     }
 }

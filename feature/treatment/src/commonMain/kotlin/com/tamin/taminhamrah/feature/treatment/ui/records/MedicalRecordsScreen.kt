@@ -1,8 +1,5 @@
 package com.tamin.taminhamrah.feature.treatment.ui.records
 
-import com.tamin.taminhamrah.feature.treatment.ui.components.raisedCard
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,7 +21,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.animation.core.tween
 import androidx.compose.ui.Modifier
+import com.tamin.taminhamrah.ui.theme.Duration
+import com.tamin.taminhamrah.ui.theme.Easing
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -35,6 +35,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.components.MedicalRecordCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.RecordGroupHeader
 import com.tamin.taminhamrah.feature.treatment.ui.components.TimelineFilterBar
 import com.tamin.taminhamrah.feature.treatment.ui.components.TreatmentFilterChipRow
+import com.tamin.taminhamrah.feature.treatment.ui.components.raisedCard
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsEvent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsIntent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.PrescriptionsUiState
@@ -64,6 +65,7 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
+import com.tamin.taminhamrah.ui.components.taminHeroGradient
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -405,6 +407,7 @@ fun MedicalRecordsContent(
         topBar = {
             TaminTopAppBar(
                 title = stringResource(Res.string.records_title),
+                background = taminHeroGradient(colors.treatmentHubStops),
                 navigationIcon = {
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
@@ -483,7 +486,17 @@ fun MedicalRecordsContent(
 
             when {
                 state.isLoading && state.prescriptionList.isEmpty() ->
-                    item { RecordsShimmerSkeleton() }
+                    item(key = RECORDS_SKELETON_KEY) {
+                        // Fades out while the first records fade in on their own staggered entrance,
+                        // so the page hands over instead of cutting from placeholder to content.
+                        RecordsShimmerSkeleton(
+                            modifier = Modifier.animateItem(
+                                fadeInSpec = null,
+                                placementSpec = null,
+                                fadeOutSpec = tween(durationMillis = Duration.normal, easing = Easing.standard),
+                            ),
+                        )
+                    }
 
                 // Guarded on error: a failed request cannot tell an empty period from an
                 // unreachable one.
@@ -534,13 +547,12 @@ private fun LazyListScope.recordTimeline(
                 title = stringResource(Res.string.records_doctor_named, record.docName),
                 subtitle = record.location.ifBlank { record.specDesc },
                 // The list endpoint carries no amount, so «سهم شما» comes from the per-record
-                // price lookup; it reads as unknown until that arrives. Old app: the insured's
-                // share is headSsoPayment (headInsuPayment is the organization's share).
-                // The list endpoint carries no amount, so the share comes from the per-record
-                // price lookup. It shimmers only while that lookup is out; once it is back, a
-                // record with no price shows the absent marker rather than shimmering forever.
+                // price lookup, where the insured's share is headInsuPayment (see
+                // ElectronicPrescriptionPricePR). It shimmers only while that lookup is out; once
+                // it is back, a record with no price shows the absent marker rather than
+                // shimmering forever.
                 shareAmount = prices[record.noteHeadEprescID]
-                    ?.headSsoPayment
+                    ?.headInsuPayment
                     ?.toLongOrNull()
                     ?.toPriceFormat()
                     ?: UNKNOWN_AMOUNT.takeIf { !isLoadingPrices },
@@ -577,9 +589,9 @@ private fun RecordsTotals(
     val pending = prices.isEmpty() && isLoadingPrices
     CostTotalsBar(
         insuredShareLabel = stringResource(Res.string.share_insured),
-        insuredShareAmount = prices.totalOf { it.headSsoPayment }.takeUnless { pending },
+        insuredShareAmount = prices.totalOf { it.headInsuPayment }.takeUnless { pending },
         organizationShareLabel = stringResource(Res.string.share_organization),
-        organizationShareAmount = prices.totalOf { it.headInsuPayment }.takeUnless { pending },
+        organizationShareAmount = prices.totalOf { it.headSsoPayment }.takeUnless { pending },
         totalLabel = stringResource(Res.string.amount_total),
         totalAmount = prices.totalOf { it.requestPrice }.takeUnless { pending },
     )
@@ -607,10 +619,12 @@ private fun recordAccent(prescType: String): RecordAccent {
     }
 }
 
+private const val RECORDS_SKELETON_KEY = "records-skeleton"
+
 @Composable
-private fun RecordsShimmerSkeleton() {
+private fun RecordsShimmerSkeleton(modifier: Modifier = Modifier) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = Spacing.page),
         verticalArrangement = Arrangement.spacedBy(Spacing.cardGap),

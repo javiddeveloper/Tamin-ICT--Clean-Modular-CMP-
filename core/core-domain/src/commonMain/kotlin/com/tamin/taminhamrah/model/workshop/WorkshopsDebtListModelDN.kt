@@ -23,7 +23,7 @@ data class WorkshopsDebtListModelDN(
     val kindDoc: String = "",
     val executiveNumber: String = "",
     val executiveDate: String = "",
-    /** تاریخ ابلاغ اجراییه — the date the one-day filing deadline is measured from. */
+    /** تاریخ ابلاغ اجراییه — the date the one-year filing deadline is measured from. */
     val executiveNotifyDate: String = "",
     val primaryVoteNumber: String = "",
     val primaryVoteDate: String = "",

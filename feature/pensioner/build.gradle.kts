@@ -13,6 +13,8 @@ kotlin {
             implementation(libs.androidx.navigation.compose)
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
+            implementation(libs.filekit.core)
+            implementation(libs.filekit.dialog.compose)
         }
     }
 }

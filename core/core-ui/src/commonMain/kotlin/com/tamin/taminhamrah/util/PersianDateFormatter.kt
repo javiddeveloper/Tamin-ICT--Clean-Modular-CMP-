@@ -208,6 +208,15 @@ object PersianDateFormatter {
         startOfDay(jy, jm, jd, TimeZone.UTC)
 
     /**
+     * A Jalali date as its Gregorian ISO calendar day, `2024-03-20`, for services that take a
+     * Gregorian day rather than an instant — without their callers depending on kotlinx-datetime.
+     */
+    fun toIsoGregorian(jy: Int, jm: Int, jd: Int): String {
+        val (gy, gm, gd) = jalaliToGregorian(jy, jm, jd)
+        return LocalDate(gy, gm, gd).toString()
+    }
+
+    /**
      * Whole calendar days between two epoch-millis instants in the device's zone, for range/
      * deadline checks (e.g. "end date must be at least N days before today"). Converts through
      * [LocalDate] rather than dividing the millis difference so a DST transition between the two
@@ -241,7 +250,7 @@ object PersianDateFormatter {
      * separate cycle rule: two independent leap rules drift apart, and the one that disagreed put
      * a 30th of اسفند on the 1st of فروردین.
      */
-    private fun isLeapYear(jy: Int): Boolean =
+    fun isLeapYear(jy: Int): Boolean =
         dayNumber(jy + 1, 1, 1) - dayNumber(jy, 1, 1) == DAYS_IN_LEAP_YEAR
 
     /** Days elapsed since the Jalali epoch, the quantity [jalaliToGregorian] is built on. */

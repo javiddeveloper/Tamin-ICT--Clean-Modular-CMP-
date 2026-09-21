@@ -83,6 +83,8 @@ enum class FilterProperty(val key: String) {
     @SerialName("debitReason") DEBIT_REASON("debitReason"),
     @SerialName("paymentSheetStatus") PAYMENT_SHEET_STATUS("paymentSheetStatus"),
     @SerialName("premiumTypeCode") PREMIUM_TYPE_CODE("premiumTypeCode"),
+    // special-insured-services/list-contracts-mobile — جستجوی قرارداد by exact contract number.
+    @SerialName("contractNumber") CONTRACT_NUMBER("contractNumber"),
     @SerialName("paymentType") PAYMENT_TYPE("paymentType"),
     @SerialName("insuranceNumber") INSURANCE_NUMBER("insuranceNumber"),
     @SerialName("endDate") END_DATE("endDate"),
@@ -98,8 +100,14 @@ enum class FilterProperty(val key: String) {
     @SerialName("type") TYPE("type"),
     @SerialName("status") STATUS("status"),
     @SerialName("jobDescription") JOB_DESCRIPTION("jobDescription"),
+    @SerialName("jobCode") JOB_CODE("jobCode"),
+    // proxy/models/branch names its label column `name` (not `branchName`, which is a
+    // different filter on other list endpoints).
+    @SerialName("name") NAME("name"),
     @SerialName("bankName") BANK_NAME("bankName"),
     @SerialName("insuranceTypeDesc") INSURANCE_TYPE_DESC("insuranceTypeDesc"),
+    /** Free-job wage titles (`baseinfo/free-job-wage`); legacy filter property is misspelled. */
+    @SerialName("discrioption") DISCRIOPTION("discrioption"),
 
     // Workshop member / stakeholder / absentee-registration lists. Each list addresses the same
     // two people-columns under a different prefix, which is why there is one entry per list
@@ -107,6 +115,7 @@ enum class FilterProperty(val key: String) {
     @SerialName("insurance.id") INSURANCE_ID("insurance.id"),
     @SerialName("insurance.nationalId") INSURANCE_NATIONAL_ID("insurance.nationalId"),
     @SerialName("personal.nationalId") PERSONAL_NATIONAL_ID("personal.nationalId"),
+    @SerialName("personal.id") PERSONAL_ID("personal.id"),
     @SerialName("personal.request.status.requestCode")
     PERSONAL_REQUEST_STATUS_CODE("personal.request.status.requestCode"),
 
@@ -115,6 +124,8 @@ enum class FilterProperty(val key: String) {
 
     @SerialName("debitNumber") DEBIT_NUMBER("debitNumber"),
     @SerialName("peymanSequence") PEYMAN_SEQUENCE("peymanSequence"),
+    @SerialName("contractRow") CONTRACT_ROW("contractRow"),
+    @SerialName("seqNo") SEQ_NO("seqNo"),
 }
 
 

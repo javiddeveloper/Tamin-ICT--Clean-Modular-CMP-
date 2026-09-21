@@ -16,7 +16,7 @@ val sharedModules: List<Module> get() = listOf(
     ApiClientsModule, remoteModule, domainModule, dataKoinModule, dataModule, pluginModule,
     agentModule, profileModule, pensionInquiryModule, pensionStatusInquiryModule, treatmentModule, cartableModule,
     historyModule, contractsModule, TaminServicesModule, workshopsModule,
-    studentContractModule, housewifeContractModule, freelanceContractModule, optionalContractModule, healthProfileModule, changeMobileModule, myInboxModule,
+    healthProfileModule, changeMobileModule, myInboxModule,
     securityModule, addDependentModule, settingsModule, userRequestModule, orotezProtezModule,
     girlSurvivorModule
 )
@@ -26,6 +26,8 @@ fun initKoin(appDeclaration: KoinAppDeclaration = {}) =
 ```
 
 **Adding a feature means adding its Koin module to this list.** Forgetting it produces a runtime failure, not a compile error.
+
+`VerifyPaymentUseCase` is the one definition wired with `getAll()` instead of explicit `get()`s: it collects every `PaymentVerifier` any feature module registers, so a feature can contribute one without core-domain or any shared list knowing that the feature exists ([[Payments]]).
 
 UseCases are not auto-discovered. A ViewModel constructor dependency needs `factoryOf(::ThatUseCase)` in `domainModule`. Add the new factory; do not replace an existing one. Missing that yields `InstanceCreationException: Could not create instance for '[Factory: …ViewModel]'`.
 
@@ -54,7 +56,7 @@ UseCases are not auto-discovered. A new constructor dependency on a ViewModel al
 HTTP clients are distinguished by `named(...)` — see [[Networking]]:
 
 ```
-"authHttpClient"  "mainHttpClient"  "healthHttpClient"  "uploadHttpClient"  "aiHttpClient"
+"authHttpClient"  "mainHttpClient"  "healthHttpClient"  "uploadHttpClient"  "aiHttpClient"  "tfhHttpClient"
 ```
 
 And one qualified ApiService: `get(named("authUserApiService"))`.

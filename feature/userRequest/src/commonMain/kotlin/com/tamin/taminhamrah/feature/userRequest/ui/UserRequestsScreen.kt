@@ -64,13 +64,15 @@ fun UserRequestsScreen(
     onBackClick: () -> Unit,
     onNavigateToDetail: (Long, String, Long, String, String) -> Unit,
     modifier: Modifier = Modifier,
+    refCodeFilter: String? = null,
+    requestTypeIdFilter: String? = null,
     viewModel: UserRequestsViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(Unit) {
-        viewModel.sendIntent(UserRequestsIntent.LoadRequests)
+    LaunchedEffect(refCodeFilter, requestTypeIdFilter) {
+        viewModel.sendIntent(UserRequestsIntent.InitFilters(refCodeFilter, requestTypeIdFilter))
         viewModel.sendIntent(UserRequestsIntent.LoadRequestTypes)
     }
 
@@ -187,6 +189,7 @@ fun UserRequestsContent(
                 item {
                     UserRequestFilterPanel(
                         refCode = state.refCode,
+                        selectedTypeId = state.selectedRequestTypeId,
                         selectedTypeName = state.selectedRequestTypeName,
                         requestTypes = state.requestTypes,
                         onRefCodeChanged = { onIntent(UserRequestsIntent.UpdateRefCode(it)) },

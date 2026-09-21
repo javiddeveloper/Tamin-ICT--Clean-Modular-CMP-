@@ -15,6 +15,8 @@ import com.tamin.taminhamrah.model.contracts.PremiumRateDTO
 import com.tamin.taminhamrah.model.contracts.RegistrationInfoDTO
 import com.tamin.taminhamrah.model.contracts.SaveContactPersonalDTO
 import com.tamin.taminhamrah.model.contracts.SaveContactRequestDTO
+import com.tamin.taminhamrah.model.contracts.UpdateOptionalContractByGuardianRequestDTO
+import com.tamin.taminhamrah.model.contracts.UpdateOptionalContractDTO
 import com.tamin.taminhamrah.model.contracts.BranchDTO
 import com.tamin.taminhamrah.util.ApiTestUtils
 import com.tamin.taminhamrah.util.ContractsTestData
@@ -447,6 +449,86 @@ class ContractsApiServiceTest : BaseApiTest() {
         val response = apiService.uploadImage(content)
 
         assertEquals("a4769aa8-b9af-4183-83b9-367dc9f52511", response.guid)
+    }
+
+    @Test
+    fun `updateFreelanceContract should accept success with null data`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(dataJson = "null")
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createContractsApiService()
+
+        val response = apiService.updateFreelanceContract(
+            premium = 25_989_368L,
+            request = FreelanceMakeContractRequestDTO(
+                brchCodeNew = "0360",
+                cityCode = "2442",
+                cntDrmn = "1",
+                cntFreeJobCode = "099796",
+                guid = "00",
+                guidName = "00",
+                premiumRateCode = "01",
+                provinceCode = "33",
+            ),
+        )
+
+        assertEquals(200, response.status)
+        assertEquals("SUCCESSFUL", response.family)
+    }
+
+    @Test
+    fun `updateOptionalContract should accept empty body success`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(dataJson = "null")
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createContractsApiService()
+
+        val response = apiService.updateOptionalContract(
+            premium = 27_000_000L,
+            request = UpdateOptionalContractDTO(),
+        )
+
+        assertEquals(200, response.status)
+    }
+
+    @Test
+    fun `updateFreelanceContractByGuardian should accept success`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(dataJson = "null")
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createContractsApiService()
+
+        val response = apiService.updateFreelanceContractByGuardian(
+            premium = 25_989_368L,
+            request = ContractByGuardianRequestDTO(
+                contract = FreelanceMakeContractRequestDTO(
+                    brchCodeNew = "0360",
+                    cityCode = "2442",
+                    cntDrmn = "1",
+                    cntFreeJobCode = "099796",
+                    guid = "00",
+                    guidName = "00",
+                    premiumRateCode = "01",
+                    provinceCode = "33",
+                ),
+                protector = sampleGuardianDetail(),
+            ),
+        )
+
+        assertEquals(200, response.status)
+    }
+
+    @Test
+    fun `updateOptionalContractByGuardian should accept success`() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(dataJson = "null")
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createContractsApiService()
+
+        val response = apiService.updateOptionalContractByGuardian(
+            premium = 27_000_000L,
+            request = UpdateOptionalContractByGuardianRequestDTO(
+                protector = sampleGuardianDetail(),
+            ),
+        )
+
+        assertEquals(200, response.status)
     }
 
     private fun sampleGuardianDetail() = GuardianShipDetailDTO(

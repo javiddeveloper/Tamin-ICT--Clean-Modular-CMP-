@@ -11,7 +11,9 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.isUnspecified
 import androidx.compose.ui.unit.sp
 
 @Composable
@@ -24,8 +26,8 @@ fun AutoResizeText(
     maxLines: Int = Int.MAX_VALUE,
     minFontSize: TextUnit = 8.sp,
 ) {
-    var resizedTextStyle by remember(text) { mutableStateOf(style) }
-    var readyToDraw by remember(text) { mutableStateOf(false) }
+    var resizedTextStyle by remember(text, style) { mutableStateOf(style) }
+    var readyToDraw by remember(text, style) { mutableStateOf(false) }
 
     Text(
         text = text,
@@ -37,11 +39,18 @@ fun AutoResizeText(
         style = resizedTextStyle,
         softWrap = maxLines > 1,
         maxLines = maxLines,
+        overflow = TextOverflow.Ellipsis,
         onTextLayout = { result ->
+            val fontSize = resizedTextStyle.fontSize
             val overflows = result.didOverflowHeight || result.didOverflowWidth
-            if (overflows && resizedTextStyle.fontSize > minFontSize) {
+            if (
+                overflows &&
+                !fontSize.isUnspecified &&
+                fontSize > minFontSize
+            ) {
+                val shrunk = fontSize * 0.95f
                 resizedTextStyle = resizedTextStyle.copy(
-                    fontSize = resizedTextStyle.fontSize * 0.95f
+                    fontSize = if (shrunk < minFontSize) minFontSize else shrunk,
                 )
             } else {
                 readyToDraw = true

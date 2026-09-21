@@ -1,5 +1,52 @@
 package com.tamin.taminhamrah.feature.agent.ui
 
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.AutoAwesome
+import androidx.compose.material.icons.rounded.Block
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Mic
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.text.style.TextOverflow
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.vectorResource
+import com.tamin.taminhamrah.ui.components.IconTile
+import com.tamin.taminhamrah.ui.components.TaminTopAppBar
+import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.Elevation
+import com.tamin.taminhamrah.ui.theme.IconSize
+import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
+import taminx.core.core_ui.agent_screen_title
+import taminx.core.core_ui.agent_processing
+import taminx.core.core_ui.agent_processing_done
+import taminx.core.core_ui.agent_step_done
+import taminx.core.core_ui.agent_history
+import taminx.core.core_ui.agent_new_chat
+import taminx.core.core_ui.agent_input_placeholder
+import taminx.core.core_ui.agent_send
+import taminx.core.core_ui.agent_stop
+import taminx.core.core_ui.agent_record_voice
+import taminx.core.core_ui.agent_suggestions_label
+import taminx.core.core_ui.agent_offline_banner
+import taminx.core.core_ui.agent_checking_permission
+import taminx.core.core_ui.agent_empty_subtitle
+import taminx.core.core_ui.agent_suggestion_history
+import taminx.core.core_ui.agent_suggestion_pension
+import taminx.core.core_ui.agent_suggestion_prescription
+import taminx.core.core_ui.agent_suggestion_early_retirement
+import taminx.core.core_ui.agent_like
+import taminx.core.core_ui.agent_dislike
+import taminx.core.core_ui.agent_share
+import taminx.core.core_ui.action_back
+import taminx.core.core_ui.action_copy
+import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ic_history
+import taminx.core.core_ui.ic_send
+import taminx.core.core_ui.ic_tamin_copy
+import taminx.core.core_ui.ic_share
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
@@ -28,6 +75,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.input.InputTransformation.Companion.keyboardOptions
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import kotlinx.coroutines.delay
 import androidx.compose.material3.*
@@ -57,6 +105,12 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.util.toPersianDigits
+import com.tamin.taminhamrah.deeplink.DeepLinkParser
+import com.tamin.taminhamrah.deeplink.DeepLinkSource
+import com.tamin.taminhamrah.deeplink.ParsedDeepLink
+import com.tamin.taminhamrah.feature.agent.ui.markdown.MarkdownContent
+import com.tamin.taminhamrah.feature.agent.markdown.MarkdownParser
+import com.tamin.taminhamrah.ui.deeplink.LocalDeepLinkHandler
 import com.tamin.taminhamrah.feature.agent.audio.rememberMicPermission
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
 import com.tamin.taminhamrah.feature.agent.ui.bubble.ChartBubble
@@ -88,27 +142,24 @@ import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.ThumbDown
 import androidx.compose.material.icons.outlined.ThumbUp
+import androidx.compose.ui.text.font.FontVariation.weight
+import de.jensklingenberg.ktorfit.http.HEAD
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
+import kotlinx.coroutines.NonCancellable.start
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.jetbrains.compose.resources.vectorResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.agent_not_allowed_default
+import taminx.core.core_ui.agent_not_allowed_title
 import taminx.feature.agent.generated.resources.Res as AgentRes
 import taminx.feature.agent.generated.resources.ic_star
 import kotlin.math.roundToInt
-
-/**
- * Navigation hand-off for [ChatBubbleContent.DeepLink] bubbles. The host supplies a
- * lambda that maps an `AgentDestination` id to a real route; the default is a no-op
- * so previews and tests render without navigation.
- */
-val LocalAgentNavigator = staticCompositionLocalOf<(String) -> Unit> { {} }
 
 // ─── AgentScreen ──────────────────────────────────────────────────────────────
 
@@ -116,9 +167,9 @@ val LocalAgentNavigator = staticCompositionLocalOf<(String) -> Unit> { {} }
 fun AgentScreen(
     viewModel: AgentViewModel = koinViewModel(),
     onNavigateBack: () -> Unit = {},
-    onNavigateToDestination: (String) -> Unit = {},
     onShareText: (String) -> Unit = {}
 ) {
+    val deepLinkHandler = LocalDeepLinkHandler.current
     val uiState by viewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
@@ -168,7 +219,8 @@ fun AgentScreen(
             when (event) {
                 is AgentEvent.ScrollToBottom -> requestScrollToBottom()
                 is AgentEvent.ShowError -> { /* handled via bubble */ }
-                is AgentEvent.NavigateToDeepLink -> onNavigateToDestination(event.destination)
+                is AgentEvent.NavigateToDeepLink ->
+                    deepLinkHandler.open(event.destination.toAgentDeepLink(), DeepLinkSource.AGENT)
                 is AgentEvent.NavigateToWebView -> { /* External navigation */ }
                 is AgentEvent.ShareText -> onShareText(event.text)
             }
@@ -179,18 +231,18 @@ fun AgentScreen(
         viewModel.sendIntent(AgentIntent.CheckPermission)
     }
 
-    // Provided via a CompositionLocal rather than threaded through five layers of
-    // composables, since only the leaf DeepLink bubble consumes it.
-    CompositionLocalProvider(LocalAgentNavigator provides onNavigateToDestination) {
-        AgentContent(
-            uiState = uiState,
-            listState = listState,
-            onIntent = { viewModel.sendIntent(it) },
-            onRequestScroll = requestScrollToBottom,
-            onNavigateBack = onNavigateBack
-        )
-    }
+    AgentContent(
+        uiState = uiState,
+        listState = listState,
+        onIntent = { viewModel.sendIntent(it) },
+        onRequestScroll = requestScrollToBottom,
+        onNavigateBack = onNavigateBack,
+    )
 }
+
+/** A bare destination key becomes the `@key` form; a full link is passed through unchanged. */
+internal fun String.toAgentDeepLink(): String =
+    if (startsWith("@") || contains("://")) this else "@$this"
 
 @Composable
 private fun AgentContent(
@@ -198,7 +250,7 @@ private fun AgentContent(
     listState: LazyListState,
     onIntent: (AgentIntent) -> Unit,
     onRequestScroll: () -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
 ) {
     when {
         uiState.isCheckingPermission -> PermissionCheckingIndicator()
@@ -208,7 +260,7 @@ private fun AgentContent(
             listState = listState,
             onIntent = onIntent,
             onRequestScroll = onRequestScroll,
-            onNavigateBack = onNavigateBack
+            onNavigateBack = onNavigateBack,
         )
     }
 
@@ -233,7 +285,7 @@ private fun ChatLayout(
     listState: LazyListState,
     onIntent: (AgentIntent) -> Unit,
     onRequestScroll: () -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
 ) {
     val hazeState = remember { HazeState() }
     val density = LocalDensity.current
@@ -255,6 +307,7 @@ private fun ChatLayout(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(LocalTaminColors.current.bgPage)
             // The app runs edge-to-edge (MainActivity.enableEdgeToEdge()), so the
             // manifest's windowSoftInputMode="adjustResize" is not honored by the
             // system — Compose must consume the IME inset itself, same as every other
@@ -421,6 +474,7 @@ private fun ChatLayout(
                     isGenerating = uiState.isGenerating,
                     hazeState = hazeState,
                     isEnabled = !uiState.isOffline,
+                    isVoiceEnabled = uiState.canSendVoice,
                     onSend = { onIntent(AgentIntent.SendTextPrompt(it)) },
                     onCancel = { onIntent(AgentIntent.CancelGeneration) },
                     onStartVoice = {
@@ -782,10 +836,9 @@ private fun ExtensionCard(
                     )
                 }
                 Text(
-                    text = if (state.isCompleted) "پردازش تمام شد" else "در حال پردازش...",
+                    text = stringResource(if (state.isCompleted) Res.string.agent_processing_done else Res.string.agent_processing),
                     style = MaterialTheme.typography.labelMedium.copy(
-                        color = if (state.isCompleted) taminColors.greenText
-                                else MaterialTheme.colorScheme.primary,
+                        color = if (state.isCompleted) taminColors.greenText else taminColors.blueText,
                         fontWeight = FontWeight.SemiBold
                     )
                 )
@@ -841,7 +894,7 @@ private fun ExtensionCardStep(
                         .width(2.dp)
                         .height(24.dp)
                         .offset(y = 16.dp)
-                        .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                        .background(taminColors.divider)
                 )
             }
             androidx.compose.animation.AnimatedVisibility(
@@ -851,7 +904,7 @@ private fun ExtensionCardStep(
             ) {
                 Icon(
                     imageVector = Icons.Default.Check,
-                    contentDescription = "انجام شد",
+                    contentDescription = stringResource(Res.string.agent_step_done),
                     tint = taminColors.greenText,
                     modifier = Modifier.size(14.dp)
                 )
@@ -863,7 +916,7 @@ private fun ExtensionCardStep(
             ) {
                 IosSpinner(
                     modifier = Modifier.size(14.dp),
-                    color = MaterialTheme.colorScheme.primary
+                    color = taminColors.blueText
                 )
             }
             androidx.compose.animation.AnimatedVisibility(
@@ -875,7 +928,7 @@ private fun ExtensionCardStep(
                     modifier = Modifier
                         .size(6.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.35f))
+                        .background(taminColors.chevron)
                 )
             }
         }
@@ -997,38 +1050,40 @@ private fun SuggestedPromptChips(
     val taminColors = LocalTaminColors.current
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm)
     ) {
         Text(
-            text = "پیشنهادات:",
-            style = MaterialTheme.typography.labelSmall.copy(color = taminColors.textMuted)
+            text = stringResource(Res.string.agent_suggestions_label),
+            style = MaterialTheme.typography.labelMedium,
+            color = taminColors.textMuted,
         )
         androidx.compose.foundation.layout.FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            verticalArrangement = Arrangement.spacedBy(Spacing.sm)
         ) {
-            prompts.forEach { prompt ->
-                SuggestionChip(
-                    onClick = { onPromptClick(prompt) },
-                    label = {
-                        Text(
-                            text = prompt,
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        )
-                    },
-                    colors = SuggestionChipDefaults.suggestionChipColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    ),
-                    border = SuggestionChipDefaults.suggestionChipBorder(
-                        enabled = true,
-                        borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                    )
-                )
-            }
+            prompts.forEach { prompt -> PromptChip(text = prompt, onClick = { onPromptClick(prompt) }) }
         }
     }
+}
+
+/** A prompt the user can send with one tap, in the app's blue chip style. */
+@Composable
+private fun PromptChip(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val taminColors = LocalTaminColors.current
+    val shape = RoundedCornerShape(CornerRadius.chip)
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodySmall,
+        color = taminColors.blueText,
+        fontWeight = FontWeight.Medium,
+        textAlign = TextAlign.Center,
+        modifier = modifier
+            .clip(shape)
+            .background(taminColors.blueBg)
+            .border(Thickness.border, taminColors.blueBorder, shape)
+            .clickable(onClick = onClick)
+            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+    )
 }
 
 /**
@@ -1038,19 +1093,17 @@ private fun SuggestedPromptChips(
 @Composable
 private fun OfflineBanner(modifier: Modifier = Modifier) {
     val taminColors = LocalTaminColors.current
-    Row(
+    val shape = RoundedCornerShape(CornerRadius.lg)
+    Text(
+        text = stringResource(Res.string.agent_offline_banner),
+        style = MaterialTheme.typography.labelMedium,
+        color = taminColors.dangerText,
         modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.errorContainer)
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "اتصال به دستیار برقرار نشد. گفتگوی قبلی شما نمایش داده می‌شود.",
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onErrorContainer
-        )
-    }
+            .clip(shape)
+            .background(taminColors.dangerBg)
+            .border(Thickness.border, taminColors.dangerBorder, shape)
+            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+    )
 }
 
 /**
@@ -1063,18 +1116,15 @@ private fun FloatingTypingIndicator() {
     Box(
         modifier = Modifier
             .shadow(
-                elevation = 6.dp,
+                elevation = Elevation.md,
                 shape = CircleShape,
-                ambientColor = Color.Black.copy(alpha = 0.10f),
-                spotColor = Color.Black.copy(alpha = 0.10f)
+                ambientColor = taminColors.shadowSubtle,
+                spotColor = taminColors.shadowSubtle
             )
             .clip(CircleShape)
             .background(taminColors.bgSurface)
-            .border(
-                BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f)),
-                shape = CircleShape
-            )
-            .padding(horizontal = 20.dp, vertical = 14.dp)
+            .border(Thickness.border, taminColors.border, CircleShape)
+            .padding(horizontal = Spacing.xlg, vertical = Spacing.smd)
     ) {
         TypingDotsIndicator()
     }
@@ -1082,6 +1132,7 @@ private fun FloatingTypingIndicator() {
 
 @Composable
 private fun TypingDotsIndicator() {
+    val taminColors = LocalTaminColors.current
     val transition = rememberInfiniteTransition(label = "typing")
     val dots = List(3) { index ->
         transition.animateFloat(
@@ -1105,7 +1156,7 @@ private fun TypingDotsIndicator() {
                     // each frame only re-lays-out/redraws instead of recomposing.
                     .offset { IntOffset(x = 0, y = (maxOffsetPx * anim.value).roundToInt()) }
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f + (anim.value * 0.6f)))
+                    .background(taminColors.blueText.copy(alpha = 0.4f + (anim.value * 0.6f)))
             )
         }
     }
@@ -1191,6 +1242,34 @@ private fun nextWordBoundary(s: String, from: Int): Int {
     while (i < s.length && s[i].isWhitespace()) i++
     while (i < s.length && !s[i].isWhitespace()) i++
     return i
+}
+
+/** An assistant markdown answer whose links are routed like every other link in the chat. */
+@Composable
+private fun AgentMarkdown(
+    text: String,
+    isAnimating: Boolean,
+    contentColor: androidx.compose.ui.graphics.Color,
+    onIntent: (AgentIntent) -> Unit,
+    onRequestScroll: () -> Unit,
+    onAnimationFinished: () -> Unit,
+) {
+    val deepLinkHandler = LocalDeepLinkHandler.current
+    MarkdownContent(
+        text = text,
+        isAnimating = isAnimating,
+        contentColor = contentColor,
+        onRequestScroll = onRequestScroll,
+        onAnimationFinished = onAnimationFinished,
+        onLinkClick = { link ->
+            // A prompt link continues the conversation; everything else leaves through
+            // the app's deep link gate, which applies the target's feature flag.
+            when (val parsed = DeepLinkParser.parse(link, DeepLinkSource.AGENT)) {
+                is ParsedDeepLink.Prompt -> onIntent(AgentIntent.SendTextPrompt(parsed.text))
+                else -> deepLinkHandler.open(link, DeepLinkSource.AGENT)
+            }
+        },
+    )
 }
 
 /**
@@ -1384,28 +1463,32 @@ private fun ChatBubbleItem(
                 }
 
                 isUser -> {
-                    Column(modifier = Modifier.widthIn(max = 300.dp)) {
-                        Surface(
-                            shape = RoundedCornerShape(
-                                topStart    = 20.dp,
-                                topEnd      = 4.dp,
-                                bottomStart = 20.dp,
-                                bottomEnd   = 20.dp
-                            ),
-                            color = MaterialTheme.colorScheme.primary,
-                        ) {
-                            Box(modifier = Modifier.padding(vertical = 10.dp, horizontal = 14.dp)) {
-                                renderContent(MaterialTheme.colorScheme.onPrimary)
-                            }
-                        }
+                    // The user's words on the app's brand gradient, like its primary buttons; the
+                    // corner nearest the screen edge is tucked in to point at the sender.
+                    val taminColors = LocalTaminColors.current
+                    Box(
+                        modifier = Modifier
+                            .widthIn(max = USER_BUBBLE_MAX_WIDTH)
+                            .clip(
+                                RoundedCornerShape(
+                                    topStart = CornerRadius.xl,
+                                    topEnd = CornerRadius.sm,
+                                    bottomStart = CornerRadius.xl,
+                                    bottomEnd = CornerRadius.xl,
+                                )
+                            )
+                            .background(taminTopAppBarGradient())
+                            .padding(vertical = Spacing.smPlus, horizontal = Spacing.smd)
+                    ) {
+                        renderContent(taminColors.onGradient)
                     }
                 }
 
                 else -> {
                     // Agent: full width, no Surface card background, no avatar padding
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        Box(modifier = Modifier.padding(vertical = 4.dp)) {
-                            renderContent(MaterialTheme.colorScheme.onSurface)
+                        Box(modifier = Modifier.padding(vertical = Spacing.xs)) {
+                            renderContent(LocalTaminColors.current.textPrimary)
                         }
                         // Follow-up suggestions belong to this reply, so they render inside
                         // the same bubble instead of forming their own chat row.
@@ -1413,7 +1496,7 @@ private fun ChatBubbleItem(
                             SuggestedPromptChips(
                                 prompts = item.suggestedPrompts,
                                 onPromptClick = { onIntent(AgentIntent.SendTextPrompt(it)) },
-                                modifier = Modifier.padding(top = 8.dp)
+                                modifier = Modifier.padding(top = Spacing.sm)
                             )
                         }
                         // Footer: only for agent bubbles, not SuggestedPrompts
@@ -1424,19 +1507,6 @@ private fun ChatBubbleItem(
                 }
             }
 
-            // User avatar
-            if (isUser) {
-                Spacer(Modifier.width(8.dp))
-                Box(
-                    modifier = Modifier
-                        .size(28.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("👤", fontSize = 14.sp)
-                }
-            }
         }
     }
 }
@@ -1474,7 +1544,18 @@ private fun BubbleContentRenderer(
             )
         }
 
-        is ChatBubbleContent.Text -> {
+        // A plain message carrying a link (e.g. a general_response in CLIENT mode) is drawn as
+        // markdown, so its links become buttons instead of raw `[label](@key)` text.
+        is ChatBubbleContent.Text -> if (MarkdownParser.containsLink(content.message)) {
+            AgentMarkdown(
+                text = content.message,
+                isAnimating = isTypingAnimating,
+                contentColor = contentColor,
+                onIntent = onIntent,
+                onRequestScroll = onRequestScroll,
+                onAnimationFinished = onAnimationFinished,
+            )
+        } else {
             val textStyle = MaterialTheme.typography.bodyMedium.copy(
                 color = contentColor,
                 lineHeight = 22.sp
@@ -1486,6 +1567,15 @@ private fun BubbleContentRenderer(
                 onAnimationFinished()
             }
         }
+
+        is ChatBubbleContent.Markdown -> AgentMarkdown(
+            text = content.text,
+            isAnimating = isTypingAnimating,
+            contentColor = contentColor,
+            onIntent = onIntent,
+            onRequestScroll = onRequestScroll,
+            onAnimationFinished = onAnimationFinished,
+        )
 
         is ChatBubbleContent.KeyValue -> {
             Column(
@@ -1561,9 +1651,9 @@ private fun BubbleContentRenderer(
         }
 
         is ChatBubbleContent.DeepLink -> {
-            val navigate = LocalAgentNavigator.current
+            val deepLinkHandler = LocalDeepLinkHandler.current
             OutlinedButton(
-                onClick = { navigate(content.destination) },
+                onClick = { deepLinkHandler.open(content.destination.toAgentDeepLink(), DeepLinkSource.AGENT) },
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
             ) {
@@ -1697,9 +1787,12 @@ private fun AgentInputBar(
     onCancel: () -> Unit,
     onStartVoice: () -> Unit = {},
     /** False while the service is unreachable — the field stays visible but inert. */
-    isEnabled: Boolean = true
+    isEnabled: Boolean = true,
+    /** The server decides per user whether voice prompts are allowed (`canSendVoice`). */
+    isVoiceEnabled: Boolean = true
 ) {
     var text by remember { mutableStateOf("") }
+    var isFocused by remember { mutableStateOf(false) }
     val taminColors = LocalTaminColors.current
     val toaster = LocalToaster.current
 
@@ -1744,8 +1837,9 @@ private fun AgentInputBar(
                 BasicTextField(
                     value = text,
                     onValueChange = { text = it },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).onFocusChanged { isFocused = it.isFocused },
                     enabled = !isGenerating && isEnabled,
+                    maxLines = INPUT_MAX_LINES,
                     textStyle = MaterialTheme.typography.bodyMedium.copy(
                         fontSize = 13.5.sp,
                         color = Color(0xFFE2ECFF),
@@ -1794,17 +1888,21 @@ private fun AgentInputBar(
                     onClick = { toaster.info("این امکان به‌زودی اضافه می‌شود") }
                 )
 
-                // Mic — always available on its own, independent of the send button.
-                InputBarGlassButton(
-                    icon = Icons.Default.Mic,
-                    contentDescription = "ضبط صدا",
-                    size = 38.dp,
-                    backgroundAlpha = 0.09f,
-                    borderAlpha = 0.14f,
-                    iconTint = InputBarMutedIconTint,
-                    onClick = onStartVoice,
-                    enabled = !isGenerating && isEnabled
-                )
+                // Mic — always available on its own, independent of the send button. Hidden
+                // behind isVoiceEnabled: the server decides per user whether voice prompts
+                // are allowed at all.
+                if (isVoiceEnabled) {
+                    InputBarGlassButton(
+                        icon = Icons.Default.Mic,
+                        contentDescription = "ضبط صدا",
+                        size = 38.dp,
+                        backgroundAlpha = 0.09f,
+                        borderAlpha = 0.14f,
+                        iconTint = InputBarMutedIconTint,
+                        onClick = onStartVoice,
+                        enabled = !isGenerating && isEnabled
+                    )
+                }
 
                 // Send/Cancel — a fixed, never-mirrored left arrow (the design's own send
                 // glyph, not a "back" affordance), 42dp — larger and more opaque than the
@@ -2040,17 +2138,17 @@ private fun AgentSuggestionRow(
 
 @Composable
 private fun PermissionCheckingIndicator() {
+    val taminColors = LocalTaminColors.current
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
-            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            CircularProgressIndicator(color = taminColors.blueText)
             Text(
-                text = "در حال بررسی دسترسی...",
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
+                text = stringResource(Res.string.agent_checking_permission),
+                style = MaterialTheme.typography.bodyMedium,
+                color = taminColors.textSecondary,
             )
         }
     }
@@ -2062,23 +2160,25 @@ private fun NotAllowedMessage(message: String?) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.padding(32.dp)
+            verticalArrangement = Arrangement.spacedBy(Spacing.md),
+            modifier = Modifier.padding(Spacing.xxl)
         ) {
-            Text("🚫", fontSize = 48.sp)
-            Text(
-                text = "دسترسی محدود",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    color = taminColors.textPrimary,
-                    fontWeight = FontWeight.Bold
-                )
+            IconTile(
+                icon = Icons.Rounded.Block,
+                tint = taminColors.onGradient,
+                background = taminColors.iconGradientDanger,
+                size = IconSize.xxlarge,
             )
             Text(
-                text = message ?: "دستیار هوشمند برای شما فعال نیست.",
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    color = taminColors.textSecondary,
-                    textAlign = TextAlign.Center
-                )
+                text = stringResource(Res.string.agent_not_allowed_title),
+                style = MaterialTheme.typography.titleLarge,
+                color = taminColors.textPrimary,
+            )
+            Text(
+                text = message ?: stringResource(Res.string.agent_not_allowed_default),
+                style = MaterialTheme.typography.bodyMedium,
+                color = taminColors.textSecondary,
+                textAlign = TextAlign.Center,
             )
         }
     }
@@ -2100,95 +2200,87 @@ private fun AgentBubbleFooter(item: ChatItem, onIntent: (AgentIntent) -> Unit) {
     @Suppress("DEPRECATION")
                     val clipboardManager = androidx.compose.ui.platform.LocalClipboardManager.current
 
-    val iconTint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
-    val activeTint = MaterialTheme.colorScheme.primary
+    val taminColors = LocalTaminColors.current
+    val iconTint = taminColors.textMuted
+    val activeTint = taminColors.blueText
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 4.dp, start = 2.dp, end = 2.dp),
+            .padding(top = Spacing.xs),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Timestamp
         Text(
             text = timeString,
-            style = MaterialTheme.typography.labelSmall.copy(
-                fontSize = 10.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-            )
+            style = MaterialTheme.typography.labelSmall,
+            color = taminColors.textMuted,
         )
 
-        // Action icons
         Row(
-            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xxs),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(
+            FooterAction(
+                icon = rememberVectorPainter(Icons.Outlined.ThumbUp),
+                description = stringResource(Res.string.agent_like),
+                tint = if (liked == true) activeTint else iconTint,
                 onClick = { liked = if (liked == true) null else true },
-                modifier = Modifier.size(24.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.ThumbUp,
-                    contentDescription = "پسندیدن",
-                    tint = if (liked == true) activeTint else iconTint,
-                    modifier = Modifier.size(14.dp)
-                )
-            }
-
-            IconButton(
+            )
+            FooterAction(
+                icon = rememberVectorPainter(Icons.Outlined.ThumbDown),
+                description = stringResource(Res.string.agent_dislike),
+                tint = if (liked == false) taminColors.dangerText else iconTint,
                 onClick = { liked = if (liked == false) null else false },
-                modifier = Modifier.size(24.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.ThumbDown,
-                    contentDescription = "نپسندیدن",
-                    tint = if (liked == false) MaterialTheme.colorScheme.error.copy(alpha = 0.8f) else iconTint,
-                    modifier = Modifier.size(14.dp)
-                )
-            }
-
-            // Divider
+            )
             Box(
                 modifier = Modifier
-                    .height(12.dp)
-                    .width(1.dp)
-                    .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    .padding(horizontal = Spacing.xs)
+                    .height(Spacing.md)
+                    .width(Thickness.border)
+                    .background(taminColors.divider)
             )
-
-            IconButton(
+            FooterAction(
+                icon = painterResource(Res.drawable.ic_tamin_copy),
+                description = stringResource(Res.string.action_copy),
+                tint = if (copied) activeTint else iconTint,
                 onClick = {
                     copied = true
                     clipboardManager.setText(androidx.compose.ui.text.AnnotatedString(extractTextFromItem(item)))
                 },
-                modifier = Modifier.size(24.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.ContentCopy,
-                    contentDescription = "کپی",
-                    tint = if (copied) activeTint else iconTint,
-                    modifier = Modifier.size(14.dp)
-                )
-            }
-
-            IconButton(
+            )
+            FooterAction(
+                icon = painterResource(Res.drawable.ic_share),
+                description = stringResource(Res.string.agent_share),
+                tint = iconTint,
                 onClick = { onIntent(AgentIntent.ShareContent(extractTextFromItem(item))) },
-                modifier = Modifier.size(24.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Share,
-                    contentDescription = "اشتراک‌گذاری",
-                    tint = iconTint,
-                    modifier = Modifier.size(14.dp)
-                )
-            }
+            )
         }
+    }
+}
+
+@Composable
+private fun FooterAction(
+    icon: androidx.compose.ui.graphics.painter.Painter,
+    description: String,
+    tint: Color,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .size(FOOTER_ACTION_SIZE)
+            .clip(RoundedCornerShape(CornerRadius.md))
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(painter = icon, contentDescription = description, tint = tint, modifier = Modifier.size(IconSize.small))
     }
 }
 
 private fun extractTextFromItem(item: ChatItem): String {
     return when (val content = item.content) {
         is ChatBubbleContent.Text -> content.message
+        is ChatBubbleContent.Markdown -> content.text
         is ChatBubbleContent.KeyValue -> {
             buildString {
                 content.title?.let { appendLine(it) }
@@ -2229,19 +2321,6 @@ private fun AgentTopBarOfflinePreview() {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+private val USER_BUBBLE_MAX_WIDTH = 300.dp
+private val FOOTER_ACTION_SIZE = 28.dp
+private const val INPUT_MAX_LINES = 4
