@@ -70,12 +70,8 @@ fun NavController.navigateToFeature(flag: FeatureFlag, beforeOpen: () -> Unit = 
     val open: () -> Unit = when (flag) {
         FeatureFlag.AGENT -> screen { navigateToAgent() }
         // «کلیه سوابق» — the one history row left after «سوابق تلفیقی» and «سوابق و دستمزد»
-        // were dropped from the menu. MERGE_HISTORY and WAGE_AND_HISTORY have no menu row of their
-        // own any more, so only a deep link or the assistant can reach them — and the flag gate
-        // turns both down until a row exists again. Kept here so they open the right page if it does.
+        // were merged into it.
         FeatureFlag.COMBINED_RECORD -> screen { navigateToHistory() }
-        FeatureFlag.MERGE_HISTORY -> screen { navigateToHistory() }
-        FeatureFlag.WAGE_AND_HISTORY -> screen { navigateToHistory() }
         FeatureFlag.WORKSHOPS -> screen { navigateToWorkshops() }
         FeatureFlag.CONTRACT_INFO -> screen { navigateToContractRows() }
         // «واگذارندگان» — the پیمان‌ها this employer assigned out.

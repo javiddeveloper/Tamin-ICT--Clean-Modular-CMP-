@@ -131,14 +131,7 @@ enum class FeatureFlag(val id: Int) {
     CONSTRUCTION_INSURANCE(1010),
 
     // ─── No menu row today ───────────────────────────────────────────────────
-    // Nothing in `MockMenuData` carries these ids, so `featureStatusOf` reads them as Disabled and
-    // the deep links and assistant actions pointing at them are gated off. They are kept because
-    // those callers still name them — these are the same legacy ids the pre-renumbering server menu
-    // used for these exact services, before the three history rows were merged into COMBINED_RECORD
-    // and this pair lost their own row.
-    MERGE_HISTORY(6),
-    WAGE_AND_HISTORY(7),
-    // Legacy server placeholders that never had a menu row either — kept under their original ids.
+    // Legacy server placeholders that never had a menu row — kept under their original ids.
     OBJECTION_INSURANCE_HISTORY_LEGACY(45),
     PRESCRIPTION_PENSIONER(102),
 

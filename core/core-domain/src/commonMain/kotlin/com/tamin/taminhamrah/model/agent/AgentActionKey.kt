@@ -157,7 +157,7 @@ fun AgentActionKey.toFeatureFlag(): FeatureFlag? = when (this) {
     AgentActionKey.HISTORY_JOB_INFOS,
     AgentActionKey.HISTORY_JOB_INFOS_LAST,
     AgentActionKey.HISTORY_SERVICES,
-    AgentActionKey.HISTORY_SERVICES_LAST -> FeatureFlag.WAGE_AND_HISTORY
+    AgentActionKey.HISTORY_SERVICES_LAST -> FeatureFlag.COMBINED_RECORD
 
     // Pension
     AgentActionKey.PENSION_INQUIRY_ALL,

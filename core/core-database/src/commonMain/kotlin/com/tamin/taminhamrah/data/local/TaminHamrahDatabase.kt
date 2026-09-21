@@ -99,13 +99,7 @@ import kotlinx.coroutines.IO
         HistoryWageRowEntity::class,
         HomeContentEntity::class,
     ],
-    // v5: the FeatureFlag id scheme changed (menu id renumbering, then reverted back to the legacy
-    // server's own ids — see docs/vault/Feature-Flags.md). Cached `home_content` rows (campaigns,
-    // quick-access, special-service entries) persist flagId and would otherwise resolve to a
-    // different, wrong feature under the old numbers until the next sync overwrites them; every
-    // other cached table is unaffected by this change but has no partial-migration path either, so
-    // fallbackToDestructiveMigration wipes all of them, not just home_content. Confirmed
-    // acceptable — see the MR !247 review, item 3.
+    // v5: FeatureFlag ids changed; cached home_content stored the old flagId.
     version = 5,
 )
 @ConstructedBy(TaminXDatabaseConstructor::class)
