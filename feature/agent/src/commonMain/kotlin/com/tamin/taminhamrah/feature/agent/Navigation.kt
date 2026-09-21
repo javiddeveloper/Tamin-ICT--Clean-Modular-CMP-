@@ -2,8 +2,8 @@ package com.tamin.taminhamrah.feature.agent
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.composable
 import com.tamin.taminhamrah.feature.agent.ui.AgentScreen
+import com.tamin.taminhamrah.ui.composableWithFadeTransitions
 import kotlinx.serialization.Serializable
 
 /**
@@ -26,7 +26,7 @@ fun NavController.navigateToAgent() {
  * `LocalDeepLinkHandler`, so the host's deep link gate (and its feature flag check) applies.
  */
 fun NavGraphBuilder.agentScreen(onNavigateBack: () -> Unit = {}) {
-    composable<AgentRoute> {
+    composableWithFadeTransitions<AgentRoute> {
         AgentScreen(onNavigateBack = onNavigateBack)
     }
 }

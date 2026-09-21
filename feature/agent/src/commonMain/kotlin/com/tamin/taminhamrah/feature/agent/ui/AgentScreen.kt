@@ -321,7 +321,17 @@ private fun ChatLayout(
         )
 
         // ── Scrolling content: the haze source, sitting behind both bars ──
-        if (isEmptyState) {
+        // Cross-fade + gentle scale between the greeting and the message list, so
+        // starting a new chat (or sending the first message) doesn't cut abruptly.
+        AnimatedContent(
+            targetState = isEmptyState,
+            transitionSpec = {
+                (fadeIn(tween(280)) + scaleIn(initialScale = 0.96f, animationSpec = tween(280)))
+                    .togetherWith(fadeOut(tween(150)))
+            },
+            label = "agent_chat_content"
+        ) { targetIsEmptyState ->
+        if (targetIsEmptyState) {
             EmptyState(
                 userFirstName = uiState.userFirstName,
                 onSuggestionClick = { onIntent(AgentIntent.SendTextPrompt(it)) },
@@ -371,6 +381,7 @@ private fun ChatLayout(
                     item { TypingIndicatorBubble(processingState = uiState.processingState) }
                 }
             }
+        }
         }
 
         // ── Pinned voice player: keeps a playing message reachable while scrolling ──
