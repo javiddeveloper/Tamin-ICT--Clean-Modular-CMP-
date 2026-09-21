@@ -30,6 +30,23 @@ class InspectionApiServiceTest : BaseApiTest() {
     }
 
     @Test
+    fun getAllManager_returnsInspectionPerformedList() = runTest {
+        val jsonResponse = ApiTestUtils.createJsonResponse(
+            dataJson = InspectionTestData.inspectionPerformedListSuccess
+        )
+
+        val ktorfit: Ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createInspectionApiService()
+
+        val response = apiService.getAllManager(emptyMap())
+
+        assertEquals(200, response.status)
+        assertNotNull(response.data)
+        assertEquals(1, response.data?.total)
+        assertEquals("تست", response.data?.list?.first()?.activityDesc)
+    }
+
+    @Test
     fun getBranches_returnsBranchesList() = runTest {
         val jsonResponse = ApiTestUtils.createJsonResponse(
             dataJson = InspectionTestData.inspectionBranchesListSuccess

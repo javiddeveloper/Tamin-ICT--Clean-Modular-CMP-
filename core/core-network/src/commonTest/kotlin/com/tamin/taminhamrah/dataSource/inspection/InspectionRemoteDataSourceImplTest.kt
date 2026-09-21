@@ -23,12 +23,14 @@ import kotlin.test.assertFailsWith
 
 class FakeInspectionApiService : InspectionApiService {
     var allInsuranceResult: BaseDTO<ListData<InspectionPerformedDTO>> = BaseDTO(status = 200, family = "OK", reason = "OK", data = ListData(total = 0, list = emptyList()))
+    var allManagerResult: BaseDTO<ListData<InspectionPerformedDTO>> = BaseDTO(status = 200, family = "OK", reason = "OK", data = ListData(total = 0, list = emptyList()))
     var branchesResult: BaseDTO<ListData<BranchDTO>> = BaseDTO(status = 200, family = "OK", reason = "OK", data = ListData(total = 0, list = emptyList()))
     var jobsResult: BaseDTO<ListData<JobDTO>> = BaseDTO(status = 200, family = "OK", reason = "OK", data = ListData(total = 0, list = emptyList()))
     var submitResult: BaseDTO<SubmitInspectionRequestModelDTO> = BaseDTO(status = 200, family = "OK", reason = "OK", data = SubmitInspectionRequestModelDTO())
 
     var shouldThrowException: Exception? = null
     var lastAllInsuranceParameters: Map<String, String>? = null
+    var lastAllManagerParameters: Map<String, String>? = null
     var lastBranchesParameters: Map<String, String>? = null
     var lastJobsParameters: Map<String, String>? = null
 
@@ -36,6 +38,12 @@ class FakeInspectionApiService : InspectionApiService {
         shouldThrowException?.let { throw it }
         lastAllInsuranceParameters = parameters
         return allInsuranceResult
+    }
+
+    override suspend fun getAllManager(parameters: Map<String, String>): BaseDTO<ListData<InspectionPerformedDTO>> {
+        shouldThrowException?.let { throw it }
+        lastAllManagerParameters = parameters
+        return allManagerResult
     }
 
     override suspend fun getBranches(parameters: Map<String, String>): BaseDTO<ListData<BranchDTO>> {
@@ -85,6 +93,28 @@ class InspectionRemoteDataSourceImplTest {
 
         assertEquals(expected, result)
         assertEquals("0", fakeApiService.lastAllInsuranceParameters?.get("page"))
+    }
+
+    @Test
+    fun getAllManager_success_returnsInspectionPerformedList() = runTest {
+        val expected = ListData(total = 1, list = listOf(InspectionPerformedDTO(activityDesc = "تست کارگاه")))
+        fakeApiService.allManagerResult = BaseDTO(status = 200, family = "OK", reason = "OK", data = expected)
+
+        val result = dataSource.getAllManager(ApiQueryParamDN())
+
+        assertEquals(expected, result)
+        assertEquals("0", fakeApiService.lastAllManagerParameters?.get("page"))
+    }
+
+    @Test
+    fun getAllManager_onNetworkError_throwsParsedTaminApiException() = runTest {
+        fakeApiService.shouldThrowException = TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+
+        val exception = assertFailsWith<TaminApiException> {
+            dataSource.getAllManager(ApiQueryParamDN())
+        }
+
+        assertEquals("خطای اتصال", exception.title)
     }
 
     @Test

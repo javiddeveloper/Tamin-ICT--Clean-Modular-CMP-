@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.flow
 class FakeInspectionRepository : InspectionRepository {
     var insurancePageResult: List<InspectionPerformedDN> = emptyList()
     var insurancePageTotal: Int? = null
+    var workshopInspectionsPageResult: List<InspectionPerformedDN> = emptyList()
+    var workshopInspectionsPageTotal: Int? = null
     var branchPageResult: List<BranchDN> = emptyList()
     var branchPageTotal: Int? = null
     var jobPageResult: List<JobDN> = emptyList()
@@ -23,6 +25,7 @@ class FakeInspectionRepository : InspectionRepository {
 
     var shouldThrowError = false
     var lastInsuranceQuery: ApiQueryParamDN? = null
+    var lastWorkshopInspectionsQuery: ApiQueryParamDN? = null
     var lastBranchQuery: ApiQueryParamDN? = null
     var lastJobQuery: ApiQueryParamDN? = null
     var lastSubmitRequest: SubmitInspectionRequestDN? = null
@@ -32,6 +35,12 @@ class FakeInspectionRepository : InspectionRepository {
         if (shouldThrowError) throw RuntimeException("Error")
         lastInsuranceQuery = query
         emit(PageDN(items = insurancePageResult, total = insurancePageTotal))
+    }
+
+    override fun getWorkshopInspectionsPage(query: ApiQueryParamDN): Flow<PageDN<InspectionPerformedDN>> = flow {
+        if (shouldThrowError) throw RuntimeException("Error")
+        lastWorkshopInspectionsQuery = query
+        emit(PageDN(items = workshopInspectionsPageResult, total = workshopInspectionsPageTotal))
     }
 
     override fun getBranchesPage(query: ApiQueryParamDN): Flow<PageDN<BranchDN>> = flow {

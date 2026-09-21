@@ -21,6 +21,11 @@ internal interface InspectionApiService {
         @QueryMap parameters: Map<String, String>
     ): BaseDTO<ListData<InspectionPerformedDTO>>
 
+    @GET("inspection-header/get-all-manager")
+    suspend fun getAllManager(
+        @QueryMap parameters: Map<String, String>
+    ): BaseDTO<ListData<InspectionPerformedDTO>>
+
     @GET("proxy/models/branch")
     suspend fun getBranches(
         @QueryMap parameters: Map<String, String>
