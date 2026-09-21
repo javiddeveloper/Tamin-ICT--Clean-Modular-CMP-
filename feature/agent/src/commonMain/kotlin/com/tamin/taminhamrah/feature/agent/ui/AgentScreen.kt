@@ -1313,12 +1313,28 @@ private fun ChatBubbleItem(
     onIntent: (AgentIntent) -> Unit = {},
     onRequestScroll: () -> Unit = {},
     isVoicePlaying: Boolean = false,
-    voicePositionMs: Int = 0
+    voicePositionMs: Int = 0,
+    modifier: Modifier = Modifier
 ) {
     val isUser = item.sender == ChatSender.User
     val currentLayoutDirection = LocalLayoutDirection.current
 
     var isAnimationFinished by rememberSaveable(item.id) { mutableStateOf(!item.isTypingAnimating) }
+
+    // Entrance: bubbles that just landed in the live session (user message, voice note,
+    // error card, ...) slide up + fade in once. Rows loaded from history, or already
+    // settled, start at full opacity/position — no replay when a row is recomposed after
+    // scrolling back into view, since the ViewModel is the source of truth for isEntering.
+    val enterProgress = remember(item.id) { Animatable(if (item.isEntering) 0f else 1f) }
+    LaunchedEffect(item.id, item.isEntering) {
+        if (item.isEntering) {
+            enterProgress.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = 280, easing = FastOutSlowInEasing)
+            )
+            onIntent(AgentIntent.OnEnterAnimationFinished(item.id))
+        }
+    }
 
     // Shared renderer for all three layouts — only the wrapper (user surface / agent
     // full-width / processing box) differs. Content itself is drawn in the caller's
@@ -1348,7 +1364,12 @@ private fun ChatBubbleItem(
 
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = modifier
+                .graphicsLayer {
+                    alpha = enterProgress.value
+                    translationY = (1f - enterProgress.value) * ENTER_SLIDE_DISTANCE.toPx()
+                }
+                .fillMaxWidth(),
             horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
         ) {
             // Full-width bubbles: system notes and data views draw their own container.
@@ -2236,4 +2257,5 @@ private fun AgentTopBarOfflinePreview() {
 
 private val USER_BUBBLE_MAX_WIDTH = 300.dp
 private val FOOTER_ACTION_SIZE = 28.dp
+private val ENTER_SLIDE_DISTANCE = 16.dp
 private const val INPUT_MAX_LINES = 4

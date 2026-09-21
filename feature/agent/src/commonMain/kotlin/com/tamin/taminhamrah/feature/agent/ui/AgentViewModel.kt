@@ -159,6 +159,7 @@ class AgentViewModel(
         }
         is AgentIntent.ExecuteServiceAction    -> handleServiceAction(intent.actionKey, intent.payload)
         is AgentIntent.OnTypingFinished        -> handleTypingFinished(intent.itemId)
+        is AgentIntent.OnEnterAnimationFinished -> handleEnterAnimationFinished(intent.itemId)
         is AgentIntent.OpenChatHistory         -> handleOpenHistory()
         is AgentIntent.CloseChatHistory        -> flow {
             emit(PartialState.HistoryVisibilityChanged(false))
@@ -280,7 +281,8 @@ class AgentViewModel(
             val userItem = ChatItem(
                 id = UUID.randomUUID().toString(),
                 sender = ChatSender.User,
-                content = ChatBubbleContent.Text(message)
+                content = ChatBubbleContent.Text(message),
+                isEntering = true
             )
             emit(PartialState.NewChatItems(listOf(userItem)))
             cacheBubble(userItem)
@@ -428,7 +430,8 @@ class AgentViewModel(
                     val errorItem = ChatItem(
                         id = UUID.randomUUID().toString(),
                         sender = ChatSender.Agent,
-                        content = ChatBubbleContent.ServiceError(message, canRetryPrompt = true)
+                        content = ChatBubbleContent.ServiceError(message, canRetryPrompt = true),
+                        isEntering = true
                     )
                     emit(PartialState.NewChatItems(listOf(errorItem)))
                     sendEvent(AgentEvent.ShowError(message))
@@ -535,6 +538,14 @@ class AgentViewModel(
         val item = uiState.value.chatItems.firstOrNull { it.id == itemId } ?: return@flow
         if (!item.isTypingAnimating) return@flow
         emit(PartialState.UpdateChatItem(item.copy(isTypingAnimating = false)))
+    }
+
+    /** Same reasoning as [handleTypingFinished]: owning the flag here keeps the entrance
+     *  animation from replaying when a row is recomposed after scrolling back into view. */
+    private fun handleEnterAnimationFinished(itemId: String): Flow<PartialState> = flow {
+        val item = uiState.value.chatItems.firstOrNull { it.id == itemId } ?: return@flow
+        if (!item.isEntering) return@flow
+        emit(PartialState.UpdateChatItem(item.copy(isEntering = false)))
     }
 
     // ─── Conversation cache ───────────────────────────────────────────────────
@@ -746,7 +757,8 @@ class AgentViewModel(
                 source = preview.filePath,
                 durationMs = preview.durationMs.toLong(),
                 amplitudes = preview.amplitudes
-            )
+            ),
+            isEntering = true
         )
         emit(PartialState.VoicePreviewUpdated(null))
         emit(PartialState.NewChatItems(listOf(userItem)))
