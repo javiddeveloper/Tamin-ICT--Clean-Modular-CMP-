@@ -21,6 +21,7 @@ import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.outlined.BrokenImage
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -29,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -66,6 +68,7 @@ import kotlin.math.roundToInt
 private val MEDIA_WIDTH = 240.dp
 private val IMAGE_HEIGHT = 160.dp
 private val VIDEO_HEIGHT = 140.dp
+private val VIDEO_PROGRESS_HEIGHT = 3.dp
 
 /**
  * Renderers for the media and data-view bubble families.
@@ -173,7 +176,6 @@ fun VideoBubble(
     modifier: Modifier = Modifier,
     coordinator: MediaPlaybackCoordinator = koinInject()
 ) {
-    val taminColors = LocalTaminColors.current
     val owner = remember(content.source) { MediaPlaybackCoordinator.videoOwner(content.source) }
     val activeOwner by coordinator.activeOwner.collectAsState()
     var isPlayingInline by remember { mutableStateOf(false) }
@@ -181,6 +183,22 @@ fun VideoBubble(
     // Inline playback starts silent: a bubble that shouts audio the moment it scrolls
     // into view is hostile. Fullscreen opts back in.
     var isMuted by remember { mutableStateOf(true) }
+    // Inline transport is the bubble's own: a tap pauses/resumes, and a thin progress bar
+    // sits on the frame's bottom edge. The native controller is off — its strip does not
+    // fit a 140dp frame (it drew a stray time bar above a black band).
+    var isPausedByUser by remember { mutableStateOf(false) }
+    var positionMs by remember { mutableStateOf(0L) }
+    var durationMs by remember { mutableStateOf(content.durationMs ?: 0L) }
+    // A finished clip offers a replay. The player cannot be resumed once it has ended, so
+    // replay bumps this key, which drops the old player and starts a fresh one from the top.
+    var hasEnded by remember { mutableStateOf(false) }
+    var playbackKey by remember { mutableStateOf(0) }
+    val replay: () -> Unit = {
+        hasEnded = false
+        isPausedByUser = false
+        positionMs = 0L
+        playbackKey++
+    }
     val frameShape = RoundedCornerShape(com.tamin.taminhamrah.ui.theme.CornerRadius.lg)
 
     Column(modifier = modifier.width(MEDIA_WIDTH)) {
@@ -195,18 +213,63 @@ fun VideoBubble(
             contentAlignment = Alignment.Center
         ) {
             if (isPlayingInline) {
-                VideoPlayer(
-                    url = content.source,
-                    autoPlay = true,
-                    muted = isMuted,
-                    // A muted clip is not competing for the ear, so it only has to yield
-                    // once the user turns its sound on.
-                    paused = !isMuted && activeOwner != owner,
-                    onPlayingChanged = { playing ->
-                        if (playing && !isMuted) coordinator.claim(owner)
-                        else if (!playing) coordinator.release(owner)
-                    },
-                    modifier = Modifier.matchParentSize()
+                key(playbackKey) {
+                    VideoPlayer(
+                        url = content.source,
+                        autoPlay = true,
+                        muted = isMuted,
+                        // A muted clip is not competing for the ear, so it only has to yield
+                        // once the user turns its sound on.
+                        paused = isPausedByUser || (!isMuted && activeOwner != owner),
+                        showControls = false,
+                        onPlayingChanged = { playing ->
+                            if (playing && !isMuted) coordinator.claim(owner)
+                            else if (!playing) coordinator.release(owner)
+                        },
+                        onProgress = { position, duration ->
+                            positionMs = position
+                            if (duration > 0) durationMs = duration
+                        },
+                        onEnded = { hasEnded = true },
+                        modifier = Modifier.matchParentSize()
+                    )
+                }
+                // Above the player, so the tap lands here and not in the platform view.
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clickable {
+                            if (hasEnded) replay() else isPausedByUser = !isPausedByUser
+                        }
+                )
+                when {
+                    hasEnded -> MediaPlayButton(
+                        icon = Icons.Default.Replay,
+                        contentDescription = "پخش دوباره",
+                        onClick = replay
+                    )
+                    isPausedByUser -> MediaPlayButton(
+                        icon = Icons.Default.PlayArrow,
+                        contentDescription = "ادامه پخش",
+                        onClick = { isPausedByUser = false }
+                    )
+                }
+                if (durationMs > 0) {
+                    Text(
+                        text = formatDuration((durationMs - positionMs).coerceAtLeast(0L)),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White,
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(horizontal = 8.dp, vertical = 8.dp + VIDEO_PROGRESS_HEIGHT)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(Color.Black.copy(alpha = 0.55f))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    )
+                }
+                VideoProgressBar(
+                    progress = if (durationMs > 0) (positionMs.toFloat() / durationMs).coerceIn(0f, 1f) else 0f,
+                    modifier = Modifier.align(Alignment.BottomCenter)
                 )
             } else {
                 content.thumbnailUrl?.let { thumb ->
@@ -217,22 +280,11 @@ fun VideoBubble(
                         modifier = Modifier.matchParentSize()
                     )
                 }
-                // The same gradient as the voice play button and the reply's action buttons.
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(taminColors.buttonGradient)
-                        .border(AgentGlass.borderWidth, AgentGlass.borderColor, CircleShape)
-                        .clickable { isPlayingInline = true },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        Icons.Default.PlayArrow,
-                        contentDescription = "پخش ویدیو",
-                        tint = Color.White
-                    )
-                }
+                MediaPlayButton(
+                    icon = Icons.Default.PlayArrow,
+                    contentDescription = "پخش ویدیو",
+                    onClick = { isPlayingInline = true }
+                )
                 content.durationMs?.let { duration ->
                     Text(
                         text = formatDuration(duration),
@@ -288,6 +340,51 @@ fun VideoBubble(
             url = content.source,
             onDismiss = { isFullscreen = false }
         )
+    }
+}
+
+/** The centered play control on a clip: the same gradient circle as the voice play button. */
+@Composable
+private fun MediaPlayButton(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    contentDescription: String,
+    onClick: () -> Unit
+) {
+    val taminColors = LocalTaminColors.current
+    Box(
+        modifier = Modifier
+            .size(48.dp)
+            .clip(CircleShape)
+            .background(taminColors.buttonGradient)
+            .border(AgentGlass.borderWidth, AgentGlass.borderColor, CircleShape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(icon, contentDescription = contentDescription, tint = Color.White)
+    }
+}
+
+/**
+ * The inline clip's progress, flush with the frame's bottom edge so it reads as part of the
+ * frame, not as a control floating in the picture.
+ */
+@Composable
+private fun VideoProgressBar(progress: Float, modifier: Modifier = Modifier) {
+    // Playback runs left to right whatever the layout direction, like every media scrubber.
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .height(VIDEO_PROGRESS_HEIGHT)
+                .background(Color.White.copy(alpha = 0.25f))
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(progress)
+                    .height(VIDEO_PROGRESS_HEIGHT)
+                    .background(AgentGlass.accent)
+            )
+        }
     }
 }
 
