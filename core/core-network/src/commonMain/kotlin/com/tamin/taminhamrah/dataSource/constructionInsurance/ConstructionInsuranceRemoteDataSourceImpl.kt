@@ -3,6 +3,8 @@ package com.tamin.taminhamrah.dataSource.constructionInsurance
 import com.tamin.taminhamrah.apiService.constructionInsurance.ConstructionInsuranceApiService
 import com.tamin.taminhamrah.model.constructionInsurance.BeneficiaryConstructionDTO
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileDTO
+import com.tamin.taminhamrah.model.constructionInsurance.InstallmentConstructionListDTO
+import com.tamin.taminhamrah.model.constructionInsurance.InstallmentDebitListDTO
 import com.tamin.taminhamrah.model.constructionInsurance.InstallmentLetterDTO
 import com.tamin.taminhamrah.model.constructionInsurance.PaymentSheetConstructionFileDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
@@ -62,5 +64,21 @@ internal class ConstructionInsuranceRemoteDataSourceImpl(
         query: ApiQueryParamDN,
     ): ListData<InstallmentLetterDTO> = errorParser.safeCall("getInstallmentLetterList") {
         apiService.getInstallmentLetterList(workshopId, branchId, queryBuilder.buildQuery(query)).extractData()
+    }
+
+    override suspend fun getDetailDebitList(
+        debitNumber: String,
+        branchId: String,
+        query: ApiQueryParamDN,
+    ): ListData<InstallmentDebitListDTO> = errorParser.safeCall("getDetailDebitList") {
+        apiService.getDetailDebitList(debitNumber, branchId, queryBuilder.buildQuery(query)).extractData()
+    }
+
+    override suspend fun getInstallmentConstructionList(
+        debitNumber: String,
+        branchId: String,
+        query: ApiQueryParamDN,
+    ): ListData<InstallmentConstructionListDTO> = errorParser.safeCall("getInstallmentConstructionList") {
+        apiService.getInstallmentConstructionList(debitNumber, branchId, queryBuilder.buildQuery(query)).extractData()
     }
 }

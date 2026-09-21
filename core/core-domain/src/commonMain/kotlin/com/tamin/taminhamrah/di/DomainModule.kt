@@ -291,6 +291,8 @@ import com.tamin.taminhamrah.useCases.constructionInsurance.GetPaymentSheetConst
 import com.tamin.taminhamrah.useCases.constructionInsurance.GetCertificatePaymentSheetPdfUseCase
 import com.tamin.taminhamrah.useCases.constructionInsurance.IssuancePaymentSheetUseCase
 import com.tamin.taminhamrah.useCases.constructionInsurance.GetInstallmentLetterListPageUseCase
+import com.tamin.taminhamrah.useCases.constructionInsurance.GetDetailDebitListPageUseCase
+import com.tamin.taminhamrah.useCases.constructionInsurance.GetInstallmentConstructionListPageUseCase
 import com.tamin.taminhamrah.useCases.versionHistory.GetVersionHistoryUseCase
 import com.tamin.taminhamrah.useCases.contactUs.GetContactUsUseCase
 import com.tamin.taminhamrah.useCases.content.GetLegalDocumentUseCase
@@ -643,6 +645,8 @@ val domainModule = module {
     factoryOf(::GetCertificatePaymentSheetPdfUseCase)
     factoryOf(::IssuancePaymentSheetUseCase)
     factoryOf(::GetInstallmentLetterListPageUseCase)
+    factoryOf(::GetDetailDebitListPageUseCase)
+    factoryOf(::GetInstallmentConstructionListPageUseCase)
 
     // Stories UseCases
     factoryOf(::GetStoryChannelsUseCase)

@@ -7,6 +7,8 @@ import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.benefic
 import com.tamin.taminhamrah.model.constructionInsurance.BeneficiaryConstructionDN
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileDN
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileSearchParamsDN
+import com.tamin.taminhamrah.model.constructionInsurance.InstallmentConstructionListDN
+import com.tamin.taminhamrah.model.constructionInsurance.InstallmentDebitListDN
 import com.tamin.taminhamrah.model.constructionInsurance.InstallmentLetterDN
 import com.tamin.taminhamrah.model.constructionInsurance.PaymentSheetConstructionFileDN
 import com.tamin.taminhamrah.model.paging.PageDN
@@ -253,5 +255,21 @@ private class FakeConstructionInsuranceRepository : ConstructionInsuranceReposit
         query: ApiQueryParamDN,
     ): Flow<PageDN<InstallmentLetterDN>> = flow {
         emit(PageDN(items = installmentLettersResult, total = installmentLettersResult.size))
+    }
+
+    override fun getDetailDebitListPage(
+        debitNumber: String,
+        branchId: String,
+        query: ApiQueryParamDN,
+    ): Flow<PageDN<InstallmentDebitListDN>> = flow {
+        emit(PageDN(items = emptyList(), total = 0))
+    }
+
+    override fun getInstallmentConstructionListPage(
+        debitNumber: String,
+        branchId: String,
+        query: ApiQueryParamDN,
+    ): Flow<PageDN<InstallmentConstructionListDN>> = flow {
+        emit(PageDN(items = emptyList(), total = 0))
     }
 }

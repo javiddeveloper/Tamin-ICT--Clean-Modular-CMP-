@@ -6,6 +6,10 @@ import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.toRoute
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.beneficiaries.ui.BeneficiariesRoute
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.beneficiaries.ui.BeneficiariesViewModel
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.installmentManagement.installmentAndPaymentSheet.ui.InstallmentManagementRoute
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.installmentManagement.installmentAndPaymentSheet.ui.InstallmentManagementViewModel
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.installmentManagement.installmentDebitList.ui.InstallmentDebitListRoute
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.installmentManagement.installmentDebitList.ui.InstallmentDebitListViewModel
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.installmentManagement.ui.InstallmentLetterRoute
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.installmentManagement.ui.InstallmentLetterViewModel
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.paymentSheet.ui.PaymentSheetRoute
@@ -58,7 +62,26 @@ data class PaymentSheetRoute(val debitNumber: String, val branchCode: String)
 
 /** مدیریت پرداخت اقساط — عملیات option "۳". */
 @Serializable
-data class InstallmentLetterRoute(val workshopId: String, val branchId: String)
+data class InstallmentLetterRoute(val fileNumber: Long?, val workshopId: String, val branchId: String)
+
+/** مدیریت اقساط و برگ پرداخت — one تقسیط‌نامه row's own عملیات option "۱". */
+@Serializable
+data class InstallmentManagementRoute(
+    val fileNumber: Long?,
+    val workshopId: String?,
+    val branchId: String,
+    val debitNumber: String,
+    val debitStepDescription: String? = null,
+)
+
+/** بدهی‌های تقسیط‌شده — one تقسیط‌نامه row's own عملیات option "۲". */
+@Serializable
+data class InstallmentDebitListRoute(
+    val fileNumber: Long?,
+    val workshopId: String?,
+    val branchId: String,
+    val debitNumber: String,
+)
 
 /** ذینفعان کارگاه — عملیات option "۴". */
 @Serializable
@@ -89,8 +112,27 @@ fun NavController.navigateToPaymentSheet(debitNumber: String, branchCode: String
     navigate(PaymentSheetRoute(debitNumber, branchCode))
 }
 
-fun NavController.navigateToInstallmentLetter(workshopId: String, branchId: String) {
-    navigate(InstallmentLetterRoute(workshopId, branchId))
+fun NavController.navigateToInstallmentLetter(fileNumber: Long?, workshopId: String, branchId: String) {
+    navigate(InstallmentLetterRoute(fileNumber, workshopId, branchId))
+}
+
+fun NavController.navigateToInstallmentManagement(
+    fileNumber: Long?,
+    workshopId: String?,
+    branchId: String,
+    debitNumber: String,
+    debitStepDescription: String? = null,
+) {
+    navigate(InstallmentManagementRoute(fileNumber, workshopId, branchId, debitNumber, debitStepDescription))
+}
+
+fun NavController.navigateToInstallmentDebitList(
+    fileNumber: Long?,
+    workshopId: String?,
+    branchId: String,
+    debitNumber: String,
+) {
+    navigate(InstallmentDebitListRoute(fileNumber, workshopId, branchId, debitNumber))
 }
 
 fun NavController.navigateToBeneficiaries(
@@ -203,7 +245,7 @@ fun NavGraphBuilder.constructionInsuranceScreen(
     onBack: () -> Unit,
     onNavigateToViewDetail: (fileNumber: Long?, requestNumber: Long?) -> Unit,
     onNavigateToPaymentSheet: (debitNumber: String, branchCode: String) -> Unit,
-    onNavigateToInstallmentLetter: (workshopId: String, branchId: String) -> Unit,
+    onNavigateToInstallmentLetter: (fileNumber: Long?, workshopId: String, branchId: String) -> Unit,
     onNavigateToBeneficiaries: (
         requestNumber: Long?,
         fileNumber: Long?,
@@ -251,14 +293,58 @@ fun NavGraphBuilder.paymentSheetScreen(onBack: () -> Unit) {
     }
 }
 
-fun NavGraphBuilder.installmentLetterScreen(onBack: () -> Unit) {
+fun NavGraphBuilder.installmentLetterScreen(
+    onBack: () -> Unit,
+    onNavigateToInstallmentManagement: (
+        fileNumber: Long?,
+        workshopId: String?,
+        branchId: String,
+        debitNumber: String,
+        debitStepDescription: String?,
+    ) -> Unit,
+    onNavigateToInstallmentDebitList: (fileNumber: Long?, workshopId: String?, branchId: String, debitNumber: String) -> Unit,
+) {
     composableWithFadeTransitions<InstallmentLetterRoute> { backStackEntry ->
         val route = backStackEntry.toRoute<InstallmentLetterRoute>()
         val viewModel: InstallmentLetterViewModel = koinViewModel()
         InstallmentLetterRoute(
             viewModel = viewModel,
+            fileNumber = route.fileNumber,
             workshopId = route.workshopId,
             branchId = route.branchId,
+            onBackClicked = onBack,
+            onNavigateToInstallmentManagement = onNavigateToInstallmentManagement,
+            onNavigateToInstallmentDebitList = onNavigateToInstallmentDebitList,
+        )
+    }
+}
+
+fun NavGraphBuilder.installmentManagementScreen(onBack: () -> Unit) {
+    composableWithFadeTransitions<InstallmentManagementRoute> { backStackEntry ->
+        val route = backStackEntry.toRoute<InstallmentManagementRoute>()
+        val viewModel: InstallmentManagementViewModel = koinViewModel()
+        InstallmentManagementRoute(
+            viewModel = viewModel,
+            fileNumber = route.fileNumber,
+            workshopId = route.workshopId,
+            branchId = route.branchId,
+            debitNumber = route.debitNumber,
+            debitStepDescription = route.debitStepDescription,
+            onBackClicked = onBack,
+        )
+    }
+}
+
+fun NavGraphBuilder.installmentDebitListScreen(onBack: () -> Unit) {
+    composableWithFadeTransitions<InstallmentDebitListRoute> { backStackEntry ->
+        val route = backStackEntry.toRoute<InstallmentDebitListRoute>()
+        val viewModel: InstallmentDebitListViewModel = koinViewModel()
+        InstallmentDebitListRoute(
+            viewModel = viewModel,
+            fileNumber = route.fileNumber,
+            workshopId = route.workshopId,
+            branchId = route.branchId,
+            debitNumber = route.debitNumber,
             onBackClicked = onBack,
         )
     }

@@ -70,7 +70,7 @@ fun ConstructionInsuranceRoute(
     onBackClicked: () -> Unit,
     onNavigateToViewDetail: (fileNumber: Long?, requestNumber: Long?) -> Unit,
     onNavigateToPaymentSheet: (debitNumber: String, branchCode: String) -> Unit,
-    onNavigateToInstallmentLetter: (workshopId: String, branchId: String) -> Unit,
+    onNavigateToInstallmentLetter: (fileNumber: Long?, workshopId: String, branchId: String) -> Unit,
     onNavigateToBeneficiaries: (
         requestNumber: Long?,
         fileNumber: Long?,
@@ -127,7 +127,7 @@ fun ConstructionInsuranceScreen(
     onIntent: (ConstructionInsuranceIntent) -> Unit,
     onNavigateToViewDetail: (fileNumber: Long?, requestNumber: Long?) -> Unit = { _, _ -> },
     onNavigateToPaymentSheet: (debitNumber: String, branchCode: String) -> Unit = { _, _ -> },
-    onNavigateToInstallmentLetter: (workshopId: String, branchId: String) -> Unit = { _, _ -> },
+    onNavigateToInstallmentLetter: (fileNumber: Long?, workshopId: String, branchId: String) -> Unit = { _, _, _ -> },
     onNavigateToBeneficiaries: (
         requestNumber: Long?,
         fileNumber: Long?,
@@ -219,6 +219,7 @@ fun ConstructionInsuranceScreen(
 
                                 ConstructionInsuranceAction.InstallmentLetter ->
                                     onNavigateToInstallmentLetter(
+                                        file.fileNumber,
                                         file.workshopInfo?.workshopId.orEmpty(),
                                         file.workshopInfo?.brhCode.orEmpty(),
                                     )

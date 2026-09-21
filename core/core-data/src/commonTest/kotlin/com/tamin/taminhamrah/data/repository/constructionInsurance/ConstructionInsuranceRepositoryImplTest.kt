@@ -7,6 +7,8 @@ import com.tamin.taminhamrah.dataSource.constructionInsurance.ConstructionInsura
 import com.tamin.taminhamrah.model.constructionInsurance.BeneficiaryConstructionDTO
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileDTO
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileSearchParamsDN
+import com.tamin.taminhamrah.model.constructionInsurance.InstallmentConstructionListDTO
+import com.tamin.taminhamrah.model.constructionInsurance.InstallmentDebitListDTO
 import com.tamin.taminhamrah.model.constructionInsurance.InstallmentLetterDTO
 import com.tamin.taminhamrah.model.constructionInsurance.PaymentSheetConstructionFileDTO
 import com.tamin.taminhamrah.model.constructionInsurance.WorkshopIdInfoDTO
@@ -274,6 +276,60 @@ class ConstructionInsuranceRepositoryImplTest {
         }
     }
 
+    @Test
+    fun `getDetailDebitListPage should emit mapped items with the backend total`() = runTest {
+        remoteDataSource.detailDebitListResult = ListData(
+            total = 3,
+            list = listOf(InstallmentDebitListDTO(debitNumber = "77640000001", remainingAmount = 4_250_000L))
+        )
+        val query = ApiQueryParamDN(page = 0, start = 0, limit = 10)
+
+        val page = repository.getDetailDebitListPage("77640000001", "6400", query).first()
+
+        assertEquals(1, page.items.size)
+        assertEquals("77640000001", page.items.first().debitNumber)
+        assertEquals(3, page.total)
+        assertEquals("77640000001", remoteDataSource.lastDetailDebitListDebitNumber)
+        assertEquals("6400", remoteDataSource.lastDetailDebitListBranchId)
+        assertEquals(query, remoteDataSource.lastDetailDebitListQuery)
+    }
+
+    @Test
+    fun `getDetailDebitListPage should propagate remote errors`() = runTest {
+        remoteDataSource.shouldThrowError = true
+
+        assertFailsWith<RuntimeException> {
+            repository.getDetailDebitListPage("1", "2", ApiQueryParamDN()).first()
+        }
+    }
+
+    @Test
+    fun `getInstallmentConstructionListPage should emit mapped items with the backend total`() = runTest {
+        remoteDataSource.installmentConstructionListResult = ListData(
+            total = 6,
+            list = listOf(InstallmentConstructionListDTO(debitNumber = "77640000001", dtnAmount = 400_000L))
+        )
+        val query = ApiQueryParamDN(page = 0, start = 0, limit = 10)
+
+        val page = repository.getInstallmentConstructionListPage("77640000001", "6400", query).first()
+
+        assertEquals(1, page.items.size)
+        assertEquals("77640000001", page.items.first().debitNumber)
+        assertEquals(6, page.total)
+        assertEquals("77640000001", remoteDataSource.lastInstallmentConstructionListDebitNumber)
+        assertEquals("6400", remoteDataSource.lastInstallmentConstructionListBranchId)
+        assertEquals(query, remoteDataSource.lastInstallmentConstructionListQuery)
+    }
+
+    @Test
+    fun `getInstallmentConstructionListPage should propagate remote errors`() = runTest {
+        remoteDataSource.shouldThrowError = true
+
+        assertFailsWith<RuntimeException> {
+            repository.getInstallmentConstructionListPage("1", "2", ApiQueryParamDN()).first()
+        }
+    }
+
     private fun createFileDTO(fileNumber: Long) = ConstructionFileDTO(
         fileNumber = fileNumber,
         workshopInfo = WorkshopIdInfoDTO(workshopId = "14020901", brhCode = "6400"),
@@ -298,6 +354,8 @@ class ConstructionInsuranceRepositoryImplTest {
         var certificatePdfResult = PdfDownloadDTO(pdf = InputStreamDTO(pdf = null))
         var issuanceMessageResult = "OK"
         var installmentLettersResult = ListData<InstallmentLetterDTO>(total = 0, list = emptyList())
+        var detailDebitListResult = ListData<InstallmentDebitListDTO>(total = 0, list = emptyList())
+        var installmentConstructionListResult = ListData<InstallmentConstructionListDTO>(total = 0, list = emptyList())
 
         var shouldThrowError = false
         var thrownError: Throwable = RuntimeException("Remote failure")
@@ -311,6 +369,12 @@ class ConstructionInsuranceRepositoryImplTest {
         var lastInstallmentWorkshopId: String? = null
         var lastInstallmentBranchId: String? = null
         var lastInstallmentQuery: ApiQueryParamDN? = null
+        var lastDetailDebitListDebitNumber: String? = null
+        var lastDetailDebitListBranchId: String? = null
+        var lastDetailDebitListQuery: ApiQueryParamDN? = null
+        var lastInstallmentConstructionListDebitNumber: String? = null
+        var lastInstallmentConstructionListBranchId: String? = null
+        var lastInstallmentConstructionListQuery: ApiQueryParamDN? = null
 
         override suspend fun getConstructionFiles(query: ApiQueryParamDN): ListData<ConstructionFileDTO> {
             lastQuery = query
@@ -353,6 +417,30 @@ class ConstructionInsuranceRepositoryImplTest {
             lastInstallmentQuery = query
             if (shouldThrowError) throw thrownError
             return installmentLettersResult
+        }
+
+        override suspend fun getDetailDebitList(
+            debitNumber: String,
+            branchId: String,
+            query: ApiQueryParamDN,
+        ): ListData<InstallmentDebitListDTO> {
+            lastDetailDebitListDebitNumber = debitNumber
+            lastDetailDebitListBranchId = branchId
+            lastDetailDebitListQuery = query
+            if (shouldThrowError) throw thrownError
+            return detailDebitListResult
+        }
+
+        override suspend fun getInstallmentConstructionList(
+            debitNumber: String,
+            branchId: String,
+            query: ApiQueryParamDN,
+        ): ListData<InstallmentConstructionListDTO> {
+            lastInstallmentConstructionListDebitNumber = debitNumber
+            lastInstallmentConstructionListBranchId = branchId
+            lastInstallmentConstructionListQuery = query
+            if (shouldThrowError) throw thrownError
+            return installmentConstructionListResult
         }
     }
 

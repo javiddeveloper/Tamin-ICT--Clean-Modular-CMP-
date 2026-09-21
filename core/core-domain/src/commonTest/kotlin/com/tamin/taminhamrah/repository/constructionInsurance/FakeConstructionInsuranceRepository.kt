@@ -3,6 +3,8 @@ package com.tamin.taminhamrah.repository.constructionInsurance
 import com.tamin.taminhamrah.model.constructionInsurance.BeneficiaryConstructionDN
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileDN
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileSearchParamsDN
+import com.tamin.taminhamrah.model.constructionInsurance.InstallmentConstructionListDN
+import com.tamin.taminhamrah.model.constructionInsurance.InstallmentDebitListDN
 import com.tamin.taminhamrah.model.constructionInsurance.InstallmentLetterDN
 import com.tamin.taminhamrah.model.constructionInsurance.PaymentSheetConstructionFileDN
 import com.tamin.taminhamrah.model.paging.PageDN
@@ -19,6 +21,8 @@ class FakeConstructionInsuranceRepository : ConstructionInsuranceRepository {
     var certificatePdfResult: PdfDownloadDN = PdfDownloadDN(pdf = null)
     var issuanceMessageResult: String = "OK"
     var installmentLettersPageResult: PageDN<InstallmentLetterDN> = PageDN(items = emptyList(), total = 0)
+    var detailDebitListPageResult: PageDN<InstallmentDebitListDN> = PageDN(items = emptyList(), total = 0)
+    var installmentConstructionListPageResult: PageDN<InstallmentConstructionListDN> = PageDN(items = emptyList(), total = 0)
 
     var shouldThrowError = false
     var thrownError: Throwable = RuntimeException("Error")
@@ -81,5 +85,23 @@ class FakeConstructionInsuranceRepository : ConstructionInsuranceRepository {
         lastInstallmentPageQuery = query
         if (shouldThrowError) throw thrownError
         emit(installmentLettersPageResult)
+    }
+
+    override fun getDetailDebitListPage(
+        debitNumber: String,
+        branchId: String,
+        query: ApiQueryParamDN,
+    ): Flow<PageDN<InstallmentDebitListDN>> = flow {
+        if (shouldThrowError) throw thrownError
+        emit(detailDebitListPageResult)
+    }
+
+    override fun getInstallmentConstructionListPage(
+        debitNumber: String,
+        branchId: String,
+        query: ApiQueryParamDN,
+    ): Flow<PageDN<InstallmentConstructionListDN>> = flow {
+        if (shouldThrowError) throw thrownError
+        emit(installmentConstructionListPageResult)
     }
 }

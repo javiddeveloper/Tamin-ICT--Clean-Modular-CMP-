@@ -3,6 +3,8 @@ package com.tamin.taminhamrah.repository.constructionInsurance
 import com.tamin.taminhamrah.model.constructionInsurance.BeneficiaryConstructionDN
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileDN
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileSearchParamsDN
+import com.tamin.taminhamrah.model.constructionInsurance.InstallmentConstructionListDN
+import com.tamin.taminhamrah.model.constructionInsurance.InstallmentDebitListDN
 import com.tamin.taminhamrah.model.constructionInsurance.InstallmentLetterDN
 import com.tamin.taminhamrah.model.constructionInsurance.PaymentSheetConstructionFileDN
 import com.tamin.taminhamrah.model.paging.PageDN
@@ -39,4 +41,18 @@ interface ConstructionInsuranceRepository {
         branchId: String,
         query: ApiQueryParamDN,
     ): Flow<PageDN<InstallmentLetterDN>>
+
+    /** بدهی‌های تقسیط‌شده — flat per-installment debit detail rows for one debit letter. Paged per [[Pagination]]. */
+    fun getDetailDebitListPage(
+        debitNumber: String,
+        branchId: String,
+        query: ApiQueryParamDN,
+    ): Flow<PageDN<InstallmentDebitListDN>>
+
+    /** مدیریت اقساط و برگ پرداخت — individual installments under one debit letter. Paged per [[Pagination]]. */
+    fun getInstallmentConstructionListPage(
+        debitNumber: String,
+        branchId: String,
+        query: ApiQueryParamDN,
+    ): Flow<PageDN<InstallmentConstructionListDN>>
 }

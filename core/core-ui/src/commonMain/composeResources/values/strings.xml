@@ -3411,6 +3411,21 @@
     <string name="action_menu_installment">مدیریت پرداخت اقساط</string>
     <string name="action_menu_beneficiaries">ذینفعان کارگاه</string>
 
+    <!-- InstallmentLetter row's own عملیات menu + its 2 destination screens -->
+    <string name="action_menu_installment_management">مدیریت اقساط و برگ پرداخت</string>
+    <string name="action_menu_installment_debit_list">بدهی‌های تقسیط‌شده</string>
+    <string name="btn_installment_debit_list">بدهی‌های تقسیط‌شده</string>
+    <string name="installment_management_title">مدیریت اقساط و برگ پرداخت</string>
+    <string name="installment_management_empty">قسطی برای این بدهی یافت نشد.</string>
+    <string name="installment_debit_list_title">بدهی‌های تقسیط‌شده</string>
+    <string name="installment_debit_list_empty">بدهی تقسیط‌شده‌ای یافت نشد.</string>
+    <string name="label_installment_due_date">سررسید</string>
+    <string name="label_installment_amount_payable">مبلغ قابل پرداخت</string>
+    <string name="label_installment_amount_paid">مبلغ پرداختی</string>
+    <string name="label_installment_sub_debit_number">شماره فرعی بدهی</string>
+    <string name="label_installment_paid_count">اقساط پرداخت‌شده</string>
+    <string name="btn_issue_payment_sheet_for_installment">صدور برگ پرداخت این قسط</string>
+
     <string name="view_detail_request_title">جزئیات درخواست</string>
     <string name="view_detail_section_file_info">اطلاعات کلی پرونده</string>
     <string name="view_detail_section_request_info">اطلاعات درخواست</string>

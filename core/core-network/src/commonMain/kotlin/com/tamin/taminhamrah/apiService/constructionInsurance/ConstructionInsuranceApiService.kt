@@ -2,6 +2,8 @@ package com.tamin.taminhamrah.apiService.constructionInsurance
 
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileDTO
 import com.tamin.taminhamrah.model.constructionInsurance.BeneficiaryConstructionDTO
+import com.tamin.taminhamrah.model.constructionInsurance.InstallmentConstructionListDTO
+import com.tamin.taminhamrah.model.constructionInsurance.InstallmentDebitListDTO
 import com.tamin.taminhamrah.model.constructionInsurance.InstallmentLetterDTO
 import com.tamin.taminhamrah.model.constructionInsurance.PaymentSheetConstructionFileDTO
 import com.tamin.taminhamrah.model.utils.ListData
@@ -33,7 +35,7 @@ interface ConstructionInsuranceApiService {
         @Path("debitNumber") debitNumber: String,
     ): BaseDTO<ListData<PaymentSheetConstructionFileDTO>>
 
-    /** مشاهده گواهی برگه پرداخت — PDF byte stream, read via [com.tamin.taminhamrah.tools.readPdfChannel]. */
+    /** مشاهده گواهی برگه پرداخت — PDF byte stream, read via . */
     @Streaming
     @GET("bld-request-services/building-workshop-certificate-report/{debitNumber}/normal/{branchCode}")
     suspend fun getCertificatePaymentSheetPdf(
@@ -54,4 +56,20 @@ interface ConstructionInsuranceApiService {
         @Path("branchId") branchId: String,
         @QueryMap parameters: Map<String, String>
     ): BaseDTO<ListData<InstallmentLetterDTO>>
+
+    /** بدهی‌های تقسیط‌شده — flat per-installment debit detail rows for one debit letter. */
+    @GET("bld-request-services/building-workshop-installment-detail/{debitNumber}/{branchId}")
+    suspend fun getDetailDebitList(
+        @Path("debitNumber") debitNumber: String,
+        @Path("branchId") branchId: String,
+        @QueryMap parameters: Map<String, String>
+    ): BaseDTO<ListData<InstallmentDebitListDTO>>
+
+    /** مدیریت اقساط و برگ پرداخت — individual installments under one debit letter. */
+    @GET("bld-request-services/building-workshop-installment-list/{debitNumber}/{branchId}")
+    suspend fun getInstallmentConstructionList(
+        @Path("debitNumber") debitNumber: String,
+        @Path("branchId") branchId: String,
+        @QueryMap parameters: Map<String, String>
+    ): BaseDTO<ListData<InstallmentConstructionListDTO>>
 }

@@ -5,6 +5,8 @@ import com.tamin.taminhamrah.apiService.constructionInsurance.ConstructionInsura
 import com.tamin.taminhamrah.apiService.constructionInsurance.createConstructionInsuranceApiService
 import com.tamin.taminhamrah.model.constructionInsurance.BeneficiaryConstructionDTO
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileDTO
+import com.tamin.taminhamrah.model.constructionInsurance.InstallmentConstructionListDTO
+import com.tamin.taminhamrah.model.constructionInsurance.InstallmentDebitListDTO
 import com.tamin.taminhamrah.model.constructionInsurance.InstallmentLetterDTO
 import com.tamin.taminhamrah.model.constructionInsurance.PaymentSheetConstructionFileDTO
 import com.tamin.taminhamrah.model.request.ApiFilterDN
@@ -43,6 +45,10 @@ class FakeConstructionInsuranceApiService : ConstructionInsuranceApiService {
         BaseDTO(status = 200, family = "SUCCESSFUL", reason = "OK", data = JsonPrimitive("OK"))
     var installmentLettersResult: BaseDTO<ListData<InstallmentLetterDTO>> =
         BaseDTO(status = 200, family = "SUCCESSFUL", reason = "OK", data = ListData(total = 0, list = emptyList()))
+    var detailDebitListResult: BaseDTO<ListData<InstallmentDebitListDTO>> =
+        BaseDTO(status = 200, family = "SUCCESSFUL", reason = "OK", data = ListData(total = 0, list = emptyList()))
+    var installmentConstructionListResult: BaseDTO<ListData<InstallmentConstructionListDTO>> =
+        BaseDTO(status = 200, family = "SUCCESSFUL", reason = "OK", data = ListData(total = 0, list = emptyList()))
 
     var shouldThrowException: Exception? = null
     var lastConstructionFilesParameters: Map<String, String>? = null
@@ -52,6 +58,10 @@ class FakeConstructionInsuranceApiService : ConstructionInsuranceApiService {
     var lastInstallmentWorkshopId: String? = null
     var lastInstallmentBranchId: String? = null
     var lastInstallmentParameters: Map<String, String>? = null
+    var lastDetailDebitListDebitNumber: String? = null
+    var lastDetailDebitListBranchId: String? = null
+    var lastInstallmentConstructionListDebitNumber: String? = null
+    var lastInstallmentConstructionListBranchId: String? = null
 
     override suspend fun getConstructionFiles(parameters: Map<String, String>): BaseDTO<ListData<ConstructionFileDTO>> {
         shouldThrowException?.let { throw it }
@@ -94,6 +104,28 @@ class FakeConstructionInsuranceApiService : ConstructionInsuranceApiService {
         lastInstallmentBranchId = branchId
         lastInstallmentParameters = parameters
         return installmentLettersResult
+    }
+
+    override suspend fun getDetailDebitList(
+        debitNumber: String,
+        branchId: String,
+        parameters: Map<String, String>
+    ): BaseDTO<ListData<InstallmentDebitListDTO>> {
+        shouldThrowException?.let { throw it }
+        lastDetailDebitListDebitNumber = debitNumber
+        lastDetailDebitListBranchId = branchId
+        return detailDebitListResult
+    }
+
+    override suspend fun getInstallmentConstructionList(
+        debitNumber: String,
+        branchId: String,
+        parameters: Map<String, String>
+    ): BaseDTO<ListData<InstallmentConstructionListDTO>> {
+        shouldThrowException?.let { throw it }
+        lastInstallmentConstructionListDebitNumber = debitNumber
+        lastInstallmentConstructionListBranchId = branchId
+        return installmentConstructionListResult
     }
 }
 
@@ -195,6 +227,54 @@ class ConstructionInsuranceRemoteDataSourceImplTest : BaseApiTest() {
         dataSource.getInstallmentLetterList("14020901", "6400", ApiQueryParamDN())
 
         assertEquals(null, fakeApiService.lastInstallmentParameters?.get("position"))
+    }
+
+    @Test
+    fun getDetailDebitList_success_forwardsDebitNumberAndBranch() = runTest {
+        val expected = listOf(InstallmentDebitListDTO(debitNumber = "77640000001"))
+        fakeApiService.detailDebitListResult =
+            BaseDTO(status = 200, family = "SUCCESSFUL", reason = "OK", data = ListData(total = 1, list = expected))
+
+        val result = dataSource.getDetailDebitList("77640000001", "6400", ApiQueryParamDN())
+
+        assertEquals(expected, result.list)
+        assertEquals("77640000001", fakeApiService.lastDetailDebitListDebitNumber)
+        assertEquals("6400", fakeApiService.lastDetailDebitListBranchId)
+    }
+
+    @Test
+    fun getDetailDebitList_onNetworkError_throwsParsedTaminApiException() = runTest {
+        fakeApiService.shouldThrowException = TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+
+        val exception = assertFailsWith<TaminApiException> {
+            dataSource.getDetailDebitList("77640000001", "6400", ApiQueryParamDN())
+        }
+
+        assertEquals("خطای اتصال", exception.title)
+    }
+
+    @Test
+    fun getInstallmentConstructionList_success_forwardsDebitNumberAndBranch() = runTest {
+        val expected = listOf(InstallmentConstructionListDTO(debitNumber = "77640000001"))
+        fakeApiService.installmentConstructionListResult =
+            BaseDTO(status = 200, family = "SUCCESSFUL", reason = "OK", data = ListData(total = 1, list = expected))
+
+        val result = dataSource.getInstallmentConstructionList("77640000001", "6400", ApiQueryParamDN())
+
+        assertEquals(expected, result.list)
+        assertEquals("77640000001", fakeApiService.lastInstallmentConstructionListDebitNumber)
+        assertEquals("6400", fakeApiService.lastInstallmentConstructionListBranchId)
+    }
+
+    @Test
+    fun getInstallmentConstructionList_onNetworkError_throwsParsedTaminApiException() = runTest {
+        fakeApiService.shouldThrowException = TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+
+        val exception = assertFailsWith<TaminApiException> {
+            dataSource.getInstallmentConstructionList("77640000001", "6400", ApiQueryParamDN())
+        }
+
+        assertEquals("خطای اتصال", exception.title)
     }
 
     @Test

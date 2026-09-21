@@ -9,6 +9,8 @@ import com.tamin.taminhamrah.model.constructionInsurance.BeneficiaryConstruction
 import com.tamin.taminhamrah.model.constructionInsurance.BuildingRequestSummaryDN
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileDN
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileSearchParamsDN
+import com.tamin.taminhamrah.model.constructionInsurance.InstallmentConstructionListDN
+import com.tamin.taminhamrah.model.constructionInsurance.InstallmentDebitListDN
 import com.tamin.taminhamrah.model.constructionInsurance.InstallmentLetterDN
 import com.tamin.taminhamrah.model.constructionInsurance.PaymentSheetConstructionFileDN
 import com.tamin.taminhamrah.model.constructionInsurance.WorkshopIdInfoDN
@@ -125,6 +127,34 @@ internal class ConstructionInsuranceRepositoryImpl(
         query: ApiQueryParamDN,
     ): Flow<PageDN<InstallmentLetterDN>> = flow {
         val response = remoteDataSource.getInstallmentLetterList(workshopId, branchId, query)
+        emit(
+            PageDN(
+                items = response.list.orEmpty().map { it.toDomain() },
+                total = response.total,
+            )
+        )
+    }
+
+    override fun getDetailDebitListPage(
+        debitNumber: String,
+        branchId: String,
+        query: ApiQueryParamDN,
+    ): Flow<PageDN<InstallmentDebitListDN>> = flow {
+        val response = remoteDataSource.getDetailDebitList(debitNumber, branchId, query)
+        emit(
+            PageDN(
+                items = response.list.orEmpty().map { it.toDomain() },
+                total = response.total,
+            )
+        )
+    }
+
+    override fun getInstallmentConstructionListPage(
+        debitNumber: String,
+        branchId: String,
+        query: ApiQueryParamDN,
+    ): Flow<PageDN<InstallmentConstructionListDN>> = flow {
+        val response = remoteDataSource.getInstallmentConstructionList(debitNumber, branchId, query)
         emit(
             PageDN(
                 items = response.list.orEmpty().map { it.toDomain() },

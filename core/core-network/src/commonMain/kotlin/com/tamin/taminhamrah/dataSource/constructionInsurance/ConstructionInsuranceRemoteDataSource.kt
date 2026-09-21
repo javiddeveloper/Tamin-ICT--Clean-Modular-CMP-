@@ -2,6 +2,8 @@ package com.tamin.taminhamrah.dataSource.constructionInsurance
 
 import com.tamin.taminhamrah.model.constructionInsurance.BeneficiaryConstructionDTO
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileDTO
+import com.tamin.taminhamrah.model.constructionInsurance.InstallmentConstructionListDTO
+import com.tamin.taminhamrah.model.constructionInsurance.InstallmentDebitListDTO
 import com.tamin.taminhamrah.model.constructionInsurance.InstallmentLetterDTO
 import com.tamin.taminhamrah.model.constructionInsurance.PaymentSheetConstructionFileDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
@@ -28,4 +30,18 @@ interface ConstructionInsuranceRemoteDataSource {
         branchId: String,
         query: ApiQueryParamDN,
     ): ListData<InstallmentLetterDTO>
+
+    /** بدهی‌های تقسیط‌شده — flat per-installment debit detail rows for one debit letter. */
+    suspend fun getDetailDebitList(
+        debitNumber: String,
+        branchId: String,
+        query: ApiQueryParamDN,
+    ): ListData<InstallmentDebitListDTO>
+
+    /** مدیریت اقساط و برگ پرداخت — individual installments under one debit letter. */
+    suspend fun getInstallmentConstructionList(
+        debitNumber: String,
+        branchId: String,
+        query: ApiQueryParamDN,
+    ): ListData<InstallmentConstructionListDTO>
 }

@@ -29,6 +29,8 @@ import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.viewDet
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.beneficiaries.ui.BeneficiariesViewModel
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.paymentSheet.ui.PaymentSheetViewModel
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.installmentManagement.ui.InstallmentLetterViewModel
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.installmentManagement.installmentAndPaymentSheet.ui.InstallmentManagementViewModel
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.installmentManagement.installmentDebitList.ui.InstallmentDebitListViewModel
 import com.tamin.taminhamrah.feature.taminServices.verifier.ConstructionWorkersPaymentVerifier
 import com.tamin.taminhamrah.repository.payment.PaymentVerifier
 import org.koin.core.module.dsl.factoryOf
@@ -75,5 +77,7 @@ val TaminServicesModule = module {
     viewModelOf(::BeneficiariesViewModel)
     viewModelOf(::PaymentSheetViewModel)
     viewModelOf(::InstallmentLetterViewModel)
+    viewModelOf(::InstallmentManagementViewModel)
+    viewModelOf(::InstallmentDebitListViewModel)
 }
 

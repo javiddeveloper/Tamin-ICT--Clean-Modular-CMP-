@@ -122,10 +122,14 @@ import com.tamin.taminhamrah.feature.taminServices.constructionInsuranceScreen
 import com.tamin.taminhamrah.feature.taminServices.viewDetailRequestScreen
 import com.tamin.taminhamrah.feature.taminServices.paymentSheetScreen
 import com.tamin.taminhamrah.feature.taminServices.installmentLetterScreen
+import com.tamin.taminhamrah.feature.taminServices.installmentManagementScreen
+import com.tamin.taminhamrah.feature.taminServices.installmentDebitListScreen
 import com.tamin.taminhamrah.feature.taminServices.beneficiariesScreen
 import com.tamin.taminhamrah.feature.taminServices.navigateToViewDetailRequest
 import com.tamin.taminhamrah.feature.taminServices.navigateToPaymentSheet
 import com.tamin.taminhamrah.feature.taminServices.navigateToInstallmentLetter
+import com.tamin.taminhamrah.feature.taminServices.navigateToInstallmentManagement
+import com.tamin.taminhamrah.feature.taminServices.navigateToInstallmentDebitList
 import com.tamin.taminhamrah.feature.taminServices.navigateToBeneficiaries
 import com.tamin.taminhamrah.feature.taminServices.sendInsuranceHistoryToInstitutionsScreen
 import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
@@ -533,8 +537,8 @@ internal fun TaminHamrahNavGraph(
                     onNavigateToPaymentSheet = { debitNumber, branchCode ->
                         navController.navigateToPaymentSheet(debitNumber, branchCode)
                     },
-                    onNavigateToInstallmentLetter = { workshopId, branchId ->
-                        navController.navigateToInstallmentLetter(workshopId, branchId)
+                    onNavigateToInstallmentLetter = { fileNumber, workshopId, branchId ->
+                        navController.navigateToInstallmentLetter(fileNumber, workshopId, branchId)
                     },
                     onNavigateToBeneficiaries = { requestNumber, fileNumber, requestDate, workshopId, branchCode ->
                         navController.navigateToBeneficiaries(
@@ -556,6 +560,22 @@ internal fun TaminHamrahNavGraph(
                 )
 
                 installmentLetterScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToInstallmentManagement = { fileNumber, workshopId, branchId, debitNumber, debitStepDescription ->
+                        navController.navigateToInstallmentManagement(
+                            fileNumber, workshopId, branchId, debitNumber, debitStepDescription,
+                        )
+                    },
+                    onNavigateToInstallmentDebitList = { fileNumber, workshopId, branchId, debitNumber ->
+                        navController.navigateToInstallmentDebitList(fileNumber, workshopId, branchId, debitNumber)
+                    },
+                )
+
+                installmentManagementScreen(
+                    onBack = { navController.popBackStack() }
+                )
+
+                installmentDebitListScreen(
                     onBack = { navController.popBackStack() }
                 )
 
