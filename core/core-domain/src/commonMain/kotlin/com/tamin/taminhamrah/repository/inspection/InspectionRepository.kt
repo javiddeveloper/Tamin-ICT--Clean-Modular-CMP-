@@ -15,6 +15,10 @@ interface InspectionRepository {
         query: ApiQueryParamDN
     ): Flow<PageDN<InspectionPerformedDN>>
 
+    fun getWorkshopInspectionsPage(
+        query: ApiQueryParamDN
+    ): Flow<PageDN<InspectionPerformedDN>>
+
     fun getBranchesPage(
         query: ApiQueryParamDN
     ): Flow<PageDN<BranchDN>>

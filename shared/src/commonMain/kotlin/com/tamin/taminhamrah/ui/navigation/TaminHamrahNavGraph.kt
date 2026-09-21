@@ -116,6 +116,7 @@ import com.tamin.taminhamrah.feature.stories.storyViewerScreen
 import com.tamin.taminhamrah.feature.taminServices.TaminServicesRoute
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServicesScreen
 import com.tamin.taminhamrah.feature.taminServices.inspectionScreen
+import com.tamin.taminhamrah.feature.taminServices.workshopInspectionScreen
 import com.tamin.taminhamrah.feature.taminServices.occurrenceScreen
 import com.tamin.taminhamrah.feature.taminServices.sendInsuranceHistoryToInstitutionsScreen
 import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
@@ -508,6 +509,10 @@ internal fun TaminHamrahNavGraph(
                 )
 
                 inspectionScreen(
+                    onBack = { navController.popBackStack() }
+                )
+
+                workshopInspectionScreen(
                     onBack = { navController.popBackStack() }
                 )
 
