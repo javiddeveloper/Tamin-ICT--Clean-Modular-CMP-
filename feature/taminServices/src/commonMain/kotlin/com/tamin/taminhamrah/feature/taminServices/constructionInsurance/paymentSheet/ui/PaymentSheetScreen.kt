@@ -297,6 +297,8 @@ fun PaymentSheetScreen(
  * item 5) — but the mapping itself no longer needs that answer, since both shapes now resolve to
  * the same two legacy states.
  */
+private const val PAID_STATUS_CODE = "1"
+
 @Composable
 private fun paymentStatusDisplay(status: String?): Triple<String, Color, Color> {
     val colors = LocalTaminColors.current
@@ -314,8 +316,6 @@ private fun paymentStatusDisplay(status: String?): Triple<String, Color, Color> 
         )
     }
 }
-
-private const val PAID_STATUS_CODE = "1"
 
 @Composable
 private fun PaymentSheetCard(item: PaymentSheetConstructionFilePR, modifier: Modifier = Modifier) {

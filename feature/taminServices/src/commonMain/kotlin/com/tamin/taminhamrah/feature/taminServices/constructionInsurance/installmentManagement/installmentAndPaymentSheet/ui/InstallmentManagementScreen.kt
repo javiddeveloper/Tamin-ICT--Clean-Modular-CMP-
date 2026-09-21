@@ -6,14 +6,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
@@ -31,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -44,6 +49,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
+import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
@@ -349,9 +355,10 @@ private fun InstallmentCard(
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            InstallmentNumberBadge(number = item.debitSubCode.orDash(), background = badgeBg, contentColor = badgeFg)
+            Spacer(modifier = Modifier.width(Spacing.sm))
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.xxs)) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -372,7 +379,6 @@ private fun InstallmentCard(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
                 ) {
-                    StatusPill(text = item.lastPaymentSheetDescription.orDash(), containerColor = badgeBg, contentColor = badgeFg)
                     Text(
                         text = stringResource(CoreRes.string.label_payment_date),
                         style = MaterialTheme.typography.labelSmall,
@@ -385,19 +391,20 @@ private fun InstallmentCard(
                     )
                 }
             }
-            InstallmentNumberBadge(number = item.debitSubCode.orDash(), background = badgeBg, contentColor = badgeFg)
+            Spacer(modifier = Modifier.weight(1f))
+            StatusPill(text = item.lastPaymentSheetDescription.orDash(), containerColor = badgeBg, contentColor = badgeFg)
         }
 
         if (!paid) {
-            TaminOutlinedButton(
+            LoadingButton(
                 text = stringResource(CoreRes.string.btn_issue_payment_sheet_for_installment),
                 onClick = onIssuePaymentSheetClick,
                 icon = Icons.AutoMirrored.Outlined.ReceiptLong,
                 enabled = !isIssuing,
-                containerColor = colors.blueBg,
-                borderColor = Color.Transparent,
+                isLoading = isIssuing,
+                background = SolidColor(colors.blueBg),
                 contentColor = colors.blueText,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().height(48.dp),
             )
         }
     }
@@ -413,7 +420,7 @@ private fun InstallmentNumberBadge(
     Box(
         modifier = modifier
             .size(36.dp)
-            .clip(CircleShape)
+            .clip(RoundedCornerShape(CornerRadius.lg))
             .background(background),
         contentAlignment = Alignment.Center,
     ) {

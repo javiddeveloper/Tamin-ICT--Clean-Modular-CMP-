@@ -12,10 +12,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -55,13 +57,17 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.toFormattedDate
 import kotlinx.coroutines.flow.Flow
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.action_back
+import taminx.core.core_ui.from_date
+import taminx.core.core_ui.ic_tamin_calendar
 import taminx.core.core_ui.installment_debit_list_empty
 import taminx.core.core_ui.installment_debit_list_title
 import taminx.core.core_ui.label_debit_end_date
 import taminx.core.core_ui.label_debit_number
 import taminx.core.core_ui.label_debit_start_date
+import taminx.core.core_ui.to_date
 import taminx.core.core_ui.workshop_number
 import taminx.core.core_ui.Res as CoreRes
 
@@ -230,13 +236,6 @@ private fun InstallmentDebitCard(item: InstallmentDebitListPR, modifier: Modifie
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            item.debitStatusDescription?.let { status ->
-                StatusPill(
-                    text = status,
-                    containerColor = statusContainer,
-                    contentColor = statusContent,
-                )
-            }
             Text(
                 text = item.debitStepDescription.orDash(),
                 style = MaterialTheme.typography.titleSmall,
@@ -246,6 +245,13 @@ private fun InstallmentDebitCard(item: InstallmentDebitListPR, modifier: Modifie
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f, fill = false),
             )
+            item.debitStatusDescription?.let { status ->
+                StatusPill(
+                    text = status,
+                    containerColor = statusContainer,
+                    contentColor = statusContent,
+                )
+            }
         }
 
         Row(
@@ -267,9 +273,15 @@ private fun InstallmentDebitCard(item: InstallmentDebitListPR, modifier: Modifie
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            Icon(
+                modifier = Modifier.size(10.dp),
+                painter = painterResource(CoreRes.drawable.ic_tamin_calendar),
+                contentDescription = ""
+            )
             Text(
-                text = stringResource(CoreRes.string.label_debit_start_date),
+                text = stringResource(CoreRes.string.from_date),
                 style = MaterialTheme.typography.labelSmall,
                 color = colors.textMuted,
             )
@@ -279,7 +291,7 @@ private fun InstallmentDebitCard(item: InstallmentDebitListPR, modifier: Modifie
                 color = colors.textPrimary,
             )
             Text(
-                text = stringResource(CoreRes.string.label_debit_end_date),
+                text = stringResource(CoreRes.string.to_date),
                 style = MaterialTheme.typography.labelSmall,
                 color = colors.textMuted,
             )

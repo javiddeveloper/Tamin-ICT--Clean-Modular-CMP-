@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -18,6 +20,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -69,18 +72,24 @@ import com.tamin.taminhamrah.ui.theme.TaminNavy300
 import com.tamin.taminhamrah.ui.theme.TaminNavy900
 import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.util.toFormattedDate
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.action_back
 import taminx.core.core_ui.btn_action
 import taminx.core.core_ui.btn_installment_debit_list
 import taminx.core.core_ui.deferred_installment_rial
+import taminx.core.core_ui.from_date
+import taminx.core.core_ui.ic_calculator
+import taminx.core.core_ui.ic_tamin_calendar
 import taminx.core.core_ui.installment_letter_empty
 import taminx.core.core_ui.installment_letter_title
 import taminx.core.core_ui.label_debit_end_date
 import taminx.core.core_ui.label_debit_number
 import taminx.core.core_ui.label_debit_start_date
 import taminx.core.core_ui.label_remaining_amount
+import taminx.core.core_ui.to_date
 import taminx.core.core_ui.workshop_number
 import taminx.core.core_ui.Res as CoreRes
 
@@ -308,13 +317,6 @@ private fun InstallmentLetterCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            item.debitStatusDescription?.let { status ->
-                StatusPill(
-                    text = status,
-                    containerColor = statusContainer,
-                    contentColor = statusContent
-                )
-            }
             Text(
                 text = item.debitStepDescription.orDash(),
                 style = MaterialTheme.typography.titleSmall,
@@ -324,6 +326,13 @@ private fun InstallmentLetterCard(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f, fill = false),
             )
+            item.debitStatusDescription?.let { status ->
+                StatusPill(
+                    text = status,
+                    containerColor = statusContainer,
+                    contentColor = statusContent
+                )
+            }
         }
 
         Row(
@@ -345,9 +354,15 @@ private fun InstallmentLetterCard(
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            Icon(
+                modifier = Modifier.size(10.dp),
+                painter = painterResource(CoreRes.drawable.ic_tamin_calendar),
+                contentDescription = ""
+            )
             Text(
-                text = stringResource(CoreRes.string.label_debit_start_date),
+                text = stringResource(CoreRes.string.from_date),
                 style = MaterialTheme.typography.labelSmall,
                 color = colors.textMuted,
             )
@@ -357,7 +372,7 @@ private fun InstallmentLetterCard(
                 color = colors.textPrimary,
             )
             Text(
-                text = stringResource(CoreRes.string.label_debit_end_date),
+                text = stringResource(CoreRes.string.to_date),
                 style = MaterialTheme.typography.labelSmall,
                 color = colors.textMuted,
             )
@@ -368,38 +383,6 @@ private fun InstallmentLetterCard(
             )
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(statusContainer, RoundedCornerShape(CornerRadius.md))
-                .padding(horizontal = Spacing.md, vertical = Spacing.sm),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Text(
-                text = stringResource(CoreRes.string.label_remaining_amount),
-                style = MaterialTheme.typography.bodySmall,
-                color = statusContent,
-            )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(Spacing.xxs),
-            ) {
-                NumericText(
-                    text = (item.remainingAmount ?: 0L).toPriceFormat(),
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                    color = statusContent,
-                )
-                Text(
-                    text = stringResource(CoreRes.string.deferred_installment_rial),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = statusContent
-                )
-            }
-        }
-
-        // Footer: بدهی‌های تقسیط‌شده shortcut on the leading (right, RTL) edge — wider — عملیات
-        // trailing. Same idiom as `ConstructionFileCard`'s own جزئیات درخواست/عملیات footer.
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
@@ -478,7 +461,7 @@ private fun installmentStatusColors(status: String?): Pair<Color, Color> {
 
 // ─── Preview ──────────────────────────────────────────────────────────────────
 
-private val PreviewLetters = kotlinx.collections.immutable.persistentListOf(
+private val PreviewLetters = persistentListOf(
     InstallmentLetterPR(
         workshopId = "2361847",
         debitNumber = "7764000001",
