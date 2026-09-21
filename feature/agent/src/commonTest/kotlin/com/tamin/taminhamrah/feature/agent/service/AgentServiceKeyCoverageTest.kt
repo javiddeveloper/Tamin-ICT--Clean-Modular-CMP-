@@ -68,7 +68,7 @@ class AgentServiceKeyCoverageTest {
 
     @Test
     fun `a screen key answers with the title and one button labelled with the menu name`() = runTest {
-        val service = DeepLinkAgentService(TitledFeatureManager(mapOf(FeatureFlag.DISABILITY_PENSION to "مستمری از کارافتادگی")))
+        val service = DeepLinkAgentService(TitledFeatureManager(mapOf(FeatureFlag.DISABILITY_PENSION_PENSIONER to "مستمری از کارافتادگی")))
         assertIs<DeepLinkAgentService>(AgentServiceRegistry(listOf(service)).get(AgentActionKey.DISABILITY_PENSION))
 
         val markdown = text(service.execute(agentParams(AgentActionKey.DISABILITY_PENSION, message = "درخواست مستمری")))

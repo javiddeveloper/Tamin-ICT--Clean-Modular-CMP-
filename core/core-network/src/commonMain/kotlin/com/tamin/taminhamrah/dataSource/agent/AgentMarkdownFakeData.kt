@@ -8,8 +8,10 @@ package com.tamin.taminhamrah.dataSource.agent
  * - a wide table
  * - formulas: an explicit `$$` block whose parentheses must all stay visible, a `label = expr`
  *   line, nested fractions, a power and a `math` fence
- * - links: enabled service, alias, disabled service (menu id 42 in MockMenuData), unknown key,
- *   prompt link, trusted and untrusted web links
+ * - links: enabled service (`@wedding_present`), alias (`@insurance_payment`, a second key for
+ *   `FeatureFlag.CONTRACTS`), another resolved service (`@objection_insurance_history` — its
+ *   `MockMenuData` row is `ACTIVE`, not disabled; there is no disabled-service link here today),
+ *   unknown key (`@group_payment`), prompt link, trusted and untrusted web links
  * - an empty markdown item, which must produce no bubble
  */
 internal const val FAKE_AGENT_MARKDOWN_RESPONSE = """

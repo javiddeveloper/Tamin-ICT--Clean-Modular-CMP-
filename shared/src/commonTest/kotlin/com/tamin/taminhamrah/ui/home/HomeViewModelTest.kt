@@ -357,7 +357,7 @@ class HomeViewModelTest {
         advanceUntilIdle()
         collector.cancel()
 
-        assertEquals(listOf<HomeEvent>(HomeEvent.NavigateToService(FeatureFlag.WAGE_AND_HISTORY)), events)
+        assertEquals(listOf<HomeEvent>(HomeEvent.NavigateToService(FeatureFlag.COMBINED_RECORD)), events)
     }
 
     /** The same gate every card goes through: a service switched off explains itself, not opens. */
