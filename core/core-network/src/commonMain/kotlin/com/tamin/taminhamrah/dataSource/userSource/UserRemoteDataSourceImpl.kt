@@ -91,7 +91,7 @@ internal class UserRemoteDataSourceImpl(
         return try {
             val response =
                 userApiService.sendImageRequest(branchCode, queryBuilder.buildFilterJson(filter))
-            response.extractData()
+            response.extractMessage()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {

@@ -51,7 +51,7 @@ internal interface UserApiService {
     suspend fun sendImageRequest(
         @Path("branchCode") branchCode: String,
         @Query("filter") filter: String
-    ): BaseDTO<String>
+    ): BaseDTO<JsonElement?>
 
 
 

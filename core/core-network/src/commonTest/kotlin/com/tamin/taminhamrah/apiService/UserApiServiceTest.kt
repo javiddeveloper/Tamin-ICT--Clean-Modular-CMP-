@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.apiService
 
+import com.tamin.taminhamrah.tools.extractMessage
 import com.tamin.taminhamrah.util.ApiTestUtils
 import com.tamin.taminhamrah.util.UserTestData
 import kotlinx.coroutines.test.runTest
@@ -125,4 +126,18 @@ class UserApiServiceTest : BaseApiTest() {
         assertNull(response.data)
     }
 
+    @Test
+    fun `sendImageRequest should return success with null data and extract message`() = runTest {
+        val jsonResponse = """{"status":200,"family":"SUCCESSFUL","reason":"OK","traceId":"c1d7d47b-d5ec-41b4-b48e-4cb48b71ee58","data":null}"""
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createUserApiService()
+
+        val response = apiService.sendImageRequest("0010", """[{"property":"serialId","value":"1G50497996","operator":"EQ"}]""")
+
+        assertEquals(200, response.status)
+        assertEquals("SUCCESSFUL", response.family)
+        assertNull(response.data)
+        assertEquals("OK", response.extractMessage())
+    }
 }
