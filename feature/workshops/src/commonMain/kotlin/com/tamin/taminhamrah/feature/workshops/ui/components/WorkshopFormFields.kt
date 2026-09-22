@@ -354,6 +354,11 @@ fun PersonSearchPanel(
     onSearch: () -> Unit,
     onClear: () -> Unit,
     modifier: Modifier = Modifier,
+    /**
+     * Offers the شماره بیمه field. True — the default — is کارکنان's two-field search; ذینفعان
+     * passes false, because its service has no insurance-number column to filter on.
+     */
+    showsInsuranceNumber: Boolean = true,
 ) {
     val tenDigits = stringResource(Res.string.workshop_ten_digits)
     WorkshopSearchCard(onSearch = onSearch, onClear = onClear, modifier = modifier) {
@@ -366,17 +371,19 @@ fun PersonSearchPanel(
             placeholder = tenDigits,
             maxLength = WorkshopConstants.NATIONAL_ID_LENGTH,
         )
-        WorkshopTextField(
-            label = stringResource(Res.string.member_insurance_number),
-            value = search.insuranceNumber,
-            onValueChange = {
-                onSearchChange(
-                    search.copy(insuranceNumber = it.digitsOnly()),
-                )
-            },
-            placeholder = tenDigits,
-            maxLength = WorkshopConstants.INSURANCE_NUMBER_LENGTH,
-        )
+        if (showsInsuranceNumber) {
+            WorkshopTextField(
+                label = stringResource(Res.string.member_insurance_number),
+                value = search.insuranceNumber,
+                onValueChange = {
+                    onSearchChange(
+                        search.copy(insuranceNumber = it.digitsOnly()),
+                    )
+                },
+                placeholder = tenDigits,
+                maxLength = WorkshopConstants.INSURANCE_NUMBER_LENGTH,
+            )
+        }
     }
 }
 

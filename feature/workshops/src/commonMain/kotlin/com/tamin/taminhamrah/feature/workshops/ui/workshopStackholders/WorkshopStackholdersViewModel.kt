@@ -75,7 +75,6 @@ class WorkshopStackholdersViewModel(
                 WorkshopStackHolderQuery(
                     workshopId = workshopId,
                     branchCode = branchCode,
-                    insuranceNumber = search.insuranceNumber.takeIf { it.isNotBlank() },
                     nationalId = search.nationalId.takeIf { it.isNotBlank() },
                     page = page,
                 )

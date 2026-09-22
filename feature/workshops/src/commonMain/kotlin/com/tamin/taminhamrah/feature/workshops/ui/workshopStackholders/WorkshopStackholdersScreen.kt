@@ -25,6 +25,8 @@ import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSearchActio
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSectionHeader
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
+import com.tamin.taminhamrah.mapper.workshop.toPresentation
+import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -92,9 +94,6 @@ fun WorkshopStackholdersContent(
             applied.nationalId.takeIf { it.isNotBlank() }?.let {
                 add(it.toPersianDigits() to WorkshopStackholdersIntent.ReplaceSearch(applied.copy(nationalId = "")))
             }
-            applied.insuranceNumber.takeIf { it.isNotBlank() }?.let {
-                add(it.toPersianDigits() to WorkshopStackholdersIntent.ReplaceSearch(applied.copy(insuranceNumber = "")))
-            }
         }
     }
     val filterChips = remember(filters) { filters.map { it.first }.toImmutableList() }
@@ -130,6 +129,8 @@ fun WorkshopStackholdersContent(
                             },
                             onSearch = { onIntent(WorkshopStackholdersIntent.ApplySearch) },
                             onClear = { onIntent(WorkshopStackholdersIntent.ClearSearch) },
+                            // کد ملی only: a stakeholder row has no insurance number to filter by.
+                            showsInsuranceNumber = false,
                         )
                     }
                     WorkshopSectionHeader(
@@ -142,10 +143,7 @@ fun WorkshopStackholdersContent(
                     )
                 }
             },
-        ) { holder, _ ->
-            StackHolderCard(
-                holder = holder
-            ) }
+        ) { holder, rowModifier -> StackHolderCard(holder, modifier = rowModifier) }
     }
 }
 
@@ -189,7 +187,9 @@ private fun StackHolderCard(holder: WorkshopStackHolderPR, modifier: Modifier = 
             TaminDivider()
             DetailRow(
                 label = stringResource(Res.string.stackholder_type),
-                value = holder.stackType,
+                // The role's own wording; a code outside the table is printed as it came, as the
+                // old app does, rather than hidden.
+                value = holder.role?.let { stringResource(it.title) } ?: holder.stackType,
                 valueColor = colors.blueText,
                 numeric = false,
                 verticalPadding = WorkshopDimens.cellVerticalPadding,
@@ -205,17 +205,7 @@ private fun WorkshopStackholdersScreenPreview() {
         WorkshopStackholdersContent(
             state = WorkshopStackholdersUiState(
                 workshopId = "0968210170",
-                list = PagedListState(
-                    items = persistentListOf(
-                        WorkshopStackHolderPR(
-                            nationalId = "۴۴۷۹۸۹۰۸۸۲",
-                            fullName = "حسین توکلی کرمانی",
-                            fatherName = "عزیزالله",
-                            birthDate = "۱۳۵۲/۰۴/۱۱",
-                            stackType = "مدیرعامل",
-                        ),
-                    ),
-                ),
+                list = PagedListState(total = PreviewStakeHolders.size, items = PreviewStakeHolders),
             ),
             workshopName = "آموزشگاه کامپیوتر توکلی-ایمیل",
             onIntent = {},
@@ -223,3 +213,24 @@ private fun WorkshopStackholdersScreenPreview() {
         )
     }
 }
+
+/**
+ * The design's sample people, run through the real mapper — so the role's wording and the Persian
+ * digits come from the code the app runs, and a preview cannot keep looking right after they break.
+ */
+private val PreviewStakeHolders = persistentListOf(
+    WorkshopStackHolderDN(
+        nationalId = "4479890882",
+        firstName = "حسین",
+        lastName = "توکلی کرمانی",
+        fatherName = "عزیزالله",
+        stackType = "3",
+    ),
+    WorkshopStackHolderDN(
+        nationalId = "0073160997",
+        firstName = "مریم",
+        lastName = "توکلی",
+        fatherName = "حسین",
+        stackType = "2",
+    ),
+).map { it.toPresentation() }.toImmutableList()
