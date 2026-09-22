@@ -399,28 +399,6 @@ private fun ChatLayout(
         }
         }
 
-        // ── Pinned voice player: keeps a playing message reachable while scrolling ──
-        uiState.playingVoiceId?.let { playingId ->
-            PinnedVoicePlayer(
-                isPlaying = uiState.isVoicePlaying,
-                positionMs = uiState.voicePlaybackPositionMs,
-                durationMs = uiState.voicePlaybackDurationMs,
-                onTogglePlay = {
-                    uiState.chatItems.firstOrNull { it.id == playingId }
-                        ?.let { it.content as? ChatBubbleContent.Voice }
-                        ?.let { onIntent(AgentIntent.ToggleVoicePlayback(playingId, it.source)) }
-                },
-                onStop = { onIntent(AgentIntent.StopVoicePlayback) },
-                onClick = {
-                    val index = uiState.chatItems.indexOfFirst { it.id == playingId }
-                    if (index >= 0) scrollToIndex(index)
-                },
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = topPad + 8.dp, start = 16.dp, end = 16.dp)
-            )
-        }
-
         // ── Offline notice: the cached conversation stays readable, sending is off ──
         if (uiState.isOffline) {
             OfflineBanner(
@@ -431,17 +409,58 @@ private fun ChatLayout(
         }
 
         // ── Top toolbar: blurred, overlays the content, seen-through from the top ──
-        AgentTopBar(
-            isGenerating = uiState.isGenerating,
-            isOffline = uiState.isOffline,
-            sessionsCount = uiState.sessions.size,
-            hazeState = hazeState,
-            onIntent = onIntent,
-            onNavigateBack = onNavigateBack,
+        // The pinned voice player shares the toolbar's measured column, so its height flows
+        // into topPad and the chat list is pushed down beneath it instead of being covered —
+        // and because the reveal is an expand/shrink, that push animates along with it.
+        Column(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .onSizeChanged { topBarHeightPx = it.height }
-        )
+        ) {
+            AgentTopBar(
+                isGenerating = uiState.isGenerating,
+                isOffline = uiState.isOffline,
+                sessionsCount = uiState.sessions.size,
+                hazeState = hazeState,
+                onIntent = onIntent,
+                onNavigateBack = onNavigateBack,
+            )
+
+            // ── Pinned voice player: keeps a playing message reachable while scrolling ──
+            // The last playing id is kept so the strip still has something to act on while
+            // it animates out after playback ends (uiState.playingVoiceId is null by then).
+            var lastPlayingVoiceId by remember { mutableStateOf<String?>(null) }
+            uiState.playingVoiceId?.let { lastPlayingVoiceId = it }
+            AnimatedVisibility(
+                visible = uiState.playingVoiceId != null,
+                enter = expandVertically(tween(PINNED_PLAYER_ANIM_MS), expandFrom = Alignment.Top) +
+                    fadeIn(tween(PINNED_PLAYER_ANIM_MS)),
+                exit = shrinkVertically(tween(PINNED_PLAYER_ANIM_MS), shrinkTowards = Alignment.Top) +
+                    fadeOut(tween(PINNED_PLAYER_ANIM_MS)),
+                label = "pinned_voice_player"
+            ) {
+                val playingId = lastPlayingVoiceId
+                PinnedVoicePlayer(
+                    isPlaying = uiState.isVoicePlaying,
+                    positionMs = uiState.voicePlaybackPositionMs,
+                    durationMs = uiState.voicePlaybackDurationMs,
+                    hazeState = hazeState,
+                    onTogglePlay = {
+                        if (playingId == null) return@PinnedVoicePlayer
+                        uiState.chatItems.firstOrNull { it.id == playingId }
+                            ?.let { it.content as? ChatBubbleContent.Voice }
+                            ?.let { onIntent(AgentIntent.ToggleVoicePlayback(playingId, it.source)) }
+                    },
+                    onStop = { onIntent(AgentIntent.StopVoicePlayback) },
+                    onClick = {
+                        val index = uiState.chatItems.indexOfFirst { it.id == playingId }
+                        if (index >= 0) scrollToIndex(index)
+                    },
+                    // Same 14dp gutter as the toolbar card so the two read as one stack.
+                    modifier = Modifier.padding(start = 14.dp, end = 14.dp, bottom = 5.dp)
+                )
+            }
+        }
 
         // ── Bottom input: global scrim gradient behind, solid pill on top ──
         // The typing/processing indicator is rendered once inside the LazyColumn above.
@@ -514,6 +533,8 @@ private val TopBarBadgeGradient = Brush.linearGradient(listOf(Color(0xFF7C5CFF),
 
 /** One blink half-cycle for the online/offline status dot (fade out, then back in). */
 private const val TOP_BAR_STATUS_DOT_BLINK_DURATION_MS = 900
+// Pinned voice player reveal/dismiss under the toolbar (expand + fade, both directions).
+private const val PINNED_PLAYER_ANIM_MS = 260
 
 private val TopBarOnlineDotColor = Color(0xFF3DDC84)
 
