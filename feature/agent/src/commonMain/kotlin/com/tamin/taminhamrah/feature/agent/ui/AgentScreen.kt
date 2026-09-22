@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.style.TextOverflow
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.vectorResource
+import com.tamin.taminhamrah.ui.components.AgentOrb
 import com.tamin.taminhamrah.ui.components.IconTile
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
@@ -383,14 +384,17 @@ private fun ChatLayout(
                         if (prevLen > 0) (prevLen * 15L) + 200L else 1500L
                     } else 1500L
 
-                    val isVoicePlaying = uiState.playingVoiceId == item.id
+                    // playingVoiceId stays set while the clip is paused (so the pinned player
+                    // survives), so the bubble's play/pause icon must follow isVoicePlaying —
+                    // the id alone only says which clip is loaded.
+                    val isVoiceLoaded = uiState.playingVoiceId == item.id
                     ChatBubbleItem(
                         item = item,
                         typingDelay = typingDelay,
                         onIntent = onIntent,
                         onRequestScroll = onRequestScroll,
-                        isVoicePlaying = isVoicePlaying,
-                        voicePositionMs = if (isVoicePlaying) uiState.voicePlaybackPositionMs else 0
+                        isVoicePlaying = isVoiceLoaded && uiState.isVoicePlaying,
+                        voicePositionMs = if (isVoiceLoaded) uiState.voicePlaybackPositionMs else 0
                     )
                 }
 
@@ -2057,6 +2061,9 @@ private fun InputBarGlassButton(
 
 // ─── Empty State ──────────────────────────────────────────────────────────────
 
+/** The welcome sphere's size — the footprint the old Figma orb (90:41) occupied. */
+private val WelcomeOrbSize = 148.dp
+
 @Composable
 private fun EmptyState(
     userFirstName: String?,
@@ -2072,8 +2079,8 @@ private fun EmptyState(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            // Figma 90:40 - the sphere carries its own 16 dp bottom margin.
-            AgentOrb()
+            // The same orb as the bottom bar's assistant button, at welcome-screen size.
+            AgentOrb(size = WelcomeOrbSize)
             Spacer(Modifier.height(Spacing.xxl))
             Text(
                 text = if (userFirstName.isNullOrBlank()) {

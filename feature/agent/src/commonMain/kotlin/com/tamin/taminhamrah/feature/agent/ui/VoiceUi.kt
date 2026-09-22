@@ -57,6 +57,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -86,11 +87,16 @@ fun VoiceWaveform(
     modifier: Modifier = Modifier,
     maxBars: Int = 48
 ) {
-    Canvas(modifier = modifier) {
-        val samples = downsample(amplitudes, maxBars)
-        val barCount = samples.size
-        if (barCount == 0) return@Canvas
+    Canvas(modifier = modifier.clipToBounds()) {
+        if (amplitudes.isEmpty()) return@Canvas
         val gap = 3.dp.toPx()
+        val minBarWidth = 2.dp.toPx()
+        // Only as many bars as fit at the minimum width: with a fixed count the gaps alone
+        // could exceed a narrow waveform (the 150dp chat bubble) and the bars spilled past
+        // the canvas edge, under the play/pause button beside it.
+        val fitBars = ((size.width + gap) / (minBarWidth + gap)).toInt().coerceAtLeast(1)
+        val samples = downsample(amplitudes, minOf(maxBars, fitBars))
+        val barCount = samples.size
         val barWidth = ((size.width - gap * (barCount - 1)) / barCount).coerceAtLeast(1f)
         val maxAmp = (samples.maxOrNull() ?: 1).coerceAtLeast(1)
         val minBar = 3.dp.toPx()
