@@ -139,8 +139,8 @@ fun WorkshopsScreen(
     val onSearchClick = { onIntent(WorkshopsIntent.SearchOpenChanged(!isSearchOpen)) }
 
     // The list's own drag folds the ring icon and subtitle away, snapping on release; the stats
-    // strip is never wrapped in a topArea behavior, so it stays pinned under the slim bar. Same
-    // shape as ObjectionStatusScreen — see docs/vault/TopArea-System.md.
+    // strip is never wrapped in a topArea behavior, so it stays pinned, unchanged, under the slim
+    // bar. Same shape as ObjectionStatusScreen — see docs/vault/TopArea-System.md.
     val topArea = rememberMeasuredTopAreaState { topAreaState ->
         WorkshopsTopArea(
             stats = stats,

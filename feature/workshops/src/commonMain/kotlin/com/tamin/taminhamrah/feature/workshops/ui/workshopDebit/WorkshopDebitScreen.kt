@@ -34,6 +34,7 @@ import taminx.core.core_ui.workshop_action_debit_turnover
 import taminx.core.core_ui.workshop_debt_amount
 import taminx.core.core_ui.workshop_debt_customer_code
 import taminx.core.core_ui.workshop_debt_documents
+import taminx.core.core_ui.workshop_debt_empty
 import taminx.core.core_ui.workshop_debt_from_date
 import taminx.core.core_ui.workshop_debt_notify_date
 import taminx.core.core_ui.workshop_debt_pay
@@ -102,6 +103,7 @@ fun WorkshopDebitContent(
     ) {
         WorkshopListScaffold(
             emptyIcon = vectorResource(Res.drawable.ic_tamin_workshop_turnover),
+            emptyMessage = stringResource(Res.string.workshop_debt_empty),
             state = state.list,
             onLoadMore = { onIntent(WorkshopDebitIntent.LoadMore) },
             onRetry = { onIntent(WorkshopDebitIntent.Retry) },

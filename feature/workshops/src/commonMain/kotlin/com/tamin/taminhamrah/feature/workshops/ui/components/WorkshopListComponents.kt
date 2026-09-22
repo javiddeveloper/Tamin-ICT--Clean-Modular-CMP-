@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
@@ -46,6 +47,7 @@ import com.tamin.taminhamrah.ui.components.dashedOutline
 import com.tamin.taminhamrah.ui.components.rememberCopyAction
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.ShimmerBlock
@@ -73,8 +75,6 @@ import taminx.core.core_ui.workshop_stat_active
 import taminx.core.core_ui.workshop_stat_inactive
 import taminx.core.core_ui.workshop_stat_total
 import kotlin.time.Duration.Companion.milliseconds
-import androidx.compose.ui.draw.shadow
-import com.tamin.taminhamrah.ui.theme.Elevation
 
 /**
  * The three figures over the list, riding up into the gradient header.

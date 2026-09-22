@@ -1847,6 +1847,7 @@
     <string name="workshop_debt_remaining">ماندهٔ بدهی (ریال)</string>
     <string name="workshop_debt_from_date">از تاریخ</string>
     <string name="workshop_debt_to_date">تا تاریخ</string>
+    <string name="workshop_debt_empty">بدهی‌ای برای این کارگاه ثبت نشده است.</string>
     <string name="workshop_debt_primary_vote_number">شماره رای هیات بدوی</string>
     <string name="workshop_debt_primary_vote_date">تاریخ رای هیات بدوی</string>
     <string name="workshop_debt_documents">مشاهده اسناد مطالبه</string>
