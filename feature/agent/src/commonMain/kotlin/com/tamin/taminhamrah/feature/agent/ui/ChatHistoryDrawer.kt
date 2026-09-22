@@ -536,16 +536,6 @@ private fun SessionRow(
             .padding(end = 8.dp, top = 15.dp, bottom = 15.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Leading (right-edge) accent strip; kept as a transparent spacer on inactive rows
-        // so titles stay aligned across the list.
-        Box(
-            modifier = Modifier
-                .padding(start = 6.dp)
-                .width(3.dp)
-                .height(42.dp)
-                .clip(CircleShape)
-                .background(if (isActive) DrawerAccentGradient else SolidColor(Color.Transparent))
-        )
         Spacer(Modifier.width(9.dp))
         Column(
             modifier = Modifier.weight(1f),
