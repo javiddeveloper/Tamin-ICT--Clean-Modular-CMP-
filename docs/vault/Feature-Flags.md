@@ -12,14 +12,72 @@ The home screen's services arrive dynamically from a web service in the data lay
 
 | Field | Meaning |
 |---|---|
-| `id` | unique service id (e.g. 35 for contract affairs) |
+| `id` | unique service id (e.g. 35 for contract affairs, the legacy server's own number) — `sorting` decides the order on screen, not this, see below |
 | `name` | display name |
 | `showRole` | array of role numbers (e.g. `[1, 2]`) controlling who sees the service |
 | `status` | current service state (active, disabled, webview, …) |
 | `message` | error message to display when the service is unavailable |
+| `sorting` | the server's explicit ordering key; **null for every locally served row** |
 | `url` | target link when the service is a webview |
 
 `menu.json` at the repo root is a local sample of this structure.
+
+### `sorting` decides the order on screen, not `id` and not the order of `MockMenuData`
+
+The menu is not rendered straight off the list the data source returns. `CommonRepositoryImpl.getMainMenu`
+writes it into Room (`menu_items`, `MenuEntity.id` as the primary key) and the UI reads it back
+through `MenuDao.getMenuItems()` — `ORDER BY sorting ASC, id ASC`. **`id` is only the tie-break**,
+consulted solely when two rows share the same `sorting` value (which shouldn't happen once every
+row carries one). Every row in `MockMenuData` sets `sorting` explicitly to the position the design
+calls for; this list's own top-to-bottom order follows the same sequence purely for readability, but
+it's `sorting`, not list position or `id`, that actually renders the menu in order.
+
+**Ids are the legacy server's own** (`1`–`47` insured, `101`–`113` pensioners, `1001`–`1012`
+employers, `2000` the assistant) — not sequential within a band, since the server left gaps for
+services this app doesn't carry:
+
+| Band | Audience | `showRole` |
+|---|---|---|
+| `1`–`47` | insured | `1` |
+| `101`–`113` | pensioners | `2` |
+| `1001`–`1012` | employers | `3` |
+| `2000` | AI assistant | all |
+| `6`, `7`, `45`, `102` | **no menu row** — flags kept only for deep links / assistant actions | — |
+
+Because these are the server's own ids, `menu_data_<version>.txt` — the canonical dump is
+`my-tamin-droid/temp_menu.csv`, see [[Reference-old-android]] — can be switched back on in
+`CommonRemoteDataSourceImpl.getMainMenu` without remapping `FeatureFlag`. Two ids, `1011`
+(`OCCURRENCE`) and `1012` (`LAWS`), keep their legacy *employer*-band numbers even though the current
+mock places both rows in the insured audience (`showRole = [1]`) — the id is the server's identity
+for the service, `showRole` is separate audience metadata this mock is only guessing at; a real
+`menu_data_<version>.txt` response is free to disagree on `showRole` without needing a new id.
+
+One id has no legacy counterpart: `DISABILITY_PENSION(44)` — the server only ever sent a
+pensioner-only "مستمری از کارافتادگی" (`DISABILITY_PENSION_PENSIONER`, id `113`); the insured-audience
+row is new content this app added, so `44` is simply an unused gap in the legacy insured band, not a
+number the server has assigned to anything. If the real menu ever sends a genuine insured-audience id
+for this service, `44` needs to be replaced with it.
+
+⚠️ A previous version of the menu briefly used app-owned, sequential ids (`1`–`37`/`101`–`110`/
+`1001`–`1010`) instead, purely to make list position double as display order — that was reverted
+(2026-09-20) once it was flagged that it would silently break the moment the real server menu was
+switched back on. Ordering is `sorting`'s job, not the id's.
+
+### One service, two audiences
+
+A service both an insured person and a pensioner reach is modelled one of two ways:
+
+- **One row, `showRole = [1, 2]`** when a single position serves both (id `26`, نسخ الکترونیک).
+- **Two rows with two ids and one `FeatureFlag` each** when each audience needs it in its own
+  position — the pensioner's flag suffixed `_PENSIONER`, both routed to the same screen in
+  `FeatureNavigation.kt`: `CALCULATE_WAGE_PENSION(23)`/`…_PENSIONER(109)`,
+  `DISABILITY_PENSION(44)`/`…_PENSIONER(113)`, `REQUEST_PENSION_BY_SURVIVOR(40)`/`…_PENSIONER(112)`,
+  `DESERVED_TREATMENT(25)`/`…_PENSIONER(101)`.
+
+⚠️ Never give two rows the same id. `MenuEntity.id` is the primary key and the insert is
+`OnConflictStrategy.REPLACE`, so the second row silently overwrites the first in the cache and one of
+them disappears. `FeatureFlag.fromId` likewise takes the *first* match, so a repeated id in the enum
+routes a menu row to whichever flag happens to be declared first.
 
 ## 2. User roles via `showRole`
 
@@ -82,12 +140,11 @@ A deep link, a story call-to-action or an assistant button never navigates on it
 (`GetWorkshopStackHoldersUseCase`, endpoint `workshop-services/workshop-stackholders/get-all`)
 — that is a **separate, pre-existing, read-only** feature (a simple
 nationalId/mobile list) with no relation to legal representatives, no OTP, and
-no add/edit/delete. The two happen to share the word "stakeholder/stack
-holder" in their naming, purely coincidentally (`WorkshopStackHolderDN` came
-first); nothing currently links them and none of the flag id `1005` overlaps
-with the flag that fronts `workshopStackholders` — searching for "stackholder"
-across the module will surface both, so check which feature you actually mean
-before touching either.
+no add/edit/delete, and no `FeatureFlag` of its own at all. The two happen to
+share the word "stakeholder/stack holder" in their naming, purely
+coincidentally (`WorkshopStackHolderDN` came first); nothing currently links
+them — searching for "stackholder" across the module will surface both, so
+check which feature you actually mean before touching either.
 
 The legal-representative flow's own API family (`legal-stakeholders`,
 `v.1/legal-stakeholders/units`, `legal-ticket*`) is a distinct, OTP-gated

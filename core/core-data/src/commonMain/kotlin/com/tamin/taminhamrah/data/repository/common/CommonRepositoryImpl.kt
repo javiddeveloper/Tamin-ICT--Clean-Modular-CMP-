@@ -53,7 +53,7 @@ class CommonRepositoryImpl(
         .onStart {
             try {
                 val remoteMenu = commonRemoteDataSource.getMainMenu(versionCode, forceUpdate)
-                menuDao.insertMenuItems(remoteMenu.map { it.toDomain().toEntity() })
+                menuDao.replaceAllMenuItems(remoteMenu.map { it.toDomain().toEntity() })
             } catch (e: Exception) {
                 throw e
             }

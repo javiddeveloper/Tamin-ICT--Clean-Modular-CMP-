@@ -22,21 +22,21 @@ object HomeServiceMembership {
      * entry here is always shown.
      */
     val frequent: List<FeatureFlag> = listOf(
-        FeatureFlag.CONTRACTS,            // امور قراردادها و پرداخت (id 35, confirmed against mockMenuData)
+        FeatureFlag.CONTRACTS,            // امور قراردادها و پرداخت
         FeatureFlag.PRESCRIPTION,         // نسخه
         FeatureFlag.PAY_ROLL,             // فیش حقوقی
-        FeatureFlag.MERGE_HISTORY,        // سوابق تلفیقی (id 6, confirmed — not 7 "سوابق و دستمزد" or 8 "مجموع سوابق")
-        FeatureFlag.FREELANCE_INSURANCE,  // بیمه صاحبان حرف و مشاغل آزاد (id 33, confirmed)
+        FeatureFlag.COMBINED_RECORD,      // کلیه سوابق — replaces the retired سوابق تلفیقی shortcut, which lost its menu row when the three history rows were merged
+        FeatureFlag.FREELANCE_INSURANCE,  // بیمه صاحبان حرف و مشاغل آزاد
         FeatureFlag.BANK_ACCOUNT_LIST,    // حساب بانکی
-        FeatureFlag.VIEW_SHORT_TERM,      // درخواست‌های تعهدات کوتاه مدت (id 13, confirmed)
+        FeatureFlag.VIEW_SHORT_TERM,      // درخواست‌های تعهدات کوتاه مدت
     )
 
     /** سابقه */
     val history: List<FeatureFlag> = listOf(
-        FeatureFlag.COMBINED_RECORD,                       // مجموع سوابق (id 8, confirmed — not 6 "سوابق تلفیقی" or 7 "سوابق و دستمزد")
+        FeatureFlag.COMBINED_RECORD,                       // کلیه سوابق — the one row left after «سوابق تلفیقی» and «سوابق و دستمزد» were merged into it
         FeatureFlag.SEND_INSURANCE_HISTORY_TO_INSTITUTION, // اعلام سابقه
         FeatureFlag.FRACTION_CONTRACT,                     // کسری از ماه
-        FeatureFlag.OBJECTION_NON_EXISTENT_HISTORY,        // اعتراض به سوابق ناموجود (id 10, confirmed — not 42 "اعتراض به سابقه کسری دار", which is OBJECTION_INSURANCE_HISTORY)
+        FeatureFlag.OBJECTION_NON_EXISTENT_HISTORY,        // اعتراض به سوابق ناموجود — not OBJECTION_INSURANCE_HISTORY ("اعتراض به سابقه کسری دارای کسری کارکرد یا اشکال")
         FeatureFlag.VIEW_TITLE_JOB,                        // عناوین شغلی
         FeatureFlag.LIST_OF_INSPECTIONS_PERFORMED,         // بازرسی‌ها
         FeatureFlag.INQUIRY_EDUCATION,                      // گواهی تحصیل
