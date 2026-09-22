@@ -42,6 +42,7 @@ import com.tamin.taminhamrah.feature.developerOptions.featureFlags.contract.Feat
 import com.tamin.taminhamrah.feature.developerOptions.featureFlags.contract.FeatureFlagsIntent
 import com.tamin.taminhamrah.feature.developerOptions.featureFlags.contract.FeatureFlagsUiState
 import com.tamin.taminhamrah.feature.developerOptions.featureFlags.contract.OverrideKind
+import com.tamin.taminhamrah.feature.developerOptions.featureFlags.model.persianLabel
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
@@ -191,7 +192,7 @@ private fun FeatureFlagRow(row: FeatureFlagRowUi, onLongPress: () -> Unit) {
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "${row.flag.name} (${row.flag.id})",
+                text = "${row.flag.name} (${row.flag.id}) — ${row.flag.persianLabel()}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = taminColors.textPrimary,
                 maxLines = 1,
@@ -276,7 +277,7 @@ private fun FeatureFlagEditorDialog(
     }
 
     TaminConfirmationDialog(
-        title = "${flag.name} (${flag.id})",
+        title = "${flag.name} (${flag.id}) — ${flag.persianLabel()}",
         description = stringResource(Res.string.developer_options_feature_flags_editor_hint),
         onDismissRequest = onDismiss,
         confirmButton = {
