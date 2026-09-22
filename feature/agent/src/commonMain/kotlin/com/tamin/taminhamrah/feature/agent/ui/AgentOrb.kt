@@ -58,7 +58,7 @@ private val OrbSize = 148.dp
 
 // ── 90:43, the halo ───────────────────────────────────────────────────────────
 
-private val HaloColor = Color(0xFFBA6CFF)
+private val HaloColor = AgentColors.orbHalo
 
 /** 94 dp shape + 70 dp blur — the same 328 dp render box Figma reports for this layer. */
 private val HaloRadius = 164.dp
@@ -104,12 +104,7 @@ private val RobotWidth = 148.dp
  * (Note: `TopBarAvatarSweep` in AgentScreen.kt uses this same palette *unrotated*, so the
  * small avatar reads 90° off against the design. Left alone — not this component.)
  */
-private val OrbCorners = listOf(
-    Color(0xFFBA6CFF), //  3 o'clock — Figma stop 25%
-    Color(0xFF1B3A8A), //  6 o'clock — Figma stop 50%
-    Color(0xFFB6D0FF), //  9 o'clock — Figma stop 75%
-    Color(0xFF5B46E4), // 12 o'clock — Figma stop 0/100%
-)
+private val OrbCorners = AgentColors.orbCorners
 
 /**
  * Angular sigma of the 16 dp layer blur, in turns. The blur's sigma is 8 dp, which at radius
@@ -130,14 +125,14 @@ private const val ORB_ROTATION_DURATION_MS = 12000
 
 /**
  * What the layer blur does to the *middle* of an angular gradient: near the centre the
- * kernel spans the whole sweep, so every hue averages into one colour — `#7A6FDB`, the mean
- * of the four corners. Without this the ramp still converges on a pinwheel pinch at the
- * exact centre of the sphere, the most-looked-at pixel on the screen.
+ * kernel spans the whole sweep, so every hue averages into one colour — the mean of the four
+ * corners, `#7A6FDB` for today's palette. Without this the ramp still converges on a pinwheel
+ * pinch at the exact centre of the sphere, the most-looked-at pixel on the screen.
  *
  * The ramp is the blur's attenuation of the first angular harmonic, `exp(-(sigma/r)² / 2)`
  * with `sigma = 8 dp`, sampled at r = 0, 1, 2, 3 and 4 sigma.
  */
-private val OrbCoreColor = Color(0xFF7A6FDB)
+private val OrbCoreColor = AgentColors.orbCore
 private val OrbCoreStops = arrayOf(
     0.000f to OrbCoreColor.copy(alpha = 1.00f),
     0.083f to OrbCoreColor.copy(alpha = 0.39f),

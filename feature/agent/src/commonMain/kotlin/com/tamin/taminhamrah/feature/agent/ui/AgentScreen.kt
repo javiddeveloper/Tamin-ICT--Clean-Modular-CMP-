@@ -14,7 +14,6 @@ import com.tamin.taminhamrah.ui.components.AgentOrb
 import com.tamin.taminhamrah.ui.components.IconTile
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
 import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.Thickness
@@ -135,7 +134,6 @@ import com.tamin.taminhamrah.ui.blur.AppBarScrim
 import com.tamin.taminhamrah.ui.blur.safeHazeSource
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.info
-import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.TaminCardPurpleStart
@@ -542,14 +540,14 @@ private val TopBarTileShape = RoundedCornerShape(13.dp)
 private val TopBarIconTint = AgentGlass.iconTint
 private val TopBarSubtitleColor = AgentGlass.textSecondary
 private val TopBarShadowColor = AgentGlass.shadowColor
-private val TopBarBadgeGradient = Brush.linearGradient(listOf(Color(0xFF7C5CFF), Color(0xFF3B6FD4)))
+private val TopBarBadgeGradient = AgentColors.brandGradient
 
 /** One blink half-cycle for the online/offline status dot (fade out, then back in). */
 private const val TOP_BAR_STATUS_DOT_BLINK_DURATION_MS = 900
 // Pinned voice player reveal/dismiss under the toolbar (expand + fade, both directions).
 private const val PINNED_PLAYER_ANIM_MS = 260
 
-private val TopBarOnlineDotColor = Color(0xFF3DDC84)
+private val TopBarOnlineDotColor = AgentColors.onlineDot
 
 /**
  * Rich persona header replacing the old plain title bar: assistant name + online status on
@@ -630,13 +628,13 @@ private fun AgentTopBar(
                                 style = MaterialTheme.typography.titleMedium.copy(
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.ExtraBold,
-                                    color = Color.White
+                                    color = AgentColors.ink
                                 )
                             )
                             Box(
                                 modifier = Modifier
-                                    .background(Color(0xFFA78BFA).copy(alpha = 0.22f), RoundedCornerShape(CornerRadius.lg))
-                                    .border(1.dp, Color(0xFFA78BFA).copy(alpha = 0.40f), RoundedCornerShape(CornerRadius.lg))
+                                    .background(AgentColors.chipFill, RoundedCornerShape(CornerRadius.lg))
+                                    .border(1.dp, AgentColors.chipBorder, RoundedCornerShape(CornerRadius.lg))
                                     .padding(top = 2.dp, bottom = 0.dp, start = 8.dp, end = 7.dp),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -645,7 +643,7 @@ private fun AgentTopBar(
                                     style = MaterialTheme.typography.labelSmall.copy(
                                         fontSize = 8.5.sp,
                                         fontWeight = FontWeight.ExtraBold,
-                                        color = Color(0xFFD8CFFF)
+                                        color = AgentColors.onChip
                                     )
                                 )
                             }
@@ -663,7 +661,7 @@ private fun AgentTopBar(
                                 ),
                                 label = "top_bar_status_dot_blink_alpha"
                             )
-                            val statusDotColor = if (isOffline) Color.White.copy(alpha = 0.4f) else TopBarOnlineDotColor
+                            val statusDotColor = if (isOffline) AgentColors.ink.copy(alpha = 0.4f) else TopBarOnlineDotColor
                             Box(
                                 modifier = Modifier
                                     .size(6.dp)
@@ -715,7 +713,7 @@ private fun AgentTopBar(
                                     .size(16.dp)
                                     .clip(CircleShape)
                                     .background(TopBarBadgeGradient)
-                                    .border(1.dp, Color.White.copy(alpha = 0.35f), CircleShape),
+                                    .border(1.dp, AgentColors.ink.copy(alpha = 0.35f), CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
                                 NumericText(
@@ -724,7 +722,7 @@ private fun AgentTopBar(
                                     fontSize = 9.sp,
                                     fontWeight = FontWeight.ExtraBold
                                 ),
-                                color = Color.White
+                                color = AgentColors.ink
                             )
                         }
                     }
@@ -747,8 +745,8 @@ private fun TopBarGlassTile(
         modifier = modifier
             .size(34.dp)
             .clip(TopBarTileShape)
-            .background(Color.White.copy(alpha = 0.10f))
-            .border(1.dp, Color.White.copy(alpha = 0.18f), TopBarTileShape)
+            .background(AgentColors.ink.copy(alpha = 0.10f))
+            .border(1.dp, AgentColors.ink.copy(alpha = 0.18f), TopBarTileShape)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
@@ -768,7 +766,6 @@ private fun ExtensionCard(
     state: AgentProcessingState,
     modifier: Modifier = Modifier
 ) {
-    val taminColors = LocalTaminColors.current
     // Single shared shimmer clock for the whole card — the active step reads
     // this instead of each step spinning up its own infinite transition.
     val shimmer = rememberInfiniteTransition(label = "step_shimmer")
@@ -805,7 +802,7 @@ private fun ExtensionCard(
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
-                        tint = taminColors.greenText,
+                        tint = AgentColors.success,
                         modifier = Modifier.size(16.dp)
                     )
                 }
@@ -814,7 +811,7 @@ private fun ExtensionCard(
                     style = MaterialTheme.typography.labelMedium.copy(
                         // Transparent card straight on AgentBackground — the theme's
                         // blueText is too dark to read there, white keeps it legible.
-                        color = if (state.isCompleted) taminColors.greenText else Color.White,
+                        color = if (state.isCompleted) AgentColors.success else AgentColors.ink,
                         fontWeight = FontWeight.SemiBold
                     )
                 )
@@ -853,7 +850,6 @@ private fun ExtensionCardStep(
     showLine: Boolean = false,
     pulseAlpha: Float = 1f
 ) {
-    val taminColors = LocalTaminColors.current
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -870,7 +866,7 @@ private fun ExtensionCardStep(
                         .width(2.dp)
                         .height(24.dp)
                         .offset(y = 16.dp)
-                        .background(Color.White.copy(alpha = 0.14f))
+                        .background(AgentColors.ink.copy(alpha = 0.14f))
                 )
             }
             androidx.compose.animation.AnimatedVisibility(
@@ -881,7 +877,7 @@ private fun ExtensionCardStep(
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = stringResource(Res.string.agent_step_done),
-                    tint = taminColors.greenText,
+                    tint = AgentColors.success,
                     modifier = Modifier.size(14.dp)
                 )
             }
@@ -892,7 +888,7 @@ private fun ExtensionCardStep(
             ) {
                 IosSpinner(
                     modifier = Modifier.size(14.dp),
-                    color = Color.White
+                    color = AgentColors.ink
                 )
             }
             androidx.compose.animation.AnimatedVisibility(
@@ -904,7 +900,7 @@ private fun ExtensionCardStep(
                     modifier = Modifier
                         .size(6.dp)
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.35f))
+                        .background(AgentColors.ink.copy(alpha = 0.35f))
                 )
             }
         }
@@ -919,9 +915,9 @@ private fun ExtensionCardStep(
             modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.bodySmall.copy(
                 color = when {
-                    isDone   -> Color.White.copy(alpha = 0.7f)
-                    isActive -> Color.White
-                    else     -> Color.White.copy(alpha = 0.4f)
+                    isDone   -> AgentColors.ink.copy(alpha = 0.7f)
+                    isActive -> AgentColors.ink
+                    else     -> AgentColors.ink.copy(alpha = 0.4f)
                 }
             )
         )
@@ -930,7 +926,7 @@ private fun ExtensionCardStep(
             Icon(
                 imageVector = Icons.Default.KeyboardArrowLeft,
                 contentDescription = null,
-                tint = taminColors.greenText.copy(alpha = 0.7f),
+                tint = AgentColors.success.copy(alpha = 0.7f),
                 modifier = Modifier.size(16.dp)
             )
         }
@@ -942,7 +938,7 @@ private fun ExtensionCardStep(
 @Composable
 private fun IosSpinner(
     modifier: Modifier = Modifier,
-    color: Color = Color.White,
+    color: Color = AgentColors.ink,
     petalCount: Int = 8
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "ios_spinner")
@@ -992,7 +988,6 @@ private fun IosSpinner(
 @Composable
 private fun TypingIndicatorBubble(processingState: AgentProcessingState?) {
     val currentLayoutDirection = LocalLayoutDirection.current
-    val taminColors = LocalTaminColors.current
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
@@ -1033,7 +1028,7 @@ private fun SuggestedPromptChips(
         Text(
             text = stringResource(Res.string.agent_suggestions_label),
             style = MaterialTheme.typography.labelMedium,
-            color = Color.White.copy(alpha = 0.6f),
+            color = AgentColors.ink.copy(alpha = 0.6f),
         )
         androidx.compose.foundation.layout.FlowRow(
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
@@ -1072,16 +1067,15 @@ private fun PromptChip(text: String, onClick: () -> Unit, modifier: Modifier = M
  */
 @Composable
 private fun OfflineBanner(modifier: Modifier = Modifier) {
-    val taminColors = LocalTaminColors.current
     val shape = RoundedCornerShape(CornerRadius.lg)
     Text(
         text = stringResource(Res.string.agent_offline_banner),
         style = MaterialTheme.typography.labelMedium,
-        color = taminColors.dangerText,
+        color = AgentGlass.dangerText,
         modifier = modifier
             .clip(shape)
-            .background(taminColors.dangerBg)
-            .border(Thickness.border, taminColors.dangerBorder, shape)
+            .background(AgentGlass.dangerFill)
+            .border(Thickness.border, AgentGlass.dangerBorder, shape)
             .padding(horizontal = Spacing.md, vertical = Spacing.sm),
     )
 }
@@ -1318,7 +1312,7 @@ private fun androidx.compose.ui.text.AnnotatedString.Builder.appendInlineStyles(
         Regex("`(.*?)`") to { _: String, content: String ->
             androidx.compose.ui.text.SpanStyle(
                 fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                background = androidx.compose.ui.graphics.Color(0x18000000)
+                background = AgentColors.inlineCodeFill
             ) to content
         }
     )
@@ -1435,12 +1429,12 @@ private fun ChatBubbleItem(
                 // it must not be wrapped in the plain text Surface — otherwise the bar is hidden.
                 // The user's voice, by contrast, sits in the same gradient card as their text.
                 item.content is ChatBubbleContent.Voice && !isUser -> {
-                    Box { renderContent(MaterialTheme.colorScheme.onSurface) }
+                    Box { renderContent(AgentGlass.textPrimary) }
                 }
 
                 isProcessingOrEmbedded -> {
                     Box(modifier = Modifier.fillMaxWidth()) {
-                        renderContent(MaterialTheme.colorScheme.onSurface)
+                        renderContent(AgentGlass.textPrimary)
                     }
                 }
 
@@ -1453,7 +1447,7 @@ private fun ChatBubbleItem(
                     // light/dark app theme's textPrimary — same reasoning as EmptyState.
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Box(modifier = Modifier.padding(vertical = Spacing.xs)) {
-                            renderContent(Color.White)
+                            renderContent(AgentColors.ink)
                         }
                         // Follow-up suggestions belong to this reply, so they render inside
                         // the same bubble instead of forming their own chat row.
@@ -1483,7 +1477,6 @@ private fun ChatBubbleItem(
  */
 @Composable
 private fun UserBubbleCard(content: @Composable (contentColor: Color) -> Unit) {
-    val taminColors = LocalTaminColors.current
     val userBubbleShape = RoundedCornerShape(
         topStart = CornerRadius.xl,
         topEnd = CornerRadius.xl,
@@ -1491,22 +1484,22 @@ private fun UserBubbleCard(content: @Composable (contentColor: Color) -> Unit) {
         bottomEnd = CornerRadius.sm,
     )
     val userBubbleBorderBrush = Brush.linearGradient(
-        colors = listOf(Color.White.copy(alpha = 0.05f), Color.White.copy(alpha = 0.3f))
+        colors = listOf(AgentColors.ink.copy(alpha = 0.05f), AgentColors.ink.copy(alpha = 0.3f))
     )
     Box(
         modifier = Modifier
             .widthIn(max = USER_BUBBLE_MAX_WIDTH)
             .clip(userBubbleShape)
-            .background(taminTopAppBarGradient())
+            .background(AgentColors.bubbleGradient)
             .border(Thickness.border, userBubbleBorderBrush, userBubbleShape)
             .padding(vertical = Spacing.smPlus, horizontal = Spacing.smd)
     ) {
         Column {
-            content(taminColors.onGradient)
+            content(AgentColors.onBubble)
             Text(
                 text = rememberChatTimeString(),
                 style = MaterialTheme.typography.labelSmall,
-                color = taminColors.onGradient.copy(alpha = 0.5f),
+                color = AgentColors.onBubble.copy(alpha = 0.5f),
                 modifier = Modifier
                     .align(Alignment.Start)
                     .padding(top = Spacing.sm)
@@ -1523,7 +1516,7 @@ private fun BubbleContentRenderer(
     isTypingAnimating: Boolean = false,
     typingDelay: Long = 1500L,
     onIntent: (AgentIntent) -> Unit = {},
-    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+    contentColor: Color = AgentGlass.textPrimary,
     onRequestScroll: () -> Unit = {},
     onAnimationFinished: () -> Unit = {},
     itemId: String = "",
@@ -1531,7 +1524,6 @@ private fun BubbleContentRenderer(
     isVoicePlaying: Boolean = false,
     voicePositionMs: Int = 0
 ) {
-    val taminColors = LocalTaminColors.current
 
     when (content) {
         is ChatBubbleContent.Voice -> {
@@ -1733,7 +1725,7 @@ private fun BubbleContentRenderer(
             onAnimationFinished()
             // Rendered once the generative-form handlers land; until then the schema is
             // carried through untouched so nothing is lost.
-            Text("📝 فرم پویا", color = MaterialTheme.colorScheme.primary)
+            Text("📝 فرم پویا", color = AgentGlass.accent)
         }
 
         // A tinted glass note. The theme's error red is for light surfaces and read as a dark
@@ -1782,8 +1774,8 @@ private fun BubbleContentRenderer(
 // Exact values pulled from the Figma node (90:120 "Background+Border+Shadow+OverlayBlur") —
 // same glass-card family as the top bar, reproduced literally rather than approximated.
 // Card/button metrics are shared with the voice bars: see ComposerCardShape & co. in VoiceUi.kt.
-private val InputBarTextColor = Color(0xFFE2ECFF)
-private val InputBarPlaceholderColor = Color(0xFFE2ECFF)
+private val InputBarTextColor = AgentColors.composerText
+private val InputBarPlaceholderColor = AgentColors.composerPlaceholder
 /** Inset between the field's text and the pill's start edge (inside ComposerContentPadding). */
 private val InputFieldStartPadding = 10.dp
 /** Vertical inset of the buttons in the resting 60dp pill: (60 − 38) / 2. */
@@ -1821,7 +1813,6 @@ private fun AgentInputBar(
     isVoiceEnabled: Boolean = true
 ) {
     var text by remember { mutableStateOf("") }
-    val taminColors = LocalTaminColors.current
     val textStyle = MaterialTheme.typography.bodyMedium.copy(
         fontSize = 13.5.sp,
         color = InputBarTextColor,
@@ -1865,7 +1856,7 @@ private fun AgentInputBar(
                                 }
                             }
                         ),
-                        cursorBrush = androidx.compose.ui.graphics.SolidColor(Color.White),
+                        cursorBrush = androidx.compose.ui.graphics.SolidColor(AgentColors.ink),
                         decorationBox = { innerTextField ->
                             Box(modifier = Modifier.fillMaxWidth().padding(start = InputFieldStartPadding)) {
                                 if (text.isEmpty()) {
@@ -1919,14 +1910,14 @@ private fun AgentInputBar(
                                 .clip(CircleShape)
                                 .background(
                                     when {
-                                        isGenerating -> MaterialTheme.colorScheme.error.copy(alpha = 0.18f)
-                                        isTyping -> taminColors.aiAssistantTint
-                                        else -> Color.White.copy(alpha = 0.10f)
+                                        isGenerating -> AgentGlass.danger.copy(alpha = 0.18f)
+                                        isTyping -> AgentColors.composerSendActive
+                                        else -> AgentColors.ink.copy(alpha = 0.10f)
                                     }
                                 )
                                 .border(
                                     1.dp,
-                                    if (isGenerating || isTyping) Color.White.copy(alpha = 0.30f) else Color.White.copy(alpha = 0.20f),
+                                    if (isGenerating || isTyping) AgentColors.ink.copy(alpha = 0.30f) else AgentColors.ink.copy(alpha = 0.20f),
                                     CircleShape
                                 )
                                 .clickable(enabled = isGenerating || isTyping) {
@@ -1939,11 +1930,11 @@ private fun AgentInputBar(
                                 label = "send_cancel_anim"
                             ) { state ->
                                 when (state) {
-                                    2 -> Icon(Icons.Default.Close, contentDescription = "توقف", tint = MaterialTheme.colorScheme.error)
+                                    2 -> Icon(Icons.Default.Close, contentDescription = "توقف", tint = AgentGlass.danger)
                                     else -> Icon(
                                         Icons.Default.ArrowBack,
                                         contentDescription = "ارسال",
-                                        tint = Color.White
+                                        tint = AgentColors.ink
                                     )
                                 }
                             }
@@ -2045,8 +2036,8 @@ private fun InputBarGlassButton(
         modifier = modifier
             .size(size)
             .clip(CircleShape)
-            .background(Color.White.copy(alpha = backgroundAlpha))
-            .border(1.dp, Color.White.copy(alpha = borderAlpha), CircleShape)
+            .background(AgentColors.ink.copy(alpha = backgroundAlpha))
+            .border(1.dp, AgentColors.ink.copy(alpha = borderAlpha), CircleShape)
             .then(if (onClick != null) Modifier.clickable(enabled = enabled, onClick = onClick) else Modifier),
         contentAlignment = Alignment.Center
     ) {
@@ -2075,7 +2066,7 @@ private fun EmptyState(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(start = Spacing.lg, end = Spacing.lg, top = Spacing.xxxxxl, bottom = Spacing.xl),
+                .padding(start = Spacing.lg, end = Spacing.lg, top = Spacing.xxxxl, bottom = Spacing.xl),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
@@ -2089,7 +2080,7 @@ private fun EmptyState(
                     "سلام $userFirstName، من یارا هستم"
                 },
                 style = MaterialTheme.typography.titleLarge.copy(
-                    color = Color.White,
+                    color = AgentColors.ink,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
                 )
@@ -2098,7 +2089,7 @@ private fun EmptyState(
             Text(
                 text = "دستیار هوشمند سازمان تأمین اجتماعی. دربارهٔ سوابق بیمه، مستمری، درمان و خدمات از من بپرسید.",
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    color = Color.White.copy(alpha = 0.75f),
+                    color = AgentColors.ink.copy(alpha = 0.75f),
                     textAlign = TextAlign.Center
                 ),
                 modifier = Modifier.padding(horizontal = Spacing.lg)
@@ -2122,32 +2113,34 @@ private fun AgentSuggestions(
     onSuggestionClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val taminColors = LocalTaminColors.current
-    val suggestions = remember(taminColors) {
+    // The tints are the feature's own accents at a tenth opacity, not the theme's `*Bg`
+    // tokens: those are pale fills for a white page and all but vanished on the backdrop.
+    val suggestions = remember {
+        val (blue, teal, violet, green) = AgentColors.suggestionTints
         listOf(
             AgentSuggestion(
                 text = "سابقهٔ بیمهٔ من چقدر است؟",
                 icon = null,
-                iconTint = Color.Black,
-                iconBackground = taminColors.blueBg.copy(alpha = 0.1f)
+                iconTint = AgentGlass.iconTint,
+                iconBackground = blue.copy(alpha = 0.1f)
             ),
             AgentSuggestion(
                 text = "مستمری این ماه چه زمانی واریز می‌شود؟",
                 icon = null,
-                iconTint = Color.Black,
-                iconBackground = taminColors.tealBg.copy(alpha = 0.1f)
+                iconTint = AgentGlass.iconTint,
+                iconBackground = teal.copy(alpha = 0.1f)
             ),
             AgentSuggestion(
                 text = "شرایط دریافت هدیهٔ ازدواج چیست؟",
                 icon = null,
-                iconTint = Color.Black,
-                iconBackground = taminColors.fuchsiaBlueBg.copy(alpha = 0.1f)
+                iconTint = AgentGlass.iconTint,
+                iconBackground = violet.copy(alpha = 0.1f)
             ),
             AgentSuggestion(
                 text = "آخرین نسخهٔ الکترونیک من",
                 icon = null,
-                iconTint = androidx.compose.ui.graphics.Color.Black,
-                iconBackground = taminColors.greenBg.copy(alpha = 0.1f)
+                iconTint = AgentGlass.iconTint,
+                iconBackground = green.copy(alpha = 0.1f)
             )
         )
     }
@@ -2176,8 +2169,8 @@ private fun AgentSuggestionRow(
         modifier = modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(Color.White.copy(alpha = 0.08f))
-            .border(1.dp, Color.White.copy(alpha = 0.14f), shape)
+            .background(AgentColors.ink.copy(alpha = 0.08f))
+            .border(1.dp, AgentColors.ink.copy(alpha = 0.14f), shape)
             .clickable(onClick = onClick)
             .padding(horizontal = Spacing.md, vertical = Spacing.lg),
         verticalAlignment = Alignment.CenterVertically,
@@ -2187,7 +2180,7 @@ private fun AgentSuggestionRow(
             text = suggestion.text,
             modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.bodyMedium.copy(
-                color = Color.White,
+                color = AgentColors.ink,
                 fontWeight = FontWeight.ExtraBold,
                 textAlign = TextAlign.Start
             )
@@ -2195,7 +2188,7 @@ private fun AgentSuggestionRow(
         Icon(
             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
-            tint = Color.White.copy(alpha = 0.5f),
+            tint = AgentColors.ink.copy(alpha = 0.5f),
             modifier = Modifier.size(18.dp)
         )
     }
@@ -2214,11 +2207,11 @@ private fun PermissionCheckingIndicator() {
             ) {
                 // Straight on AgentBackground — see the EmptyState greeting for the
                 // same white/0.75-alpha split used on that fixed-dark backdrop.
-                CircularProgressIndicator(color = Color.White)
+                CircularProgressIndicator(color = AgentColors.ink)
                 Text(
                     text = stringResource(Res.string.agent_checking_permission),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White.copy(alpha = 0.75f),
+                    color = AgentColors.ink.copy(alpha = 0.75f),
                 )
             }
         }
@@ -2227,7 +2220,6 @@ private fun PermissionCheckingIndicator() {
 
 @Composable
 private fun NotAllowedMessage(message: String?) {
-    val taminColors = LocalTaminColors.current
     Box(modifier = Modifier.fillMaxSize()) {
         AgentBackground(modifier = Modifier.fillMaxSize())
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -2238,8 +2230,8 @@ private fun NotAllowedMessage(message: String?) {
             ) {
                 IconTile(
                     icon = Icons.Rounded.Block,
-                    tint = taminColors.onGradient,
-                    background = taminColors.iconGradientDanger,
+                    tint = AgentColors.ink,
+                    background = AgentColors.dangerGradient,
                     size = IconSize.xxlarge,
                 )
                 // Straight on AgentBackground — theme's textPrimary/textSecondary are
@@ -2248,12 +2240,12 @@ private fun NotAllowedMessage(message: String?) {
                 Text(
                     text = stringResource(Res.string.agent_not_allowed_title),
                     style = MaterialTheme.typography.titleLarge,
-                    color = Color.White,
+                    color = AgentColors.ink,
                 )
                 Text(
                     text = message ?: stringResource(Res.string.agent_not_allowed_default),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White.copy(alpha = 0.75f),
+                    color = AgentColors.ink.copy(alpha = 0.75f),
                     textAlign = TextAlign.Center,
                 )
             }
@@ -2280,11 +2272,10 @@ private fun AgentBubbleFooter(item: ChatItem, onIntent: (AgentIntent) -> Unit) {
     @Suppress("DEPRECATION")
                     val clipboardManager = androidx.compose.ui.platform.LocalClipboardManager.current
 
-    val taminColors = LocalTaminColors.current
     // Sits directly on AgentBackground (no card), so it follows that fixed-dark
     // backdrop's white-based palette rather than the theme's textMuted/blueText.
-    val iconTint = Color.White.copy(alpha = 0.5f)
-    val activeTint = Color.White
+    val iconTint = AgentColors.ink.copy(alpha = 0.5f)
+    val activeTint = AgentColors.ink
 
     Row(
         modifier = Modifier
@@ -2308,7 +2299,7 @@ private fun AgentBubbleFooter(item: ChatItem, onIntent: (AgentIntent) -> Unit) {
             FooterAction(
                 icon = rememberVectorPainter(Icons.Outlined.ThumbDown),
                 description = stringResource(Res.string.agent_dislike),
-                tint = if (liked == false) taminColors.dangerText else iconTint,
+                tint = if (liked == false) AgentGlass.dangerText else iconTint,
                 onClick = { liked = if (liked == false) null else false },
             )
             Box(
@@ -2316,7 +2307,7 @@ private fun AgentBubbleFooter(item: ChatItem, onIntent: (AgentIntent) -> Unit) {
                     .padding(horizontal = Spacing.xs)
                     .height(Spacing.md)
                     .width(Thickness.border)
-                    .background(Color.White.copy(alpha = 0.14f))
+                    .background(AgentColors.ink.copy(alpha = 0.14f))
             )
             FooterAction(
                 icon = painterResource(Res.drawable.ic_tamin_copy),
@@ -2338,7 +2329,7 @@ private fun AgentBubbleFooter(item: ChatItem, onIntent: (AgentIntent) -> Unit) {
         Text(
             text = timeString,
             style = MaterialTheme.typography.labelSmall,
-            color = Color.White.copy(alpha = 0.6f),
+            color = AgentColors.ink.copy(alpha = 0.6f),
         )
     }
 }

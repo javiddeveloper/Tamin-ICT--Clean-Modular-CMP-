@@ -46,12 +46,7 @@ private const val REF_H = 892f
 
 /** 90:14 — `linear-gradient(168deg, …)`. CSS angles run clockwise from "up". */
 private const val BASE_ANGLE_DEG = 168f
-private val BaseGradientStops = arrayOf(
-    0.00f to Color(0xFF0A1633),
-    0.36f to Color(0xFF11264D),
-    0.68f to Color(0xFF231A5C),
-    1.00f to Color(0xFF080F26),
-)
+private val BaseGradientStops = AgentColors.backdropStops
 
 /**
  * 90:15 — the conic wash. Figma authors it as `conic-gradient(from 90deg, …)` inside a
@@ -59,14 +54,7 @@ private val BaseGradientStops = arrayOf(
  * `Brush.sweepGradient` starts at 3 o'clock instead, so every stop is shifted by -25% and
  * the wrap-around stop is repeated at 1.0 to close the ramp seamlessly.
  */
-private val SweepStops = arrayOf(
-    0.000f to Color(0x38BA6CFF),
-    0.125f to Color(0x426B53C5),
-    0.250f to Color(0x4D1B3A8A),
-    0.500f to Color(0x24B6D0FF),
-    0.750f to Color(0x4D5B46E4),
-    1.000f to Color(0x38BA6CFF),
-)
+private val SweepStops = AgentColors.backdropSweepStops
 private const val SWEEP_ALPHA = 0.75f
 
 /**
@@ -87,20 +75,20 @@ private data class Blob(
 
 private val BackgroundBlobs = listOf(
     // 90:16 — 300 dp circle hung off the top-right corner (right -80, top -110).
-    Blob(centerX = 325f / REF_W, centerY = 25f / REF_H, radius = 178.7f / REF_W, color = Color(0x9EBA6CFF)),
+    Blob(centerX = 325f / REF_W, centerY = 25f / REF_H, radius = 178.7f / REF_W, color = AgentColors.backdropBlobViolet),
     // 90:17 — 320 dp circle hung off the bottom-left corner (left -110, bottom 60).
-    Blob(centerX = 50f / REF_W, centerY = 672f / REF_H, radius = 158.4f / REF_W, color = Color(0x945B46E4)),
+    Blob(centerX = 50f / REF_W, centerY = 672f / REF_H, radius = 158.4f / REF_W, color = AgentColors.backdropBlobIndigo),
     // 90:18 — 250 dp circle a little below centre.
-    Blob(centerX = 227.6f / REF_W, centerY = 428.3f / REF_H, radius = 123.8f / REF_W, color = Color(0x991B3A8A)),
+    Blob(centerX = 227.6f / REF_W, centerY = 428.3f / REF_H, radius = 123.8f / REF_W, color = AgentColors.backdropBlobBlueDeep),
     // 90:19 — 210 dp circle on the upper-left edge (left -40, top 12%).
-    Blob(centerX = 65f / REF_W, centerY = 212f / REF_H, radius = 191f / REF_W, color = Color(0x57B6D0FF)),
+    Blob(centerX = 65f / REF_W, centerY = 212f / REF_H, radius = 191f / REF_W, color = AgentColors.backdropBlobBluePale),
 )
 
 /**
  * 90:20 — an ellipse centred on the top edge, transparent across its inner 40% and
  * reaching 55% opacity at its rim. Its radii are 1.2 × width and 0.8 × height.
  */
-private val VignetteColor = Color(0xFF080F26)
+private val VignetteColor = AgentColors.backdropVignette
 private const val VIGNETTE_RX = 1.2f
 private const val VIGNETTE_RY = 0.8f
 private const val VIGNETTE_INNER_STOP = 0.4f

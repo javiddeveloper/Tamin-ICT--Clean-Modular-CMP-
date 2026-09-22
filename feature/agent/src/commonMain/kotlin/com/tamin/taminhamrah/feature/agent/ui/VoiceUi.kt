@@ -69,7 +69,6 @@ import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.agent.ui.contract.VoicePreviewState
 import com.tamin.taminhamrah.feature.agent.ui.contract.VoiceRecordingState
 import com.tamin.taminhamrah.feature.agent.ui.contract.VOICE_MAX_DURATION_MS
-import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import dev.chrisbanes.haze.HazeState
 
 // ─── Waveform ─────────────────────────────────────────────────────────────────
@@ -207,7 +206,7 @@ fun VoiceRecorderBar(
             contentDescription = stringResource(Res.string.agent_stop_recording),
             size = ComposerButtonSize,
             background = dangerColor.copy(alpha = 0.18f),
-            borderColor = Color.White.copy(alpha = 0.30f),
+            borderColor = AgentColors.ink.copy(alpha = 0.30f),
             iconTint = dangerColor,
             onClick = onStop
         )
@@ -268,7 +267,6 @@ fun VoicePreviewBar(
     onSend: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val taminColors = LocalTaminColors.current
     val dangerColor = AgentGlass.danger
     VoiceGlassBar(hazeState = hazeState, modifier = modifier) {
         SeekableWaveform(
@@ -277,7 +275,7 @@ fun VoicePreviewBar(
             durationMs = state.durationMs,
             onSeek = onSeek,
             activeColor = AgentGlass.accent,
-            inactiveColor = Color.White.copy(alpha = 0.30f),
+            inactiveColor = AgentColors.ink.copy(alpha = 0.30f),
             modifier = Modifier.weight(1f).height(VoiceBarWaveHeight)
         )
         Text(
@@ -289,8 +287,8 @@ fun VoicePreviewBar(
             icon = Icons.Default.Delete,
             contentDescription = stringResource(Res.string.agent_delete_recording),
             size = ComposerButtonSize,
-            background = Color.White.copy(alpha = 0.09f),
-            borderColor = Color.White.copy(alpha = 0.14f),
+            background = AgentColors.ink.copy(alpha = 0.09f),
+            borderColor = AgentColors.ink.copy(alpha = 0.14f),
             iconTint = dangerColor,
             onClick = onDelete
         )
@@ -298,8 +296,8 @@ fun VoicePreviewBar(
             icon = if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
             contentDescription = stringResource(if (state.isPlaying) Res.string.agent_pause else Res.string.agent_play),
             size = ComposerButtonSize,
-            background = Color.White.copy(alpha = 0.09f),
-            borderColor = Color.White.copy(alpha = 0.14f),
+            background = AgentColors.ink.copy(alpha = 0.09f),
+            borderColor = AgentColors.ink.copy(alpha = 0.14f),
             iconTint = ComposerMutedIconTint,
             onClick = onTogglePlay
         )
@@ -309,9 +307,9 @@ fun VoicePreviewBar(
             icon = Icons.Default.ArrowBack,
             contentDescription = stringResource(Res.string.agent_send),
             size = ComposerButtonSize,
-            background = taminColors.aiAssistantTint,
-            borderColor = Color.White.copy(alpha = 0.30f),
-            iconTint = Color.White,
+            background = AgentColors.composerSendActive,
+            borderColor = AgentColors.ink.copy(alpha = 0.30f),
+            iconTint = AgentColors.ink,
             onClick = onSend
         )
     }
@@ -331,14 +329,13 @@ fun VoiceChatBubble(
     onSeek: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val taminColors = LocalTaminColors.current
     // The user's clip is drawn inside the same gradient card as the user's text (the caller
     // provides that card), so it only lays out its row; the assistant's clip draws its own
     // glass card — the same one as the reply's tables and charts, since it sits on the dark
     // AgentBackground where the theme's surface would be a white block.
-    val onGradient = taminColors.onGradient
+    val onGradient = AgentColors.onBubble
     val activeColor = if (isUser) onGradient else AgentGlass.accent
-    val inactiveColor = if (isUser) onGradient.copy(alpha = 0.4f) else Color.White.copy(alpha = 0.25f)
+    val inactiveColor = if (isUser) onGradient.copy(alpha = 0.4f) else AgentColors.ink.copy(alpha = 0.25f)
     val timeColor = if (isUser) onGradient.copy(alpha = 0.7f) else AgentGlass.textSecondary
     val shape = RoundedCornerShape(com.tamin.taminhamrah.ui.theme.CornerRadius.xl)
     val container = if (isUser) {
@@ -361,8 +358,8 @@ fun VoiceChatBubble(
                 icon = playIcon,
                 contentDescription = playDescription,
                 size = ComposerButtonSize,
-                background = Color.White.copy(alpha = 0.09f),
-                borderColor = Color.White.copy(alpha = 0.14f),
+                background = AgentColors.ink.copy(alpha = 0.09f),
+                borderColor = AgentColors.ink.copy(alpha = 0.14f),
                 iconTint = ComposerMutedIconTint,
                 onClick = onToggle
             )
@@ -370,8 +367,8 @@ fun VoiceChatBubble(
             // The reply's button gradient, like the video play button and action buttons.
             RoundIconButton(
                 icon = playIcon,
-                tint = Color.White,
-                background = taminColors.buttonGradient,
+                tint = AgentColors.ink,
+                background = AgentColors.actionGradient,
                 contentDescription = playDescription,
                 onClick = onToggle
             )
@@ -412,8 +409,8 @@ private fun SeekableWaveform(
     durationMs: Int,
     onSeek: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    activeColor: Color = LocalTaminColors.current.blueText,
-    inactiveColor: Color = LocalTaminColors.current.chevron
+    activeColor: Color = AgentGlass.accent,
+    inactiveColor: Color = AgentColors.ink.copy(alpha = 0.25f)
 ) {
     val progress = if (durationMs > 0) positionMs.toFloat() / durationMs else 0f
     Box(
@@ -448,7 +445,7 @@ internal val ComposerButtonGap = 9.dp
 internal val ComposerContentPadding = PaddingValues(start = 10.dp, end = 15.dp)
 /** Outer margin of the pill; the disclaimer line sits in the gap below it. */
 internal val ComposerOuterPadding = PaddingValues(start = 14.dp, end = 14.dp, top = 8.dp, bottom = 6.dp)
-internal val ComposerMutedIconTint = Color(0xFFBFD0F0)
+internal val ComposerMutedIconTint = AgentColors.composerMutedIcon
 private val VoiceBarWaveHeight = 28.dp
 
 /** Recording border is a touch heavier than the resting hairline so the red reads at a glance. */

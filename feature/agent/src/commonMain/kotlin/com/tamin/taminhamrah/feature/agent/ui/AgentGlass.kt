@@ -24,30 +24,30 @@ import dev.chrisbanes.haze.HazeTint
 internal object AgentGlass {
     /** Diagonal white sheen laid over the blurred/backdrop content. */
     val sheen: Brush = Brush.linearGradient(
-        listOf(Color.White.copy(alpha = 0.16f), Color.White.copy(alpha = 0.05f))
+        listOf(AgentColors.ink.copy(alpha = 0.16f), AgentColors.ink.copy(alpha = 0.05f))
     )
-    val borderColor: Color = Color.White.copy(alpha = 0.18f)
+    val borderColor: Color = AgentColors.ink.copy(alpha = 0.18f)
     val borderWidth = 1.dp
     /** Nested tiles (icon buttons, table header, striped rows) on top of a glass card. */
-    val tileFill: Color = Color.White.copy(alpha = 0.10f)
-    val tileFillSubtle: Color = Color.White.copy(alpha = 0.06f)
-    val shadowColor: Color = Color(0xFF040A1E)
+    val tileFill: Color = AgentColors.ink.copy(alpha = 0.10f)
+    val tileFillSubtle: Color = AgentColors.ink.copy(alpha = 0.06f)
+    val shadowColor: Color = AgentPalette.shadow
 
-    val textPrimary: Color = Color(0xFFE2ECFF)
-    val textSecondary: Color = Color(0xFFA9BDE6)
-    val iconTint: Color = Color(0xFFD5E1FA)
+    val textPrimary: Color = AgentPalette.contentHigh
+    val textSecondary: Color = AgentPalette.contentMedium
+    val iconTint: Color = AgentPalette.contentIcon
     /** Links and table headers — the dark theme's info blue, readable on the dark glass. */
-    val accent: Color = Color(0xFF7FB0FF)
+    val accent: Color = AgentPalette.accentBlue
     /** Math formulas — kept distinct from [accent] so equations don't read as links. */
-    val formula: Color = Color(0xFF6FDDC4)
+    val formula: Color = AgentPalette.accentTeal
     /** Chart slices and series beside [accent], in the same lightness so none recedes. */
     val chartPalette: List<Color> = listOf(
         accent,
-        Color(0xFF6FDDC4),
-        Color(0xFFFFC46B),
-        Color(0xFFF08BAB),
-        Color(0xFFB69CFF),
-        Color(0xFF9AD0FF),
+        AgentPalette.accentTeal,
+        AgentPalette.chartAmber,
+        AgentPalette.chartRose,
+        AgentPalette.chartLilac,
+        AgentPalette.chartSky,
     )
 
     /**
@@ -55,10 +55,10 @@ internal object AgentGlass {
      * on the backdrop; this is the same hue lifted to the glass palette's lightness, with a
      * tinted tile so the note is a card like everything else in a reply.
      */
-    val danger: Color = Color(0xFFFF8E8E)
-    val dangerText: Color = Color(0xFFFFC4C4)
-    val dangerFill: Color = Color(0xFFFF6B6B).copy(alpha = 0.12f)
-    val dangerBorder: Color = Color(0xFFFF8E8E).copy(alpha = 0.35f)
+    val danger: Color = AgentPalette.danger
+    val dangerText: Color = AgentPalette.dangerSoft
+    val dangerFill: Color = AgentPalette.dangerStrong.copy(alpha = 0.12f)
+    val dangerBorder: Color = AgentPalette.danger.copy(alpha = 0.35f)
 
     /**
      * The blur itself. The tint is dark and opaque enough that scrolled-under text reads as a
@@ -66,7 +66,7 @@ internal object AgentGlass {
      * [fallbackTint] covers Android < 12, where Haze cannot blur and only paints a scrim, and
      * [fallbackColor] the moments [safeHazeEffect] switches the blur off entirely.
      */
-    private val frostColor: Color = Color(0xFF0E1B3F)
+    private val frostColor: Color = AgentPalette.frost
     val frostStyle: HazeStyle = HazeStyle(
         backgroundColor = frostColor,
         tint = HazeTint(color = frostColor.copy(alpha = 0.72f)),

@@ -55,10 +55,10 @@ import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.agent.audio.MediaPlaybackCoordinator
 import com.tamin.taminhamrah.feature.agent.service.base.ChartKind
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
+import com.tamin.taminhamrah.feature.agent.ui.AgentColors
 import com.tamin.taminhamrah.feature.agent.ui.AgentGlass
 import com.tamin.taminhamrah.feature.agent.ui.agentGlassCard
 import com.tamin.taminhamrah.ui.theme.IconSize
-import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.util.toPersianDigits
@@ -258,7 +258,7 @@ fun VideoBubble(
                     Text(
                         text = formatDuration((durationMs - positionMs).coerceAtLeast(0L)),
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color.White,
+                        color = AgentColors.ink,
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
                             .padding(horizontal = 8.dp, vertical = 8.dp + VIDEO_PROGRESS_HEIGHT)
@@ -289,7 +289,7 @@ fun VideoBubble(
                     Text(
                         text = formatDuration(duration),
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color.White,
+                        color = AgentColors.ink,
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
                             .padding(8.dp)
@@ -350,17 +350,16 @@ private fun MediaPlayButton(
     contentDescription: String,
     onClick: () -> Unit
 ) {
-    val taminColors = LocalTaminColors.current
     Box(
         modifier = Modifier
             .size(48.dp)
             .clip(CircleShape)
-            .background(taminColors.buttonGradient)
+            .background(AgentColors.actionGradient)
             .border(AgentGlass.borderWidth, AgentGlass.borderColor, CircleShape)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Icon(icon, contentDescription = contentDescription, tint = Color.White)
+        Icon(icon, contentDescription = contentDescription, tint = AgentColors.ink)
     }
 }
 
@@ -376,7 +375,7 @@ private fun VideoProgressBar(progress: Float, modifier: Modifier = Modifier) {
             modifier = modifier
                 .fillMaxWidth()
                 .height(VIDEO_PROGRESS_HEIGHT)
-                .background(Color.White.copy(alpha = 0.25f))
+                .background(AgentColors.ink.copy(alpha = 0.25f))
         ) {
             Box(
                 modifier = Modifier
@@ -406,7 +405,7 @@ private fun OverlayIconButton(
         Icon(
             icon,
             contentDescription = contentDescription,
-            tint = Color.White,
+            tint = AgentColors.ink,
             modifier = Modifier.size(18.dp)
         )
     }

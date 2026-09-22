@@ -123,16 +123,14 @@ private val DrawerTileShape = RoundedCornerShape(13.dp)
 private val DrawerRowShape = RoundedCornerShape(16.dp)
 private val DialogShape = RoundedCornerShape(22.dp)
 
-private val DrawerScrimColor = Color.Black.copy(alpha = 0.55f)
+private val DrawerScrimColor = AgentColors.scrim.copy(alpha = 0.55f)
 
 /** Same purple → blue as the history badge on the top bar. */
-private val DrawerAccentGradient = Brush.linearGradient(listOf(Color(0xFF7C5CFF), Color(0xFF3B6FD4)))
-private val DrawerAccentSoft = Color(0xFFA78BFA)
+private val DrawerAccentGradient = AgentColors.brandGradient
+private val DrawerAccentSoft = AgentColors.drawerAccentSoft
 
 /** Fill of the open conversation's row — the accent gradient, faded so the text stays legible. */
-private val ActiveRowGradient = Brush.linearGradient(
-    listOf(Color(0xFF7C5CFF).copy(alpha = 0.34f), Color(0xFF3B6FD4).copy(alpha = 0.26f))
-)
+private val ActiveRowGradient = AgentColors.brandGradientSoft
 
 private val NewChatButtonRadius = 25.dp
 private val NewChatButtonShape = RoundedCornerShape(NewChatButtonRadius)
@@ -404,7 +402,7 @@ private fun DrawerHeader(sessionsCount: Int, onClose: () -> Unit) {
                 Icon(
                     imageVector = Icons.Outlined.History,
                     contentDescription = null,
-                    tint = Color.White,
+                    tint = AgentColors.ink,
                     modifier = Modifier.size(18.dp)
                 )
             }
@@ -414,7 +412,7 @@ private fun DrawerHeader(sessionsCount: Int, onClose: () -> Unit) {
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontSize = 15.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        color = Color.White
+                        color = AgentColors.ink
                     )
                 )
                 Text(
@@ -482,14 +480,14 @@ private fun NewChatButton(onClick: () -> Unit) {
             .fillMaxWidth()
             .height(50.dp)
             .coloredShadow(
-                color = Color(0xFF5B46E4).copy(alpha = 0.45f),
+                color = AgentColors.drawerGlow,
                 borderRadius = NewChatButtonRadius,
                 blurRadius = 16.dp,
                 offsetY = 6.dp
             )
             .clip(NewChatButtonShape)
             .background(DrawerAccentGradient)
-            .border(AgentGlass.borderWidth, Color.White.copy(alpha = 0.22f), NewChatButtonShape)
+            .border(AgentGlass.borderWidth, AgentColors.ink.copy(alpha = 0.22f), NewChatButtonShape)
             .clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
@@ -497,7 +495,7 @@ private fun NewChatButton(onClick: () -> Unit) {
         Icon(
             imageVector = Icons.Rounded.Add,
             contentDescription = null,
-            tint = Color.White,
+            tint = AgentColors.ink,
             modifier = Modifier.size(20.dp)
         )
         Spacer(Modifier.width(8.dp))
@@ -506,7 +504,7 @@ private fun NewChatButton(onClick: () -> Unit) {
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontSize = 14.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = Color.White
+                color = AgentColors.ink
             )
         )
     }
@@ -550,7 +548,7 @@ private fun SessionRow(
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontSize = 13.5.sp,
                         fontWeight = if (isActive) FontWeight.ExtraBold else FontWeight.Medium,
-                        color = if (isActive) Color.White else AgentGlass.textPrimary
+                        color = if (isActive) AgentColors.ink else AgentGlass.textPrimary
                     ),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -569,7 +567,7 @@ private fun SessionRow(
                             style = MaterialTheme.typography.labelSmall.copy(
                                 fontSize = 9.5.sp,
                                 fontWeight = FontWeight.ExtraBold,
-                                color = Color(0xFFE6DEFF)
+                                color = AgentColors.onDrawerAccent
                             )
                         )
                     }
@@ -685,7 +683,7 @@ private fun DialogTitle(text: String) {
         style = MaterialTheme.typography.titleMedium.copy(
             fontSize = 15.sp,
             fontWeight = FontWeight.ExtraBold,
-            color = Color.White
+            color = AgentColors.ink
         )
     )
 }
@@ -732,7 +730,7 @@ private fun DialogFilledButton(
             .alpha(if (enabled) 1f else 0.45f)
             .clip(DrawerTileShape)
             .background(brush)
-            .border(AgentGlass.borderWidth, Color.White.copy(alpha = 0.22f), DrawerTileShape)
+            .border(AgentGlass.borderWidth, AgentColors.ink.copy(alpha = 0.22f), DrawerTileShape)
             .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
@@ -741,7 +739,7 @@ private fun DialogFilledButton(
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = AgentColors.ink
             )
         )
     }
@@ -778,7 +776,7 @@ private fun RenameSessionDialog(
                     color = AgentGlass.textPrimary,
                     textAlign = TextAlign.Right
                 ),
-                cursorBrush = SolidColor(Color.White),
+                cursorBrush = SolidColor(AgentColors.ink),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = { if (canSave) onConfirm(text) }),
                 decorationBox = { innerTextField ->

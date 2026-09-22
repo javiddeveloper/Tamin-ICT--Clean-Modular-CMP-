@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
-import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.util.toPersianDigits
@@ -54,15 +53,14 @@ internal fun AgentActionButton(
     compact: Boolean = false,
     trailingIcon: ImageVector? = if (compact) null else Icons.AutoMirrored.Rounded.KeyboardArrowRight,
 ) {
-    val colors = LocalTaminColors.current
     val shape = RoundedCornerShape(if (compact) CornerRadius.md else CornerRadius.chip)
     Row(
         modifier = modifier
             .then(if (compact) Modifier.fillMaxWidth() else Modifier)
-            .alpha(if (enabled) 1f else colors.disabledAlpha)
+            .alpha(if (enabled) 1f else AgentColors.DISABLED_ALPHA)
             .heightIn(min = if (compact) COMPACT_MIN_HEIGHT else MIN_HEIGHT)
             .clip(shape)
-            .background(colors.buttonGradient)
+            .background(AgentColors.actionGradient)
             .border(Thickness.border, SheenBorder, shape)
             .clickable(enabled = enabled, onClick = onClick)
             .padding(
@@ -79,7 +77,7 @@ internal fun AgentActionButton(
             } else {
                 MaterialTheme.typography.labelLarge
             },
-            color = Color.White,
+            color = AgentColors.ink,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
             maxLines = 2,
@@ -90,7 +88,7 @@ internal fun AgentActionButton(
             Icon(
                 imageVector = trailingIcon,
                 contentDescription = null,
-                tint = Color.White,
+                tint = AgentColors.ink,
                 modifier = Modifier.size(IconSize.small),
             )
         }
@@ -99,7 +97,7 @@ internal fun AgentActionButton(
 
 /** The same faint highlight edge the user's gradient bubble has. */
 private val SheenBorder: Brush = Brush.linearGradient(
-    listOf(Color.White.copy(alpha = 0.05f), Color.White.copy(alpha = 0.3f))
+    listOf(AgentColors.ink.copy(alpha = 0.05f), AgentColors.ink.copy(alpha = 0.3f))
 )
 private val MIN_HEIGHT = 40.dp
 private val COMPACT_MIN_HEIGHT = 32.dp
