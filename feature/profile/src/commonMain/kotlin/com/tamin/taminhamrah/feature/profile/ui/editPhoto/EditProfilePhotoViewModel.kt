@@ -75,28 +75,35 @@ class EditProfilePhotoViewModel(
         )
     }.catch { emit(PartialState.DependantsLoaded(persistentListOf())) }
 
+    // flatMapMerge runs intents concurrently, so a second Submit can still read a stale uiState;
+    // this plain field is set before the first suspension point, so the second call sees it.
+    private var isSubmitting = false
+
     private fun submit(): Flow<PartialState> = flow {
-        val state = uiState.value
-        // flatMapMerge runs intents concurrently: a second tap must not queue a second request.
-        if (state.isSubmitting) return@flow
+        if (isSubmitting) return@flow
+        isSubmitting = true
+        try {
+            val state = uiState.value
+            val dependant = state.selectedDependant.takeIf { state.isDependantMode }
+            // Old-app rule: the serial is required in both modes, even though a dependant's request
+            // sends their national code in its place.
+            val serialError = state.serialNumber.isBlank()
+            val dependantError = state.isDependantMode && dependant == null
+            if (serialError || dependantError) {
+                emit(PartialState.ValidationFailed(serialError, dependantError))
+                return@flow
+            }
 
-        val dependant = state.selectedDependant.takeIf { state.isDependantMode }
-        // Old-app rule: the serial is required in both modes, even though a dependant's request
-        // sends their national code in its place.
-        val serialError = state.serialNumber.isBlank()
-        val dependantError = state.isDependantMode && dependant == null
-        if (serialError || dependantError) {
-            emit(PartialState.ValidationFailed(serialError, dependantError))
-            return@flow
+            emit(PartialState.Submitting)
+            // Path segment and filter value both fall back to "0", never "", as the old app does.
+            val serialId = dependant?.nationalCode?.ifBlank { "0" } ?: state.serialNumber
+            emitAll(
+                sendImageRequestUseCase(branchCode = state.branchCode.ifBlank { "0" }, serialId = serialId)
+                    .map { PartialState.DialogShown(PhotoDialogState.Success) }
+            )
+        } finally {
+            isSubmitting = false
         }
-
-        emit(PartialState.Submitting)
-        // Path segment and filter value both fall back to "0", never "", as the old app does.
-        val serialId = dependant?.nationalCode?.ifBlank { "0" } ?: state.serialNumber
-        emitAll(
-            sendImageRequestUseCase(branchCode = state.branchCode.ifBlank { "0" }, serialId = serialId)
-                .map { PartialState.DialogShown(PhotoDialogState.Success) }
-        )
     }
 
     private fun dismissDialog(): Flow<PartialState> {

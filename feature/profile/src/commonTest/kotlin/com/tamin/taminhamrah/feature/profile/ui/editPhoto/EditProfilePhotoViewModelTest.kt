@@ -22,12 +22,15 @@ import com.tamin.taminhamrah.repository.UserRepository
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
 import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -197,6 +200,31 @@ class EditProfilePhotoViewModelTest {
     }
 
     @Test
+    fun submit_calledTwiceInARow_onlySendsOnce() {
+        // StandardTestDispatcher orders work like a real main thread; UnconfinedTestDispatcher runs
+        // every step eagerly and passes even when the guard reads the reduced uiState.
+        val standardDispatcher = StandardTestDispatcher()
+        Dispatchers.setMain(standardDispatcher)
+        runTest(standardDispatcher) {
+            val gate = CompletableDeferred<Unit>()
+            fakeUserRepository.sendImageGate = gate
+            val viewModel = createViewModel()
+            viewModel.sendIntent(EditProfilePhotoIntent.SerialNumberChanged("1G50497996"))
+            advanceUntilIdle()
+
+            viewModel.sendIntent(EditProfilePhotoIntent.Submit)
+            viewModel.sendIntent(EditProfilePhotoIntent.Submit)
+            // The first request suspends on the gate while the second reaches the guard.
+            advanceUntilIdle()
+            gate.complete(Unit)
+            advanceUntilIdle()
+
+            assertEquals(1, fakeUserRepository.sendImageCallCount)
+            assertEquals(PhotoDialogState.Success, viewModel.uiState.value.dialogState)
+        }
+    }
+
+    @Test
     fun onBackClicked_navigatesBack() = runTest(testDispatcher) {
         val viewModel = createViewModel()
 
@@ -220,6 +248,8 @@ class EditProfilePhotoViewModelTest {
 private class FakeProfileUserRepository : UserRepository {
     var relationError: Throwable? = null
     var sendImageError: Throwable? = null
+    var sendImageGate: CompletableDeferred<Unit>? = null
+    var sendImageCallCount = 0
     var lastSentBranchCode: String? = null
     var lastSentSerialId: String? = null
 
@@ -259,6 +289,8 @@ private class FakeProfileUserRepository : UserRepository {
     )
 
     override suspend fun sendImageRequest(branchCode: String, serialId: String): Flow<String> = flow {
+        sendImageCallCount++
+        sendImageGate?.await()
         sendImageError?.let { throw it }
         lastSentBranchCode = branchCode
         lastSentSerialId = serialId

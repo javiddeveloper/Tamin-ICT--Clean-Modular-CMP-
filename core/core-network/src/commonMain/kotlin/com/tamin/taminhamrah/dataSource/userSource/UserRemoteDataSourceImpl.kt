@@ -13,6 +13,7 @@ import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
 import com.tamin.taminhamrah.tools.extractTypedData
+import com.tamin.taminhamrah.tools.safeCall
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import com.tamin.taminhamrah.apiService.UserApiService
@@ -87,18 +88,8 @@ internal class UserRemoteDataSourceImpl(
     override suspend fun sendImageRequest(
         branchCode: String,
         filter: List<ApiFilterDN>
-    ): String {
-        return try {
-            val response =
-                userApiService.sendImageRequest(branchCode, queryBuilder.buildFilterJson(filter))
-            response.extractMessage()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
-        }
+    ): String = errorParser.safeCall("sendImageRequest") {
+        userApiService.sendImageRequest(branchCode, queryBuilder.buildFilterJson(filter)).extractMessage()
     }
 
     override suspend fun getSubDominantsInfo(
