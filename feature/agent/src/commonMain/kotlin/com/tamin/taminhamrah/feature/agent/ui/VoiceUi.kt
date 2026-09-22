@@ -11,7 +11,23 @@ import taminx.core.core_ui.agent_delete_recording
 import taminx.core.core_ui.agent_pause
 import taminx.core.core_ui.agent_play
 import taminx.core.core_ui.agent_send
+import taminx.core.core_ui.agent_input_disclaimer
+import taminx.core.core_ui.agent_recording_in_progress
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.util.lerp
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -120,6 +136,11 @@ private fun formatMillis(ms: Long): String {
 /**
  * Replaces `AgentInputBar` while recording: the same 60dp frosted glass pill (Figma 90:120),
  * with a live waveform, a countdown and a stop button in the send button's slot.
+ *
+ * "Something is live" is signalled twice, so it can't be missed: the pill's hairline turns
+ * the glass palette's red ([AgentGlass.danger]) and breathes, and a red mic — in the slot
+ * the mic button occupies on the text bar — pulses with an expanding halo, like a call
+ * recorder's REC light.
  */
 @Composable
 fun VoiceRecorderBar(
@@ -132,7 +153,35 @@ fun VoiceRecorderBar(
     val dangerColor = AgentGlass.danger
     val waveColor = if (state.isNearLimit) dangerColor else AgentGlass.accent
 
-    VoiceGlassBar(hazeState = hazeState, modifier = modifier) {
+    val pulse = rememberInfiniteTransition(label = "recording_pulse")
+    // One shared clock for the border and the mic so the two beat together.
+    val beat by pulse.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(RECORDING_PULSE_PERIOD_MS, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "recording_beat"
+    )
+    // Halo ring: a separate one-way loop, so it always expands outward and fades.
+    val halo by pulse.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(RECORDING_HALO_PERIOD_MS, easing = LinearOutSlowInEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "recording_halo"
+    )
+    val borderColor = dangerColor.copy(alpha = lerp(0.55f, 1f, beat))
+
+    VoiceGlassBar(
+        hazeState = hazeState,
+        modifier = modifier,
+        borderColor = borderColor,
+        borderWidth = RecordingBorderWidth
+    ) {
         VoiceWaveform(
             amplitudes = state.amplitudes,
             progress = 1f,
@@ -145,15 +194,54 @@ fun VoiceRecorderBar(
             style = MaterialTheme.typography.labelLarge,
             color = if (state.isNearLimit) dangerColor else AgentGlass.textSecondary
         )
-        // Stop sits where the send button sits on the text bar, at the same 42dp size.
+        RecordingPulseIndicator(beat = beat, halo = halo, color = dangerColor)
+        // Stop sits where the send button sits on the text bar, at the same size.
         VoiceGlassButton(
             icon = Icons.Default.Stop,
             contentDescription = stringResource(Res.string.agent_stop_recording),
-            size = VoiceBarPrimaryButtonSize,
+            size = ComposerButtonSize,
             background = dangerColor.copy(alpha = 0.18f),
             borderColor = Color.White.copy(alpha = 0.30f),
             iconTint = dangerColor,
             onClick = onStop
+        )
+    }
+}
+
+/**
+ * The live mic in the recorder bar: a red-tinted glass tile whose mic glyph breathes with
+ * [beat] (0..1, ping-pong) while a ring driven by [halo] (0..1, restart) grows out of it
+ * and fades. Purely decorative — stopping is the stop button's job.
+ */
+@Composable
+private fun RecordingPulseIndicator(beat: Float, halo: Float, color: Color) {
+    Box(
+        modifier = Modifier
+            .size(ComposerButtonSize)
+            .drawBehind {
+                val ringScale = lerp(1f, RECORDING_HALO_MAX_SCALE, halo)
+                val ringAlpha = (1f - halo) * 0.45f
+                drawCircle(
+                    color = color.copy(alpha = ringAlpha),
+                    radius = size.minDimension / 2f * ringScale
+                )
+            }
+            .clip(CircleShape)
+            .background(color.copy(alpha = lerp(0.14f, 0.28f, beat)))
+            .border(1.dp, color.copy(alpha = lerp(0.35f, 0.8f, beat)), CircleShape),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.Mic,
+            contentDescription = stringResource(Res.string.agent_recording_in_progress),
+            tint = color,
+            modifier = Modifier
+                .size(18.dp)
+                .graphicsLayer {
+                    val s = lerp(1f, RECORDING_MIC_MAX_SCALE, beat)
+                    scaleX = s
+                    scaleY = s
+                }
         )
     }
 }
@@ -194,7 +282,7 @@ fun VoicePreviewBar(
         VoiceGlassButton(
             icon = Icons.Default.Delete,
             contentDescription = stringResource(Res.string.agent_delete_recording),
-            size = VoiceBarSecondaryButtonSize,
+            size = ComposerButtonSize,
             background = Color.White.copy(alpha = 0.09f),
             borderColor = Color.White.copy(alpha = 0.14f),
             iconTint = dangerColor,
@@ -203,10 +291,10 @@ fun VoicePreviewBar(
         VoiceGlassButton(
             icon = if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
             contentDescription = stringResource(if (state.isPlaying) Res.string.agent_pause else Res.string.agent_play),
-            size = VoiceBarSecondaryButtonSize,
+            size = ComposerButtonSize,
             background = Color.White.copy(alpha = 0.09f),
             borderColor = Color.White.copy(alpha = 0.14f),
-            iconTint = VoiceBarMutedIconTint,
+            iconTint = ComposerMutedIconTint,
             onClick = onTogglePlay
         )
         // Same fixed, never-mirrored left arrow as the text bar's send button, in its
@@ -214,7 +302,7 @@ fun VoicePreviewBar(
         VoiceGlassButton(
             icon = Icons.Default.ArrowBack,
             contentDescription = stringResource(Res.string.agent_send),
-            size = VoiceBarPrimaryButtonSize,
+            size = ComposerButtonSize,
             background = taminColors.aiAssistantTint,
             borderColor = Color.White.copy(alpha = 0.30f),
             iconTint = Color.White,
@@ -266,10 +354,10 @@ fun VoiceChatBubble(
             VoiceGlassButton(
                 icon = playIcon,
                 contentDescription = playDescription,
-                size = VoiceBarSecondaryButtonSize,
+                size = ComposerButtonSize,
                 background = Color.White.copy(alpha = 0.09f),
                 borderColor = Color.White.copy(alpha = 0.14f),
-                iconTint = VoiceBarMutedIconTint,
+                iconTint = ComposerMutedIconTint,
                 onClick = onToggle
             )
         } else {
@@ -340,40 +428,80 @@ private fun SeekableWaveform(
     }
 }
 
-// Mirrors AgentInputBar's card and button metrics (Figma 90:120) so swapping the text bar
-// for the voice bars is seamless — same 60dp pill, 26dp radius, shadow, blur and padding.
-private val VoiceBarCardShape = RoundedCornerShape(26.dp)
-private val VoiceBarHeight = 60.dp
-private val VoiceBarPrimaryButtonSize = 42.dp
-private val VoiceBarSecondaryButtonSize = 38.dp
+// ─── Composer metrics shared by the text bar and the voice bars ─────────────────
+
+// One set of card and button metrics (Figma 90:120) for AgentInputBar and both voice bars,
+// so swapping the text bar for a voice bar is seamless — same 60dp pill, 26dp radius,
+// shadow, blur, padding and button size.
+internal val ComposerCardShape = RoundedCornerShape(26.dp)
+/** The pill's resting height; the text bar grows past it as the message wraps. */
+internal val ComposerBarHeight = 60.dp
+/** Every circle button on the composer — send, mic, stop, delete, play — is this size. */
+internal val ComposerButtonSize = 38.dp
+internal val ComposerButtonGap = 9.dp
+internal val ComposerContentPadding = PaddingValues(start = 10.dp, end = 15.dp)
+/** Outer margin of the pill; the disclaimer line sits in the gap below it. */
+internal val ComposerOuterPadding = PaddingValues(start = 14.dp, end = 14.dp, top = 8.dp, bottom = 6.dp)
+internal val ComposerMutedIconTint = Color(0xFFBFD0F0)
 private val VoiceBarWaveHeight = 28.dp
-private val VoiceBarMutedIconTint = Color(0xFFBFD0F0)
+
+/** Recording border is a touch heavier than the resting hairline so the red reads at a glance. */
+private val RecordingBorderWidth = 1.5.dp
+private const val RECORDING_PULSE_PERIOD_MS = 700
+private const val RECORDING_HALO_PERIOD_MS = 1400
+private const val RECORDING_MIC_MAX_SCALE = 1.18f
+/** Keeps the ring inside the pill: 19dp × 1.55 ≈ 29.5dp, under the 30dp to the pill edge. */
+private const val RECORDING_HALO_MAX_SCALE = 1.55f
+
+/** The composer's drop shadow — one definition for the text bar and the voice bars. */
+internal fun Modifier.composerShadow(): Modifier = coloredShadow(
+    color = AgentGlass.shadowColor.copy(alpha = 0.55f),
+    borderRadius = 22.dp,
+    blurRadius = 24.dp,
+    offsetY = 10.dp
+)
+
+/**
+ * The one-line legal note under every composer mode: the assistant's replies are guidance,
+ * not an official source. Drawn on the fixed-dark backdrop in the glass palette's secondary
+ * text, so it stays readable but quieter than the message itself.
+ */
+@Composable
+internal fun ComposerDisclaimer(modifier: Modifier = Modifier) {
+    Text(
+        text = stringResource(Res.string.agent_input_disclaimer),
+        style = MaterialTheme.typography.labelSmall,
+        color = AgentGlass.textSecondary.copy(alpha = 0.75f),
+        textAlign = TextAlign.Center,
+        maxLines = 2,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = Spacing.lg, end = Spacing.lg, bottom = Spacing.sm)
+    )
+}
 
 @Composable
 private fun VoiceGlassBar(
     hazeState: HazeState,
     modifier: Modifier = Modifier,
+    borderColor: Color = AgentGlass.borderColor,
+    borderWidth: Dp = AgentGlass.borderWidth,
     content: @Composable RowScope.() -> Unit
 ) {
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = 14.dp, end = 14.dp, bottom = 16.dp, top = 8.dp)
+            .padding(ComposerOuterPadding)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(VoiceBarHeight)
-                .coloredShadow(
-                    color = AgentGlass.shadowColor.copy(alpha = 0.55f),
-                    borderRadius = 22.dp,
-                    blurRadius = 24.dp,
-                    offsetY = 10.dp
-                )
-                .agentFrostedGlassCard(VoiceBarCardShape, hazeState)
-                .padding(start = 10.dp, end = 15.dp),
+                .height(ComposerBarHeight)
+                .composerShadow()
+                .agentFrostedGlassCard(ComposerCardShape, hazeState, borderColor, borderWidth)
+                .padding(ComposerContentPadding),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(9.dp),
+            horizontalArrangement = Arrangement.spacedBy(ComposerButtonGap),
             content = content
         )
     }

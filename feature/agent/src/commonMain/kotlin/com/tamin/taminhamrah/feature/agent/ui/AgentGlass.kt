@@ -7,6 +7,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.blur.safeHazeEffect
 import dev.chrisbanes.haze.HazeState
@@ -91,7 +92,13 @@ internal fun Modifier.agentGlassCard(shape: Shape): Modifier =
  * A glass card that floats *over* the haze source (the top/input bars): frosted blur of
  * whatever scrolls beneath, then the same sheen and border as [agentGlassCard].
  */
-internal fun Modifier.agentFrostedGlassCard(shape: Shape, hazeState: HazeState): Modifier =
+internal fun Modifier.agentFrostedGlassCard(
+    shape: Shape,
+    hazeState: HazeState,
+    /** The hairline; the recorder bar swaps in [AgentGlass.danger] while the mic is live. */
+    borderColor: Color = AgentGlass.borderColor,
+    borderWidth: Dp = AgentGlass.borderWidth,
+): Modifier =
     clip(shape)
         .safeHazeEffect(
             state = hazeState,
@@ -99,4 +106,4 @@ internal fun Modifier.agentFrostedGlassCard(shape: Shape, hazeState: HazeState):
             fallbackColor = AgentGlass.frostFallbackColor,
         )
         .background(AgentGlass.sheen)
-        .border(AgentGlass.borderWidth, AgentGlass.borderColor, shape)
+        .border(borderWidth, borderColor, shape)

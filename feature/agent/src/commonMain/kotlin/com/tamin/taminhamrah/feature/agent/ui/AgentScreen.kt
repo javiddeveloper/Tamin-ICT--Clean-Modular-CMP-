@@ -96,7 +96,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -482,39 +486,44 @@ private fun ChatLayout(
                 .background(AppBarScrim.bottomGradient)
                 .windowInsetsPadding(WindowInsets.navigationBars)
         ) {
-            // The voice bars carry the same outer padding as AgentInputBar themselves, so the
-            // glass pill stays exactly in place when the composer swaps mode.
-            when {
-                uiState.voiceRecording != null -> VoiceRecorderBar(
-                    state = uiState.voiceRecording,
-                    hazeState = hazeState,
-                    onStop = { onIntent(AgentIntent.StopVoiceRecording) }
-                )
-                uiState.voicePreview != null -> VoicePreviewBar(
-                    state = uiState.voicePreview,
-                    hazeState = hazeState,
-                    onDelete = { onIntent(AgentIntent.DeleteVoiceRecording) },
-                    onTogglePlay = { onIntent(AgentIntent.TogglePreviewPlayback) },
-                    onSeek = { onIntent(AgentIntent.SeekPreview(it)) },
-                    onSend = { onIntent(AgentIntent.SendVoiceRecording) }
-                )
-                else -> AgentInputBar(
-                    isGenerating = uiState.isGenerating,
-                    hazeState = hazeState,
-                    isEnabled = !uiState.isOffline,
-                    isVoiceEnabled = uiState.canSendVoice,
-                    onSend = { onIntent(AgentIntent.SendTextPrompt(it)) },
-                    onCancel = { onIntent(AgentIntent.CancelGeneration) },
-                    onStartVoice = {
-                        if (micPermission.granted) {
-                            onIntent(AgentIntent.StartVoiceRecording)
-                        } else {
-                            micPermission.request { granted ->
-                                if (granted) onIntent(AgentIntent.StartVoiceRecording)
+            // The composer pill in whichever mode applies, then the one-line disclaimer under
+            // it — part of this Box so the chat list reserves room for both.
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // The voice bars carry the same outer padding as AgentInputBar themselves, so the
+                // glass pill stays exactly in place when the composer swaps mode.
+                when {
+                    uiState.voiceRecording != null -> VoiceRecorderBar(
+                        state = uiState.voiceRecording,
+                        hazeState = hazeState,
+                        onStop = { onIntent(AgentIntent.StopVoiceRecording) }
+                    )
+                    uiState.voicePreview != null -> VoicePreviewBar(
+                        state = uiState.voicePreview,
+                        hazeState = hazeState,
+                        onDelete = { onIntent(AgentIntent.DeleteVoiceRecording) },
+                        onTogglePlay = { onIntent(AgentIntent.TogglePreviewPlayback) },
+                        onSeek = { onIntent(AgentIntent.SeekPreview(it)) },
+                        onSend = { onIntent(AgentIntent.SendVoiceRecording) }
+                    )
+                    else -> AgentInputBar(
+                        isGenerating = uiState.isGenerating,
+                        hazeState = hazeState,
+                        isEnabled = !uiState.isOffline,
+                        isVoiceEnabled = uiState.canSendVoice,
+                        onSend = { onIntent(AgentIntent.SendTextPrompt(it)) },
+                        onCancel = { onIntent(AgentIntent.CancelGeneration) },
+                        onStartVoice = {
+                            if (micPermission.granted) {
+                                onIntent(AgentIntent.StartVoiceRecording)
+                            } else {
+                                micPermission.request { granted ->
+                                    if (granted) onIntent(AgentIntent.StartVoiceRecording)
+                                }
                             }
                         }
-                    }
-                )
+                    )
+                }
+                ComposerDisclaimer()
             }
         }
     }
@@ -1768,16 +1777,32 @@ private fun BubbleContentRenderer(
 
 // Exact values pulled from the Figma node (90:120 "Background+Border+Shadow+OverlayBlur") —
 // same glass-card family as the top bar, reproduced literally rather than approximated.
-private val InputBarCardShape = RoundedCornerShape(26.dp)
-private val InputBarMutedIconTint = Color(0xFFBFD0F0)
+// Card/button metrics are shared with the voice bars: see ComposerCardShape & co. in VoiceUi.kt.
+private val InputBarTextColor = Color(0xFFE2ECFF)
 private val InputBarPlaceholderColor = Color(0xFFE2ECFF)
+/** Inset between the field's text and the pill's start edge (inside ComposerContentPadding). */
+private val InputFieldStartPadding = 10.dp
+/** Vertical inset of the buttons in the resting 60dp pill: (60 − 38) / 2. */
+private val InputBarButtonInset = (ComposerBarHeight - ComposerButtonSize) / 2
+/** Top inset of a wrapped message, so the first line clears the pill's rounded top. */
+private val InputBarExpandedTopInset = 14.dp
+/** Gap between the last text line and the buttons row once the composer has expanded. */
+private val InputBarExpandedRowGap = 6.dp
 
 /**
  * Bottom composer, matching the Figma "یارا" input bar card (node 90:120) at 1:1
- * spacing/color fidelity: a 60dp glass pill (26dp radius, diagonal white sheen, blurred
- * background, dark drop shadow) holding a fixed left-pointing send button (42dp, opaque
- * white glass — not RTL-mirrored, the design always points it left), then mic and image
- * buttons (38dp, more transparent, muted blue-white icon tint), then the message field.
+ * spacing/color fidelity: a glass pill (26dp radius, diagonal white sheen, blurred
+ * background, dark drop shadow) holding the message field, a mic button and a fixed
+ * left-pointing send button (not RTL-mirrored — the design always points it left). All
+ * buttons are the same [ComposerButtonSize] circle.
+ *
+ * The pill rests at 60dp with the buttons inline beside the field. Once the message no
+ * longer fits on the single line beside them — it wraps or contains a newline — the
+ * composer expands the way ChatGPT's does: the field takes the pill's full width and grows
+ * up to [INPUT_MAX_LINES] lines (scrolling internally past that), and the buttons drop to
+ * their own row under the text. The two arrangements are the *same* nodes placed
+ * differently by [ComposerLayout], never a Row swapped for a Column, so the field keeps its
+ * focus and the keyboard stays up through the transition.
  */
 @Composable
 private fun AgentInputBar(
@@ -1792,153 +1817,214 @@ private fun AgentInputBar(
     isVoiceEnabled: Boolean = true
 ) {
     var text by remember { mutableStateOf("") }
-    var isFocused by remember { mutableStateOf(false) }
     val taminColors = LocalTaminColors.current
-    val toaster = LocalToaster.current
+    val textStyle = MaterialTheme.typography.bodyMedium.copy(
+        fontSize = 13.5.sp,
+        color = InputBarTextColor,
+        textAlign = TextAlign.Right
+    )
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 14.dp, end = 14.dp, bottom = 16.dp, top = 8.dp)
+            .padding(ComposerOuterPadding)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(60.dp)
-                .coloredShadow(
-                    color = TopBarShadowColor.copy(alpha = 0.55f),
-                    borderRadius = TopBarCardRadius,
-                    blurRadius = 24.dp,
-                    offsetY = 10.dp
-                )
+                .heightIn(min = ComposerBarHeight)
+                // Grow/shrink smoothly as lines are added or removed.
+                .animateContentSize(animationSpec = tween(INPUT_BAR_RESIZE_ANIM_MS))
+                .composerShadow()
                 // Same frosted glass as the top bar — see AgentGlass.
-                .agentFrostedGlassCard(InputBarCardShape, hazeState)
+                .agentFrostedGlassCard(ComposerCardShape, hazeState)
         ) {
-            Row(
+            ComposerLayout(
+                text = text,
+                textStyle = textStyle,
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(start = 10.dp, end = 15.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(9.dp)
-            ) {
-
-                // Text field
-                BasicTextField(
-                    value = text,
-                    onValueChange = { text = it },
-                    modifier = Modifier.weight(1f).onFocusChanged { isFocused = it.isFocused },
-                    enabled = !isGenerating && isEnabled,
-                    maxLines = INPUT_MAX_LINES,
-                    textStyle = MaterialTheme.typography.bodyMedium.copy(
-                        fontSize = 13.5.sp,
-                        color = Color(0xFFE2ECFF),
-                        textAlign = TextAlign.Right
-                    ),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
-                    keyboardActions = KeyboardActions(
-                        onSend = {
-                            if (text.isNotBlank() && !isGenerating) {
-                                onSend(text.trim())
-                                text = ""
+                    .fillMaxWidth()
+                    .padding(ComposerContentPadding),
+                field = {
+                    BasicTextField(
+                        value = text,
+                        onValueChange = { text = it },
+                        enabled = !isGenerating && isEnabled,
+                        maxLines = INPUT_MAX_LINES,
+                        textStyle = textStyle,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+                        keyboardActions = KeyboardActions(
+                            onSend = {
+                                if (text.isNotBlank() && !isGenerating) {
+                                    onSend(text.trim())
+                                    text = ""
+                                }
+                            }
+                        ),
+                        cursorBrush = androidx.compose.ui.graphics.SolidColor(Color.White),
+                        decorationBox = { innerTextField ->
+                            Box(modifier = Modifier.fillMaxWidth().padding(start = InputFieldStartPadding)) {
+                                if (text.isEmpty()) {
+                                    Text(
+                                        text = "پیام خود را بنویسید…",
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            fontSize = 13.5.sp,
+                                            color = InputBarPlaceholderColor.copy(alpha = 0.45f)
+                                        ),
+                                        modifier = Modifier.align(Alignment.CenterStart)
+                                    )
+                                }
+                                // Same anchor as the placeholder above (CenterStart = right edge
+                                // under the app's global RTL) — otherwise the placeholder sits on
+                                // the right but typed text jumps to anchor on the left, appearing
+                                // to start from the middle of the field the moment you type.
+                                Box(modifier = Modifier.align(Alignment.CenterStart)) { innerTextField() }
                             }
                         }
-                    ),
-                    cursorBrush = androidx.compose.ui.graphics.SolidColor(Color.White),
-                    decorationBox = { innerTextField ->
-                        Box(modifier = Modifier.fillMaxWidth().padding(start = 10.dp)) {
-                            if (text.isEmpty()) {
-                                Text(
-                                    text = "پیام خود را بنویسید…",
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        fontSize = 13.5.sp,
-                                        color = InputBarPlaceholderColor.copy(alpha = 0.45f)
-                                    ),
-                                    modifier = Modifier.align(Alignment.CenterStart)
-                                )
-                            }
-                            // Same anchor as the placeholder above (CenterStart = right edge
-                            // under the app's global RTL) — otherwise the placeholder sits on
-                            // the right but typed text jumps to anchor on the left, appearing
-                            // to start from the middle of the field the moment you type.
-                            Box(modifier = Modifier.align(Alignment.CenterStart)) { innerTextField() }
-                        }
-                    }
-                )
-
-                // Image attach — matches the Figma layout; no attach flow exists yet, so it
-                // just says so rather than being a button that silently does nothing.
-                InputBarGlassButton(
-                    icon = Icons.Default.Image,
-                    contentDescription = null,
-                    size = 38.dp,
-                    backgroundAlpha = 0.09f,
-                    borderAlpha = 0.14f,
-                    iconTint = InputBarMutedIconTint,
-                    onClick = { toaster.info("این امکان به‌زودی اضافه می‌شود") }
-                )
-
-                // Mic — always available on its own, independent of the send button. Hidden
-                // behind isVoiceEnabled: the server decides per user whether voice prompts
-                // are allowed at all.
-                if (isVoiceEnabled) {
-                    InputBarGlassButton(
-                        icon = Icons.Default.Mic,
-                        contentDescription = "ضبط صدا",
-                        size = 38.dp,
-                        backgroundAlpha = 0.09f,
-                        borderAlpha = 0.14f,
-                        iconTint = InputBarMutedIconTint,
-                        onClick = onStartVoice,
-                        enabled = !isGenerating && isEnabled
                     )
-                }
-
-                // Send/Cancel — a fixed, never-mirrored left arrow (the design's own send
-                // glyph, not a "back" affordance), 42dp — larger and more opaque than the
-                // other two. Only reacts once there is text to send or a request to cancel;
-                // otherwise it sits at the design's neutral idle glass look.
-                val isTyping = text.isNotBlank()
-                Box(
-                    modifier = Modifier
-                        .size(42.dp)
-                        .clip(CircleShape)
-                        .background(
-                            when {
-                                isGenerating -> MaterialTheme.colorScheme.error.copy(alpha = 0.18f)
-                                isTyping -> taminColors.aiAssistantTint
-                                else -> Color.White.copy(alpha = 0.10f)
-                            }
-                        )
-                        .border(
-                            1.dp,
-                            if (isGenerating || isTyping) Color.White.copy(alpha = 0.30f) else Color.White.copy(alpha = 0.20f),
-                            CircleShape
-                        )
-                        .clickable(enabled = isGenerating || isTyping) {
-                            if (isGenerating) onCancel() else if (isTyping) { onSend(text.trim()); text = "" }
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    AnimatedContent(
-                        targetState = if (isGenerating) 2 else 1,
-                        label = "send_cancel_anim"
-                    ) { state ->
-                        when (state) {
-                            2 -> Icon(Icons.Default.Close, contentDescription = "توقف", tint = MaterialTheme.colorScheme.error)
-                            else -> Icon(
-                                Icons.Default.ArrowBack,
-                                contentDescription = "ارسال",
-                                tint = Color.White
+                },
+                buttons = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(ComposerButtonGap)
+                    ) {
+                        // Mic — always available on its own, independent of the send button.
+                        // Hidden behind isVoiceEnabled: the server decides per user whether
+                        // voice prompts are allowed at all.
+                        if (isVoiceEnabled) {
+                            InputBarGlassButton(
+                                icon = Icons.Default.Mic,
+                                contentDescription = "ضبط صدا",
+                                size = ComposerButtonSize,
+                                backgroundAlpha = 0.09f,
+                                borderAlpha = 0.14f,
+                                iconTint = ComposerMutedIconTint,
+                                onClick = onStartVoice,
+                                enabled = !isGenerating && isEnabled
                             )
                         }
+
+                        // Send/Cancel — a fixed, never-mirrored left arrow (the design's own
+                        // send glyph, not a "back" affordance), the same size as the mic but
+                        // more opaque. Only reacts once there is text to send or a request to
+                        // cancel; otherwise it sits at the design's neutral idle glass look.
+                        val isTyping = text.isNotBlank()
+                        Box(
+                            modifier = Modifier
+                                .size(ComposerButtonSize)
+                                .clip(CircleShape)
+                                .background(
+                                    when {
+                                        isGenerating -> MaterialTheme.colorScheme.error.copy(alpha = 0.18f)
+                                        isTyping -> taminColors.aiAssistantTint
+                                        else -> Color.White.copy(alpha = 0.10f)
+                                    }
+                                )
+                                .border(
+                                    1.dp,
+                                    if (isGenerating || isTyping) Color.White.copy(alpha = 0.30f) else Color.White.copy(alpha = 0.20f),
+                                    CircleShape
+                                )
+                                .clickable(enabled = isGenerating || isTyping) {
+                                    if (isGenerating) onCancel() else if (isTyping) { onSend(text.trim()); text = "" }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            AnimatedContent(
+                                targetState = if (isGenerating) 2 else 1,
+                                label = "send_cancel_anim"
+                            ) { state ->
+                                when (state) {
+                                    2 -> Icon(Icons.Default.Close, contentDescription = "توقف", tint = MaterialTheme.colorScheme.error)
+                                    else -> Icon(
+                                        Icons.Default.ArrowBack,
+                                        contentDescription = "ارسال",
+                                        tint = Color.White
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
+            )
+        }
+    }
+}
+
+/**
+ * Places the composer's [field] and [buttons] either inline (buttons beside the field,
+ * everything centred in the resting pill height) or expanded (field across the full width
+ * on top, buttons in a row underneath at the pill's end edge).
+ *
+ * Which arrangement applies is decided *here*, from [text] measured against the width the
+ * field would get inline, not from what the live field reports: measuring the field itself
+ * would flip-flop (a message that wraps inline fits on one line at full width, which would
+ * collapse it, which would wrap it again…). Inline width is known only at measure time, so
+ * the decision is made inside the measure policy, and the policy re-runs whenever [text]
+ * changes because it captures it.
+ *
+ * Layout-direction aware: the field hugs the start edge and the buttons the end edge in
+ * both arrangements, so under the app's RTL the send arrow is at the far left as designed.
+ */
+@Composable
+private fun ComposerLayout(
+    text: String,
+    textStyle: TextStyle,
+    field: @Composable () -> Unit,
+    buttons: @Composable () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val textMeasurer = rememberTextMeasurer()
+    Layout(
+        contents = listOf(field, buttons),
+        modifier = modifier
+    ) { (fieldMeasurables, buttonsMeasurables), constraints ->
+        val width = constraints.maxWidth
+        val gap = ComposerButtonGap.roundToPx()
+        val buttonsPlaceable = buttonsMeasurables.first().measure(Constraints())
+        val inlineFieldWidth = (width - buttonsPlaceable.width - gap).coerceAtLeast(0)
+
+        // Would the message fit on one line in the inline slot? The measured width matches
+        // what the field's text actually gets: the slot minus the decoration's start inset.
+        val inlineTextWidth = (inlineFieldWidth - InputFieldStartPadding.roundToPx()).coerceAtLeast(0)
+        val isExpanded = text.contains('\n') || (
+            text.isNotEmpty() && textMeasurer.measure(
+                text = text,
+                style = textStyle,
+                constraints = Constraints(maxWidth = inlineTextWidth)
+            ).lineCount > 1
+        )
+
+        val fieldWidth = if (isExpanded) width else inlineFieldWidth
+        val fieldPlaceable = fieldMeasurables.first().measure(
+            Constraints(minWidth = fieldWidth, maxWidth = fieldWidth)
+        )
+        // placeRelative mirrors x under RTL, so positions are given in the LTR frame: field
+        // at the start edge, buttons at the end edge.
+        val buttonsX = width - buttonsPlaceable.width
+
+        if (!isExpanded) {
+            val inset = InputBarButtonInset.roundToPx()
+            val height = maxOf(ComposerBarHeight.roundToPx(), fieldPlaceable.height + inset * 2)
+            layout(width, height) {
+                fieldPlaceable.placeRelative(0, (height - fieldPlaceable.height) / 2)
+                buttonsPlaceable.placeRelative(buttonsX, (height - buttonsPlaceable.height) / 2)
+            }
+        } else {
+            val top = InputBarExpandedTopInset.roundToPx()
+            val rowGap = InputBarExpandedRowGap.roundToPx()
+            val bottom = InputBarButtonInset.roundToPx()
+            val buttonsY = top + fieldPlaceable.height + rowGap
+            val height = buttonsY + buttonsPlaceable.height + bottom
+            layout(width, height) {
+                fieldPlaceable.placeRelative(0, top)
+                buttonsPlaceable.placeRelative(buttonsX, buttonsY)
             }
         }
     }
 }
 
-/** One glass icon button on the input bar — the mic/image buttons (fixed 38dp per spec). */
+/** One glass icon button on the input bar — the mic button ([ComposerButtonSize] per spec). */
 @Composable
 private fun InputBarGlassButton(
     icon: ImageVector,
@@ -2200,12 +2286,8 @@ private fun AgentBubbleFooter(item: ChatItem, onIntent: (AgentIntent) -> Unit) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = timeString,
-            style = MaterialTheme.typography.labelSmall,
-            color = Color.White.copy(alpha = 0.6f),
-        )
-
+        // The row is laid out LTR (see ChatBubbleItem): actions sit on the left edge, the
+        // send time on the right edge, lined up under the start of the reply's RTL text.
         Row(
             horizontalArrangement = Arrangement.spacedBy(Spacing.xxs),
             verticalAlignment = Alignment.CenterVertically
@@ -2245,6 +2327,12 @@ private fun AgentBubbleFooter(item: ChatItem, onIntent: (AgentIntent) -> Unit) {
                 onClick = { onIntent(AgentIntent.ShareContent(extractTextFromItem(item))) },
             )
         }
+
+        Text(
+            text = timeString,
+            style = MaterialTheme.typography.labelSmall,
+            color = Color.White.copy(alpha = 0.6f),
+        )
     }
 }
 
@@ -2313,4 +2401,6 @@ private fun AgentTopBarOfflinePreview() {
 private val USER_BUBBLE_MAX_WIDTH = 300.dp
 private val FOOTER_ACTION_SIZE = 28.dp
 private val ENTER_SLIDE_DISTANCE = 16.dp
-private const val INPUT_MAX_LINES = 4
+private const val INPUT_MAX_LINES = 10
+/** How long the composer pill takes to grow or shrink between line counts. */
+private const val INPUT_BAR_RESIZE_ANIM_MS = 160
