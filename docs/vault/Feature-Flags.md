@@ -95,6 +95,61 @@ contract ported from `old_android`'s `ui.home.services.employer.legalStackHolder
 package — see that package for the original behavior if the contract needs
 re-verifying against a live backend.
 
+## 5b. Beyond the services page — profile, treatment and the home dashboard
+
+`feature:taminServices` (the «خدمات» tab) was, for a long time, the only screen that actually read
+`FeatureManager`/the menu per row. Home already gated its own service cards; profile and treatment
+did not gate anything except one tap in `TreatmentViewModel.openRecords`. All three now follow the
+same shape:
+
+- **One lookup, many flags.** `FeatureManager.observeFeatureStatuses(flags: Set<FeatureFlag>)` reads
+  the menu once and resolves every flag in the set from it (`FeatureManagerImpl` overrides it to do
+  one `getMainMenu` call; the interface default just `combine`s `getFeatureStatus` per flag, which is
+  what `FakeFeatureManager`-based tests fall back to). A menu that cannot be read leaves every flag
+  `Enabled` — a failed lookup must never lock someone out of a feature the server never said was off.
+- **`FeatureStatus.toGate(): FeatureGate`** (`core-domain/model/common/FeatureStatus.kt`) is the one
+  decision every gated tap now goes through: `Open`, `OpenWithWarning(message)`, `Blocked(message)`,
+  `OpenWeb(url)`. `FeatureStatus.serverMessage` pulls the same string out of `Disabled` /
+  `TemporaryDisabled` / `EnabledWithError` for display without a `when`.
+- **`ListItemData.gatedBy(status: FeatureStatus?, warningColor)`**
+  (`core-ui/mapper/feature/FeatureGateMapper.kt`) turns a menu row into how it should render: `null`
+  status shimmers the row (`ListItemData.isLoading`, new field on `ListItemData`/`ListGroupView`),
+  `Disabled`/`TemporaryDisabled` dims it and shows the server's message as the subtitle,
+  `EnabledWithError` keeps it tappable with the message in [warningColor].
+
+### Profile (`feature:profile`)
+
+Only the rows that actually have a server flag are gated — `ProfileMenuItem.flag` carries it, `null`
+for everything else (settings, support, logout, …). Gated today: `IDENTITY_INFO`(1),
+`ACTIVE_RELATION`(2), `BANK_ACCOUNTS`→`BANK_ACCOUNT_LIST`(3), `DEPENDENTS`(5),
+`ELECTRONIC_FILE`→`MY_ELECTRONIC_FILE`(46). `ProfileViewModel` loads
+`observeFeatureStatuses(ProfileMenuItem.gatedFlags)` alongside the rest of `LoadProfile`;
+`handleItemClick` reads `FeatureStatus.toGate()` before navigating and posts `ProfileEvent.ShowToast`
+for the server's message, which `ProfileScreen` now actually shows (was a `// TODO` no-op) via the
+same snackbar the home screen and deep links use.
+
+### Treatment hub (`feature:treatment`)
+
+`TreatmentFeatureFlags` (`ui/model/TreatmentFeatureFlags.kt`) is the single map from a hub tile to its
+flag: «سوابق پزشکی»/«نسخه‌ها» → `PRESCRIPTION`(26); the insurance-card carousel, «هزینه‌های متفرقه» and
+«تاییدیه‌ها» → `DESERVED_TREATMENT_101` (استحقاق درمان — everything reading the person's treatment
+entitlement, not `DESERVED_TREATMENT`(25), which nothing currently navigates to). The health-profile
+tile and the contracted-centers link have no flag and stay open. `TreatmentViewModel.openGated`
+replaces the old one-off `openRecords`-only check and backs `OpenRecords`, the new `OpenMiscClaims`
+and `OpenApprovals` intents alike; it reads `uiState.featureStatuses` first so a tap does not
+re-fetch what `InitTreatmentFlow` already loaded via `observeFeatureStatuses(TreatmentFeatureFlags.all)`.
+`CategoryTile` gained `isLoading`/`dimmed`; the insurance carousel shimmers until its flag resolves
+and shows the server's message instead of the "no patient" placeholder when the flag is off.
+
+### Home dashboard (`HomeScreen`/`HomeViewModel`)
+
+Service cards, «خلاصهٔ سابقه» (gated on `WAGE_AND_HISTORY`) and campaign cards were already gated.
+What was missing: `isAgentEnabled` used to default to `false`, so the AI ask-bar and its suggestion
+chips just popped in once `FeatureFlag.AGENT` resolved `Enabled`. It is now `Boolean?` — `null` means
+"not answered yet" and shimmers the bar's own footprint and three chip-shaped blocks instead of
+leaving that header slot looking finished before it is; a failed lookup resolves to `false` (hidden)
+rather than shimmering forever.
+
 ## 6. The AI Agent flag
 
 The AI assistant is a standalone feature in the flag system.

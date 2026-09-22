@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.profile.ui
 
 import androidx.lifecycle.viewModelScope
 import com.tamin.taminhamrah.base.BaseViewModel
+import com.tamin.taminhamrah.feature.FeatureManager
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
@@ -11,6 +12,7 @@ import com.tamin.taminhamrah.mapper.activeRelation.toUiModelList
 import com.tamin.taminhamrah.mapper.identity.toPresentation
 import com.tamin.taminhamrah.mapper.relation.toPresentation
 import com.tamin.taminhamrah.model.DarkThemeConfig
+import com.tamin.taminhamrah.model.common.FeatureGate
 import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.useCases.auth.GetSignOutUrlUseCase
 import com.tamin.taminhamrah.useCases.auth.SignOutUseCase
@@ -29,6 +31,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 
@@ -45,7 +48,8 @@ class ProfileViewModel(
     private val getRelationTaminAllUseCase: GetRelationTaminAllUseCase,
     private val changeMobileUseCase: ChangeMobileUseCase,
     private val verifyChangeMobileUseCase: VerifyChangeMobileUseCase,
-    private val setThemeUseCase: SetThemeUseCase
+    private val setThemeUseCase: SetThemeUseCase,
+    private val featureManager: FeatureManager
 ) : BaseViewModel<ProfileUiState, PartialState, ProfileEvent, ProfileIntent>(
     initialState = ProfileUiState()
 ) {
@@ -111,7 +115,18 @@ class ProfileViewModel(
             }
         }
 
-        merge(userIdFlow, imageFlow, identityFlow, taminRelationFlow, dependentsCountFlow, activeRelationFlow).collect {
+        val featureStatusFlow = featureManager.observeFeatureStatuses(ProfileMenuItem.gatedFlags)
+            .map { PartialState.FeatureStatusesLoaded(it) }
+
+        merge(
+            userIdFlow,
+            imageFlow,
+            identityFlow,
+            taminRelationFlow,
+            dependentsCountFlow,
+            activeRelationFlow,
+            featureStatusFlow
+        ).collect {
             emit(it)
         }
     }
@@ -135,7 +150,31 @@ class ProfileViewModel(
         sendEvent(ProfileEvent.NavigateBack)
     }
 
+    /**
+     * Every row goes through its feature flag before it opens. A row without a flag is always
+     * open; one whose flag the menu has not answered yet is still shimmering and ignores the tap.
+     */
     private fun handleItemClick(item: ProfileMenuItem): Flow<PartialState> {
+        val gate = item.flag
+            ?.let { flag -> uiState.value.featureStatuses?.get(flag)?.toGate() ?: return emptyFlow() }
+            ?: FeatureGate.Open
+        when (gate) {
+            is FeatureGate.Blocked -> {
+                gate.message?.let { sendEvent(ProfileEvent.ShowToast(it)) }
+                return emptyFlow()
+            }
+            is FeatureGate.OpenWeb -> {
+                sendEvent(ProfileEvent.OpenUrl(gate.url))
+                return emptyFlow()
+            }
+            is FeatureGate.OpenWithWarning -> gate.message?.let { sendEvent(ProfileEvent.ShowToast(it)) }
+            FeatureGate.Open -> Unit
+        }
+        navigateTo(item)
+        return emptyFlow()
+    }
+
+    private fun navigateTo(item: ProfileMenuItem) {
         when (item) {
             ProfileMenuItem.SETTINGS -> sendEvent(ProfileEvent.NavigateToSettings)
             ProfileMenuItem.LOGOUT -> sendIntent(ProfileIntent.Logout)
@@ -143,6 +182,7 @@ class ProfileViewModel(
             ProfileMenuItem.ELECTRONIC_FILE -> sendEvent(ProfileEvent.NavigateToElectronicFile)
             ProfileMenuItem.VERSION_HISTORY -> sendEvent(ProfileEvent.NavigateToVersionHistory)
             ProfileMenuItem.ACTIVE_RELATION -> sendEvent(ProfileEvent.NavigateToActiveRelation)
+            ProfileMenuItem.DEPENDENTS -> sendEvent(ProfileEvent.NavigateToDependentsList)
             ProfileMenuItem.CHANGE_MOBILE -> sendEvent(ProfileEvent.NavigateToChangeMobile)
             ProfileMenuItem.BANK_ACCOUNTS -> sendEvent(ProfileEvent.NavigateToBankAccount)
             ProfileMenuItem.CONTACT_ME -> sendEvent(ProfileEvent.NavigateToContactUs)
@@ -155,7 +195,6 @@ class ProfileViewModel(
             ProfileMenuItem.SAVE_EVENTS -> sendEvent(ProfileEvent.NavigateToSaveEvents)
             else -> sendEvent(ProfileEvent.ShowToast("به زودی: ${item.name}"))
         }
-        return emptyFlow()
     }
 
     private fun handleSendImageRequest(branchCode: String, filter: String): Flow<PartialState> = flow {
@@ -167,11 +206,8 @@ class ProfileViewModel(
     }
 
 
-    private fun handleNavigateToDependentsList(): Flow<PartialState> {
-        return flow {
-            sendEvent(ProfileEvent.NavigateToDependentsList)
-        }
-    }
+    private fun handleNavigateToDependentsList(): Flow<PartialState> =
+        handleItemClick(ProfileMenuItem.DEPENDENTS)
 
     private fun handleGetInsuranceActiveBranch(): Flow<PartialState> {
         return flow {
@@ -237,6 +273,10 @@ class ProfileViewModel(
             activeRelationCount = partialState.activeCount,
             inactiveRelationCount = partialState.inactiveCount,
             isActiveRelationLoading = false
+        )
+
+        is PartialState.FeatureStatusesLoaded -> currentState.copy(
+            featureStatuses = partialState.statuses
         )
 
         is PartialState.ImageRequestLoading -> currentState.copy(

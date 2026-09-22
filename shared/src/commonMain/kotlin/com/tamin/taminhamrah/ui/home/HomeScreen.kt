@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -63,6 +64,10 @@ import com.tamin.taminhamrah.ui.components.HomeQuickAccessSection
 import com.tamin.taminhamrah.ui.home.contract.HomeEvent
 import com.tamin.taminhamrah.ui.home.contract.HomeIntent
 import com.tamin.taminhamrah.ui.home.contract.HomeUiState
+import com.tamin.taminhamrah.ui.theme.ButtonDimens
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.ShimmerBlock
+import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import kotlinx.collections.immutable.persistentListOf
@@ -234,12 +239,22 @@ private fun HomeScreenContent(
                         hasDarmanCoverage = uiState.homeContent?.userInfo?.hasDarmanCoverage,
                         hasActiveRelation = uiState.homeContent?.userInfo?.hasActiveRelation,
                     )
-                    if (uiState.isAgentEnabled) {
+                    if (uiState.isAgentEnabled != false) {
                         Spacer(modifier = Modifier.height(HomeAskBarOverlap))
                     }
                 }
-                if (uiState.isAgentEnabled) {
-                    HomeAgentAskBar(
+                when (uiState.isAgentEnabled) {
+                    // Not known yet: the bar's own footprint shimmers rather than the header
+                    // jumping once the menu answers.
+                    null -> ShimmerBlock(
+                        cornerRadius = CornerRadius.max,
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(horizontal = HomeContentPadding)
+                            .fillMaxWidth()
+                            .height(ButtonDimens.height),
+                    )
+                    true -> HomeAgentAskBar(
                         hint = stringResource(Res.string.home_ask_agent_hint),
                         contentDescription = stringResource(Res.string.home_ask_agent_cd),
                         onClick = onNavigateToAgent,
@@ -247,10 +262,11 @@ private fun HomeScreenContent(
                             .align(Alignment.BottomCenter)
                             .padding(horizontal = HomeContentPadding),
                     )
+                    false -> Unit
                 }
             }
 
-            if (uiState.isAgentEnabled) {
+            if (uiState.isAgentEnabled != false) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -258,12 +274,21 @@ private fun HomeScreenContent(
                         .padding(top = Spacing.sm),
                     horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 ) {
-                    listOf(
-                        stringResource(Res.string.home_suggestion_retirement),
-                        stringResource(Res.string.home_suggestion_history),
-                        stringResource(Res.string.home_suggestion_booklet),
-                    ).forEach { suggestion ->
-                        HeaderSuggestionChip(text = suggestion, onClick = onNavigateToAgent)
+                    if (uiState.isAgentEnabled == null) {
+                        repeat(3) {
+                            ShimmerBlock(
+                                cornerRadius = CornerRadius.max,
+                                modifier = Modifier.width(ShimmerSize.chipWidth).height(ShimmerSize.valueHeight),
+                            )
+                        }
+                    } else {
+                        listOf(
+                            stringResource(Res.string.home_suggestion_retirement),
+                            stringResource(Res.string.home_suggestion_history),
+                            stringResource(Res.string.home_suggestion_booklet),
+                        ).forEach { suggestion ->
+                            HeaderSuggestionChip(text = suggestion, onClick = onNavigateToAgent)
+                        }
                     }
                 }
             }

@@ -41,6 +41,8 @@ import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.ShimmerBlock
+import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
 import org.jetbrains.compose.resources.painterResource
 import taminx.core.core_ui.Res
@@ -88,6 +90,8 @@ data class ListItemData(
     val customTrailingContent: (@Composable () -> Unit)? = null,
     val onClick: (() -> Unit)? = null,
     val enabled: Boolean = true,
+    /** The row's state is still being decided: text and trailing content shimmer and the row is not tappable. */
+    val isLoading: Boolean = false,
     val titleStyle: TextStyle? = null,
     val subtitleStyle: TextStyle? = null,
     val colors: ListItemColors = ListItemColors(),
@@ -176,7 +180,7 @@ private fun ListItemRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(
-                    enabled = item.enabled && item.onClick != null,
+                    enabled = item.enabled && !item.isLoading && item.onClick != null,
                     onClick = { item.onClick?.invoke() }
                 )
                 .alpha(if (item.enabled) 1f else taminColors.disabledAlpha)
@@ -255,27 +259,37 @@ private fun ListItemRow(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(
-                    text = item.title,
-                    style = titleStyle,
-                    color = resolvedTitleColor,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                if (!item.subtitle.isNullOrBlank()) {
-                    Spacer(modifier = Modifier.height(Spacing.xs))
+                if (item.isLoading) {
+                    ShimmerBlock(
+                        modifier = Modifier
+                            .width(ShimmerSize.titleWidth)
+                            .height(ShimmerSize.titleHeight)
+                    )
+                } else {
                     Text(
-                        text = item.subtitle,
-                        style = subtitleStyle,
-                        color = resolvedSubtitleColor,
-                        maxLines = 2,
+                        text = item.title,
+                        style = titleStyle,
+                        color = resolvedTitleColor,
+                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
+                    if (!item.subtitle.isNullOrBlank()) {
+                        Spacer(modifier = Modifier.height(Spacing.xs))
+                        Text(
+                            text = item.subtitle,
+                            style = subtitleStyle,
+                            color = resolvedSubtitleColor,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
             }
 
             // Trailing Content
-            if (item.customTrailingContent != null) {
+            if (item.isLoading) {
+                // Nothing to promise yet: no badge, no chevron, until the row knows it can open.
+            } else if (item.customTrailingContent != null) {
                 Spacer(modifier = Modifier.width(Spacing.md))
                 item.customTrailingContent.invoke()
             } else if (item.badge != null || item.showArrow) {

@@ -446,6 +446,9 @@ internal fun TaminHamrahNavGraph(
 
                 profileGraph(
                     navController = navController,
+                    onShowMessage = { message ->
+                        snackbarScope.launch { snackbarHostState.showSnackbar(message) }
+                    },
                     onNavigateToIdentity = { userId ->
                         navController.navigate(ProfileRoute.Identity(userId))
                     },

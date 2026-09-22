@@ -31,6 +31,7 @@ import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentUiState
 import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItemPR
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
+import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentFeatureFlags
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMessageType
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMocks
 import com.tamin.taminhamrah.feature.treatment.ui.model.toCardItems
@@ -48,6 +49,7 @@ import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.deep_link_feature_unavailable
 import taminx.core.core_ui.patient_dependant_relation
 import taminx.core.core_ui.patient_main_insured_fallback
 
@@ -79,6 +81,8 @@ fun TreatmentScreen(
             if (tab == RecordTab.MEDICINE) onOpenPrescriptions(nationalCode)
             else onOpenMedicalRecords(nationalCode)
         },
+        onNavigateToMiscClaims = onOpenMiscClaims,
+        onNavigateToApprovals = onOpenApprovals,
     )
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -86,8 +90,6 @@ fun TreatmentScreen(
             state = uiState,
             onIntent = viewModel::sendIntent,
             onOpenHealthProfile = onOpenHealthProfile,
-            onOpenMiscClaims = onOpenMiscClaims,
-            onOpenApprovals = onOpenApprovals,
         )
         // Overlaid rather than wrapped in a Scaffold so the hub keeps its edge-to-edge header.
         SnackbarHost(
@@ -103,11 +105,15 @@ fun HandleTreatmentEvents(
     events: Flow<TreatmentEvent>,
     snackbarHostState: SnackbarHostState,
     onNavigateToRecords: (String, RecordTab) -> Unit,
+    onNavigateToMiscClaims: () -> Unit = {},
+    onNavigateToApprovals: () -> Unit = {},
 ) {
     events.collectWithLifecycleAware {
         when (it) {
             // Navigation is an event because the feature flag decides it, not the tap.
             is TreatmentEvent.NavigateToRecords -> onNavigateToRecords(it.nationalCode, it.tab)
+            TreatmentEvent.NavigateToMiscClaims -> onNavigateToMiscClaims()
+            TreatmentEvent.NavigateToApprovals -> onNavigateToApprovals()
 
             // A gated feature explains itself here; a silent gate would look like a dead button.
             is TreatmentEvent.ShowMessage -> snackbarHostState.showSnackbar(
@@ -124,10 +130,10 @@ fun HandleTreatmentEvents(
 }
 
 /**
- * Records and prescriptions are not callbacks here: both tiles raise
- * [TreatmentIntent.OpenRecords], and the feature flag in the view model decides whether that
- * becomes a [TreatmentEvent.NavigateToRecords]. The navigation lambdas belong to [TreatmentScreen],
- * which handles that event.
+ * Records, prescriptions, costs and approvals are not callbacks here: each tile raises an intent,
+ * and the feature flag in the view model decides whether that becomes a navigation event. The
+ * navigation lambdas belong to [TreatmentScreen], which handles those events. Only the health
+ * profile has no flag, so it stays a plain callback.
  */
 @Composable
 fun TreatmentContent(
@@ -135,8 +141,6 @@ fun TreatmentContent(
     onIntent: (TreatmentIntent) -> Unit,
     modifier: Modifier = Modifier,
     onOpenHealthProfile: (nationalCode: String) -> Unit = {},
-    onOpenMiscClaims: () -> Unit = {},
-    onOpenApprovals: () -> Unit = {},
 ) {
     // Keyed on the data the cards are built from, not on the whole state: selecting a patient
     // must not rebuild the list, or every swipe would invalidate the carousel and its effects.
@@ -167,16 +171,14 @@ fun TreatmentContent(
 
     val mainUserNationalCode = state.mainUserNationalCode
     val currentOnOpenHealthProfile by rememberUpdatedState(onOpenHealthProfile)
-    val currentOnOpenMiscClaims by rememberUpdatedState(onOpenMiscClaims)
-    val currentOnOpenApprovals by rememberUpdatedState(onOpenApprovals)
 
     val handleOpenMedicalRecords = remember(onIntent) { { onIntent(TreatmentIntent.OpenRecords(RecordTab.Default)) } }
     val handleOpenHealthProfile = remember(mainUserNationalCode) {
         { mainUserNationalCode?.let { currentOnOpenHealthProfile(it) } ?: Unit }
     }
     val handleOpenPrescriptions = remember(onIntent) { { onIntent(TreatmentIntent.OpenRecords(RecordTab.MEDICINE)) } }
-    val handleOpenMiscClaims = remember { { currentOnOpenMiscClaims() } }
-    val handleOpenApprovals = remember { { currentOnOpenApprovals() } }
+    val handleOpenMiscClaims = remember(onIntent) { { onIntent(TreatmentIntent.OpenMiscClaims) } }
+    val handleOpenApprovals = remember(onIntent) { { onIntent(TreatmentIntent.OpenApprovals) } }
     val handleRetry = remember(onIntent) { { onIntent(TreatmentIntent.InitTreatmentFlow) } }
 
     Box(
@@ -196,11 +198,15 @@ fun TreatmentContent(
             Spacer(modifier = Modifier.height(Spacing.sm))
             TreatmentQuickAccess(
                 healthProfileCompleted = state.healthProfileCompleted,
+                recordsStatus = state.featureStatuses?.get(TreatmentFeatureFlags.records),
                 onOpenMedicalRecords = handleOpenMedicalRecords,
                 onOpenHealthProfile = handleOpenHealthProfile,
             )
             Spacer(modifier = Modifier.height(Spacing.lg))
             TreatmentCategories(
+                prescriptionsStatus = state.featureStatuses?.get(TreatmentFeatureFlags.prescriptions),
+                approvalsStatus = state.featureStatuses?.get(TreatmentFeatureFlags.approvals),
+                miscClaimsStatus = state.featureStatuses?.get(TreatmentFeatureFlags.miscClaims),
                 onOpenPrescriptions = handleOpenPrescriptions,
                 onOpenMiscClaims = handleOpenMiscClaims,
                 onOpenApprovals = handleOpenApprovals,
@@ -222,9 +228,14 @@ fun TreatmentContent(
                 .align(Alignment.TopCenter)
                 .onSizeChanged { headerHeightPx = it.height },
         ) {
+            val cardStatus = state.featureStatuses?.get(TreatmentFeatureFlags.insuranceCard)
             PatientCarousel(
                 cards = cards,
-                isLoading = state.isLoading,
+                // The card is not drawn before the menu has said it may be.
+                isLoading = state.isLoading || cardStatus == null,
+                unavailableMessage = cardStatus?.takeUnless { it.opensSomething }?.let {
+                    it.serverMessage ?: stringResource(Res.string.deep_link_feature_unavailable)
+                },
                 error = state.error,
                 pagerState = pagerState,
                 onRetry = handleRetry,

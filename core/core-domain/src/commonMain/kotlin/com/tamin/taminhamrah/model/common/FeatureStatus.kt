@@ -10,6 +10,37 @@ sealed class FeatureStatus {
     /** True when tapping the service opens something — the only cases that are worth showing. */
     val opensSomething: Boolean
         get() = this is Enabled || this is EnabledWithError || this is WebView
+
+    /** The server's note for this state — the reason a service is off, or the warning on one that is on. */
+    val serverMessage: String?
+        get() = when (this) {
+            is Disabled -> message
+            is TemporaryDisabled -> message
+            is EnabledWithError -> message
+            Enabled, is WebView -> null
+        }
+
+    /** What a tap on a service in this state must do — the one decision every screen shares. */
+    fun toGate(): FeatureGate = when (this) {
+        Enabled -> FeatureGate.Open
+        is EnabledWithError -> FeatureGate.OpenWithWarning(message)
+        is Disabled -> FeatureGate.Blocked(message)
+        is TemporaryDisabled -> FeatureGate.Blocked(message)
+        is WebView -> FeatureGate.OpenWeb(url)
+    }
+}
+
+/** The outcome of asking a [FeatureStatus] whether a tap may go through. */
+sealed interface FeatureGate {
+    data object Open : FeatureGate
+
+    /** Opens, but the server has a warning to show first. */
+    data class OpenWithWarning(val message: String?) : FeatureGate
+
+    /** Does not open; [message] is the server's reason, when it gave one. */
+    data class Blocked(val message: String?) : FeatureGate
+
+    data class OpenWeb(val url: String) : FeatureGate
 }
 
 /**

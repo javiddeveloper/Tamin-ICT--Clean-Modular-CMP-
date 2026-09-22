@@ -137,4 +137,46 @@ class FeatureManagerImplTest {
         assertTrue(isContractsEnabled)
         assertTrue(!isStudentEnabled) // Should be false
     }
+
+    @Test
+    fun `test observeFeatureStatuses resolves every flag from one menu read`() = runTest {
+        val activeService = MainServiceDN(id = FeatureFlag.CONTRACTS.id, active = true, status = MenuServiceStatusDN.ACTIVE)
+        val disabledService = MainServiceDN(
+            id = FeatureFlag.STUDENT_INSURANCE.id,
+            active = true,
+            status = MenuServiceStatusDN.DISABLED,
+            message = "Not eligible",
+        )
+        fakeRepository.mainMenuResult = listOf(activeService, disabledService)
+
+        val statuses = featureManager.observeFeatureStatuses(
+            setOf(FeatureFlag.CONTRACTS, FeatureFlag.STUDENT_INSURANCE, FeatureFlag.BANK_ACCOUNT_LIST)
+        ).first()
+
+        assertTrue(statuses.getValue(FeatureFlag.CONTRACTS) is FeatureStatus.Enabled)
+        assertEquals("Not eligible", (statuses.getValue(FeatureFlag.STUDENT_INSURANCE) as FeatureStatus.Disabled).message)
+        // Absent from the menu entirely: Disabled with no message, not a crash.
+        assertTrue(statuses.getValue(FeatureFlag.BANK_ACCOUNT_LIST) is FeatureStatus.Disabled)
+    }
+
+    @Test
+    fun `test observeFeatureStatuses falls back to Enabled for every flag when the menu fails`() = runTest {
+        val failingRepository = object : CommonRepository by fakeRepository {
+            override fun getMainMenu(versionCode: String, forceUpdate: Boolean): Flow<List<MainServiceDN>> = flow {
+                throw RuntimeException("network down")
+            }
+        }
+        val manager = FeatureManagerImpl(failingRepository)
+
+        val statuses = manager.observeFeatureStatuses(setOf(FeatureFlag.CONTRACTS, FeatureFlag.STUDENT_INSURANCE)).first()
+
+        assertTrue(statuses.getValue(FeatureFlag.CONTRACTS) is FeatureStatus.Enabled)
+        assertTrue(statuses.getValue(FeatureFlag.STUDENT_INSURANCE) is FeatureStatus.Enabled)
+    }
+
+    @Test
+    fun `test observeFeatureStatuses returns an empty map for an empty flag set without reading the menu`() = runTest {
+        val statuses = featureManager.observeFeatureStatuses(emptySet()).first()
+        assertTrue(statuses.isEmpty())
+    }
 }

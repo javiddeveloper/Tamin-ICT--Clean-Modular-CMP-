@@ -2,6 +2,8 @@ package com.tamin.taminhamrah.feature.profile.ui.contract
 
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.feature.profile.ui.model.ProfileMenuItem
+import com.tamin.taminhamrah.model.common.FeatureFlag
+import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.identity.IdentityInfoPR
 import com.tamin.taminhamrah.model.relation.TaminRelationPR
 
@@ -21,6 +23,8 @@ data class ProfileUiState(
     val activeRelationCount: Int = 0,
     val inactiveRelationCount: Int = 0,
     val isActiveRelationLoading: Boolean = true,
+    /** The menu's answer for each gated row; `null` until it arrives, so those rows shimmer. */
+    val featureStatuses: Map<FeatureFlag, FeatureStatus>? = null,
 ) {
     sealed class PartialState {
         data class Loading(val isLoading: Boolean) : PartialState()
@@ -31,6 +35,7 @@ data class ProfileUiState(
         data class TaminRelationLoaded(val relation: TaminRelationPR?) : PartialState()
         data class DependentsCountLoaded(val count: Int) : PartialState()
         data class ActiveRelationStatusLoaded(val activeCount: Int, val inactiveCount: Int) : PartialState()
+        data class FeatureStatusesLoaded(val statuses: Map<FeatureFlag, FeatureStatus>) : PartialState()
         data class ImageRequestLoading(val isLoading: Boolean) : PartialState()
         data class ImageRequestResult(val result: String) : PartialState()
         data class ImageRequestError(val message: String) : PartialState()
@@ -66,6 +71,7 @@ sealed interface ProfileEvent {
     data object NavigateToUserContracts : ProfileEvent
     data object NavigateToSaveEvents : ProfileEvent
     data class OpenUrl(val url: String) : ProfileEvent
+    /** The server's note about a row — why it is off, or the warning on one that still opens. */
     data class ShowToast(val message: String) : ProfileEvent
     data object NavigateToBankAccount : ProfileEvent
     data object NavigateToSecurity : ProfileEvent

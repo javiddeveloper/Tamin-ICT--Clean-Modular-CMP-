@@ -161,7 +161,9 @@ class HomeViewModel(
                     status is FeatureStatus.Enabled || status is FeatureStatus.EnabledWithError
                 )
             }
-            .catch { }
+            // A flag lookup that fails must not leave the bar shimmering forever — it hides instead,
+            // the same as the flag genuinely being off.
+            .catch { emit(HomeUiState.HomePartialState.AgentAvailability(false)) }
 
     private suspend fun handleServiceClick(service: MainServiceDN) {
         val flag = FeatureFlag.fromId(service.id) ?: return

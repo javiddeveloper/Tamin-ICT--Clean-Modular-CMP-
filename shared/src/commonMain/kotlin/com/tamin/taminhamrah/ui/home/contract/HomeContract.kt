@@ -20,8 +20,11 @@ data class HomeUiState(
     /** Unified offline-first data model containing UserInfo, Requests, Stories, Campaigns,
      *  QuickAccess and SpecialServices — the sole source for everything below the header. */
     val homeContent: HomeContentDN? = null,
-    /** Whether `FeatureFlag.AGENT` is on — gates the ask-bar and suggestion chips in the header. */
-    val isAgentEnabled: Boolean = false,
+    /**
+     * Whether `FeatureFlag.AGENT` is on — gates the ask-bar and suggestion chips in the header.
+     * Null until the menu answers, which shimmers the bar instead of skipping straight to hidden.
+     */
+    val isAgentEnabled: Boolean? = null,
     /**
      * خلاصهٔ سابقه for the newest year on record, or null when there is none to summarize — a
      * person with no insured year, or one the service refuses to answer for at all (a کارفرما and a
@@ -50,7 +53,7 @@ data class HomeUiState(
         data class Loading(val isLoading: Boolean) : HomePartialState
         data class SectionSelected(val section: HomeServiceSection) : HomePartialState
         data class HomeContentLoaded(val content: HomeContentDN?) : HomePartialState
-        data class AgentAvailability(val enabled: Boolean) : HomePartialState
+        data class AgentAvailability(val enabled: Boolean?) : HomePartialState
         /** The summary is being fetched — on first load, and again on every retry. */
         data object HistorySummaryLoading : HomePartialState
         /**

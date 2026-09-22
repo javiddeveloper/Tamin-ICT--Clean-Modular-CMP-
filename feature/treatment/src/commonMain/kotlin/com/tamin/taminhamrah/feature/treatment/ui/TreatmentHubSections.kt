@@ -36,6 +36,8 @@ import com.tamin.taminhamrah.feature.treatment.ui.components.PatientCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.quickAccessGradient
 import com.tamin.taminhamrah.feature.treatment.ui.components.raisedShadow
 import com.tamin.taminhamrah.feature.treatment.ui.model.PatientCardItemPR
+import com.tamin.taminhamrah.mapper.feature.gatedBy
+import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.ui.components.ListGroupView
 import com.tamin.taminhamrah.ui.components.ListItemBadge
 import com.tamin.taminhamrah.ui.components.ListItemColors
@@ -103,10 +105,13 @@ internal fun PatientCarousel(
     isLoading: Boolean,
     error: String?,
     pagerState: PagerState,
+    /** Why the card cannot be shown because its feature is switched off; not a failure, so no retry. */
+    unavailableMessage: String? = null,
     onRetry: () -> Unit = {},
     collapseProgress: () -> Float = { 0f },
 ) {
     val phase = when {
+        unavailableMessage != null -> CarouselPhase.Placeholder
         isLoading && cards.isEmpty() -> CarouselPhase.Loading
         cards.isEmpty() -> CarouselPhase.Placeholder
         else -> CarouselPhase.Cards
@@ -127,8 +132,8 @@ internal fun PatientCarousel(
             // A failure or an empty result still renders a card, so the carousel slot never
             // collapses into a bare line of text.
             CarouselPhase.Placeholder -> PatientPlaceholderCard(
-                message = error ?: stringResource(Res.string.hub_empty_patients),
-                isError = error != null,
+                message = unavailableMessage ?: error ?: stringResource(Res.string.hub_empty_patients),
+                isError = unavailableMessage == null && error != null,
                 onRetry = onRetry,
             )
 
@@ -220,6 +225,8 @@ private fun PatientPlaceholderCard(
 @Composable
 internal fun TreatmentQuickAccess(
     healthProfileCompleted: Boolean?,
+    /** The flag state of «سوابق درمانی»; `null` while the menu has not answered. */
+    recordsStatus: FeatureStatus?,
     onOpenMedicalRecords: () -> Unit,
     onOpenHealthProfile: () -> Unit,
 ) {
@@ -256,7 +263,7 @@ internal fun TreatmentQuickAccess(
                         leadingIconTintColor = TaminOnAccentInk,
                     ),
                     onClick = onOpenMedicalRecords,
-                ),
+                ).gatedBy(recordsStatus, warningColor = TaminOnAccentInk),
             ),
         )
 
@@ -313,6 +320,10 @@ internal fun TreatmentQuickAccess(
 /** The three-up grid of treatment services. */
 @Composable
 internal fun TreatmentCategories(
+    /** Each tile's flag state; `null` while the menu has not answered, which shimmers the tile. */
+    prescriptionsStatus: FeatureStatus?,
+    approvalsStatus: FeatureStatus?,
+    miscClaimsStatus: FeatureStatus?,
     onOpenPrescriptions: () -> Unit,
     onOpenMiscClaims: () -> Unit,
     onOpenApprovals: () -> Unit = {},
@@ -328,6 +339,8 @@ internal fun TreatmentCategories(
             iconTint = colors.blueText,
             iconBackground = Brush.linearGradient(listOf(colors.blueBg, colors.blueBg)),
             onClick = onOpenPrescriptions,
+            isLoading = prescriptionsStatus == null,
+            dimmed = prescriptionsStatus?.opensSomething == false,
             modifier = Modifier.weight(1f),
         )
         CategoryTile(
@@ -336,6 +349,8 @@ internal fun TreatmentCategories(
             iconTint = colors.teal,
             iconBackground = Brush.linearGradient(listOf(colors.greenBg, colors.greenBg)),
             onClick = onOpenApprovals,
+            isLoading = approvalsStatus == null,
+            dimmed = approvalsStatus?.opensSomething == false,
             modifier = Modifier.weight(1f),
         )
         CategoryTile(
@@ -344,6 +359,8 @@ internal fun TreatmentCategories(
             iconTint = colors.orangeText,
             iconBackground = Brush.linearGradient(listOf(colors.orangeBg, colors.orangeBg)),
             onClick = onOpenMiscClaims,
+            isLoading = miscClaimsStatus == null,
+            dimmed = miscClaimsStatus?.opensSomething == false,
             modifier = Modifier.weight(1f),
         )
     }

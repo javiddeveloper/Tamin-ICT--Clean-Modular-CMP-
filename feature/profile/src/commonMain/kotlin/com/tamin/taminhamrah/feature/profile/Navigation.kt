@@ -75,6 +75,7 @@ fun NavGraphBuilder.profileGraph(
     onNavigateToAddDependent: () -> Unit,
     onNavigateToUserRequests: () -> Unit,
     onOpenUrl: (String) -> Unit,
+    onShowMessage: (String) -> Unit,
     onBack: () -> Unit
 ) {
     navigation<ProfileRoute.Graph>(startDestination = ProfileRoute.Main()) {
@@ -100,6 +101,7 @@ fun NavGraphBuilder.profileGraph(
                 onNavigateToUserRequests = onNavigateToUserRequests,
                 onNavigateToSaveEvents = { navController.navigate(ProfileRoute.SaveEvents) },
                 onOpenUrl = onOpenUrl,
+                onShowMessage = onShowMessage,
                 onBackClicked = onBack
             )
         }

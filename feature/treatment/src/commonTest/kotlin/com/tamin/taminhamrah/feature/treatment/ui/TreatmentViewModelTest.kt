@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.feature.treatment.fake.FakeUserRepository
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentEvent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
+import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetDependantUnderEighteenUseCase
@@ -214,6 +215,50 @@ class TreatmentViewModelTest {
             // The gate must say why rather than silently doing nothing.
             val event = assertIs<TreatmentEvent.ShowMessage>(awaitItem())
             assertEquals("سرویس غیرفعال است", event.message)
+        }
+    }
+
+    @Test
+    fun initTreatmentFlow_loadsFeatureStatusesForTheHub() = runTest(testDispatcher) {
+        featureManager.status = FeatureStatus.Enabled
+
+        viewModel.uiState.test {
+            awaitItem() // initial state, statuses not yet loaded
+
+            viewModel.sendIntent(TreatmentIntent.InitTreatmentFlow)
+
+            var state = awaitItem()
+            while (state.featureStatuses == null) {
+                state = awaitItem()
+            }
+            assertEquals(FeatureStatus.Enabled, state.featureStatuses?.get(FeatureFlag.PRESCRIPTION))
+            assertEquals(FeatureStatus.Enabled, state.featureStatuses?.get(FeatureFlag.DESERVED_TREATMENT_101))
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun openMiscClaims_whenFeatureEnabled_navigates() = runTest(testDispatcher) {
+        featureManager.status = FeatureStatus.Enabled
+        viewModel.sendIntent(TreatmentIntent.InitTreatmentFlow)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.events.test {
+            viewModel.sendIntent(TreatmentIntent.OpenMiscClaims)
+            assertIs<TreatmentEvent.NavigateToMiscClaims>(awaitItem())
+        }
+    }
+
+    @Test
+    fun openApprovals_whenFeatureDisabled_explainsInsteadOfNavigating() = runTest(testDispatcher) {
+        featureManager.status = FeatureStatus.Disabled("استحقاق درمان غیرفعال است")
+        viewModel.sendIntent(TreatmentIntent.InitTreatmentFlow)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.events.test {
+            viewModel.sendIntent(TreatmentIntent.OpenApprovals)
+            val event = assertIs<TreatmentEvent.ShowMessage>(awaitItem())
+            assertEquals("استحقاق درمان غیرفعال است", event.message)
         }
     }
 
