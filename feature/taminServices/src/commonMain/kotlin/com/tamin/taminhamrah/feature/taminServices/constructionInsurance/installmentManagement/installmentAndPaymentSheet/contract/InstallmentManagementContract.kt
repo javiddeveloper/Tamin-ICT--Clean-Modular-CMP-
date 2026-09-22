@@ -8,6 +8,9 @@ import kotlinx.collections.immutable.persistentListOf
 /**
  * مدیریت اقساط و برگ پرداخت — عملیات option "۱" of [InstallmentLetterActionsSheet]. Lists the
  * individual installments under one debit letter via `GetInstallmentConstructionListPageUseCase`.
+ * Read-only, matching legacy's `InstallmentManagementFragment` — issuing a payment sheet only
+ * happens from the payment-sheet screen (`PaymentSheetViewModel`), and only for the whole debit;
+ * there is no per-installment issuance endpoint.
  */
 @Immutable
 data class InstallmentManagementUiState(
@@ -29,12 +32,6 @@ data class InstallmentManagementUiState(
     val endReached: Boolean = false,
     /** A page request past the first one failed — shown in the list footer with a retry action. */
     val paginationError: String? = null,
-
-    // «صدور برگ پرداخت این قسط» — reuses the whole-debit issuance endpoint (there is no
-    // per-installment issuance endpoint), same shape as PaymentSheetContract's issuance fields.
-    val isIssuing: Boolean = false,
-    val issuanceMessage: String? = null,
-    val issuanceFailed: Boolean = false,
 ) {
     sealed interface PartialState {
         data class HeaderSeeded(
@@ -52,11 +49,6 @@ data class InstallmentManagementUiState(
             val error: String?,
         ) : PartialState
         data class Error(val message: String?) : PartialState
-
-        data class IssuanceLoading(val loading: Boolean) : PartialState
-        data class IssuanceSucceeded(val message: String?) : PartialState
-        data class IssuanceFailed(val failed: Boolean) : PartialState
-        data object IssuanceNoticeDismissed : PartialState
     }
 }
 
@@ -71,9 +63,6 @@ sealed interface InstallmentManagementIntent {
     ) : InstallmentManagementIntent
     data object LoadNextPage : InstallmentManagementIntent
     data object RetryNextPage : InstallmentManagementIntent
-    data object IssuePaymentSheet : InstallmentManagementIntent
-    /** Dismisses the post-issuance "processing, please wait" notice; the screen stays open. */
-    data object DismissIssuanceNotice : InstallmentManagementIntent
     data object OnBackClicked : InstallmentManagementIntent
 }
 

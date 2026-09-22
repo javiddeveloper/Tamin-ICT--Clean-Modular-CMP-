@@ -34,7 +34,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -223,6 +225,31 @@ class PaymentSheetViewModelTest {
         assertTrue(viewModel.uiState.value.isIssuing)
 
         viewModel.sendIntent(PaymentSheetIntent.IssuePaymentSheet)
+
+        assertEquals(1, fakeRepository.issuanceCallCount)
+    }
+
+    /**
+     * `UnconfinedTestDispatcher` (used by every other test in this class) runs each coroutine
+     * eagerly to its next suspension point, including the separate collector `BaseViewModel` uses
+     * to reduce partial states into `uiState` — so a guard reading `uiState.value.isIssuing` looks
+     * correct here even though it isn't. `StandardTestDispatcher` schedules coroutines instead of
+     * running them inline, which reproduces the real ordering: two intents queued back to back,
+     * then let run together, is how a user's two quick taps actually reach the ViewModel. This is
+     * the scenario MR !244 review item 4 asked to be covered.
+     */
+    @Test
+    fun issuePaymentSheet_twoIntentsQueuedBeforeEitherRuns_onlyCallsRepositoryOnce() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        Dispatchers.setMain(dispatcher)
+        fakeRepository.issuanceNeverCompletes = true
+        val viewModel = buildViewModel()
+        viewModel.sendIntent(PaymentSheetIntent.Load(debitNumber = "123456789010", branchCode = "6400"))
+        advanceUntilIdle()
+
+        viewModel.sendIntent(PaymentSheetIntent.IssuePaymentSheet)
+        viewModel.sendIntent(PaymentSheetIntent.IssuePaymentSheet)
+        advanceUntilIdle()
 
         assertEquals(1, fakeRepository.issuanceCallCount)
     }

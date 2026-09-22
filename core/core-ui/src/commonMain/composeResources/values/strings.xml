@@ -3436,7 +3436,6 @@
     <string name="label_installment_amount_paid">مبلغ پرداختی</string>
     <string name="label_installment_sub_debit_number">شماره فرعی بدهی</string>
     <string name="label_installment_paid_count">اقساط پرداخت‌شده</string>
-    <string name="btn_issue_payment_sheet_for_installment">صدور برگ پرداخت این قسط</string>
 
     <string name="view_detail_request_title">جزئیات درخواست</string>
     <string name="view_detail_section_file_info">اطلاعات کلی پرونده</string>

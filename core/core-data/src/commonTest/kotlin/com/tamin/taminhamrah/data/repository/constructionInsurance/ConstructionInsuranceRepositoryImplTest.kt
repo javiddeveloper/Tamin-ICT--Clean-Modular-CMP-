@@ -77,8 +77,20 @@ class ConstructionInsuranceRepositoryImplTest {
         remoteDataSource.shouldThrowError = true
 
         repository.getConstructionFiles().test {
-            awaitItem() // first emission: empty local list
+            // An empty cache is never emitted — it would show as "not found" instead of loading.
             awaitError()
+        }
+    }
+
+    @Test
+    fun `getConstructionFiles should emit only the remote result when the cache is empty`() = runTest {
+        dao.filesFlow.value = emptyList()
+        remoteDataSource.constructionFilesResult = ListData(total = 1, list = listOf(createFileDTO(fileNumber = 2L)))
+
+        repository.getConstructionFiles().test {
+            val onlyEmission = awaitItem()
+            assertEquals(listOf(2L), onlyEmission.map { it.fileNumber })
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -103,11 +115,10 @@ class ConstructionInsuranceRepositoryImplTest {
         val search = ConstructionFileSearchParamsDN(fileNo = "2", reqNo = null, workshopId = null, branchCode = null)
 
         repository.getConstructionFiles(search).test {
-            val firstEmission = awaitItem()
-            assertEquals(emptyList<Long>(), firstEmission.map { it.fileNumber })
-
-            val secondEmission = awaitItem()
-            assertEquals(listOf(2L), secondEmission.map { it.fileNumber })
+            // No matching cached file, so the only emission is the remote result — no empty
+            // first emission that would flash a "not found" state while loading.
+            val emission = awaitItem()
+            assertEquals(listOf(2L), emission.map { it.fileNumber })
 
             cancelAndIgnoreRemainingEvents()
         }
@@ -133,8 +144,7 @@ class ConstructionInsuranceRepositoryImplTest {
         val search = ConstructionFileSearchParamsDN(fileNo = "2", reqNo = null, workshopId = null, branchCode = null)
 
         repository.getConstructionFiles(search).test {
-            val firstEmission = awaitItem()
-            assertEquals(emptyList<Long>(), firstEmission.map { it.fileNumber })
+            // No matching cached file to fall back to, so the failure surfaces directly.
             awaitError()
         }
     }

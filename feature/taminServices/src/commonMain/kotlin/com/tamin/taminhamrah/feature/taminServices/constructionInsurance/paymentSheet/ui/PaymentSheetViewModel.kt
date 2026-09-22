@@ -32,6 +32,7 @@ class PaymentSheetViewModel(
     private var debitNumber: String = ""
     private var branchCode: String = ""
     private var hasLoaded = false
+    private var isIssuing = false
 
     override fun handleIntent(intent: PaymentSheetIntent): Flow<PartialState> =
         when (intent) {
@@ -114,10 +115,13 @@ class PaymentSheetViewModel(
      * (`DialogManagerMessageOfRequest`) before sending the intent — that confirmation is a UI
      * concern, so this fires the request immediately once the intent arrives. Intents are merged
      * rather than serialized ([BaseViewModel]), so a second confirm fired before this flow starts
-     * running must be rejected here rather than relying on the UI's disabled-button state alone.
+     * running must be rejected here. [isIssuing] is a plain field set synchronously before the
+     * first suspension point, not the reduced [uiState] — that state is applied by a separate
+     * collector, so a second intent arriving before it catches up would still read `false` there.
      */
     private fun issuePaymentSheet(): Flow<PartialState> = flow {
-        if (uiState.value.isIssuing) return@flow
+        if (isIssuing) return@flow
+        isIssuing = true
         emit(PartialState.IssuanceFailed(false))
         emit(PartialState.IssuanceLoading(true))
         try {
@@ -129,6 +133,7 @@ class PaymentSheetViewModel(
             sendEvent(PaymentSheetEvent.ShowError(e.toSingleLineMessage()))
             emit(PartialState.IssuanceFailed(true))
         } finally {
+            isIssuing = false
             emit(PartialState.IssuanceLoading(false))
         }
     }

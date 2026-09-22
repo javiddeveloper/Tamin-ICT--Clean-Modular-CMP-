@@ -16,7 +16,6 @@ import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.constructionInsurance.ConstructionInsuranceRepository
 import com.tamin.taminhamrah.useCases.constructionInsurance.GetInstallmentConstructionListPageUseCase
-import com.tamin.taminhamrah.useCases.constructionInsurance.IssuancePaymentSheetUseCase
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -24,11 +23,9 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -55,7 +52,6 @@ class InstallmentManagementViewModelTest {
 
     private fun buildViewModel() = InstallmentManagementViewModel(
         getInstallmentConstructionListPageUseCase = GetInstallmentConstructionListPageUseCase(fakeRepository),
-        issuancePaymentSheetUseCase = IssuancePaymentSheetUseCase(fakeRepository),
     )
 
     private fun sampleInstallment(debitSubCode: String = "1") = InstallmentConstructionListDN(
@@ -165,66 +161,6 @@ class InstallmentManagementViewModelTest {
 
         assertEquals("مرحلهٔ اول تقسیط بدهی ساختمانی", viewModel.uiState.value.debitStepDescription)
     }
-
-    @Test
-    fun issuePaymentSheet_success_setsIssuanceMessage() = runTest {
-        fakeRepository.issuanceMessageResult = "برگه پرداخت با موفقیت صادر شد."
-        val viewModel = buildViewModel()
-        viewModel.sendIntent(InstallmentManagementIntent.Load(fileNumber = null, workshopId = "1", branchId = "1", debitNumber = "1"))
-
-        viewModel.sendIntent(InstallmentManagementIntent.IssuePaymentSheet)
-
-        val state = viewModel.uiState.value
-        assertEquals("برگه پرداخت با موفقیت صادر شد.", state.issuanceMessage)
-        assertFalse(state.issuanceFailed)
-        assertFalse(state.isIssuing)
-        assertEquals("1", fakeRepository.lastIssuanceDebitNumber)
-    }
-
-    @Test
-    fun issuePaymentSheet_error_marksIssuanceFailedAndSendsShowErrorEvent() = runTest {
-        fakeRepository.shouldThrowOnIssuance = true
-        val viewModel = buildViewModel()
-        viewModel.sendIntent(InstallmentManagementIntent.Load(fileNumber = null, workshopId = "1", branchId = "1", debitNumber = "1"))
-
-        viewModel.events.test {
-            viewModel.sendIntent(InstallmentManagementIntent.IssuePaymentSheet)
-            assertIs<InstallmentManagementEvent.ShowError>(awaitItem())
-            cancelAndIgnoreRemainingEvents()
-        }
-
-        assertTrue(viewModel.uiState.value.issuanceFailed)
-        assertFalse(viewModel.uiState.value.isIssuing)
-    }
-
-    @Test
-    fun issuePaymentSheet_whileAlreadyIssuing_doesNotCallRepositoryTwice() = runTest {
-        fakeRepository.issuanceNeverCompletes = true
-        val viewModel = buildViewModel()
-        viewModel.sendIntent(InstallmentManagementIntent.Load(fileNumber = null, workshopId = "1", branchId = "1", debitNumber = "1"))
-
-        viewModel.sendIntent(InstallmentManagementIntent.IssuePaymentSheet)
-        assertTrue(viewModel.uiState.value.isIssuing)
-
-        viewModel.sendIntent(InstallmentManagementIntent.IssuePaymentSheet)
-
-        assertEquals(1, fakeRepository.issuanceCallCount)
-    }
-
-    @Test
-    fun dismissIssuanceNotice_clearsIssuanceMessageWithoutNavigatingBack() = runTest {
-        fakeRepository.issuanceMessageResult = "برگه پرداخت با موفقیت صادر شد."
-        val viewModel = buildViewModel()
-        viewModel.sendIntent(InstallmentManagementIntent.Load(fileNumber = null, workshopId = "1", branchId = "1", debitNumber = "1"))
-        viewModel.sendIntent(InstallmentManagementIntent.IssuePaymentSheet)
-        assertNotNull(viewModel.uiState.value.issuanceMessage)
-
-        viewModel.events.test {
-            viewModel.sendIntent(InstallmentManagementIntent.DismissIssuanceNotice)
-            expectNoEvents()
-        }
-        assertNull(viewModel.uiState.value.issuanceMessage)
-    }
 }
 
 private class FakeConstructionInsuranceRepository : ConstructionInsuranceRepository {
@@ -233,12 +169,6 @@ private class FakeConstructionInsuranceRepository : ConstructionInsuranceReposit
     var shouldThrowOnPage = false
     var lastDebitNumber: String? = null
     var lastBranchId: String? = null
-
-    var issuanceMessageResult: String = "OK"
-    var shouldThrowOnIssuance = false
-    var issuanceNeverCompletes = false
-    var issuanceCallCount = 0
-    var lastIssuanceDebitNumber: String? = null
 
     override fun getConstructionFiles(search: ConstructionFileSearchParamsDN?): Flow<List<ConstructionFileDN>> = flow {
         emit(emptyList())
@@ -261,11 +191,7 @@ private class FakeConstructionInsuranceRepository : ConstructionInsuranceReposit
     }
 
     override fun issuancePaymentSheet(debitNumber: String): Flow<String> = flow {
-        issuanceCallCount++
-        lastIssuanceDebitNumber = debitNumber
-        if (issuanceNeverCompletes) awaitCancellation()
-        if (shouldThrowOnIssuance) throw RuntimeException("Error")
-        emit(issuanceMessageResult)
+        emit("OK")
     }
 
     override fun getInstallmentLetterListPage(

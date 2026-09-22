@@ -93,10 +93,6 @@ import taminx.core.core_ui.to_date
 import taminx.core.core_ui.workshop_number
 import taminx.core.core_ui.Res as CoreRes
 
-/** مرحله بدهی status text this branch's data uses; matched by substring since no status code exists on [InstallmentLetterPR]. */
-private const val STATUS_KEYWORD_OVERDUE = "معوق"
-private const val STATUS_KEYWORD_PAID = "پرداخت شده"
-
 @Composable
 fun InstallmentLetterRoute(
     viewModel: InstallmentLetterViewModel,
@@ -296,7 +292,7 @@ private fun InstallmentLetterCard(
     onDebitListShortcutClick: () -> Unit = {},
 ) {
     val colors = LocalTaminColors.current
-    val (statusContainer, statusContent) = installmentStatusColors(item.debitStatusDescription)
+    val (statusContainer, statusContent) = installmentStatusColors()
     var menuOpen by remember { mutableStateOf(false) }
 
     Column(
@@ -443,20 +439,15 @@ private fun InfoTile(label: String, value: String, modifier: Modifier = Modifier
 }
 
 /**
- * Maps the free-text `debitStatusDescription` to a status-pill color pair. There is no status
- * code on [InstallmentLetterPR] (see `InstallmentLetterDN`/`InstallmentLetterDTO`) — only the
- * description string the API sends — so this matches the known phrases substring-wise and falls
- * back to a neutral blue for anything else (e.g. «سررسید نشده») rather than guessing.
+ * The status-pill color pair for `debitStatusDescription`. There is no status code on
+ * [InstallmentLetterPR] (see `InstallmentLetterDN`/`InstallmentLetterDTO`) — only free text the API
+ * sends — so this doesn't try to classify it by matching Persian phrases (MR !244 review item 9);
+ * every status gets the same neutral treatment, and the text itself is shown as-is on the pill.
  */
 @Composable
-private fun installmentStatusColors(status: String?): Pair<Color, Color> {
+private fun installmentStatusColors(): Pair<Color, Color> {
     val colors = LocalTaminColors.current
-    return when {
-        status == null -> colors.bgPage to colors.textMuted
-        status.contains(STATUS_KEYWORD_OVERDUE) -> colors.dangerBorder to colors.dangerText
-        status.contains(STATUS_KEYWORD_PAID) -> colors.greenBg to colors.greenText
-        else -> colors.blueBg to colors.blueText
-    }
+    return colors.blueBg to colors.blueText
 }
 
 // ─── Preview ──────────────────────────────────────────────────────────────────

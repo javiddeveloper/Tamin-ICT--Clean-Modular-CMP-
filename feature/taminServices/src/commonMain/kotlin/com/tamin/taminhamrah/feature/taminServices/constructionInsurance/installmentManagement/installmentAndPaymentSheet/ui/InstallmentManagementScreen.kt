@@ -9,33 +9,26 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
-import androidx.compose.material.icons.outlined.PriorityHigh
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -49,12 +42,8 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
-import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.StatusPill
-import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
-import com.tamin.taminhamrah.ui.components.TaminFilledButton
-import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.coloredShadow
@@ -73,19 +62,12 @@ import com.tamin.taminhamrah.util.toFormattedDate
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.action_back
-import taminx.core.core_ui.action_cancel
-import taminx.core.core_ui.btn_issue_payment_sheet_for_installment
 import taminx.core.core_ui.deferred_installment_rial
-import taminx.core.core_ui.issue_payment_sheet_confirm_button
-import taminx.core.core_ui.issue_payment_sheet_confirm_message
-import taminx.core.core_ui.issue_payment_sheet_confirm_title
 import taminx.core.core_ui.installment_management_empty
 import taminx.core.core_ui.installment_management_title
 import taminx.core.core_ui.label_debit_number
 import taminx.core.core_ui.label_installment_paid_count
 import taminx.core.core_ui.label_payment_date
-import taminx.core.core_ui.objection_document_got_it
-import taminx.core.core_ui.payment_sheet_issuance_processing_notice
 import taminx.core.core_ui.Res as CoreRes
 
 @Composable
@@ -141,7 +123,6 @@ fun InstallmentManagementScreen(
 ) {
     val colors = LocalTaminColors.current
     val listState = rememberLazyListState()
-    var showIssueConfirm by remember { mutableStateOf(false) }
 
     listState.OnLoadMore(
         enabled = !state.endReached && state.paginationError == null,
@@ -217,11 +198,7 @@ fun InstallmentManagementScreen(
                         items = state.items,
                         key = { "${it.debitNumber}-${it.debitSubCode}" }
                     ) { installment ->
-                        InstallmentCard(
-                            item = installment,
-                            isIssuing = state.isIssuing,
-                            onIssuePaymentSheetClick = { showIssueConfirm = true },
-                        )
+                        InstallmentCard(item = installment)
                     }
                     item {
                         PagingFooter(
@@ -233,49 +210,6 @@ fun InstallmentManagementScreen(
                 }
             }
         }
-    }
-
-    state.issuanceMessage?.let {
-        TaminConfirmationDialog(
-            title = stringResource(CoreRes.string.issue_payment_sheet_confirm_title),
-            description = stringResource(CoreRes.string.payment_sheet_issuance_processing_notice),
-            icon = Icons.Outlined.PriorityHigh,
-            confirmButton = {
-                TaminFilledButton(
-                    text = stringResource(CoreRes.string.objection_document_got_it),
-                    onClick = { onIntent(InstallmentManagementIntent.DismissIssuanceNotice) },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            },
-            dismissButton = {},
-            onDismissRequest = { onIntent(InstallmentManagementIntent.DismissIssuanceNotice) },
-        )
-    }
-
-    if (showIssueConfirm) {
-        TaminConfirmationDialog(
-            title = stringResource(CoreRes.string.issue_payment_sheet_confirm_title),
-            description = stringResource(CoreRes.string.issue_payment_sheet_confirm_message),
-            icon = Icons.Outlined.PriorityHigh,
-            confirmButton = {
-                TaminFilledButton(
-                    text = stringResource(CoreRes.string.issue_payment_sheet_confirm_button),
-                    onClick = {
-                        showIssueConfirm = false
-                        onIntent(InstallmentManagementIntent.IssuePaymentSheet)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            },
-            dismissButton = {
-                TaminOutlinedButton(
-                    text = stringResource(CoreRes.string.action_cancel),
-                    onClick = { showIssueConfirm = false },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            },
-            onDismissRequest = { showIssueConfirm = false },
-        )
     }
 }
 
@@ -324,16 +258,10 @@ private fun InstallmentSummaryCard(
     }
 }
 
-/**
- * One قسط row — number badge, amount, status pill + payment date, and (only while unpaid) the
- * «صدور برگ پرداخت این قسط» action, which reuses the whole-debit issuance call (see
- * [InstallmentManagementViewModel.issuePaymentSheet] — there is no per-installment endpoint).
- */
+/** One قسط row — number badge, amount, status pill + payment date. Read-only, as in legacy. */
 @Composable
 private fun InstallmentCard(
     item: InstallmentConstructionListPR,
-    isIssuing: Boolean,
-    onIssuePaymentSheetClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
@@ -393,20 +321,6 @@ private fun InstallmentCard(
             }
             Spacer(modifier = Modifier.weight(1f))
             StatusPill(text = item.lastPaymentSheetDescription.orDash(), containerColor = badgeBg, contentColor = badgeFg)
-        }
-
-        if (!paid) {
-            LoadingButton(
-                textStyle = MaterialTheme.typography.titleSmall,
-                text = stringResource(CoreRes.string.btn_issue_payment_sheet_for_installment),
-                onClick = onIssuePaymentSheetClick,
-                icon = Icons.AutoMirrored.Outlined.ReceiptLong,
-                enabled = !isIssuing,
-                isLoading = isIssuing,
-                background = SolidColor(colors.blueBg),
-                contentColor = colors.blueText,
-                modifier = Modifier.fillMaxWidth().height(48.dp),
-            )
         }
     }
 }

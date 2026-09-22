@@ -9,9 +9,7 @@ import com.tamin.taminhamrah.mapper.toPR
 import com.tamin.taminhamrah.paging.Paginator
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.constructionInsurance.GetInstallmentConstructionListPageUseCase
-import com.tamin.taminhamrah.useCases.constructionInsurance.IssuancePaymentSheetUseCase
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
@@ -21,7 +19,6 @@ import kotlinx.coroutines.flow.merge
 
 class InstallmentManagementViewModel(
     private val getInstallmentConstructionListPageUseCase: GetInstallmentConstructionListPageUseCase,
-    private val issuancePaymentSheetUseCase: IssuancePaymentSheetUseCase,
 ) : BaseViewModel<InstallmentManagementUiState, PartialState, InstallmentManagementEvent, InstallmentManagementIntent>(
     initialState = InstallmentManagementUiState()
 ) {
@@ -67,39 +64,11 @@ class InstallmentManagementViewModel(
 
             InstallmentManagementIntent.RetryNextPage -> flow { paginator.retry() }
 
-            InstallmentManagementIntent.IssuePaymentSheet -> issuePaymentSheet()
-
-            InstallmentManagementIntent.DismissIssuanceNotice -> flow {
-                emit(PartialState.IssuanceNoticeDismissed)
-            }
-
             InstallmentManagementIntent.OnBackClicked -> {
                 sendEvent(InstallmentManagementEvent.NavigateBack)
                 emptyFlow()
             }
         }
-
-    /**
-     * «صدور برگ پرداخت این قسط» — the old app only ever issues a payment sheet per whole debit
-     * (`issuancePaymentSheet(debitNumber)`); there is no per-installment endpoint, so the per-row
-     * button in the new design triggers the same call as `PaymentSheetViewModel.issuePaymentSheet`.
-     */
-    private fun issuePaymentSheet(): Flow<PartialState> = flow {
-        if (uiState.value.isIssuing) return@flow
-        emit(PartialState.IssuanceFailed(false))
-        emit(PartialState.IssuanceLoading(true))
-        try {
-            val message = issuancePaymentSheetUseCase(debitNumber).first()
-            emit(PartialState.IssuanceSucceeded(message))
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            sendEvent(InstallmentManagementEvent.ShowError(e.toSingleLineMessage()))
-            emit(PartialState.IssuanceFailed(true))
-        } finally {
-            emit(PartialState.IssuanceLoading(false))
-        }
-    }
 
     private fun observePaging(): Flow<PartialState> = paginator.state.map { paging ->
         val errorMessage = paging.error?.toSingleLineMessage()
@@ -137,14 +106,6 @@ class InstallmentManagementViewModel(
         )
 
         is PartialState.Error -> currentState.copy(isLoading = false, error = partialState.message)
-
-        is PartialState.IssuanceLoading -> currentState.copy(isIssuing = partialState.loading)
-        is PartialState.IssuanceSucceeded -> currentState.copy(
-            issuanceMessage = partialState.message,
-            issuanceFailed = false,
-        )
-        is PartialState.IssuanceFailed -> currentState.copy(issuanceFailed = partialState.failed)
-        is PartialState.IssuanceNoticeDismissed -> currentState.copy(issuanceMessage = null)
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)

@@ -42,6 +42,7 @@ import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.payment
 import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.components.ConstructionRequestHeroCard
 import com.tamin.taminhamrah.model.constructionInsurance.BuildingRequestSummaryPR
 import com.tamin.taminhamrah.model.constructionInsurance.PaymentSheetConstructionFilePR
+import com.tamin.taminhamrah.model.constructionInsurance.PaymentSheetStatusDN
 import com.tamin.taminhamrah.model.constructionInsurance.WorkshopIdInfoPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -285,31 +286,18 @@ fun PaymentSheetScreen(
     }
 }
 
-/**
- * The text/container/content triple a payment sheet's status pill is drawn from.
- *
- * Legacy compares the server's status as a bare code — `status == "1"` → «پرداخت شده» (green),
- * anything else → «پرداخت نشده» (red) — a strict binary, not the four-way pending/expired/void
- * split this screen used to draw from Persian substrings. This now matches that binary exactly:
- * a `"1"` code or the «پرداخت شده» text itself means paid; every other non-null value, whatever its
- * shape, is shown as unpaid. Which shape the live `getPaymentSheetConstructionInfo` service actually
- * sends (a code or free text) still couldn't be confirmed from client code alone (MR !244 review
- * item 5) — but the mapping itself no longer needs that answer, since both shapes now resolve to
- * the same two legacy states.
- */
-private const val PAID_STATUS_CODE = "1"
-
+/** The text/container/content triple a payment sheet's status pill is drawn from [PaymentSheetStatusDN]. */
 @Composable
 private fun paymentStatusDisplay(status: String?): Triple<String, Color, Color> {
     val colors = LocalTaminColors.current
-    return when {
-        status == null -> Triple("-", colors.chipBg, colors.textSecondary)
-        status == PAID_STATUS_CODE || status.contains("پرداخت شده") -> Triple(
+    return when (PaymentSheetStatusDN.from(status)) {
+        PaymentSheetStatusDN.UNKNOWN -> Triple("-", colors.chipBg, colors.textSecondary)
+        PaymentSheetStatusDN.PAID -> Triple(
             stringResource(CoreRes.string.payment_sheet_status_paid),
             colors.greenBg,
             colors.greenText,
         )
-        else -> Triple(
+        PaymentSheetStatusDN.UNPAID -> Triple(
             stringResource(CoreRes.string.payment_sheet_status_unpaid),
             colors.dangerBorder,
             colors.dangerText,

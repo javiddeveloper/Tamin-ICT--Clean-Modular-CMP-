@@ -42,7 +42,12 @@ internal class ConstructionInsuranceRepositoryImpl(
         return flow {
             val matchingLocalFiles = constructionFileDao.getConstructionFiles().first()
                 .filter { it.matches(search) }
-            emit(matchingLocalFiles.map { it.toDomain() })
+            // Only the file(s) from the last detail search are ever cached (the paged list never
+            // writes to it), so most searches find nothing here. Emitting an empty list anyway
+            // would show as "not found" until the network answers instead of the loading state.
+            if (matchingLocalFiles.isNotEmpty()) {
+                emit(matchingLocalFiles.map { it.toDomain() })
+            }
 
             try {
                 val query = buildQuery(search)

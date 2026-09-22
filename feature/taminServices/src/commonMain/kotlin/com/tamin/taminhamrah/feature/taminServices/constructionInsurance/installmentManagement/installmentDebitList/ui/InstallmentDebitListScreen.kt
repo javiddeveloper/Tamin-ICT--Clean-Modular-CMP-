@@ -71,10 +71,6 @@ import taminx.core.core_ui.to_date
 import taminx.core.core_ui.workshop_number
 import taminx.core.core_ui.Res as CoreRes
 
-/** مرحله بدهی status text this branch's data uses; matched by substring, same idiom as `InstallmentLetterScreen`'s `installmentStatusColors`. */
-private const val STATUS_KEYWORD_OVERDUE = "معوق"
-private const val STATUS_KEYWORD_SETTLED = "تسویه"
-
 @Composable
 fun InstallmentDebitListRoute(
     viewModel: InstallmentDebitListViewModel,
@@ -219,7 +215,7 @@ fun InstallmentDebitListScreen(
 @Composable
 private fun InstallmentDebitCard(item: InstallmentDebitListPR, modifier: Modifier = Modifier) {
     val colors = LocalTaminColors.current
-    val (statusContainer, statusContent) = installmentDebitStatusColors(item.debitStatusDescription)
+    val (statusContainer, statusContent) = installmentDebitStatusColors()
 
     Column(
         modifier = modifier
@@ -326,19 +322,15 @@ private fun DebitInfoTile(label: String, value: String, modifier: Modifier = Mod
 }
 
 /**
- * Maps the free-text `debitStatusDescription` to a status-pill color pair, same substring idiom as
+ * The status-pill color pair for `debitStatusDescription`, same reasoning as
  * `InstallmentLetterScreen.installmentStatusColors` — there is no status code on
- * [InstallmentDebitListPR], only the description string the API sends.
+ * [InstallmentDebitListPR], only free text the API sends, so this doesn't classify it by matching
+ * Persian phrases (MR !244 review item 9); every status gets the same neutral treatment.
  */
 @Composable
-private fun installmentDebitStatusColors(status: String?): Pair<Color, Color> {
+private fun installmentDebitStatusColors(): Pair<Color, Color> {
     val colors = LocalTaminColors.current
-    return when {
-        status == null -> colors.bgPage to colors.textMuted
-        status.contains(STATUS_KEYWORD_OVERDUE) -> colors.dangerBorder to colors.dangerText
-        status.contains(STATUS_KEYWORD_SETTLED) -> colors.greenBg to colors.greenText
-        else -> colors.blueBg to colors.blueText
-    }
+    return colors.blueBg to colors.blueText
 }
 
 // ─── Preview ──────────────────────────────────────────────────────────────────
