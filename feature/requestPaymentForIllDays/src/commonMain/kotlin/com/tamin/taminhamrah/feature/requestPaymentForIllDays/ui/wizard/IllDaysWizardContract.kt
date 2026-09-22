@@ -139,7 +139,6 @@ sealed interface IllDaysWizardIntent {
     data object Retry : IllDaysWizardIntent
     data object OpenBranchPicker : IllDaysWizardIntent
     data object OpenCityPicker : IllDaysWizardIntent
-    data class CitySearchQuery(val query: String) : IllDaysWizardIntent
     data object DismissPicker : IllDaysWizardIntent
     data class BranchPicked(val branch: IllDaysBranchWorkshopPR) : IllDaysWizardIntent
     data class CityPicked(val city: CityPR) : IllDaysWizardIntent

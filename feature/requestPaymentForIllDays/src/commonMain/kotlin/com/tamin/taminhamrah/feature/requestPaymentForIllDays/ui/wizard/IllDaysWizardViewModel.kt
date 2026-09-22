@@ -53,7 +53,6 @@ class IllDaysWizardViewModel(
             IllDaysWizardIntent.OpenBranchPicker ->
                 emit(PartialState.PickerChanged(IllDaysWizardPicker.Branch))
             IllDaysWizardIntent.OpenCityPicker -> openCityPicker()
-            is IllDaysWizardIntent.CitySearchQuery -> searchCities(intent.query)
             IllDaysWizardIntent.DismissPicker ->
                 emit(PartialState.PickerChanged(IllDaysWizardPicker.None))
             is IllDaysWizardIntent.BranchPicked -> {
@@ -191,18 +190,6 @@ class IllDaysWizardViewModel(
             }
         }
         emit(PartialState.PickerChanged(IllDaysWizardPicker.City))
-    }
-
-    private suspend fun kotlinx.coroutines.flow.FlowCollector<PartialState>.searchCities(query: String) {
-        try {
-            val cities = getCitiesUseCase(cityName = query.takeIf { it.isNotBlank() })
-                .first()
-                .toCityPresentation()
-                .toImmutableList()
-            emit(PartialState.CitiesLoaded(cities))
-        } catch (error: Throwable) {
-            sendEvent(IllDaysWizardEvent.ShowToast(error.toSingleLineMessage()))
-        }
     }
 
     private suspend fun kotlinx.coroutines.flow.FlowCollector<PartialState>.handleNext() {
