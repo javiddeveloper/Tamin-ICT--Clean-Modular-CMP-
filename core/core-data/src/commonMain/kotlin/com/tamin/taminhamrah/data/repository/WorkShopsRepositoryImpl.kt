@@ -383,11 +383,9 @@ class WorkShopsRepositoryImpl(
         val filters = buildFilters {
             add(FilterProperty.WORKSHOPID_ID, query.workshopId)
             add(FilterProperty.WORKSHOPID_BRANCH_CODE, query.branchCode)
-            // The stakeholder endpoint nests person fields under `workshopId`, not `insurance` —
-            // the old client sent insurance.* here which the data source silently dropped, so
-            // stakeholder search was always unfiltered. These are the keys the endpoint reads.
-            add(FilterProperty.WORKSHOPID_PERSON_ID, query.insuranceNumber)
-            add(FilterProperty.WORKSHOPID_PERSON_NATIONAL_ID, query.nationalId)
+            // The row's own national-code column — see FilterProperty.STAKEHOLDER_NATIONAL_ID for
+            // why not `workshopId.*`, which is the workshop entity and answers 500.
+            add(FilterProperty.STAKEHOLDER_NATIONAL_ID, query.nationalId)
         }
         return remoteDataSource
             .getWorkshopStackHolders(pageQuery(query.page, query.pageSize, filters))
