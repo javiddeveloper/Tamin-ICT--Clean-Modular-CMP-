@@ -14,9 +14,6 @@ data class ProfileUiState(
     val profileImage: String? = null,
     val identityInfo: IdentityInfoPR? = null,
     val taminRelation: TaminRelationPR? = null,
-    val imageRequestResult: String? = null,
-    val isImageRequestLoading: Boolean = false,
-    val imageRequestError: String? = null,
     val dependentsCount: Int = 0,
     val activeRelationCount: Int = 0,
     val inactiveRelationCount: Int = 0,
@@ -31,9 +28,6 @@ data class ProfileUiState(
         data class TaminRelationLoaded(val relation: TaminRelationPR?) : PartialState()
         data class DependentsCountLoaded(val count: Int) : PartialState()
         data class ActiveRelationStatusLoaded(val activeCount: Int, val inactiveCount: Int) : PartialState()
-        data class ImageRequestLoading(val isLoading: Boolean) : PartialState()
-        data class ImageRequestResult(val result: String) : PartialState()
-        data class ImageRequestError(val message: String) : PartialState()
         sealed class ScreenStateChanged : PartialState() {
             data object Loading : ScreenStateChanged()
             data object Success : ScreenStateChanged()
@@ -46,7 +40,6 @@ sealed class ProfileIntent {
     data class LoadProfile(val userId: String? = null) : ProfileIntent()
     data object Logout : ProfileIntent()
     data class OnItemClick(val item: ProfileMenuItem) : ProfileIntent()
-    data class SendImageRequest(val branchCode: String, val filter: String) : ProfileIntent()
 
     data object NavigateToDependentsList : ProfileIntent()
     data class ToggleTheme(val isDark: Boolean) : ProfileIntent()

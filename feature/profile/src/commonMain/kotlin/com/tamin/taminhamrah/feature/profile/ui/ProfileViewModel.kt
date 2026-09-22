@@ -19,7 +19,6 @@ import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
 import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
 import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
-import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
 import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
@@ -37,7 +36,6 @@ class ProfileViewModel(
     private val identityInfoUseCase: IdentityInfoUseCase,
     private val getUserProfileImageUseCase: UserProfileImageUseCase,
     private val taminRelationUseCase: TaminRelationUseCase,
-    private val sendImageRequestUseCase: SendImageRequestUseCase,
     private val subdominantUseCase: SubdominantUseCase,
     private val signOutUseCase: SignOutUseCase,
     private val getSignOutUrlUseCase: GetSignOutUrlUseCase,
@@ -55,10 +53,6 @@ class ProfileViewModel(
             is ProfileIntent.LoadProfile -> handleLoadProfile(intent.userId)
             is ProfileIntent.Logout -> handleLogout()
             is ProfileIntent.OnItemClick -> handleItemClick(intent.item)
-            is ProfileIntent.SendImageRequest -> handleSendImageRequest(
-                intent.branchCode,
-                intent.filter
-            )
             is ProfileIntent.NavigateToDependentsList -> handleNavigateToDependentsList()
             is ProfileIntent.ToggleTheme -> handleToggleTheme(intent.isDark)
         }
@@ -158,15 +152,6 @@ class ProfileViewModel(
         return emptyFlow()
     }
 
-    private fun handleSendImageRequest(branchCode: String, filter: String): Flow<PartialState> = flow {
-        emit(PartialState.ImageRequestLoading(true))
-        sendImageRequestUseCase(branchCode, filter)
-            .collect { result ->
-                emit(PartialState.ImageRequestResult(result))
-            }
-    }
-
-
     private fun handleNavigateToDependentsList(): Flow<PartialState> {
         return flow {
             sendEvent(ProfileEvent.NavigateToDependentsList)
@@ -237,20 +222,6 @@ class ProfileViewModel(
             activeRelationCount = partialState.activeCount,
             inactiveRelationCount = partialState.inactiveCount,
             isActiveRelationLoading = false
-        )
-
-        is PartialState.ImageRequestLoading -> currentState.copy(
-            isImageRequestLoading = partialState.isLoading,
-            imageRequestError = null
-        )
-
-        is PartialState.ImageRequestResult -> currentState.copy(
-            isImageRequestLoading = false,
-            imageRequestResult = partialState.result
-        )
-        is PartialState.ImageRequestError -> currentState.copy(
-            isImageRequestLoading = false,
-            imageRequestError = partialState.message
         )
 
         is PartialState.ScreenStateChanged -> when (partialState) {
