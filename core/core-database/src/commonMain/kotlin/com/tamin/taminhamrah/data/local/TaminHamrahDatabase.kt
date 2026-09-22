@@ -99,7 +99,8 @@ import kotlinx.coroutines.IO
         HistoryWageRowEntity::class,
         HomeContentEntity::class,
     ],
-    version = 4,
+    // v5: FeatureFlag ids changed; cached home_content stored the old flagId.
+    version = 5,
 )
 @ConstructedBy(TaminXDatabaseConstructor::class)
 @TypeConverters(TaminHamrahConverters::class)

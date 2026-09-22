@@ -101,7 +101,7 @@ class AgentActionDispatcherTest {
     @Test
     fun `dispatch - when feature is ENABLED - executes service and returns Success`() = runTest {
         // Arrange
-        fakeFeatureManager.setStatus(FeatureFlag.WAGE_AND_HISTORY, FeatureStatus.Enabled)
+        fakeFeatureManager.setStatus(FeatureFlag.COMBINED_RECORD, FeatureStatus.Enabled)
         val entity = buildEntity(AgentActionKey.DASTMOZD_INFOS)
 
         // Act
@@ -118,8 +118,8 @@ class AgentActionDispatcherTest {
     @Test
     fun `dispatch - when feature DISABLED - uses entity message from AI server first`() = runTest {
         // Arrange: AI server sends a specific disabled message
-        fakeFeatureManager.setStatus(FeatureFlag.WAGE_AND_HISTORY, FeatureStatus.Disabled("Updating..."))
-        fakeFeatureManager.setDisabledMessage(FeatureFlag.WAGE_AND_HISTORY, "FeatureManager Message")
+        fakeFeatureManager.setStatus(FeatureFlag.COMBINED_RECORD, FeatureStatus.Disabled("Updating..."))
+        fakeFeatureManager.setDisabledMessage(FeatureFlag.COMBINED_RECORD, "FeatureManager Message")
         val entity = buildEntity(
             action = AgentActionKey.DASTMOZD_INFOS,
             message = "The history service is temporarily unavailable." // AI server message
@@ -143,8 +143,8 @@ class AgentActionDispatcherTest {
     @Test
     fun `dispatch - when DISABLED and no AI message - falls back to FeatureManager message`() = runTest {
         // Arrange: AI sends no message, but FeatureManager has a predefined message
-        fakeFeatureManager.setStatus(FeatureFlag.WAGE_AND_HISTORY, FeatureStatus.Disabled(null))
-        fakeFeatureManager.setDisabledMessage(FeatureFlag.WAGE_AND_HISTORY, "Service is currently updating")
+        fakeFeatureManager.setStatus(FeatureFlag.COMBINED_RECORD, FeatureStatus.Disabled(null))
+        fakeFeatureManager.setDisabledMessage(FeatureFlag.COMBINED_RECORD, "Service is currently updating")
         val entity = buildEntity(
             action = AgentActionKey.DASTMOZD_INFOS,
             message = null // AI sent no message
@@ -163,8 +163,8 @@ class AgentActionDispatcherTest {
     @Test
     fun `dispatch - when DISABLED with no messages anywhere - leaves the message to the screen`() = runTest {
         // Arrange: Neither AI nor FeatureManager provides a message
-        fakeFeatureManager.setStatus(FeatureFlag.WAGE_AND_HISTORY, FeatureStatus.TemporaryDisabled(null))
-        fakeFeatureManager.setDisabledMessage(FeatureFlag.WAGE_AND_HISTORY, null)
+        fakeFeatureManager.setStatus(FeatureFlag.COMBINED_RECORD, FeatureStatus.TemporaryDisabled(null))
+        fakeFeatureManager.setDisabledMessage(FeatureFlag.COMBINED_RECORD, null)
         val entity = buildEntity(AgentActionKey.DASTMOZD_INFOS, message = null)
 
         // Act
