@@ -327,7 +327,7 @@ private fun MarkdownSection(
 private fun FormulaRow(formula: MarkdownBlock.Formula, color: Color) {
     // The app's font, like the prose around it; a bare TextStyle would fall back to the system font.
     val style = MaterialTheme.typography.bodyMedium.copy(color = color, fontSize = FORMULA_FONT_SIZE, lineHeight = FORMULA_LINE_HEIGHT)
-    val mathStyle = style.copy(color = AgentGlass.accent)
+    val mathStyle = style.copy(color = AgentGlass.formula)
     val direction = if (MathParser.isRightToLeft(formula.expression)) LayoutDirection.Rtl else LayoutDirection.Ltr
     CompositionLocalProvider(LocalLayoutDirection provides direction) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {

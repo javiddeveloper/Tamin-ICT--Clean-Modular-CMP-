@@ -35,8 +35,10 @@ internal object AgentGlass {
     val textPrimary: Color = Color(0xFFE2ECFF)
     val textSecondary: Color = Color(0xFFA9BDE6)
     val iconTint: Color = Color(0xFFD5E1FA)
-    /** Links, math and table headers — the dark theme's info blue, readable on the dark glass. */
+    /** Links and table headers — the dark theme's info blue, readable on the dark glass. */
     val accent: Color = Color(0xFF7FB0FF)
+    /** Math formulas — kept distinct from [accent] so equations don't read as links. */
+    val formula: Color = Color(0xFF6FDDC4)
     /** Chart slices and series beside [accent], in the same lightness so none recedes. */
     val chartPalette: List<Color> = listOf(
         accent,
