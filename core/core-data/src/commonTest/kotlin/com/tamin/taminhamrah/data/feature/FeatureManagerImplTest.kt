@@ -12,14 +12,38 @@ import com.tamin.taminhamrah.model.common.UserTypeInfoDN
 import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.common.CommonRepository
+import com.tamin.taminhamrah.repository.feature.FeatureFlagOverrideRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+
+/** In-memory stand-in for the "Feature flags" dev screen's storage. */
+class FakeFeatureFlagOverrideRepository : FeatureFlagOverrideRepository {
+    private val overrides = MutableStateFlow<Map<FeatureFlag, FeatureStatus>>(emptyMap())
+
+    override fun observeOverrides(): Flow<Map<FeatureFlag, FeatureStatus>> = overrides.asStateFlow()
+
+    override fun setOverride(flag: FeatureFlag, status: FeatureStatus) {
+        overrides.value += (flag to status)
+    }
+
+    override fun clearOverride(flag: FeatureFlag) {
+        overrides.value -= flag
+    }
+
+    override fun clearAllOverrides() {
+        overrides.value = emptyMap()
+    }
+}
 
 // A simple fake repository just for this test
 class FakeRepositoryForFeatureManager : CommonRepository {
@@ -178,5 +202,82 @@ class FeatureManagerImplTest {
     fun `test observeFeatureStatuses returns an empty map for an empty flag set without reading the menu`() = runTest {
         val statuses = featureManager.observeFeatureStatuses(emptySet()).first()
         assertTrue(statuses.isEmpty())
+    }
+
+    @Test
+    fun `test an override wins over the real menu status`() = runTest {
+        val activeService = MainServiceDN(id = FeatureFlag.CONTRACTS.id, active = true, status = MenuServiceStatusDN.ACTIVE)
+        fakeRepository.mainMenuResult = listOf(activeService)
+        val overrideRepository = FakeFeatureFlagOverrideRepository()
+        val manager = FeatureManagerImpl(fakeRepository, overrideRepository)
+
+        overrideRepository.setOverride(FeatureFlag.CONTRACTS, FeatureStatus.TemporaryDisabled("در حال بازبینی"))
+
+        val status = manager.getFeatureStatus(FeatureFlag.CONTRACTS).first()
+
+        assertTrue(status is FeatureStatus.TemporaryDisabled)
+        assertEquals("در حال بازبینی", (status as FeatureStatus.TemporaryDisabled).message)
+    }
+
+    @Test
+    fun `test clearing an override falls back to the real menu status`() = runTest {
+        val activeService = MainServiceDN(id = FeatureFlag.CONTRACTS.id, active = true, status = MenuServiceStatusDN.ACTIVE)
+        fakeRepository.mainMenuResult = listOf(activeService)
+        val overrideRepository = FakeFeatureFlagOverrideRepository()
+        val manager = FeatureManagerImpl(fakeRepository, overrideRepository)
+
+        overrideRepository.setOverride(FeatureFlag.CONTRACTS, FeatureStatus.Disabled("override"))
+        overrideRepository.clearOverride(FeatureFlag.CONTRACTS)
+
+        assertTrue(manager.getFeatureStatus(FeatureFlag.CONTRACTS).first() is FeatureStatus.Enabled)
+    }
+
+    @Test
+    fun `test observeFeatureStatuses applies an override to only the flag it targets`() = runTest {
+        val activeContracts = MainServiceDN(id = FeatureFlag.CONTRACTS.id, active = true, status = MenuServiceStatusDN.ACTIVE)
+        val activeBankAccount = MainServiceDN(id = FeatureFlag.BANK_ACCOUNT_LIST.id, active = true, status = MenuServiceStatusDN.ACTIVE)
+        fakeRepository.mainMenuResult = listOf(activeContracts, activeBankAccount)
+        val overrideRepository = FakeFeatureFlagOverrideRepository()
+        val manager = FeatureManagerImpl(fakeRepository, overrideRepository)
+
+        overrideRepository.setOverride(FeatureFlag.CONTRACTS, FeatureStatus.Disabled("override"))
+
+        val statuses = manager.observeFeatureStatuses(setOf(FeatureFlag.CONTRACTS, FeatureFlag.BANK_ACCOUNT_LIST)).first()
+
+        assertTrue(statuses.getValue(FeatureFlag.CONTRACTS) is FeatureStatus.Disabled)
+        assertTrue(statuses.getValue(FeatureFlag.BANK_ACCOUNT_LIST) is FeatureStatus.Enabled)
+    }
+
+    /**
+     * Regression guard for a real trap in this exact shape: `commonRepository.getMainMenu(...)` is a
+     * live, never-completing flow in production (backed by the menu DAO), so combining it with the
+     * override flow keeps reacting to later override changes. A menu source that *does* complete
+     * after its first emission — like [FakeRepositoryForFeatureManager] above — would hide a bug
+     * where that stopped being true, since `combine` stops responding once one of its sources
+     * finishes. This test uses a live menu source instead, so it actually exercises a *second*
+     * emission after the first, the way a long-lived screen observing this flow does.
+     */
+    @Test
+    fun `test a later override change reaches an already-subscribed collector`() = runTest {
+        val liveMenu = MutableStateFlow(
+            listOf(MainServiceDN(id = FeatureFlag.CONTRACTS.id, active = true, status = MenuServiceStatusDN.ACTIVE))
+        )
+        val liveRepository = object : CommonRepository by fakeRepository {
+            override fun getMainMenu(versionCode: String, forceUpdate: Boolean): Flow<List<MainServiceDN>> = liveMenu
+        }
+        val overrideRepository = FakeFeatureFlagOverrideRepository()
+        val manager = FeatureManagerImpl(liveRepository, overrideRepository)
+
+        val statuses = mutableListOf<FeatureStatus>()
+        val collectJob = launch {
+            manager.getFeatureStatus(FeatureFlag.CONTRACTS).collect { statuses.add(it) }
+        }
+        runCurrent()
+
+        overrideRepository.setOverride(FeatureFlag.CONTRACTS, FeatureStatus.Disabled("later override"))
+        runCurrent()
+
+        collectJob.cancel()
+        assertEquals(listOf(FeatureStatus.Enabled, FeatureStatus.Disabled("later override")), statuses)
     }
 }

@@ -150,6 +150,42 @@ chips just popped in once `FeatureFlag.AGENT` resolved `Enabled`. It is now `Boo
 leaving that header slot looking finished before it is; a failed lookup resolves to `false` (hidden)
 rather than shimmering forever.
 
+## 5c. Testing a flag state without server control — Developer Options → "تست فیچر فلگ‌ها"
+
+Profile → Developer Options → **تست فیچر فلگ‌ها** (`feature:developerOptions`'s `featureFlags` package,
+route `FeatureFlagsRoute`) lists every [[Feature-Flags#4-server-id--client-enum-featureflag|FeatureFlag]]
+with what it currently resolves to. Long-pressing a row opens an editor to force that flag to
+`Enabled` / `Disabled` / `TemporaryDisabled` / `EnabledWithError`, each with an optional message —
+covering the states a real menu response might not currently be serving, without needing the server
+side changed. A badge marks an overridden row; "پاک کردن همه‌ی بازنویسی‌ها" clears every override at once.
+
+**How it reaches the rest of the app**: `FeatureFlagOverrideRepository` (core-domain interface;
+`FeatureFlagOverrideRepositoryImpl` in core-datastore, one `Settings` entry pair — kind + message —
+per flag, mirroring `DeveloperOptionsRepositoryImpl`'s base-URL override storage). `FeatureManagerImpl`
+takes it as a second constructor parameter (default `NoOpFeatureFlagOverrideRepository`, so every
+existing caller and test that doesn't care about overrides is unaffected) and reads it *ahead* of the
+real menu in both `getFeatureStatus` and `observeFeatureStatuses` — present, it wins outright; absent,
+the menu answers as always. This means every screen this document already describes (services,
+profile, treatment, home) is automatically testable from this one screen with no per-feature wiring:
+setting an override is visible on the very next flag check anywhere in the app, no restart.
+
+**Debug-only in three layers**: the Developer Options entry itself only renders when
+`AppConfig.isDebug` (`ProfileScreen`'s existing gate); `FeatureFlagOverrideRepositoryImpl` also
+refuses to load or write overrides when `isDebug` is false, so a value left over in shared app storage
+from a prior debug install can never leak into a release build.
+
+⚠️ **A `combine` trap this code deliberately avoids**: `FeatureManager.observeFeatureStatuses` already
+folds overrides into its statuses (via `FeatureManagerImpl`'s own `combine` of the override flow and
+the menu flow). `FeatureFlagsViewModel.observeRows()` therefore does **not** additionally `combine` its
+own `overrideRepository.observeOverrides()` with that same statuses flow — `combine` stops responding
+to a still-live source once *any* one of its given flows completes (a single-shot flow completing
+mid-combine silently freezes the whole thing), and a naive test double for `FeatureManager` that
+answers with `flowOf(...)` per flag (unlike the real DB-backed menu flow, which never completes) hits
+that exact trap. `observeRows()` instead uses `overrideRepository.observeOverrides().flatMapLatest { … }`,
+re-subscribing to a fresh status read only when the overrides themselves change — see
+`FeatureManagerImplTest`'s `"a later override change reaches an already-subscribed collector"` for the
+regression test on this specific shape.
+
 ## 6. The AI Agent flag
 
 The AI assistant is a standalone feature in the flag system.

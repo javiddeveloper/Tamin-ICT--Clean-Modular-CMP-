@@ -70,9 +70,11 @@ import com.tamin.taminhamrah.feature.deferredInstallment.deferredInstallmentScre
 import com.tamin.taminhamrah.feature.deferredInstallment.navigateToDeferredInstallment
 import com.tamin.taminhamrah.feature.developerOptions.DebugLoginRoute
 import com.tamin.taminhamrah.feature.developerOptions.DeveloperOptionsRoute
+import com.tamin.taminhamrah.feature.developerOptions.FeatureFlagsRoute
 import com.tamin.taminhamrah.feature.developerOptions.TokenManagerRoute
 import com.tamin.taminhamrah.feature.developerOptions.debugLoginScreen
 import com.tamin.taminhamrah.feature.developerOptions.developerOptionsScreen
+import com.tamin.taminhamrah.feature.developerOptions.featureFlagsScreen
 import com.tamin.taminhamrah.feature.developerOptions.tokenManagerScreen
 import com.tamin.taminhamrah.feature.fractionContract.fractionContractScreen
 import com.tamin.taminhamrah.feature.girlSurvivor.girlSurvivorScreen
@@ -685,6 +687,7 @@ internal fun TaminHamrahNavGraph(
                         onNavigateBack = { navController.popBackStack() },
                         onNavigateToDebugLogin = { navController.navigate(DebugLoginRoute) },
                         onNavigateToTokenManager = { navController.navigate(TokenManagerRoute) },
+                        onNavigateToFeatureFlags = { navController.navigate(FeatureFlagsRoute) },
                         onStartTestPayment = { navController.navigate(PaymentRoute.Sandbox) }
                     )
                     paymentSandboxScreen(
@@ -693,6 +696,7 @@ internal fun TaminHamrahNavGraph(
                     )
                     debugLoginScreen(onNavigateBack = { navController.popBackStack() })
                     tokenManagerScreen(onNavigateBack = { navController.popBackStack() })
+                    featureFlagsScreen(onNavigateBack = { navController.popBackStack() })
                 }
 
                 orotezProtezScreen(onBack = { navController.popBackStack() })

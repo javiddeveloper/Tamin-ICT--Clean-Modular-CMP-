@@ -11,6 +11,8 @@ import com.tamin.taminhamrah.repository.BiometricSessionState
 import com.tamin.taminhamrah.core.datastore.InMemoryBiometricSessionState
 import com.tamin.taminhamrah.repository.DeveloperOptionsRepository
 import com.tamin.taminhamrah.core.datastore.DeveloperOptionsRepositoryImpl
+import com.tamin.taminhamrah.repository.feature.FeatureFlagOverrideRepository
+import com.tamin.taminhamrah.core.datastore.FeatureFlagOverrideRepositoryImpl
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -21,5 +23,6 @@ val datastoreModule = module {
     single<TokenStoreManager> { TokenStoreManagerImpl(get()) }
     singleOf(::InMemoryBiometricSessionState) bind BiometricSessionState::class
     single<DeveloperOptionsRepository> { DeveloperOptionsRepositoryImpl(get()) }
+    single<FeatureFlagOverrideRepository> { FeatureFlagOverrideRepositoryImpl(get()) }
     single<AgentAccessStore> { AgentAccessStoreImpl(get()) }
 }
