@@ -333,6 +333,13 @@ private fun DrawerPanel(
             if (sessions.isEmpty()) {
                 EmptyHistoryMessage(modifier = Modifier.weight(1f))
             } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(AgentGlass.borderColor)
+                )
+                Spacer(Modifier.height(12.dp))
                 Text(
                     text = "گفتگوهای اخیر",
                     style = MaterialTheme.typography.labelSmall.copy(
@@ -437,15 +444,25 @@ private fun GlassTile(
     modifier: Modifier = Modifier,
     size: Dp = 34.dp,
     iconSize: Dp = 18.dp,
-    tint: Color = AgentGlass.iconTint
+    tint: Color = AgentGlass.iconTint,
+    showBackground: Boolean = true
 ) {
-    Box(
-        modifier = modifier
+    val boxModifier = if (showBackground) {
+        modifier
             .size(size)
             .clip(DrawerTileShape)
             .background(AgentGlass.tileFill)
             .border(AgentGlass.borderWidth, AgentGlass.borderColor, DrawerTileShape)
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+    } else {
+        modifier
+            .size(size)
+            .clip(CircleShape)
+            .clickable(onClick = onClick)
+    }
+
+    Box(
+        modifier = boxModifier,
         contentAlignment = Alignment.Center
     ) {
         Icon(
@@ -516,7 +533,7 @@ private fun SessionRow(
             .background(background)
             .border(borderWidth, borderColor, DrawerRowShape)
             .clickable(onClick = onOpen)
-            .padding(end = 8.dp, top = 10.dp, bottom = 10.dp),
+            .padding(end = 8.dp, top = 15.dp, bottom = 15.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Leading (right-edge) accent strip; kept as a transparent spacer on inactive rows
@@ -525,14 +542,14 @@ private fun SessionRow(
             modifier = Modifier
                 .padding(start = 6.dp)
                 .width(3.dp)
-                .height(34.dp)
+                .height(42.dp)
                 .clip(CircleShape)
                 .background(if (isActive) DrawerAccentGradient else SolidColor(Color.Transparent))
         )
         Spacer(Modifier.width(9.dp))
         Column(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(3.dp)
+            verticalArrangement = Arrangement.spacedBy(5.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -595,16 +612,18 @@ private fun SessionRow(
             contentDescription = "تغییر نام",
             onClick = onRename,
             size = 30.dp,
-            iconSize = 15.dp
+            iconSize = 16.dp,
+            showBackground = false
         )
-        Spacer(Modifier.width(6.dp))
+        Spacer(Modifier.width(4.dp))
         GlassTile(
             icon = Icons.Outlined.Delete,
             contentDescription = "حذف",
             onClick = onDelete,
             size = 30.dp,
-            iconSize = 15.dp,
-            tint = AgentGlass.danger
+            iconSize = 16.dp,
+            tint = AgentGlass.danger,
+            showBackground = false
         )
     }
 }
