@@ -63,7 +63,9 @@ import taminx.core.core_ui.btn_understood
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_search
 import taminx.core.core_ui.ic_tamin_workshop
+import taminx.core.core_ui.workshop_empty_list
 import taminx.core.core_ui.workshop_search
+import taminx.core.core_ui.workshops_empty
 import taminx.core.core_ui.workshops_header_subtitle
 import taminx.core.core_ui.workshops_title
 
@@ -155,6 +157,7 @@ fun WorkshopsScreen(
     Box(modifier = modifier.fillMaxSize()) {
         WorkshopListScaffold(
             emptyIcon = vectorResource(Res.drawable.ic_tamin_workshop),
+            emptyMessage = stringResource(if (hasActiveFilter) Res.string.workshop_empty_list else Res.string.workshops_empty),
             state = state.list,
             listState = listState,
             modifier = Modifier.fillMaxSize().driveTopArea(topArea, listState),

@@ -50,6 +50,8 @@ import taminx.core.core_ui.member_nationality
 import taminx.core.core_ui.workshop_action_members
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.ic_tamin_workshop_members
+import taminx.core.core_ui.workshop_empty_list
+import taminx.core.core_ui.workshop_members_empty
 
 /**
  * کارکنان — the insured people registered against one workshop.
@@ -121,6 +123,7 @@ fun WorkshopMembersContent(
     ) {
         WorkshopListScaffold(
             emptyIcon = vectorResource(Res.drawable.ic_tamin_workshop_members),
+            emptyMessage = stringResource(if (applied.isNotEmpty) Res.string.workshop_empty_list else Res.string.workshop_members_empty),
             state = state.list,
             onLoadMore = { onIntent(WorkshopMembersIntent.LoadMore) },
             // No key: a person who left and was taken on again is two rows with the same

@@ -1848,6 +1848,15 @@
     <string name="workshop_debt_from_date">از تاریخ</string>
     <string name="workshop_debt_to_date">تا تاریخ</string>
     <string name="workshop_debt_empty">بدهی‌ای برای این کارگاه ثبت نشده است.</string>
+    <!-- Each list's own empty line, for when no search or filter narrowed it; a narrowed list that
+         comes back empty keeps workshop_empty_list. -->
+    <string name="workshops_empty">کارگاهی به نام شما ثبت نشده است.</string>
+    <string name="workshop_demand_docs_empty">سند مطالبه‌ای برای این بدهی ثبت نشده است.</string>
+    <string name="article_sixteen_empty">بدهی قابل رسیدگی ماده ۱۶ برای این کارگاه ثبت نشده است.</string>
+    <string name="objectionable_debt_empty">بدهی قابل اعتراضی برای این کارگاه ثبت نشده است.</string>
+    <string name="payment_sheets_empty">برگ پرداختی برای این کارگاه ثبت نشده است.</string>
+    <string name="workshop_members_empty">بیمه‌شدهٔ شاغلی برای این کارگاه ثبت نشده است.</string>
+    <string name="new_member_requests_empty">درخواست نام‌نویسی برای این کارگاه ثبت نشده است.</string>
     <string name="workshop_debt_primary_vote_number">شماره رای هیات بدوی</string>
     <string name="workshop_debt_primary_vote_date">تاریخ رای هیات بدوی</string>
     <string name="workshop_debt_documents">مشاهده اسناد مطالبه</string>

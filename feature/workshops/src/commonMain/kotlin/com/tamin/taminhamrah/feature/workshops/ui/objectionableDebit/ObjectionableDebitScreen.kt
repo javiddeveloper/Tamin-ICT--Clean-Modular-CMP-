@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.feature.workshops.ui.objectionableDebit
 import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.obj_form_done_body
 import taminx.core.core_ui.obj_form_done_title
+import taminx.core.core_ui.objectionable_debt_empty
 import taminx.core.core_ui.ws_dialog_ok
 import org.jetbrains.compose.resources.getString
 import kotlinx.coroutines.flow.Flow
@@ -189,6 +190,7 @@ fun ObjectionableDebitContent(
         ) {
             WorkshopListScaffold(
                 emptyIcon = vectorResource(Res.drawable.ic_tamin_workshop_objection),
+                emptyMessage = stringResource(Res.string.objectionable_debt_empty),
                 state = state.list,
                 onLoadMore = onLoadMore,
                 onRetry = onRetry,

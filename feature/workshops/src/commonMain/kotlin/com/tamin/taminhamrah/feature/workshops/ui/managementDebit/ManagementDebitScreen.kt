@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import taminx.core.core_ui.article_sixteen_empty
+import taminx.core.core_ui.workshop_empty_list
 import taminx.core.core_ui.ws_dialog_ok
 import taminx.core.core_ui.article_sixteen_form_done_body
 import taminx.core.core_ui.article_sixteen_form_done_title
@@ -232,6 +234,7 @@ fun ManagementDebitContent(
             }
             WorkshopListScaffold(
                 emptyIcon = vectorResource(Res.drawable.ic_tamin_workshop_article_sixteen),
+                emptyMessage = stringResource(if (filters.isNotEmpty()) Res.string.workshop_empty_list else Res.string.article_sixteen_empty),
                 state = displayedList,
                 onLoadMore = { onIntent(ManagementDebitIntent.LoadMore) },
                 key = { it.debitNumber },

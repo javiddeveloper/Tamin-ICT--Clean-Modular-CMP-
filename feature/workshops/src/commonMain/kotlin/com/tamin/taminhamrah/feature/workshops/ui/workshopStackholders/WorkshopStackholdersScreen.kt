@@ -49,6 +49,7 @@ import taminx.core.core_ui.workshop_action_stackholders
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Groups
 import taminx.core.core_ui.beneficiaries_empty
+import taminx.core.core_ui.workshop_empty_list
 
 /**
  * ذینفعان — the employer, the partners and the representatives behind one workshop.
@@ -117,7 +118,7 @@ fun WorkshopStackholdersContent(
     ) {
         WorkshopListScaffold(
             emptyIcon = Icons.Filled.Groups,
-            emptyMessage = stringResource(Res.string.beneficiaries_empty),
+            emptyMessage = stringResource(if (applied.isNotEmpty) Res.string.workshop_empty_list else Res.string.beneficiaries_empty),
             state = state.list,
             onLoadMore = { onIntent(WorkshopStackholdersIntent.LoadMore) },
             header = {

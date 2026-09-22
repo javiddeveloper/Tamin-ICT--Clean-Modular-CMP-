@@ -36,6 +36,7 @@ import taminx.core.core_ui.workshop_demand_doc_number
 import taminx.core.core_ui.workshop_demand_doc_state
 import taminx.core.core_ui.workshop_demand_doc_step
 import taminx.core.core_ui.workshop_demand_doc_type
+import taminx.core.core_ui.workshop_demand_docs_empty
 import taminx.core.core_ui.workshop_docs_debit_heading
 import taminx.core.core_ui.workshop_turnover_filename_format
 import org.jetbrains.compose.resources.vectorResource
@@ -98,6 +99,7 @@ fun DemandDocumentsContent(
         )
         WorkshopListScaffold(
             emptyIcon = vectorResource(Res.drawable.ic_tamin_document_lines),
+            emptyMessage = stringResource(Res.string.workshop_demand_docs_empty),
             state = state.list,
             onLoadMore = { onIntent(DemandDocumentsIntent.LoadMore) },
             onRetry = { onIntent(DemandDocumentsIntent.Retry) },
