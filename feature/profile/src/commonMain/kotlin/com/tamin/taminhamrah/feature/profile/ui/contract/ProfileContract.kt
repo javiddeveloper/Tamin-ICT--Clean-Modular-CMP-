@@ -40,6 +40,7 @@ sealed class ProfileIntent {
     data class LoadProfile(val userId: String? = null) : ProfileIntent()
     data object Logout : ProfileIntent()
     data class OnItemClick(val item: ProfileMenuItem) : ProfileIntent()
+    data object EditPhotoClicked : ProfileIntent()
 
     data object NavigateToDependentsList : ProfileIntent()
     data class ToggleTheme(val isDark: Boolean) : ProfileIntent()
@@ -58,6 +59,7 @@ sealed interface ProfileEvent {
     data object NavigateToElectronicFile : ProfileEvent
     data object NavigateToUserContracts : ProfileEvent
     data object NavigateToSaveEvents : ProfileEvent
+    data object NavigateToEditProfilePhoto : ProfileEvent
     data class OpenUrl(val url: String) : ProfileEvent
     data class ShowToast(val message: String) : ProfileEvent
     data object NavigateToBankAccount : ProfileEvent

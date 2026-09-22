@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.profile.ui
 
 import androidx.lifecycle.viewModelScope
 import com.tamin.taminhamrah.base.BaseViewModel
+import com.tamin.taminhamrah.feature.FeatureManager
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
@@ -11,6 +12,8 @@ import com.tamin.taminhamrah.mapper.activeRelation.toUiModelList
 import com.tamin.taminhamrah.mapper.identity.toPresentation
 import com.tamin.taminhamrah.mapper.relation.toPresentation
 import com.tamin.taminhamrah.model.DarkThemeConfig
+import com.tamin.taminhamrah.model.common.FeatureFlag
+import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.useCases.auth.GetSignOutUrlUseCase
 import com.tamin.taminhamrah.useCases.auth.SignOutUseCase
@@ -25,8 +28,8 @@ import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
 import com.tamin.taminhamrah.useCases.user.VerifyChangeMobileUseCase
 import com.tamin.taminhamrah.util.HeaderConstant
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
@@ -43,7 +46,8 @@ class ProfileViewModel(
     private val getRelationTaminAllUseCase: GetRelationTaminAllUseCase,
     private val changeMobileUseCase: ChangeMobileUseCase,
     private val verifyChangeMobileUseCase: VerifyChangeMobileUseCase,
-    private val setThemeUseCase: SetThemeUseCase
+    private val setThemeUseCase: SetThemeUseCase,
+    private val featureManager: FeatureManager,
 ) : BaseViewModel<ProfileUiState, PartialState, ProfileEvent, ProfileIntent>(
     initialState = ProfileUiState()
 ) {
@@ -53,6 +57,7 @@ class ProfileViewModel(
             is ProfileIntent.LoadProfile -> handleLoadProfile(intent.userId)
             is ProfileIntent.Logout -> handleLogout()
             is ProfileIntent.OnItemClick -> handleItemClick(intent.item)
+            is ProfileIntent.EditPhotoClicked -> handleEditPhotoClick()
             is ProfileIntent.NavigateToDependentsList -> handleNavigateToDependentsList()
             is ProfileIntent.ToggleTheme -> handleToggleTheme(intent.isDark)
         }
@@ -127,6 +132,20 @@ class ProfileViewModel(
         val signOutUrl = getSignOutUrlUseCase()
         sendEvent(ProfileEvent.OpenUrl(signOutUrl))
         sendEvent(ProfileEvent.NavigateBack)
+    }
+
+    /** The camera badge opens the «ویرایش تصویر» service, so it obeys that menu row's status. */
+    private fun handleEditPhotoClick(): Flow<PartialState> = flow {
+        when (val status = featureManager.getFeatureStatus(FeatureFlag.EDIT_IMAGE).first()) {
+            is FeatureStatus.Enabled -> sendEvent(ProfileEvent.NavigateToEditProfilePhoto)
+            is FeatureStatus.Disabled -> status.message?.let { sendEvent(ProfileEvent.ShowToast(it)) }
+            is FeatureStatus.TemporaryDisabled -> status.message?.let { sendEvent(ProfileEvent.ShowToast(it)) }
+            is FeatureStatus.EnabledWithError -> {
+                status.message?.let { sendEvent(ProfileEvent.ShowToast(it)) }
+                sendEvent(ProfileEvent.NavigateToEditProfilePhoto)
+            }
+            is FeatureStatus.WebView -> sendEvent(ProfileEvent.OpenUrl(status.url))
+        }
     }
 
     private fun handleItemClick(item: ProfileMenuItem): Flow<PartialState> {
