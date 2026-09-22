@@ -506,8 +506,11 @@ fun DetailRow(
      * classification rather than a plain reading («نوع فعالیت» on جزئیات کارگاه).
      */
     valueBoxed: Boolean = false,
+    /** Draws a [copyValue] row's value as a [CopyCodeChip] instead of a glyph beside plain text. */
+    copyAsChip: Boolean = false,
 ) {
-    val copy = copyValue?.let { rememberCopyAction(it) }
+    val chipCopy = if (copyAsChip && copyValue != null) rememberCopyAction(copyValue, announce = false) else null
+    val copy = if (chipCopy == null) copyValue?.let { rememberCopyAction(it) } else null
     val colors = LocalTaminColors.current
     val boxShape = RoundedCornerShape(CornerRadius.md)
     Row(
@@ -530,6 +533,10 @@ fun DetailRow(
         ) {
             // First child, so under the app's right-to-left layout the glyph sits to the *right*
             // of the value it copies rather than drifting off to the far edge.
+            if (chipCopy != null) {
+                CopyCodeChip(text = value, onCopy = chipCopy, contentDescription = label)
+                return@Row
+            }
             if (copyValue != null) {
                 CopyIconButton(value = copyValue, label = label, interactive = false)
             }

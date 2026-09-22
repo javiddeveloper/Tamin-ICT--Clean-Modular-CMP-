@@ -219,6 +219,7 @@ fun RecordDetailContent(
                 background = taminHeroGradient(colors.treatmentHubStops),
                 navigationIcon = {
                     TaminTopAppBarButton(
+                        bordered = true,
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                         contentDescription = stringResource(Res.string.action_back),
                         onClick = onBack,
@@ -227,6 +228,7 @@ fun RecordDetailContent(
                 action = {
                     Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                         TaminTopAppBarButton(
+                            bordered = true,
                             icon = vectorResource(Res.drawable.ic_share),
                             contentDescription = stringResource(Res.string.prescription_share_cd),
                             onClick = { launcher.shareText(shareBody) },
@@ -239,6 +241,7 @@ fun RecordDetailContent(
                         // where it can only fail. See RecordExport.
                         export?.let { available ->
                             TaminTopAppBarButton(
+                                bordered = true,
                                 icon = vectorResource(available.icon),
                                 contentDescription = stringResource(available.contentDescription),
                                 onClick = { showing = available.export },

@@ -62,7 +62,6 @@ object HistoryDimens {
     val durationCardCollapsedOverlap = durationCardCollapsedHeight / 2
 
     val durationCardCorner = 24.dp
-    val durationStripeHeight = 3.dp
     val durationNavSize = 31.dp
 
     val durationCardPaddingH = 14.dp

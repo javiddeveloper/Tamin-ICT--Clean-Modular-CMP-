@@ -250,29 +250,13 @@ fun RecordSearchSheet(
 
             Spacer(modifier = Modifier.height(Spacing.xs))
 
-            // Action Buttons: Clear on the right (first child in RTL), Apply Search Gradient on the left (second child in RTL)
+            // Action buttons: Apply on the right (first child in RTL), Clear on the left.
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = Spacing.xs),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             ) {
-                OutlinedButton(
-                    onClick = { criteria = RecordSearchCriteria() },
-                    shape = RoundedCornerShape(TreatmentDimens.searchActionCorner),
-                    border = BorderStroke(Thickness.border, colors.border),
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(TreatmentDimens.searchActionHeight),
-                ) {
-                    Text(
-                        text = stringResource(Res.string.search_clear),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = colors.textSecondary,
-                    )
-                }
-
                 Box(
                     modifier = Modifier
                         .weight(1.5f)
@@ -287,6 +271,22 @@ fun RecordSearchSheet(
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = TaminOnAccentInk,
+                    )
+                }
+
+                OutlinedButton(
+                    onClick = { criteria = RecordSearchCriteria() },
+                    shape = RoundedCornerShape(TreatmentDimens.searchActionCorner),
+                    border = BorderStroke(Thickness.border, colors.border),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(TreatmentDimens.searchActionHeight),
+                ) {
+                    Text(
+                        text = stringResource(Res.string.search_clear),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = colors.textSecondary,
                     )
                 }
             }

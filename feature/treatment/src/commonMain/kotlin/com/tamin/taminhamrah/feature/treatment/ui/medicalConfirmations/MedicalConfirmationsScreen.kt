@@ -36,6 +36,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
+import com.tamin.taminhamrah.ui.components.collapseHeightAway
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.taminHeroGradient
@@ -136,6 +137,7 @@ fun MedicalConfirmationsScreen(
                 background = taminHeroGradient(colors.treatmentHubStops),
                 navigationIcon = {
                     TaminTopAppBarButton(
+                        bordered = true,
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                         contentDescription = stringResource(Res.string.action_back),
                         onClick = {
@@ -147,7 +149,11 @@ fun MedicalConfirmationsScreen(
                 content = {
                     if (selectedDetail == null) {
                         Column(
-                            modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                // Folds away as the list scrolls, leaving only the title row.
+                                .collapseHeightAway(collapseState.progressProvider)
+                                .padding(top = Spacing.sm),
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
                             AnimatedRingHeaderIcon(
@@ -201,6 +207,7 @@ fun MedicalConfirmationsScreen(
 
     showingRepId?.let { repId ->
         TaminPdfViewer(
+            background = taminHeroGradient(colors.treatmentHubStops),
             fileName = "medical_confirmation_$repId.pdf",
             pdf = state.viewerPdf,
             downloadFailed = state.viewerDownloadFailed,
