@@ -10,12 +10,13 @@ import com.tamin.taminhamrah.feature.developerOptions.featureFlags.contract.Feat
 import com.tamin.taminhamrah.feature.developerOptions.featureFlags.contract.OverrideKind
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
+import com.tamin.taminhamrah.repository.common.CommonRepository
 import com.tamin.taminhamrah.repository.feature.FeatureFlagOverrideRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 
 /**
  * Backs the developer-only "Feature flags" screen: every [FeatureFlag] alongside what it currently
@@ -26,6 +27,7 @@ import kotlinx.coroutines.flow.map
 class FeatureFlagsViewModel(
     private val featureManager: FeatureManager,
     private val overrideRepository: FeatureFlagOverrideRepository,
+    private val commonRepository: CommonRepository,
 ) : BaseViewModel<FeatureFlagsUiState, PartialState, FeatureFlagsEvent, FeatureFlagsIntent>(
     initialState = FeatureFlagsUiState()
 ) {
@@ -76,19 +78,28 @@ class FeatureFlagsViewModel(
      * The whole flag list, live: every status change (a menu refresh, or a change made right here)
      * re-derives the rows, so the screen never needs its own refresh action.
      *
-     * Driven by the overrides, not `combine`d with them: [FeatureManager.observeFeatureStatuses]
+     * The name shown for each row is read straight off the real menu ([CommonRepository.getMainMenu])
+     * by id — never authored here — since the server is free to rename a service at any time; a flag
+     * this account's menu carries no row for at all shows no name.
+     *
+     * Driven by the overrides, not `combine`d with the status flow: [FeatureManager.observeFeatureStatuses]
      * already reads the same overrides internally to resolve its statuses, so a plain `combine` of
      * both would race two dependent views of the same state. `flatMapLatest` instead re-subscribes to
-     * a fresh status read every time the overrides change, which also happens to be the only re-read
-     * this screen's own writes need — the real menu still pushes its own updates through that same
-     * subscription in between.
+     * a fresh status+menu read every time the overrides change, which also happens to be the only
+     * re-read this screen's own writes need — the real menu still pushes its own updates through that
+     * same subscription in between.
      */
     private fun observeRows(): Flow<PartialState> =
         overrideRepository.observeOverrides().flatMapLatest { overrides ->
-            featureManager.observeFeatureStatuses(FeatureFlag.entries.toSet()).map { statuses ->
+            combine(
+                featureManager.observeFeatureStatuses(FeatureFlag.entries.toSet()),
+                commonRepository.getMainMenu("", false),
+            ) { statuses, menu ->
+                val nameById = menu.associate { it.id to it.name }
                 val rows = FeatureFlag.entries.map { flag ->
                     FeatureFlagRowUi(
                         flag = flag,
+                        serverName = nameById[flag.id]?.takeIf { it.isNotBlank() },
                         status = statuses[flag] ?: FeatureStatus.Enabled,
                         isOverridden = overrides.containsKey(flag),
                     )

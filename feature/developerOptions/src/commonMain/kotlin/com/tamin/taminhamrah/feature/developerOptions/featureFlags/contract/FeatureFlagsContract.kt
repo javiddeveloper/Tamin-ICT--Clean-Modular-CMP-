@@ -11,10 +11,16 @@ import com.tamin.taminhamrah.model.common.FeatureStatus
  */
 enum class OverrideKind { ENABLED, DISABLED, TEMPORARY_DISABLED, ENABLED_WITH_ERROR }
 
-/** One row of the list: a flag, what it currently resolves to, and whether that answer is an override. */
+/**
+ * One row of the list: a flag, the name the server's own menu currently gives it (`null` when this
+ * account's menu carries no row for that id at all — never guessed at or hardcoded, since the
+ * server is free to rename a service at any time), what it resolves to, and whether that answer is
+ * an override.
+ */
 @Immutable
 data class FeatureFlagRowUi(
     val flag: FeatureFlag,
+    val serverName: String?,
     val status: FeatureStatus,
     val isOverridden: Boolean,
 )

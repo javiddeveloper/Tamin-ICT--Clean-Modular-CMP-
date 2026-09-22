@@ -42,7 +42,6 @@ import com.tamin.taminhamrah.feature.developerOptions.featureFlags.contract.Feat
 import com.tamin.taminhamrah.feature.developerOptions.featureFlags.contract.FeatureFlagsIntent
 import com.tamin.taminhamrah.feature.developerOptions.featureFlags.contract.FeatureFlagsUiState
 import com.tamin.taminhamrah.feature.developerOptions.featureFlags.contract.OverrideKind
-import com.tamin.taminhamrah.feature.developerOptions.featureFlags.model.persianLabel
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
@@ -168,6 +167,7 @@ private fun FeatureFlagsContent(
         val editingRow = state.rows.firstOrNull { it.flag == editingFlag }
         FeatureFlagEditorDialog(
             flag = editingFlag,
+            serverName = editingRow?.serverName,
             currentStatus = editingRow?.status,
             isOverridden = editingRow?.isOverridden == true,
             onConfirm = { kind, message -> onIntent(FeatureFlagsIntent.OnOverrideConfirmed(editingFlag, kind, message)) },
@@ -192,7 +192,7 @@ private fun FeatureFlagRow(row: FeatureFlagRowUi, onLongPress: () -> Unit) {
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "${row.flag.name} (${row.flag.id}) — ${row.flag.persianLabel()}",
+                text = row.flag.displayLabel(row.serverName),
                 style = MaterialTheme.typography.bodyMedium,
                 color = taminColors.textPrimary,
                 maxLines = 1,
@@ -219,6 +219,10 @@ private fun FeatureFlagRow(row: FeatureFlagRowUi, onLongPress: () -> Unit) {
         }
     }
 }
+
+/** The enum constant (to match against code) plus whatever the server currently calls it, if it does. */
+private fun FeatureFlag.displayLabel(serverName: String?): String =
+    "$name ($id)" + (serverName?.let { " — $it" } ?: "")
 
 @Composable
 private fun FeatureStatus.describe(): String = when (this) {
@@ -248,6 +252,7 @@ private fun FeatureStatus.statusColor(colors: TaminColors) = when (this) {
 @Composable
 private fun FeatureFlagEditorDialog(
     flag: FeatureFlag,
+    serverName: String?,
     currentStatus: FeatureStatus?,
     isOverridden: Boolean,
     onConfirm: (OverrideKind, String) -> Unit,
@@ -277,7 +282,7 @@ private fun FeatureFlagEditorDialog(
     }
 
     TaminConfirmationDialog(
-        title = "${flag.name} (${flag.id}) — ${flag.persianLabel()}",
+        title = flag.displayLabel(serverName),
         description = stringResource(Res.string.developer_options_feature_flags_editor_hint),
         onDismissRequest = onDismiss,
         confirmButton = {
