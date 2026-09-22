@@ -324,20 +324,14 @@ fun String.digitsOnly(): String = buildString(length) {
     }
 }
 
-/**
- * Alphanumeric serial as printed on Iranian Smart National ID cards:
- * Persian and Arabic digits are folded onto ASCII '0'..'9', lowercase Latin letters 'a'..'z'
- * are uppercased to 'A'..'Z', uppercase Latin letters 'A'..'Z' and ASCII digits '0'..'9' are kept,
- * and all other characters are dropped.
- */
+/** A smart-card serial as printed: ASCII digits and uppercase Latin letters, nothing else. */
 fun String.alphanumericOnly(): String = buildString(length) {
     for (char in this@alphanumericOnly) {
         when (char) {
-            in '0'..'9' -> append(char)
+            in '0'..'9', in 'A'..'Z' -> append(char)
             in '۰'..'۹' -> append('0' + (char - '۰'))
             in '٠'..'٩' -> append('0' + (char - '٠'))
             in 'a'..'z' -> append(char.uppercaseChar())
-            in 'A'..'Z' -> append(char)
         }
     }
 }
