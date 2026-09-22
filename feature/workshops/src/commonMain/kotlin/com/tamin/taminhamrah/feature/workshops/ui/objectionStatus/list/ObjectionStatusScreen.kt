@@ -164,7 +164,7 @@ fun ObjectionStatusContent(
         ObjectionStatusTopArea(
             identityName = state.identityName,
             identityNationalId = state.identityNationalId,
-            totalCount = state.totalCount,
+            totalCount = state.list.distinctTotal,
             onBack = onBack,
             onSearchClick = { onIntent(ObjectionStatusIntent.SearchOpenChanged(true)) },
             topAreaState = topAreaState,
@@ -213,7 +213,7 @@ fun ObjectionStatusContent(
         ObjectionStatusTopArea(
             identityName = state.identityName,
             identityNationalId = state.identityNationalId,
-            totalCount = state.totalCount,
+            totalCount = state.list.distinctTotal,
             onBack = onBack,
             onSearchClick = { onIntent(ObjectionStatusIntent.SearchOpenChanged(true)) },
             topAreaState = topArea,
@@ -802,8 +802,8 @@ private fun ObjectionStatusScreenPreview() {
             state = ObjectionStatusUiState(
                 identityName = "حسین توکلی کرمانی",
                 identityNationalId = "۴۴۷۹۸۹۰۸۸۲",
-                totalCount = 4,
                 list = PagedListState(
+                    total = 4,
                     items = persistentListOf(
                         WorkShopObjectionPR(
                             seqNo = 1403008720,

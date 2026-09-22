@@ -46,8 +46,7 @@ import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.rideUpIntoHeader
-import com.tamin.taminhamrah.ui.pushBack
-import com.tamin.taminhamrah.ui.pushForward
+import com.tamin.taminhamrah.ui.navigationFade
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toparea.TopAreaState
@@ -125,13 +124,13 @@ fun WorkshopsScreen(
 
     // جزئیات کارگاه is the same destination in the design's own model: picking a workshop
     // swaps the page, and back returns to the list. Everything it draws already traveled
-    // with the workshop, so it costs no request and needs no route of its own — but it is a step
-    // deeper as far as the person tapping is concerned, so it moves with the app's own push.
+    // with the workshop, so it costs no request and needs no route of its own — but to the person
+    // tapping it is the next screen, so it arrives with the same fade every route in the app uses.
     // Keyed on open/closed only, so a refreshed copy of the open workshop never replays it.
     AnimatedContent(
         targetState = state.detailFor,
         contentKey = { it != null },
-        transitionSpec = { if (targetState != null) pushForward() else pushBack() },
+        transitionSpec = { navigationFade() },
         label = "workshop-detail",
         modifier = modifier.fillMaxSize(),
     ) { workshop ->

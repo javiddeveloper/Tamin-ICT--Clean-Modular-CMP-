@@ -5,6 +5,7 @@ import app.cash.turbine.test
 import com.tamin.taminhamrah.feature.workshops.fake.FakeFeatureManager
 import com.tamin.taminhamrah.feature.workshops.fake.FakeWorkShopsRepository
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopSearch
+import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopStats
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsEvent
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsIntent
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState
@@ -78,17 +79,64 @@ class WorkshopsViewModelTest {
     }
 
     @Test
-    fun `an unfiltered first page also counts how many are active`() = runTest(testDispatcher) {
-        repository.employerAgreements = agreementsPage(count = 3, total = 7)
+    fun `an unfiltered list that fits one page is counted without another request`() =
+        runTest(testDispatcher) {
+            repository.employerAgreements = PagedListDN(
+                items = listOf(agreement(0, ACTIVE_CODE), agreement(1, ACTIVE_CODE), agreement(2, SEMI_ACTIVE_CODE)),
+                total = 3,
+            )
 
-        val viewModel = viewModel()
-        val stats = assertNotNull(viewModel.uiState.value.stats)
+            val viewModel = viewModel()
+            val stats = assertNotNull(viewModel.uiState.value.stats)
 
-        assertEquals(7, stats.total)
-        // The count comes from a second, deliberately tiny request for the ACTIVE slice.
-        val last = assertNotNull(repository.lastWorkshopListQuery)
-        assertEquals(WorkshopActivityStatus.ACTIVE, last.status)
-        assertEquals(1, last.pageSize)
+            assertEquals(WorkshopStats(total = 3, active = 2), stats)
+            assertEquals(1, stats.inactive)
+            // The page the list asked for was the last one made: nothing was fetched to count.
+            val last = assertNotNull(repository.lastWorkshopListQuery)
+            assertNull(last.status)
+            assertEquals(0, last.page)
+        }
+
+    /**
+     * The service answers one row per agreement, so a workshop under nine agreements arrives nine
+     * times. The list shows it once; the strip above it has to agree — it used to read ۹ over ۱.
+     */
+    @Test
+    fun `a workshop repeated across agreements is counted once, as the list shows it`() =
+        runTest(testDispatcher) {
+            repository.employerAgreements = PagedListDN(
+                items = List(9) { agreement(0, ACTIVE_CODE) },
+                total = 9,
+            )
+
+            val state = viewModel().uiState.value
+
+            assertEquals(1, state.list.items.size)
+            assertEquals(WorkshopStats(total = 1, active = 1), state.stats)
+        }
+
+    /** A count of the first page alone would stop at ten; the rest of the pages count too. */
+    @Test
+    fun `the count covers every page, repeats across pages included`() = runTest(testDispatcher) {
+        val firstPage = PagedListDN(items = List(WORKSHOP_PAGE_SIZE) { agreement(it, ACTIVE_CODE) }, total = 15)
+        // Two of the second page's rows repeat workshops from the first.
+        val secondPage = PagedListDN(
+            items = listOf(agreement(0, ACTIVE_CODE), agreement(1, ACTIVE_CODE)) +
+                List(3) { agreement(WORKSHOP_PAGE_SIZE + it, INACTIVE_CODE) },
+            total = 15,
+        )
+        val pages = PagedAgreements(repository, listOf(firstPage, secondPage))
+
+        val viewModel = WorkshopsViewModel(
+            GetEmployerAgreementsUseCase(pages),
+            featureManager,
+            GetArticleSixteenDebtsUseCase(repository),
+        )
+
+        assertEquals(WorkshopStats(total = 13, active = 10), viewModel.uiState.value.stats)
+        assertEquals(listOf(0, 1), pages.requestedPages)
+        // Counting does not page the list itself in: it still holds only what was asked for.
+        assertEquals(WORKSHOP_PAGE_SIZE, viewModel.uiState.value.list.items.size)
     }
 
     // ------------------------------------------------- feature flags and identity
@@ -161,17 +209,20 @@ class WorkshopsViewModelTest {
     }
 
     @Test
-    fun `a failed count still leaves the total on screen`() = runTest(testDispatcher) {
-        repository.employerAgreements = agreementsPage(count = 3, total = 7)
+    fun `a later page failing still counts what arrived`() = runTest(testDispatcher) {
+        repository.employerAgreements = PagedListDN(
+            items = List(WORKSHOP_PAGE_SIZE) { agreement(it, if (it < 4) ACTIVE_CODE else INACTIVE_CODE) },
+            total = 15,
+        )
         val viewModel = WorkshopsViewModel(
             GetEmployerAgreementsUseCase(FailAfterFirstCall(repository)),
             featureManager,
             GetArticleSixteenDebtsUseCase(repository),
         )
 
-        val stats = assertNotNull(viewModel.uiState.value.stats)
-        assertEquals(7, stats.total)
-        assertEquals(0, stats.active)
+        assertEquals(WorkshopStats(total = WORKSHOP_PAGE_SIZE, active = 4), viewModel.uiState.value.stats)
+        // The list itself is untouched by the count failing.
+        assertNull(viewModel.uiState.value.list.error)
     }
 
     @Test
@@ -428,6 +479,16 @@ class WorkshopsViewModelTest {
         assertFalse(viewModel.uiState.value.list.isLoading)
     }
 
+    /** Workshop [id]'s row under one agreement; the same [id] twice is the same workshop twice. */
+    private fun agreement(id: Int, statusCode: String) = EmployerAgreementDN(
+        workshop = WorkshopSummaryDN(
+            workshopId = "09682101$id",
+            branchCode = "14",
+            name = "آموزشگاه شماره $id",
+            statusCode = statusCode,
+        ),
+    )
+
     private fun agreementsPage(count: Int, total: Int, startAt: Int = 0) = PagedListDN(
         items = List(count) {
             EmployerAgreementDN(
@@ -452,11 +513,30 @@ class WorkshopsViewModelTest {
     }
 }
 
+private val ACTIVE_CODE = WorkshopActivityStatus.ACTIVE.code
+private val SEMI_ACTIVE_CODE = WorkshopActivityStatus.SEMI_ACTIVE.code
+private val INACTIVE_CODE = WorkshopActivityStatus.INACTIVE.code
+
+/** Answers each page from its own list, the way the service pages; past the last, nothing. */
+private class PagedAgreements(
+    private val delegate: FakeWorkShopsRepository,
+    private val pages: List<PagedListDN<EmployerAgreementDN>>,
+) : com.tamin.taminhamrah.repository.WorkShopsRepository by delegate {
+    val requestedPages = mutableListOf<Int>()
+
+    override suspend fun getEmployerAgreements(
+        query: com.tamin.taminhamrah.model.workshop.WorkshopListQuery,
+    ): PagedListDN<EmployerAgreementDN> {
+        requestedPages += query.page
+        return pages.getOrElse(query.page) { PagedListDN(total = pages.first().total) }
+    }
+}
+
 /**
  * Answers the first call and refuses every one after it.
  *
- * Stands in for the count request failing on its own: the list is on screen, the ACTIVE slice is
- * not, and the header must still print a total rather than nothing.
+ * Stands in for the count failing part-way: the first page is on screen, a later one the count
+ * needed is not, and the strip must still print figures rather than nothing.
  */
 private class FailAfterFirstCall(
     private val delegate: FakeWorkShopsRepository,

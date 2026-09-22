@@ -144,9 +144,10 @@ fun WorkshopMembersContent(
                     }
                     WorkshopSectionHeader(
                         title = stringResource(Res.string.workshop_action_members),
-                        // The service's own total, not how much of it has been paged in: a count
+                        // The service's own total less the repeats the list dropped, not how much of it has
+                        // been paged in: a count
                         // that climbs while the user scrolls reads as though the first one was wrong.
-                        count = state.list.total,
+                        count = state.list.distinctTotal,
                     )
                     WorkshopFilterChips(
                         chips = filterChips,

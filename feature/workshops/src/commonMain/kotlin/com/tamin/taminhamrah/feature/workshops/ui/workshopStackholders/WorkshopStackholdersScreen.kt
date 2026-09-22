@@ -141,7 +141,7 @@ fun WorkshopStackholdersContent(
                     }
                     WorkshopSectionHeader(
                         title = stringResource(Res.string.workshop_action_stackholders),
-                        count = state.list.total,
+                        count = state.list.distinctTotal,
                     )
                     WorkshopFilterChips(
                         chips = filterChips,
