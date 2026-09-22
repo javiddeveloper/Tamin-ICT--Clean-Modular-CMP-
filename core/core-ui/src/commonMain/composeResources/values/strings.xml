@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="disability_pension_male_title">آقای</string>
     <string name="disability_pension_female_title">خانم</string>
@@ -3610,14 +3610,11 @@
     <string name="profile_photo_error_title">نتیجهٔ پردازش</string>
     <string name="profile_photo_error_empty_serial">کد سریال/کد رهگیری کارت ملی هوشمند را وارد نمایید</string>
     <string name="profile_photo_error_select_dependant">فرد تبعی مورد نظر را انتخاب کنید و یا وضعیت انتخاب افراد تبعی را غیر فعال کنید</string>
-    <string name="profile_photo_dialog_understood">متوجه شدم</string>
     <string name="profile_photo_guide_button">راهنما</string>
     <string name="profile_photo_guide_title">راهنمای کد سریال و کد رهگیری</string>
     <string name="profile_photo_guide_smart_card_title">کارت ملی هوشمند (جدید)</string>
     <string name="profile_photo_guide_smart_card_desc">کد ۱۰ رقمی عمودی درج شده در حاشیه چپ پشت کارت ملی هوشمند (شامل حروف و اعداد انگلیسی مانند 1P12863319 یا 1G50497996)</string>
     <string name="profile_photo_guide_receipt_title">رسید ثبت‌نام (در انتظار دریافت کارت)</string>
     <string name="profile_photo_guide_receipt_desc">کد رهگیری ۱۰ رقمی مندرج در برگه رسید متقاضی کارت هوشمند ملی صادره از دفاتر پیشخوان دولت یا پست (مانند 6035130378)</string>
-    <string name="profile_photo_guide_old_card_title">کارت ملی عادی (قدیمی)</string>
-    <string name="profile_photo_guide_old_card_desc">شماره سریال مندرج در گوشه پایین سمت چپ کارت (فقط ارقام ابتدایی پیش از اولین خط فاصله مانند 010524678)</string>
 
 </resources>

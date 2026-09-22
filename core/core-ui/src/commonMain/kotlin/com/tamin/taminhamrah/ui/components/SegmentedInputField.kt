@@ -63,13 +63,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.ui.alphanumericOnly
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -103,7 +101,6 @@ fun SegmentedInputField(
     showClearButton: Boolean = true,
     leadingIcon: ImageVector? = null,
     keyboardType: KeyboardType = KeyboardType.Number,
-    keyboardCapitalization: KeyboardCapitalization = KeyboardCapitalization.None,
     horizontalArrangement: Arrangement.Horizontal = Arrangement.End,
     placeholders: ImmutableList<Char> = List(slotCount) { 'ـ' }.toImmutableList(),
     groupBreaks: ImmutableSet<Int> = persistentSetOf(),
@@ -116,13 +113,10 @@ fun SegmentedInputField(
      * shorter box passes a smaller value rather than every screen getting one.
      */
     verticalPadding: Dp = Spacing.md,
+    /** False draws Latin characters as typed, for codes printed in Latin (the smart-card serial). */
     formatAsPersianDigits: Boolean = true,
     valueFilter: (String) -> String = { raw ->
-        if (formatAsPersianDigits) {
-            raw.filter { it.isDigit() || it.isPersianDigit() }.take(slotCount)
-        } else {
-            raw.alphanumericOnly().take(slotCount)
-        }
+        raw.filter { it.isDigit() || it.isPersianDigit() }.take(slotCount)
     },
 ) {
     val colors = LocalTaminColors.current
@@ -177,10 +171,7 @@ fun SegmentedInputField(
                 onValueChange = { newValue -> onValueChange(valueFilter(newValue.text)) },
                 enabled = enabled,
                 interactionSource = interactionSource,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = keyboardType,
-                    capitalization = keyboardCapitalization,
-                ),
+                keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
                 singleLine = true,
                 textStyle = TextStyle(color = Color.Transparent),
                 cursorBrush = SolidColor(Color.Transparent),
@@ -346,7 +337,7 @@ private fun DigitSlot(
     textColor: Color,
     placeholderColor: Color,
     blinkState: State<Float>,
-    formatAsPersianDigits: Boolean = true,
+    formatAsPersianDigits: Boolean,
 ) {
     AnimatedContent(
         targetState = digit,
@@ -366,19 +357,14 @@ private fun DigitSlot(
             modifier = Modifier.defaultMinSize(minWidth = 14.dp)
         ) {
             if (currentDigit != null) {
-                val displayText = if (formatAsPersianDigits) {
-                    currentDigit.toString().toPersianDigits()
-                } else {
-                    currentDigit.toString().uppercase()
-                }
-                val textStyle = if (formatAsPersianDigits) {
-                    MaterialTheme.typography.titleLarge
-                } else {
-                    MaterialTheme.typography.titleLarge.copy(fontFeatureSettings = "tnum")
-                }
                 Text(
-                    text = displayText,
-                    style = textStyle,
+                    text = if (formatAsPersianDigits) currentDigit.toString().toPersianDigits() else currentDigit.toString(),
+                    // Replacing the theme's `ss01` keeps ASCII digits Latin (see Type.kt).
+                    style = if (formatAsPersianDigits) {
+                        MaterialTheme.typography.titleLarge
+                    } else {
+                        MaterialTheme.typography.titleLarge.copy(fontFeatureSettings = "tnum")
+                    },
                     color = textColor
                 )
             } else {
