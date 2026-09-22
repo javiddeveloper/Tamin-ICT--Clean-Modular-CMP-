@@ -262,4 +262,55 @@ class TreatmentViewModelTest {
         }
     }
 
+    @Test
+    fun openHealthProfile_whenFeatureEnabled_navigatesWithTheMainUsersNationalCode() = runTest(testDispatcher) {
+        featureManager.status = FeatureStatus.Enabled
+        viewModel.sendIntent(TreatmentIntent.InitTreatmentFlow)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.events.test {
+            viewModel.sendIntent(TreatmentIntent.OpenHealthProfile)
+            val event = assertIs<TreatmentEvent.NavigateToHealthProfile>(awaitItem())
+            assertEquals("1234567890", event.nationalCode)
+        }
+    }
+
+    @Test
+    fun openHealthProfile_whenFeatureDisabled_explainsInsteadOfNavigating() = runTest(testDispatcher) {
+        featureManager.status = FeatureStatus.Disabled("پرونده سلامت غیرفعال است")
+        viewModel.sendIntent(TreatmentIntent.InitTreatmentFlow)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.events.test {
+            viewModel.sendIntent(TreatmentIntent.OpenHealthProfile)
+            val event = assertIs<TreatmentEvent.ShowMessage>(awaitItem())
+            assertEquals("پرونده سلامت غیرفعال است", event.message)
+        }
+    }
+
+    @Test
+    fun openContractedCenters_whenFeatureEnabled_navigates() = runTest(testDispatcher) {
+        featureManager.status = FeatureStatus.Enabled
+        viewModel.sendIntent(TreatmentIntent.InitTreatmentFlow)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.events.test {
+            viewModel.sendIntent(TreatmentIntent.OpenContractedCenters)
+            assertIs<TreatmentEvent.NavigateToContractedCenters>(awaitItem())
+        }
+    }
+
+    @Test
+    fun openContractedCenters_whenFeatureDisabled_explainsInsteadOfNavigating() = runTest(testDispatcher) {
+        featureManager.status = FeatureStatus.TemporaryDisabled("مراکز درمانی موقتاً در دسترس نیست")
+        viewModel.sendIntent(TreatmentIntent.InitTreatmentFlow)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.events.test {
+            viewModel.sendIntent(TreatmentIntent.OpenContractedCenters)
+            val event = assertIs<TreatmentEvent.ShowMessage>(awaitItem())
+            assertEquals("مراکز درمانی موقتاً در دسترس نیست", event.message)
+        }
+    }
+
 }

@@ -53,7 +53,17 @@ class TreatmentViewModel(
                 TreatmentFeatureFlags.approvals,
                 TreatmentEvent.NavigateToApprovals,
             )
+            is TreatmentIntent.OpenHealthProfile -> openHealthProfile()
+            is TreatmentIntent.OpenContractedCenters -> openGated(
+                TreatmentFeatureFlags.contractedCenters,
+                TreatmentEvent.NavigateToContractedCenters,
+            )
         }
+    }
+
+    private fun openHealthProfile(): Flow<PartialState> {
+        val nationalCode = uiState.value.mainUserNationalCode ?: return emptyFlow()
+        return openGated(TreatmentFeatureFlags.healthProfile, TreatmentEvent.NavigateToHealthProfile(nationalCode))
     }
 
     private fun openRecords(tab: RecordTab): Flow<PartialState> {

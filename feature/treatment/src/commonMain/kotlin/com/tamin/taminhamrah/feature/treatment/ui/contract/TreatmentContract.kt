@@ -67,6 +67,12 @@ sealed class TreatmentIntent {
 
     /** «تاییدیه‌ها» was tapped; gated by its flag like [OpenRecords]. */
     data object OpenApprovals : TreatmentIntent()
+
+    /** «پرونده سلامت من» was tapped; gated by its flag like [OpenRecords]. */
+    data object OpenHealthProfile : TreatmentIntent()
+
+    /** «مراکز درمانی طرف قرارداد» was tapped; gated by its flag like [OpenRecords]. */
+    data object OpenContractedCenters : TreatmentIntent()
 }
 
 sealed class TreatmentEvent {
@@ -78,4 +84,8 @@ sealed class TreatmentEvent {
     data object NavigateToMiscClaims : TreatmentEvent()
 
     data object NavigateToApprovals : TreatmentEvent()
+
+    data class NavigateToHealthProfile(val nationalCode: String) : TreatmentEvent()
+
+    data object NavigateToContractedCenters : TreatmentEvent()
 }

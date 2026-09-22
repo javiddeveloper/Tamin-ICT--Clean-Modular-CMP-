@@ -44,6 +44,7 @@ import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.reservedHeight
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.util.ExternalAppLauncher
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
@@ -74,6 +75,9 @@ fun TreatmentScreen(
     }
 
     val snackbarHostState = remember { SnackbarHostState() }
+    // The contracted-centers directory is a web page the organization maintains, not a screen of
+    // ours, so it opens in the browser on both platforms.
+    val centersLauncher = remember { ExternalAppLauncher() }
     HandleTreatmentEvents(
         events = viewModel.events,
         snackbarHostState = snackbarHostState,
@@ -83,13 +87,14 @@ fun TreatmentScreen(
         },
         onNavigateToMiscClaims = onOpenMiscClaims,
         onNavigateToApprovals = onOpenApprovals,
+        onNavigateToHealthProfile = onOpenHealthProfile,
+        onNavigateToContractedCenters = { centersLauncher.openUrl(CONTRACTED_CENTERS_URL) },
     )
 
     Box(modifier = Modifier.fillMaxSize()) {
         TreatmentContent(
             state = uiState,
             onIntent = viewModel::sendIntent,
-            onOpenHealthProfile = onOpenHealthProfile,
         )
         // Overlaid rather than wrapped in a Scaffold so the hub keeps its edge-to-edge header.
         SnackbarHost(
@@ -107,6 +112,8 @@ fun HandleTreatmentEvents(
     onNavigateToRecords: (String, RecordTab) -> Unit,
     onNavigateToMiscClaims: () -> Unit = {},
     onNavigateToApprovals: () -> Unit = {},
+    onNavigateToHealthProfile: (nationalCode: String) -> Unit = {},
+    onNavigateToContractedCenters: () -> Unit = {},
 ) {
     events.collectWithLifecycleAware {
         when (it) {
@@ -114,6 +121,8 @@ fun HandleTreatmentEvents(
             is TreatmentEvent.NavigateToRecords -> onNavigateToRecords(it.nationalCode, it.tab)
             TreatmentEvent.NavigateToMiscClaims -> onNavigateToMiscClaims()
             TreatmentEvent.NavigateToApprovals -> onNavigateToApprovals()
+            is TreatmentEvent.NavigateToHealthProfile -> onNavigateToHealthProfile(it.nationalCode)
+            TreatmentEvent.NavigateToContractedCenters -> onNavigateToContractedCenters()
 
             // A gated feature explains itself here; a silent gate would look like a dead button.
             is TreatmentEvent.ShowMessage -> snackbarHostState.showSnackbar(
@@ -130,17 +139,15 @@ fun HandleTreatmentEvents(
 }
 
 /**
- * Records, prescriptions, costs and approvals are not callbacks here: each tile raises an intent,
- * and the feature flag in the view model decides whether that becomes a navigation event. The
- * navigation lambdas belong to [TreatmentScreen], which handles those events. Only the health
- * profile has no flag, so it stays a plain callback.
+ * Every tile raises an intent, not a callback: the feature flag in the view model decides whether
+ * that becomes a navigation event, and the navigation lambdas belong to [TreatmentScreen], which
+ * handles those events.
  */
 @Composable
 fun TreatmentContent(
     state: TreatmentUiState,
     onIntent: (TreatmentIntent) -> Unit,
     modifier: Modifier = Modifier,
-    onOpenHealthProfile: (nationalCode: String) -> Unit = {},
 ) {
     // Keyed on the data the cards are built from, not on the whole state: selecting a patient
     // must not rebuild the list, or every swipe would invalidate the carousel and its effects.
@@ -169,16 +176,12 @@ fun TreatmentContent(
     val collapse = rememberCollapsingHeaderState(TreatmentDimens.headerCollapseDistance)
     var headerHeightPx by remember { mutableIntStateOf(0) }
 
-    val mainUserNationalCode = state.mainUserNationalCode
-    val currentOnOpenHealthProfile by rememberUpdatedState(onOpenHealthProfile)
-
     val handleOpenMedicalRecords = remember(onIntent) { { onIntent(TreatmentIntent.OpenRecords(RecordTab.Default)) } }
-    val handleOpenHealthProfile = remember(mainUserNationalCode) {
-        { mainUserNationalCode?.let { currentOnOpenHealthProfile(it) } ?: Unit }
-    }
+    val handleOpenHealthProfile = remember(onIntent) { { onIntent(TreatmentIntent.OpenHealthProfile) } }
     val handleOpenPrescriptions = remember(onIntent) { { onIntent(TreatmentIntent.OpenRecords(RecordTab.MEDICINE)) } }
     val handleOpenMiscClaims = remember(onIntent) { { onIntent(TreatmentIntent.OpenMiscClaims) } }
     val handleOpenApprovals = remember(onIntent) { { onIntent(TreatmentIntent.OpenApprovals) } }
+    val handleOpenCenters = remember(onIntent) { { onIntent(TreatmentIntent.OpenContractedCenters) } }
     val handleRetry = remember(onIntent) { { onIntent(TreatmentIntent.InitTreatmentFlow) } }
 
     Box(
@@ -199,8 +202,11 @@ fun TreatmentContent(
             TreatmentQuickAccess(
                 healthProfileCompleted = state.healthProfileCompleted,
                 recordsStatus = state.featureStatuses?.get(TreatmentFeatureFlags.records),
+                healthProfileStatus = state.featureStatuses?.get(TreatmentFeatureFlags.healthProfile),
+                centersStatus = state.featureStatuses?.get(TreatmentFeatureFlags.contractedCenters),
                 onOpenMedicalRecords = handleOpenMedicalRecords,
                 onOpenHealthProfile = handleOpenHealthProfile,
+                onOpenCenters = handleOpenCenters,
             )
             Spacer(modifier = Modifier.height(Spacing.lg))
             TreatmentCategories(
@@ -211,12 +217,17 @@ fun TreatmentContent(
                 onOpenMiscClaims = handleOpenMiscClaims,
                 onOpenApprovals = handleOpenApprovals,
             )
-            Spacer(modifier = Modifier.height(Spacing.lg))
-            TreatmentCostSummary(
-                insuredShare = state.insuredShareTotal,
-                organizationShare = state.organizationShareTotal,
-                isLoading = state.isLoading,
-            )
+            // Hidden once the flag has actually answered off; unresolved (null) still shows it as
+            // loading, the same as every gated entry above.
+            val costsStatus = state.featureStatuses?.get(TreatmentFeatureFlags.currentYearCosts)
+            if (costsStatus?.opensSomething != false) {
+                Spacer(modifier = Modifier.height(Spacing.lg))
+                TreatmentCostSummary(
+                    insuredShare = state.insuredShareTotal,
+                    organizationShare = state.organizationShareTotal,
+                    isLoading = state.isLoading || costsStatus == null,
+                )
+            }
             Spacer(modifier = Modifier.height(Spacing.xxl + TreatmentDimens.cardOverlap))
         }
 
@@ -276,6 +287,14 @@ private fun SyncPagerWithSelection(
         }
     }
 }
+
+/**
+ * The organization's directory of contracted treatment centres.
+ *
+ * A page on tamin.ir rather than an endpoint: there is no centers API, and the published list is
+ * what the branches actually keep current.
+ */
+private const val CONTRACTED_CENTERS_URL = "https://tamin.ir/html/item/4474"
 
 @PreviewRtlTheme
 @Composable

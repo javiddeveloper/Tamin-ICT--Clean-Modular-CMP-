@@ -144,6 +144,8 @@ fun HomeScreen(
                     event.title,
                     event.referenceId,
                 )
+                is HomeEvent.NavigateToStory -> onOpenStory(event.channelIndex)
+                is HomeEvent.NavigateToUserRequests -> onNavigateToUserRequests(event.refCode)
             }
         }
     }
@@ -152,9 +154,9 @@ fun HomeScreen(
         uiState = uiState,
         onNavigateToAgent = onNavigateToAgent,
         onNavigateToAllServices = onNavigateToAllServices,
-        onNavigateToUserRequests = { onNavigateToUserRequests(null) },
+        onNavigateToUserRequests = { viewModel.sendIntent(HomeIntent.OnLastRequestsSeeAllClick) },
         onRequestClick = { request ->
-            onNavigateToUserRequests(request.refCode)
+            viewModel.sendIntent(HomeIntent.OnLastRequestClick(request.refCode))
         },
         onCampaignClick = { viewModel.sendIntent(HomeIntent.OnCampaignClick(it)) },
         onSectionSelected = { viewModel.sendIntent(HomeIntent.OnSectionSelected(it)) },
@@ -172,12 +174,17 @@ fun HomeScreen(
         storyRail = {
             // «تازه‌ها» sits directly above the campaigns, as on the design, and is full-bleed for
             // the same reason: a row that scrolls has to be able to run a ring off the screen edge.
-            StoryRail(
-                onOpenViewer = onOpenStory,
-                modifier = Modifier
-                    .ignoreHorizontalPadding(HomeContentPadding)
-                    .padding(top = Spacing.xlg),
-            )
+            //
+            // Hidden only once the flag has actually answered off — unresolved (null) still shows
+            // it, the same as every other tap on this screen that is never blocked on ambiguity.
+            if (uiState.sectionStatuses?.get(FeatureFlag.STORIES_AND_SAVE_EVENTS)?.opensSomething != false) {
+                StoryRail(
+                    onOpenViewer = { index -> viewModel.sendIntent(HomeIntent.OnStoryChannelClick(index)) },
+                    modifier = Modifier
+                        .ignoreHorizontalPadding(HomeContentPadding)
+                        .padding(top = Spacing.xlg),
+                )
+            }
         },
     )
 }
@@ -374,8 +381,11 @@ private fun HomeScreenContent(
                 )
             }
 
+            // Hidden once the flag has actually answered off; unresolved (null) still shows it,
+            // same as the story rail above.
+            val lastRequestsBlocked = uiState.sectionStatuses?.get(FeatureFlag.HOME_LAST_REQUESTS)?.opensSomething == false
             HomeLastRequestsSection(
-                requests = requests,
+                requests = if (lastRequestsBlocked) emptyList() else requests,
                 onSeeAllClick = onNavigateToUserRequests,
                 onRequestClick = onRequestClick,
                 modifier = Modifier.padding(top = Spacing.md),

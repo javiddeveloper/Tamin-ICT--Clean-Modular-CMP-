@@ -134,7 +134,27 @@ enum class FeatureFlag(val id: Int) {
 
     // ─── AI Assistant / Chatbot ──────────────────────────────────────────────
     /** Controls the entry point for the Agent and chatbot access */
-    AGENT(2000);
+    AGENT(2000),
+
+    // ─── Client-only — no server menu id yet ────────────────────────────────
+    // Every flag above mirrors a row the server's menu already carries by this exact id.
+    // The ones below gate a screen the current menu says nothing about at all; each is
+    // resolved through `FeatureManager` exactly like any other flag (Enabled unless the
+    // server, or a "Feature flags" dev-screen override, says otherwise) so the day the
+    // server starts sending a real row for one of these, only the id here needs to change
+    // to that row's — nothing that reads the flag has to.
+    CHANGE_MOBILE(3001),
+    PERSONAL_INBOX(3002),
+    /** «لیست درخواست‌ها» in profile's کارتابل section. */
+    MY_REQUESTS(3003),
+    /** Shared by «تازه‌ها» (the home story rail) and «ذخیره رویدادها» — one flag gates both. */
+    STORIES_AND_SAVE_EVENTS(3004),
+    HEALTH_PROFILE(3005),
+    CONTRACTED_CENTERS(3006),
+    /** The treatment hub's yearly insured/organization spend card. */
+    CURRENT_YEAR_TREATMENT_COSTS(3007),
+    /** «آخرین درخواست‌ها» on the home dashboard. */
+    HOME_LAST_REQUESTS(3008);
 
     companion object {
         fun fromId(id: Int?) = entries.find { it.id == id }

@@ -54,7 +54,6 @@ import com.tamin.taminhamrah.ui.theme.TaminOnAccentInk
 import com.tamin.taminhamrah.ui.theme.TaminOnAccentInkMuted
 import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.ui.toPriceFormat
-import com.tamin.taminhamrah.ui.util.ExternalAppLauncher
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.ImmutableList
@@ -225,17 +224,15 @@ private fun PatientPlaceholderCard(
 @Composable
 internal fun TreatmentQuickAccess(
     healthProfileCompleted: Boolean?,
-    /** The flag state of «سوابق درمانی»; `null` while the menu has not answered. */
+    /** The flag state of each tile; `null` while the menu has not answered yet. */
     recordsStatus: FeatureStatus?,
+    healthProfileStatus: FeatureStatus?,
+    centersStatus: FeatureStatus?,
     onOpenMedicalRecords: () -> Unit,
     onOpenHealthProfile: () -> Unit,
+    onOpenCenters: () -> Unit,
 ) {
     val colors = LocalTaminColors.current
-    // The contracted-centers directory is a web page the organization maintains, not a screen of
-    // ours, so it opens in the browser on both platforms. Remembered so the item's onClick stays
-    // the same instance across recompositions and the list item keeps skipping.
-    val launcher = remember { ExternalAppLauncher() }
-    val openCenters = remember(launcher) { { launcher.openUrl(CONTRACTED_CENTERS_URL) } }
     Column(
         modifier = Modifier.padding(horizontal = Spacing.page),
         verticalArrangement = Arrangement.spacedBy(Spacing.cardGap),
@@ -294,7 +291,7 @@ internal fun TreatmentQuickAccess(
                         )
                     },
                     onClick = onOpenHealthProfile,
-                ),
+                ).gatedBy(healthProfileStatus, warningColor = colors.orangeText),
             ),
         )
 
@@ -310,8 +307,8 @@ internal fun TreatmentQuickAccess(
                         leadingIconBackgroundColor = colors.greenBg,
                         leadingIconTintColor = colors.teal,
                     ),
-                    onClick = openCenters,
-                ),
+                    onClick = onOpenCenters,
+                ).gatedBy(centersStatus, warningColor = colors.orangeText),
             ),
         )
     }
@@ -395,10 +392,3 @@ internal fun TreatmentCostSummary(
     )
 }
 
-/**
- * The organization's directory of contracted treatment centres.
- *
- * A page on tamin.ir rather than an endpoint: there is no centers API, and the published list is
- * what the branches actually keep current.
- */
-private const val CONTRACTED_CENTERS_URL = "https://tamin.ir/html/item/4474"

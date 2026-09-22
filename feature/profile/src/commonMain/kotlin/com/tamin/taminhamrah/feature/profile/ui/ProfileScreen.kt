@@ -543,7 +543,7 @@ fun ProfileContent(
                                 ),
                                 showArrow = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.CHANGE_MOBILE)) }
-                            )
+                            ).gated(ProfileMenuItem.CHANGE_MOBILE, state, taminColors.dangerText),
                         )
                     )
                 }
@@ -563,7 +563,7 @@ fun ProfileContent(
                                 ),
                                 showArrow = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.REQUESTS)) }
-                            ),
+                            ).gated(ProfileMenuItem.REQUESTS, state, taminColors.dangerText),
                             ListItemData(
                                 title = stringResource(Res.string.profile_personal_inbox),
                                 leadingIconPainter = painterResource(Res.drawable.ic_inbox),
@@ -573,7 +573,7 @@ fun ProfileContent(
                                 ),
                                 showArrow = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.PERSONAL_INBOX)) }
-                            ),
+                            ).gated(ProfileMenuItem.PERSONAL_INBOX, state, taminColors.dangerText),
                             ListItemData(
                                 title = stringResource(Res.string.profile_save_events),
                                 leadingIconPainter = painterResource(Res.drawable.ic_tamin_calendar),
@@ -583,7 +583,7 @@ fun ProfileContent(
                                 ),
                                 showArrow = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.SAVE_EVENTS)) }
-                            )
+                            ).gated(ProfileMenuItem.SAVE_EVENTS, state, taminColors.dangerText),
                         )
                     )
                 }

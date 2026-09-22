@@ -375,6 +375,78 @@ class HomeViewModelTest {
         assertEquals(listOf<HomeEvent>(HomeEvent.ShowMessage("سرویس غیرفعال است")), events)
     }
 
+    // ─── تازه‌ها / آخرین درخواست‌ها — client-only flags ─────────────────────────────────────────
+
+    @Test
+    fun `tapping a story channel opens the viewer when its flag is enabled`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(FakeFeatureManager(FeatureStatus.Enabled))
+        advanceUntilIdle()
+
+        val events = mutableListOf<HomeEvent>()
+        val collector = launch { viewModel.events.toList(events) }
+        viewModel.sendIntent(HomeIntent.OnStoryChannelClick(2))
+        advanceUntilIdle()
+        collector.cancel()
+
+        assertEquals(listOf<HomeEvent>(HomeEvent.NavigateToStory(2)), events)
+    }
+
+    @Test
+    fun `tapping a story channel while its flag is off explains instead of opening`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(FakeFeatureManager(FeatureStatus.Disabled("موقتاً در دسترس نیست")))
+        advanceUntilIdle()
+
+        val events = mutableListOf<HomeEvent>()
+        val collector = launch { viewModel.events.toList(events) }
+        viewModel.sendIntent(HomeIntent.OnStoryChannelClick(0))
+        advanceUntilIdle()
+        collector.cancel()
+
+        assertEquals(listOf<HomeEvent>(HomeEvent.ShowMessage("موقتاً در دسترس نیست")), events)
+    }
+
+    @Test
+    fun `see-all on last requests opens the unfiltered list when enabled`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(FakeFeatureManager(FeatureStatus.Enabled))
+        advanceUntilIdle()
+
+        val events = mutableListOf<HomeEvent>()
+        val collector = launch { viewModel.events.toList(events) }
+        viewModel.sendIntent(HomeIntent.OnLastRequestsSeeAllClick)
+        advanceUntilIdle()
+        collector.cancel()
+
+        assertEquals(listOf<HomeEvent>(HomeEvent.NavigateToUserRequests(null)), events)
+    }
+
+    @Test
+    fun `a last-request row opens filtered to its refCode when enabled`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(FakeFeatureManager(FeatureStatus.Enabled))
+        advanceUntilIdle()
+
+        val events = mutableListOf<HomeEvent>()
+        val collector = launch { viewModel.events.toList(events) }
+        viewModel.sendIntent(HomeIntent.OnLastRequestClick("REF-1"))
+        advanceUntilIdle()
+        collector.cancel()
+
+        assertEquals(listOf<HomeEvent>(HomeEvent.NavigateToUserRequests("REF-1")), events)
+    }
+
+    @Test
+    fun `last requests are blocked the same way when the flag is off`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(FakeFeatureManager(FeatureStatus.TemporaryDisabled(null)))
+        advanceUntilIdle()
+
+        val events = mutableListOf<HomeEvent>()
+        val collector = launch { viewModel.events.toList(events) }
+        viewModel.sendIntent(HomeIntent.OnLastRequestsSeeAllClick)
+        advanceUntilIdle()
+        collector.cancel()
+
+        assertTrue(events.none { it is HomeEvent.NavigateToUserRequests })
+    }
+
     private fun talfighInfo(year: String, months: List<String>) = TalfighInfoDN(
         list = listOf(
             TalfighInfoItemDN(

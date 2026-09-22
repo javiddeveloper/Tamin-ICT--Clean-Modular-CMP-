@@ -186,6 +186,49 @@ re-subscribing to a fresh status read only when the overrides themselves change 
 `FeatureManagerImplTest`'s `"a later override change reaches an already-subscribed collector"` for the
 regression test on this specific shape.
 
+## 5d. Client-only flags — screens the server menu says nothing about
+
+`FeatureFlag.kt` has a dedicated block, below `AGENT(2000)`, for screens the server's menu has no
+row for at all (no id to read a status from): `CHANGE_MOBILE(3001)`, `PERSONAL_INBOX(3002)`,
+`MY_REQUESTS(3003)`, `STORIES_AND_SAVE_EVENTS(3004)`, `HEALTH_PROFILE(3005)`,
+`CONTRACTED_CENTERS(3006)`, `CURRENT_YEAR_TREATMENT_COSTS(3007)`, `HOME_LAST_REQUESTS(3008)`. Each
+still goes through `FeatureManager` exactly like any server-backed flag — `Enabled` unless the
+"Feature flags" dev screen (§5c) overrides it — so the day the server starts sending a real row for
+one of these, only the id constant needs to change to that row's; nothing that reads the flag does.
+
+`STORIES_AND_SAVE_EVENTS` is shared on purpose: it gates both the home screen's «تازه‌ها» story rail
+and profile's «ذخیره رویدادها» row, one flag for both features per product decision, not two.
+
+Where each is read:
+- **Profile** (`ProfileMenuItem`) — `CHANGE_MOBILE`, `MY_REQUESTS` (لیست درخواست‌ها), `PERSONAL_INBOX`
+  (صندوق شخصی), `SAVE_EVENTS`→`STORIES_AND_SAVE_EVENTS`. Gated the same way as the server-backed rows
+  in §5b (`ListItemData.gatedBy`).
+- **Home** (`HomeViewModel.sectionStatusesFlow()`) — «تازه‌ها» (`StoryRail`) and «آخرین درخواست‌ها»
+  (`HomeLastRequestsSection`). Both a tap and the section's visibility go through the flag: unresolved
+  (`null`) still shows the section (never blocked on ambiguity, same rule as everywhere else), resolved
+  `Disabled`/`TemporaryDisabled` hides it. Tapping a story channel or a request row routes through
+  `HomeIntent.OnStoryChannelClick`/`OnLastRequestClick`/`OnLastRequestsSeeAllClick` — these used to call
+  the screen's navigation callback directly, bypassing the ViewModel (and therefore any gate) entirely.
+- **Treatment** (`TreatmentFeatureFlags`) — `healthProfile`, `contractedCenters`, `currentYearCosts`.
+  The first two are navigational tiles gated the same way as `records`/`miscClaims`/`approvals`
+  (`TreatmentIntent.OpenHealthProfile`/`OpenContractedCenters` → `openGated`); `currentYearCosts` gates
+  a passive display card (`TreatmentCostSummary`) instead of a tap — the card is hidden once the flag
+  resolves off rather than dimmed, since there is nothing on it to tap.
+
+### A real gap this closed: the assistant bypassing a flag entirely
+
+`AgentActionKey.toFeatureFlag()` mapped `GET_DEPENDENT`/`ADD_DEPENDENT`/`DEPENDENT_CANCELLATION*` and
+`EDIT_BANK_ACCOUNT_*` to `null` (the `else -> null` fallthrough) despite `DEPENDENTS` and
+`BANK_ACCOUNT_LIST` already existing — meaning the assistant could read, add or cancel a dependent, or
+edit a bank account, even with that row switched off in profile. `AgentActionDispatcher.dispatch()`
+only blocks an action whose key maps to a flag at all (step 1 in its own doc comment), so an
+unmapped key was never gated, full stop. Both are now mapped to their existing flags; `EDIT_PHONE_NUMBER*`
+maps to the new `CHANGE_MOBILE`, and `PROFILE_INFO`/`EDIT_PROFILE*` map to `IDENTITY_INFO` (the
+closest existing concept). See `AgentActionKeyFeatureFlagTest` for the regression coverage.
+
+`EDIT_ADDRESS*` remains unmapped — there is no address-editing screen or flag anywhere in this
+codebase to gate it against yet.
+
 ## 6. The AI Agent flag
 
 The AI assistant is a standalone feature in the flag system.
