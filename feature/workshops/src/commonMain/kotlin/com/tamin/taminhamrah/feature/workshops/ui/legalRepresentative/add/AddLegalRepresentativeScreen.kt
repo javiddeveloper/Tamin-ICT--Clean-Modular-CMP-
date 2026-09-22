@@ -278,6 +278,7 @@ fun AddLegalRepresentativeScreen(
             onDismissRequest = onSubmitted,
             confirmButton = {
                 TaminFilledButton(
+                    background = LocalTaminColors.current.buttonGradient,
                     text = stringResource(Res.string.legal_representative_success_confirm),
                     onClick = onSubmitted,
                     modifier = Modifier.fillMaxWidth(),
@@ -297,6 +298,7 @@ fun AddLegalRepresentativeScreen(
             onDismissRequest = { viewModel.sendIntent(AddLegalRepresentativeIntent.DismissOtpExpiredDialog) },
             confirmButton = {
                 TaminFilledButton(
+                    background = LocalTaminColors.current.buttonGradient,
                     text = stringResource(Res.string.legal_representative_otp_retry_action),
                     onClick = { viewModel.sendIntent(AddLegalRepresentativeIntent.DismissOtpExpiredDialog) },
                     modifier = Modifier.fillMaxWidth(),

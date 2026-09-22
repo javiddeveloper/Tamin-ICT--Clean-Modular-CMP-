@@ -414,6 +414,7 @@ private fun MemberActionDialog(
         description = stringResource(action.question),
         confirmButton = {
             TaminFilledButton(
+                background = LocalTaminColors.current.buttonGradient,
                 text = stringResource(Res.string.action_confirm),
                 onClick = onAccept,
                 modifier = Modifier.fillMaxWidth(),

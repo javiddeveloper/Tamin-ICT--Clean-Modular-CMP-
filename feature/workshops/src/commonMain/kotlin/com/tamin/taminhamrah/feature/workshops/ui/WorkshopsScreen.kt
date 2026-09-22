@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +46,12 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.rideUpIntoHeader
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toparea.TopAreaState
+import com.tamin.taminhamrah.ui.toparea.driveTopArea
+import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
+import com.tamin.taminhamrah.ui.toparea.reportTopAreaHeight
+import com.tamin.taminhamrah.ui.toparea.topAreaContentPadding
+import com.tamin.taminhamrah.ui.toparea.topAreaHide
 import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -112,6 +119,7 @@ fun WorkshopsScreen(
                 icon = Icons.Outlined.Info,
                 confirmButton = {
                     TaminFilledButton(
+                        background = LocalTaminColors.current.buttonGradient,
                         text = stringResource(Res.string.btn_understood),
                         onClick = { onIntent(WorkshopsIntent.NoDebtDialogDismissed) },
                         modifier = Modifier.fillMaxWidth(),
@@ -124,73 +132,33 @@ fun WorkshopsScreen(
         return
     }
 
-    val colors = LocalTaminColors.current
-    val headerGradient = remember(colors.profileGradientStops) {
-        Brush.horizontalGradient(colors.profileGradientStops)
-    }
-
     val workshops = state.workshops
     val stats = state.stats
     val isSearchOpen = state.isSearchOpen
     val hasActiveFilter = state.hasActiveFilter
+    val onSearchClick = { onIntent(WorkshopsIntent.SearchOpenChanged(!isSearchOpen)) }
 
-    Column(modifier = modifier.fillMaxSize()) {
-        TaminTopAppBar(
-            title = stringResource(Res.string.workshops_title),
-            navigationIcon = {
-                TaminTopAppBarButton(
-                    icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                    contentDescription = null,
-                    onClick = onBack,
-                    bordered = true,
-                )
-            },
-            action = {
-                TaminTopAppBarButton(
-                    icon = vectorResource(Res.drawable.ic_tamin_search),
-                    contentDescription = stringResource(Res.string.workshop_search),
-                    onClick = { onIntent(WorkshopsIntent.SearchOpenChanged(!isSearchOpen)) },
-                    bordered = true,
-                )
-            },
-            background = headerGradient,
-            bottomPadding = WorkshopDimens.headerBottomPadding,
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = Spacing.lg),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(Spacing.md),
-            ) {
-                AnimatedRingHeaderIcon(icon = vectorResource(Res.drawable.ic_tamin_workshop))
-                Text(
-                    text = stringResource(Res.string.workshops_header_subtitle),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.textHeaderSubtitle,
-                    textAlign = TextAlign.Center,
-                )
-            }
-        }
-
-        // The strip rides 42dp up into the navy, which means drawing outside the list's bounds —
-        // and a scrollable container clips to those. So it sits here, a sibling of the bar in a
-        // Column that does not clip, and the list starts below it.
-        WorkshopStatsCard(
+    // The list's own drag folds the ring icon and subtitle away, snapping on release; the stats
+    // strip is never wrapped in a topArea behavior, so it stays pinned under the slim bar. Same
+    // shape as ObjectionStatusScreen — see docs/vault/TopArea-System.md.
+    val topArea = rememberMeasuredTopAreaState { topAreaState ->
+        WorkshopsTopArea(
             stats = stats,
-            modifier = Modifier
-                .padding(horizontal = Spacing.page)
-                .rideUpIntoHeader(
-                    progress = { 0f },
-                    expandedOverlap = WorkshopDimens.statsCardOverlap,
-                    collapsedOverlap = WorkshopDimens.statsCardOverlap,
-                ),
+            onBack = onBack,
+            onSearchClick = onSearchClick,
+            topAreaState = topAreaState,
         )
+    }
+    val listState = rememberLazyListState()
 
+    // Overlaid rather than a Column, so the list passes underneath the header as it scrolls.
+    Box(modifier = modifier.fillMaxSize()) {
         WorkshopListScaffold(
-
             emptyIcon = vectorResource(Res.drawable.ic_tamin_workshop),
             state = state.list,
+            listState = listState,
+            modifier = Modifier.fillMaxSize().driveTopArea(topArea, listState),
+            contentPadding = topAreaContentPadding(state = topArea, rest = WorkshopDimens.listContentPadding),
             onLoadMore = { onIntent(WorkshopsIntent.LoadMore) },
             onRetry = { onIntent(WorkshopsIntent.Load) },
             key = { "${it.workshopId}_${it.branchCode}" },
@@ -208,6 +176,16 @@ fun WorkshopsScreen(
                 modifier = itemModifier,
             )
         }
+
+        WorkshopsTopArea(
+            stats = stats,
+            onBack = onBack,
+            onSearchClick = onSearchClick,
+            topAreaState = topArea,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .reportTopAreaHeight(topArea),
+        )
     }
 
     if (isSearchOpen) {
@@ -230,6 +208,82 @@ fun WorkshopsScreen(
             selected = state.statusFilter,
             onDismiss = { onIntent(WorkshopsIntent.FilterSheetOpenChanged(false)) },
             onSelect = { status -> onIntent(WorkshopsIntent.StatusFilterChanged(status)) },
+        )
+    }
+}
+
+/**
+ * The list's floating top area: the gradient bar, whose ring icon and subtitle fold away, and the
+ * stats strip riding [WorkshopDimens.statsCardOverlap] up into it, pinned there at every fold.
+ */
+@Composable
+private fun WorkshopsTopArea(
+    stats: WorkshopStats?,
+    onBack: () -> Unit,
+    onSearchClick: () -> Unit,
+    topAreaState: TopAreaState,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+    val headerGradient = remember(colors.profileGradientStops) {
+        Brush.horizontalGradient(colors.profileGradientStops)
+    }
+    Column(modifier = modifier.fillMaxWidth()) {
+        TaminTopAppBar(
+            title = stringResource(Res.string.workshops_title),
+            navigationIcon = {
+                TaminTopAppBarButton(
+                    icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                    contentDescription = null,
+                    onClick = onBack,
+                    bordered = true,
+                )
+            },
+            action = {
+                TaminTopAppBarButton(
+                    icon = vectorResource(Res.drawable.ic_tamin_search),
+                    contentDescription = stringResource(Res.string.workshop_search),
+                    onClick = onSearchClick,
+                    bordered = true,
+                )
+            },
+            background = headerGradient,
+            bottomPadding = WorkshopDimens.headerBottomPadding,
+        ) {
+            // Hidden together with its top gap, so the folded bar closes up under the title row.
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .topAreaHide(topAreaState)
+                    .padding(top = Spacing.lg),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(Spacing.md),
+            ) {
+                // Static while this is one of rememberMeasuredTopAreaState's off-screen probes.
+                AnimatedRingHeaderIcon(
+                    icon = vectorResource(Res.drawable.ic_tamin_workshop),
+                    animated = !topAreaState.isMeasureProbe,
+                )
+                Text(
+                    text = stringResource(Res.string.workshops_header_subtitle),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.textHeaderSubtitle,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
+
+        // Rides up into the bar's reserved bottom space and reports a height reduced by the same
+        // overlap, so reportTopAreaHeight sees the block's true footprint, not the overlap twice.
+        WorkshopStatsCard(
+            stats = stats,
+            modifier = Modifier
+                .padding(horizontal = Spacing.page)
+                .rideUpIntoHeader(
+                    progress = { 0f },
+                    expandedOverlap = WorkshopDimens.statsCardOverlap,
+                    collapsedOverlap = WorkshopDimens.statsCardOverlap,
+                ),
         )
     }
 }

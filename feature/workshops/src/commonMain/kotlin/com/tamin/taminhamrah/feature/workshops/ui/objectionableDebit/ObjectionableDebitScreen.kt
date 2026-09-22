@@ -169,6 +169,7 @@ fun ObjectionableDebitContent(
             iconBackground = colors.greenBg,
             confirmButton = {
                 TaminFilledButton(
+                    background = LocalTaminColors.current.buttonGradient,
                     text = stringResource(Res.string.ws_dialog_ok),
                     onClick = onDismissFiled,
                     modifier = Modifier.fillMaxWidth(),

@@ -146,6 +146,7 @@ fun ManagementDebitContent(
             icon = Icons.Outlined.Info,
             confirmButton = {
                 TaminFilledButton(
+                    background = LocalTaminColors.current.buttonGradient,
                     text = stringResource(Res.string.ws_dialog_ok),
                     onClick = { onIntent(ManagementDebitIntent.DismissExpertMessage) },
                     modifier = Modifier.fillMaxWidth(),
@@ -171,6 +172,7 @@ fun ManagementDebitContent(
             iconBackground = colors.greenBg,
             confirmButton = {
                 TaminFilledButton(
+                    background = LocalTaminColors.current.buttonGradient,
                     text = stringResource(Res.string.ws_dialog_ok),
                     onClick = { onIntent(ManagementDebitIntent.DismissFiled) },
                     modifier = Modifier.fillMaxWidth(),

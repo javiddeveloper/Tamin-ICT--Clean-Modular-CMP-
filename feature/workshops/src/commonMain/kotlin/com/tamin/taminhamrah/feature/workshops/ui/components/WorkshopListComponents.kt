@@ -73,6 +73,8 @@ import taminx.core.core_ui.workshop_stat_active
 import taminx.core.core_ui.workshop_stat_inactive
 import taminx.core.core_ui.workshop_stat_total
 import kotlin.time.Duration.Companion.milliseconds
+import androidx.compose.ui.draw.shadow
+import com.tamin.taminhamrah.ui.theme.Elevation
 
 /**
  * The three figures over the list, riding up into the gradient header.
@@ -229,7 +231,11 @@ fun WorkshopSectionHeader(
  * One کارگاه.
  *
  * Details and actions sit behind a single button, as the design has it: on the old screen the
- * actions only existed once a card had been expanded, which hid the whole point of the list.
+ * actions only existed once a card had been expanded, which hid the whole point of the list. The
+ * card itself answers a tap the same way, since the whole of it reads as the workshop.
+ *
+ * Lifted off the page as the medical records cards are — the shadow cast before the surface, so it
+ * falls outside the card rather than darkening its edge.
  */
 @Composable
 fun WorkshopCard(
@@ -242,7 +248,9 @@ fun WorkshopCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .shadow(elevation = Elevation.lg, shape = WorkshopCardShape)
             .taminSurface(CornerRadius.lg)
+            .clickable(onClick = onOpenDetails)
             .padding(Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
@@ -441,5 +449,7 @@ fun CardExpandToggle(
 }
 
 private val CodeChipShape = RoundedCornerShape(WorkshopDimens.codeChipCorner)
+
+private val WorkshopCardShape = RoundedCornerShape(CornerRadius.lg)
 
 
