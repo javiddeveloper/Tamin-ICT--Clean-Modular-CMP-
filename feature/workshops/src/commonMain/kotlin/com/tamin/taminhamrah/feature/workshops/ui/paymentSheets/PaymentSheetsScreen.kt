@@ -145,6 +145,7 @@ fun PaymentSheetsContent(
                 onClick = {
                     onIntent(PaymentSheetsIntent.SearchOpenChanged(!state.isSearchOpen))
                 },
+                bordered = true,
             )
         },
         modifier = modifier,

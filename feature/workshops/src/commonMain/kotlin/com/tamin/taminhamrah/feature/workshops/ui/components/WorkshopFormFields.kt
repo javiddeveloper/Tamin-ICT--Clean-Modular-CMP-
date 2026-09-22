@@ -337,6 +337,7 @@ fun WorkshopSearchAction(onClick: () -> Unit) {
         icon = vectorResource(Res.drawable.ic_tamin_search),
         contentDescription = stringResource(Res.string.workshop_search),
         onClick = onClick,
+        bordered = true,
     )
 }
 
