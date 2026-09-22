@@ -9,7 +9,6 @@ import com.tamin.taminhamrah.model.workshop.WORKSHOP_PAGE_SIZE
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
 import com.tamin.taminhamrah.tools.errorHandling.TaminApiException
 import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 import kotlinx.coroutines.CompletableDeferred
 import com.tamin.taminhamrah.useCases.workshops.GetWorkshopStackHoldersUseCase
 import kotlin.test.AfterTest
@@ -68,8 +67,9 @@ class WorkshopStackholdersViewModelTest {
         }
     }
 
+    /** The one search this list has: a stakeholder row carries no insurance number to filter by. */
     @Test
-    fun `each search field lands in the column that names it`() = runTest(testDispatcher) {
+    fun `a national code search is sent as the national code filter`() = runTest(testDispatcher) {
         repository.stackHolders = holdersPage(count = 1, total = 1)
 
         viewModel.uiState.test {
@@ -78,16 +78,15 @@ class WorkshopStackholdersViewModelTest {
             awaitUntil { it.list.items.isNotEmpty() }
 
             viewModel.sendIntent(
-                WorkshopStackholdersIntent.DraftChanged(
-                    PersonSearch(nationalId = "0024567891", insuranceNumber = "1122334455"),
-                ),
+                WorkshopStackholdersIntent.DraftChanged(PersonSearch(nationalId = "0024567891")),
             )
             viewModel.sendIntent(WorkshopStackholdersIntent.ApplySearch)
             awaitUntil { it.applied.isNotEmpty }
 
             val query = assertNotNull(repository.lastStackHolderQuery)
             assertEquals("0024567891", query.nationalId)
-            assertEquals("1122334455", query.insuranceNumber)
+            assertEquals(WORKSHOP_ID, query.workshopId)
+            assertEquals(BRANCH_CODE, query.branchCode)
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -119,7 +118,7 @@ class WorkshopStackholdersViewModelTest {
     }
 
     @Test
-    fun `clearing the search drops both filters`() = runTest(testDispatcher) {
+    fun `clearing the search drops the filter`() = runTest(testDispatcher) {
         repository.stackHolders = holdersPage(count = 1, total = 1)
 
         viewModel.uiState.test {
@@ -127,9 +126,7 @@ class WorkshopStackholdersViewModelTest {
             viewModel.sendIntent(WorkshopStackholdersIntent.Open(WORKSHOP_ID, BRANCH_CODE))
             awaitUntil { it.list.items.isNotEmpty() }
             viewModel.sendIntent(
-                WorkshopStackholdersIntent.DraftChanged(
-                    PersonSearch(nationalId = "0024567891", insuranceNumber = "1122334455"),
-                ),
+                WorkshopStackholdersIntent.DraftChanged(PersonSearch(nationalId = "0024567891")),
             )
             viewModel.sendIntent(WorkshopStackholdersIntent.ApplySearch)
             awaitUntil { it.applied.isNotEmpty }
@@ -138,7 +135,6 @@ class WorkshopStackholdersViewModelTest {
             awaitUntil { !it.applied.isNotEmpty }
 
             assertNull(repository.lastStackHolderQuery?.nationalId)
-            assertNull(repository.lastStackHolderQuery?.insuranceNumber)
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -241,37 +237,27 @@ class WorkshopStackholdersViewModelTest {
             }
         }
 
+    /** Removing the national-code chip is the chip's own way back to the whole list. */
     @Test
-    fun `removing one chip via ReplaceSearch reloads with that filter cleared`() = runTest(testDispatcher) {
+    fun `removing the national code chip reloads without the filter`() = runTest(testDispatcher) {
         repository.stackHolders = holdersPage(count = 1, total = 1)
 
         viewModel.uiState.test {
             awaitItem()
             viewModel.sendIntent(WorkshopStackholdersIntent.Open(WORKSHOP_ID, BRANCH_CODE))
             awaitUntil { it.list.items.isNotEmpty() }
-
-            // Apply both filters.
             viewModel.sendIntent(
-                WorkshopStackholdersIntent.DraftChanged(
-                    PersonSearch(nationalId = "0024567891", insuranceNumber = "1122334455"),
-                ),
+                WorkshopStackholdersIntent.DraftChanged(PersonSearch(nationalId = "0024567891")),
             )
             viewModel.sendIntent(WorkshopStackholdersIntent.ApplySearch)
             awaitUntil { it.applied.isNotEmpty }
 
-            // Remove only the national-id chip.
-            viewModel.sendIntent(
-                WorkshopStackholdersIntent.ReplaceSearch(
-                    PersonSearch(nationalId = "", insuranceNumber = "1122334455"),
-                ),
-            )
+            viewModel.sendIntent(WorkshopStackholdersIntent.ReplaceSearch(PersonSearch(nationalId = "")))
             val afterRemoval = awaitUntil { it.applied.nationalId.isBlank() }
 
-            // The insurance number is still applied, the national id is not.
             assertNull(repository.lastStackHolderQuery?.nationalId)
-            assertEquals("1122334455", repository.lastStackHolderQuery?.insuranceNumber)
-            assertTrue(afterRemoval.applied.insuranceNumber.isNotBlank())
-            assertFalse(afterRemoval.applied.nationalId.isNotBlank())
+            assertEquals(0, repository.lastStackHolderQuery?.page)
+            assertFalse(afterRemoval.applied.isNotEmpty)
             cancelAndIgnoreRemainingEvents()
         }
     }

@@ -5,7 +5,6 @@ import com.tamin.taminhamrah.model.common.FeatureFlag
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.ic_tamin_workshop_article_sixteen
 import taminx.core.core_ui.assigner_contracts_action_desc
 import taminx.core.core_ui.assigner_contracts_title
 import taminx.core.core_ui.contract_rows_action_desc
@@ -19,6 +18,7 @@ import taminx.core.core_ui.ic_tamin_workshop_payment
 import taminx.core.core_ui.ic_tamin_workshop_stackholders
 import taminx.core.core_ui.ic_tamin_workshop_objection
 import taminx.core.core_ui.ic_tamin_workshop_turnover
+import taminx.core.core_ui.ic_tamin_workshop_article_sixteen
 import taminx.core.core_ui.workshop_action_article_sixteen
 import taminx.core.core_ui.workshop_action_article_sixteen_desc
 import taminx.core.core_ui.workshop_action_debit_turnover
@@ -90,6 +90,12 @@ enum class WorkshopAction(
         icon = Res.drawable.ic_tamin_workshop_new_member,
         tint = StatusTint.INFO,
     ),
+    ARTICLE_SIXTEEN(
+        label = Res.string.workshop_action_article_sixteen,
+        description = Res.string.workshop_action_article_sixteen_desc,
+        icon = Res.drawable.ic_tamin_workshop_article_sixteen,
+        tint = StatusTint.PURPLE,
+    ),
     MEMBERS(
         label = Res.string.workshop_action_members,
         description = Res.string.workshop_action_members_desc,
@@ -101,12 +107,6 @@ enum class WorkshopAction(
         description = Res.string.workshop_action_stackholders_desc,
         icon = Res.drawable.ic_tamin_workshop_stackholders,
         tint = StatusTint.WARNING,
-    ),
-    ARTICLE_SIXTEEN(
-        label = Res.string.workshop_action_article_sixteen,
-        description = Res.string.workshop_action_article_sixteen_desc,
-        icon = Res.drawable.ic_tamin_workshop_article_sixteen,
-        tint = StatusTint.PURPLE,
     ),
 
     CONTRACT_ROWS(
