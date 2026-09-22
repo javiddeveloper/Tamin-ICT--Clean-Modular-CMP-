@@ -58,6 +58,7 @@ import taminx.core.core_ui.workshop_debt_from_date
 import taminx.core.core_ui.workshop_debt_notify_date
 import taminx.core.core_ui.workshop_debt_remaining
 import taminx.core.core_ui.workshop_debt_to_date
+import taminx.core.core_ui.ic_tamin_workshop_objection
 
 /**
  * اعتراض به بدهی.
@@ -186,6 +187,7 @@ fun ObjectionableDebitContent(
             workshopCode = workshopCode,
         ) {
             WorkshopListScaffold(
+                emptyIcon = vectorResource(Res.drawable.ic_tamin_workshop_objection),
                 state = state.list,
                 onLoadMore = onLoadMore,
                 onRetry = onRetry,

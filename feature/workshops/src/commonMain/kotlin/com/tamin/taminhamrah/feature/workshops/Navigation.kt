@@ -242,7 +242,6 @@ data class WorkshopStackholdersRoute(
     val workshopName: String = "",
 )
 
-
 fun NavController.navigateToWorkshops() {
     navigate(WorkshopsListRoute)
 }

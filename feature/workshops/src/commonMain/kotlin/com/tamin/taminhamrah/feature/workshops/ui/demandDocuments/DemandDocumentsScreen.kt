@@ -38,6 +38,8 @@ import taminx.core.core_ui.workshop_demand_doc_step
 import taminx.core.core_ui.workshop_demand_doc_type
 import taminx.core.core_ui.workshop_docs_debit_heading
 import taminx.core.core_ui.workshop_turnover_filename_format
+import org.jetbrains.compose.resources.vectorResource
+import taminx.core.core_ui.ic_tamin_document_lines
 
 /**
  * اسناد مطالبه of one debt, each openable as a PDF.
@@ -95,6 +97,7 @@ fun DemandDocumentsContent(
             debitNumber.toPersianDigits(),
         )
         WorkshopListScaffold(
+            emptyIcon = vectorResource(Res.drawable.ic_tamin_document_lines),
             state = state.list,
             onLoadMore = { onIntent(DemandDocumentsIntent.LoadMore) },
             onRetry = { onIntent(DemandDocumentsIntent.Retry) },

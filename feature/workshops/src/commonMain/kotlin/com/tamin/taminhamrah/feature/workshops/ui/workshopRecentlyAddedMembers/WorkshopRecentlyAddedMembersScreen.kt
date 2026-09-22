@@ -83,6 +83,8 @@ import taminx.core.core_ui.new_member_request_status
 import taminx.core.core_ui.new_member_status
 import taminx.core.core_ui.workshop_action_new_member
 import taminx.core.core_ui.workshop_ten_digits
+import org.jetbrains.compose.resources.vectorResource
+import taminx.core.core_ui.ic_tamin_workshop_new_member
 
 /**
  * نام‌نویسی غیرحضوری بیمه‌شده.
@@ -213,6 +215,7 @@ fun WorkshopRecentlyAddedMembersContent(
         modifier = modifier,
     ) {
         WorkshopListScaffold(
+            emptyIcon = vectorResource(Res.drawable.ic_tamin_workshop_new_member),
             state = state.list,
             onLoadMore = onLoadMore,
             key = { it.personalId ?: it.nationalId },

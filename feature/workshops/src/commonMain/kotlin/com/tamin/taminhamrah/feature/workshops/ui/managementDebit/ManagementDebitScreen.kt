@@ -81,6 +81,7 @@ import taminx.core.core_ui.payment_sheet_debit_number
 import taminx.core.core_ui.workshop_action_article_sixteen
 import taminx.core.core_ui.workshop_debt_from_date
 import taminx.core.core_ui.workshop_debt_to_date
+import taminx.core.core_ui.ic_tamin_workshop_article_sixteen
 
 /**
  * رسیدگی به بدهی ماده ۱۶.
@@ -228,6 +229,7 @@ fun ManagementDebitContent(
                 state.list.copy(items = visibleDebts)
             }
             WorkshopListScaffold(
+                emptyIcon = vectorResource(Res.drawable.ic_tamin_workshop_article_sixteen),
                 state = displayedList,
                 onLoadMore = { onIntent(ManagementDebitIntent.LoadMore) },
                 key = { it.debitNumber },

@@ -89,6 +89,7 @@ import taminx.core.core_ui.workshop_action_payment_sheets
 import taminx.core.core_ui.workshop_all_items
 import taminx.core.core_ui.workshop_search
 import taminx.core.core_ui.workshop_select_date
+import taminx.core.core_ui.ic_tamin_workshop_payment
 
 /**
  * برگ پرداخت‌ها — receipt list of one workshop.
@@ -151,6 +152,7 @@ fun PaymentSheetsContent(
         modifier = modifier,
     ) {
         WorkshopListScaffold(
+            emptyIcon = vectorResource(Res.drawable.ic_tamin_workshop_payment),
             state = state.list,
             onLoadMore = { onIntent(PaymentSheetsIntent.LoadMore) },
             onRetry = { onIntent(PaymentSheetsIntent.Load) },

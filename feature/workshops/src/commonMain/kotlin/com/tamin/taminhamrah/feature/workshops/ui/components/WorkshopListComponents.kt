@@ -418,7 +418,7 @@ fun CardExpandToggle(
                 )
             }
             .clickable(onClick = onToggle)
-            .padding(top = WorkshopDimens.toggleTopPadding),
+            .padding(vertical = WorkshopDimens.toggleVerticalPadding),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {

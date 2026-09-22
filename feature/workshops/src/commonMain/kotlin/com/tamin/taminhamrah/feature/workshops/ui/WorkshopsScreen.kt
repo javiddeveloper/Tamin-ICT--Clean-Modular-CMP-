@@ -188,6 +188,8 @@ fun WorkshopsScreen(
         )
 
         WorkshopListScaffold(
+
+            emptyIcon = vectorResource(Res.drawable.ic_tamin_workshop),
             state = state.list,
             onLoadMore = { onIntent(WorkshopsIntent.LoadMore) },
             onRetry = { onIntent(WorkshopsIntent.Load) },

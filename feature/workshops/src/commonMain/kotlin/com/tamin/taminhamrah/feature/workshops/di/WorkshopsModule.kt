@@ -43,12 +43,12 @@ val workshopsModule = module {
     }
 
     viewModelOf(::WorkshopsViewModel)
-    viewModelOf(::WorkshopStackholdersViewModel)
     viewModelOf(::WorkshopMembersViewModel)
+    viewModelOf(::WorkshopStackholdersViewModel)
     viewModelOf(::ManagementDebitViewModel)
-    viewModelOf(::WorkshopRecentlyAddedMembersViewModel)
-    viewModelOf(::ObjectionableDebitViewModel)
     viewModelOf(::WorkshopDebtInquiryViewModel)
+    viewModelOf(::ObjectionableDebitViewModel)
+    viewModelOf(::WorkshopRecentlyAddedMembersViewModel)
     viewModelOf(::PaymentSheetsViewModel)
     viewModelOf(::WorkshopDebitViewModel)
     viewModelOf(::DemandDocumentsViewModel)

@@ -41,6 +41,8 @@ import taminx.core.core_ui.workshop_debt_primary_vote_date
 import taminx.core.core_ui.workshop_debt_primary_vote_number
 import taminx.core.core_ui.workshop_debt_remaining
 import taminx.core.core_ui.workshop_debt_to_date
+import org.jetbrains.compose.resources.vectorResource
+import taminx.core.core_ui.ic_tamin_workshop_turnover
 
 /**
  * گردش حساب بدهی — every debt raised against one workshop.
@@ -99,6 +101,7 @@ fun WorkshopDebitContent(
         modifier = modifier,
     ) {
         WorkshopListScaffold(
+            emptyIcon = vectorResource(Res.drawable.ic_tamin_workshop_turnover),
             state = state.list,
             onLoadMore = { onIntent(WorkshopDebitIntent.LoadMore) },
             onRetry = { onIntent(WorkshopDebitIntent.Retry) },
