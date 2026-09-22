@@ -39,14 +39,27 @@ fun MainServiceDN?.toFeatureStatus(): FeatureStatus {
 fun List<MainServiceDN>.featureStatusOf(flag: FeatureFlag): FeatureStatus =
     find { it.id == flag.id }.toFeatureStatus()
 
+/**
+ * One entry per menu id. The id is the only thing the menu and a flag share, so every id in
+ * `MockMenuData` must appear here exactly once — `fromId` takes the *first* match, so a repeated id
+ * would silently route one menu row to the wrong feature.
+ *
+ * **These are the legacy server's own ids** (`1`–`47` insured, `101`–`113` pensioners, `1001`–`1012`
+ * employers, `2000` the assistant), not a scheme this app invented — `menu_data_<version>.txt`, once
+ * switched back on, has to line up with these without a remap. The numbers are *not* sequential
+ * within a band (the server left gaps — e.g. `12`, `24`, `27`–`32` in the insured band — for
+ * services this app doesn't carry, or hasn't been assigned) and do **not** decide display order;
+ * that's `MockMenuData`'s `sorting` field, read by `MenuDao.getMenuItems()` before `id` is ever
+ * consulted as a tie-break. A service that both an insured person and a pensioner reach has one flag
+ * per audience, the pensioner's suffixed `_PENSIONER`, when each audience needs its own menu row.
+ */
 enum class FeatureFlag(val id: Int) {
+    // ─── Insured ──────────────────────────────────────────────────────────────
     IDENTITY_INFO(1),
     ACTIVE_RELATION(2),
     BANK_ACCOUNT_LIST(3),
     EDIT_IMAGE(4),
     DEPENDENTS(5),
-    MERGE_HISTORY(6),
-    WAGE_AND_HISTORY(7),
     COMBINED_RECORD(8),
     SEND_INSURANCE_HISTORY_TO_INSTITUTION(9),
     OBJECTION_NON_EXISTENT_HISTORY(10),
@@ -74,20 +87,38 @@ enum class FeatureFlag(val id: Int) {
     REQUEST_PENSION_BY_SURVIVOR(40),
     RETIREMENT_PENSION(41),
     OBJECTION_INSURANCE_HISTORY(42),
-    OBJECTION_INSURANCE_HISTORY_45(45),
+    // No legacy row ever carried an insured-audience "مستمری از کارافتادگی" (the server only ever
+    // sent one, pensioner-only, at id 113 — see DISABILITY_PENSION_PENSIONER). This id and the
+    // MockMenuData row that uses it are new; 44 is simply an unused gap in the legacy insured band,
+    // not a number the server has ever assigned to anything.
+    DISABILITY_PENSION(44),
     MY_ELECTRONIC_FILE(46),
     WORKERS_PAYMENT_INFO(47),
-    DESERVED_TREATMENT_101(101),
-    PRESCRIPTION_102(102),
+
+    // «اعلام حادثه» and «سامانه قوانین و مقررات» keep the *employer* ids the legacy server assigned
+    // them (`1011`/`1012`) even though `MockMenuData` currently places both rows in the insured
+    // audience (`showRole = [1]`) — the id is the server's identity for the service, `showRole` is
+    // separate, server-supplied audience metadata this mock is only guessing at.
+    OCCURRENCE(1011),
+    LAWS(1012),
+
+    // ─── Pensioners ───────────────────────────────────────────────────────────
+    DESERVED_TREATMENT_PENSIONER(101),
     PENSION_INQUIRY(104),
     PAY_ROLL(105),
     EDICT_PENSIONER(106),
     ISSUANCE_WAGE_CERTIFICATE(107),
     DEFERRED_INSTALLMENT_CERTIFICATE(108),
-    CALCULATE_WAGE_PENSION_109(109),
     GIRL_SURVIVOR(110),
-    REQUEST_PENSION_BY_SURVIVOR_112(112),
-    DISABILITY_PENSION(113),
+    REQUEST_PENSION_BY_SURVIVOR_PENSIONER(112),
+    DISABILITY_PENSION_PENSIONER(113),
+    // The legacy server never sent a dedicated pensioner row for this — `CALCULATE_WAGE_PENSION`
+    // covered both audiences with one row (id 23, showRole [1, 2]). 109 was already reserved for it
+    // in the old enum (as a rowless placeholder) when a service needed a pensioner-only position;
+    // reused here now that MockMenuData gives it a real, separate row.
+    CALCULATE_WAGE_PENSION_PENSIONER(109),
+
+    // ─── Employers ────────────────────────────────────────────────────────────
     WORKSHOPS(1001),
     CONTRACT_INFO(1002),
     ASSIGNER_CONTRACT(1003),
@@ -98,8 +129,11 @@ enum class FeatureFlag(val id: Int) {
     PERFORMED_INSPECTION(1008),
     INSTALLMENT_DEBT(1009),
     CONSTRUCTION_INSURANCE(1010),
-    OCCURRENCE(1011),
-    LAWS(1012),
+
+    // ─── No menu row today ───────────────────────────────────────────────────
+    // Legacy server placeholders that never had a menu row — kept under their original ids.
+    OBJECTION_INSURANCE_HISTORY_LEGACY(45),
+    PRESCRIPTION_PENSIONER(102),
 
     // ─── AI Assistant / Chatbot ──────────────────────────────────────────────
     /** Controls the entry point for the Agent and chatbot access */

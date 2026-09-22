@@ -107,7 +107,7 @@ class HomeViewModel(
                 handleFeatureClick(intent.flag)
             }
             is HomeIntent.OnHistorySummaryClick -> {
-                handleFeatureClick(FeatureFlag.WAGE_AND_HISTORY)
+                handleFeatureClick(FeatureFlag.COMBINED_RECORD)
             }
             is HomeIntent.RefreshAgentAccess -> {
                 // Like the native dashboard: the answer is cached by the use case and drives the
