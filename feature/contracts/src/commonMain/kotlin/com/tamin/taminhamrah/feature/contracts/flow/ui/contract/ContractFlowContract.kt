@@ -28,8 +28,12 @@ data class ContractFlowUiState(
     val existingContracts: List<ContractPR> = emptyList(),
     val rawTypedContracts: List<ContractDN> = emptyList(),
     val hasLoadedTypedContracts: Boolean = false,
+    /** True after the typed-contracts Flow finishes (cache + network attempt), not on first emit. */
+    val hasCompletedTypedContractsRefresh: Boolean = false,
     val allContracts: List<ContractDN> = emptyList(),
     val hasLoadedAllContracts: Boolean = false,
+    /** True after the all-contracts Flow finishes (cache + network attempt), not on first emit. */
+    val hasCompletedAllContractsRefresh: Boolean = false,
     val allContractsLoadFailed: Boolean = false,
     val eligibility: ContractEligibilityPR? = null,
     val isRulesConfirmed: Boolean = false,
@@ -112,6 +116,15 @@ data class ContractFlowUiState(
             branchSelection.branchName.ifBlank { branchSelection.provinceName },
         ).filter { it.isNotBlank() }.joinToString(" - ")
 
+    /**
+     * Eligibility / preflight / next-step CTA must wait for contract list refresh to finish.
+     * Room may emit cached rows first; treating those as final lets the green “allowed” UI and
+     * bottom bar enable before the API responds.
+     */
+    val isRegistrationGateLoading: Boolean
+        get() = !isEditingExistingContract &&
+            (!hasCompletedTypedContractsRefresh || !hasCompletedAllContractsRefresh)
+
     val canGoNext: Boolean
         get() {
             val flowConfig = config ?: return false
@@ -120,12 +133,14 @@ data class ContractFlowUiState(
                     if (isEditingExistingContract) {
                         registrationInfo != null
                     } else {
-                        registrationInfo != null &&
+                        !isRegistrationGateLoading &&
+                            registrationInfo != null &&
                             genderGateError == null &&
                             preflightGateError == null &&
                             (eligibility == null || eligibility.isEligible)
                     }
-                ContractStep.STEP_AUTHORIZATION -> eligibility?.isEligible == true
+                ContractStep.STEP_AUTHORIZATION ->
+                    !isRegistrationGateLoading && eligibility?.isEligible == true
                 ContractStep.STEP_CONTRACT_TERMS -> isRulesConfirmed
                 ContractStep.STEP_USER_INFO -> isUserInfoStepComplete(userInfo)
                 ContractStep.STEP_CONTRACT_APPLICANT ->
@@ -165,6 +180,8 @@ data class ContractFlowUiState(
         data class RawTypedContractsLoaded(val contracts: List<ContractDN>) : PartialState()
         data class AllContractsLoaded(val contracts: List<ContractDN>) : PartialState()
         data object AllContractsLoadFailed : PartialState()
+        data object TypedContractsRefreshCompleted : PartialState()
+        data object AllContractsRefreshCompleted : PartialState()
         data class EligibilityLoaded(val eligibility: ContractEligibilityPR) : PartialState()
         data class RulesConfirmedChanged(val confirmed: Boolean) : PartialState()
         data class UserInfoChanged(val userInfo: UserInfoFormPR) : PartialState()

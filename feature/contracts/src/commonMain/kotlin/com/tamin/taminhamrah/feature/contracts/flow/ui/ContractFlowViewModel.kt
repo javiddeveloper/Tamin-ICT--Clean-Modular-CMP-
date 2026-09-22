@@ -273,14 +273,17 @@ class ContractFlowViewModel(
         } catch (e: Exception) {
             emit(PartialState.AllContractsLoadFailed)
             emitPreflightGateIfReady()
+        } finally {
+            emit(PartialState.AllContractsRefreshCompleted)
+            emitPreflightGateIfReady()
         }
     }
 
     private suspend fun kotlinx.coroutines.flow.FlowCollector<PartialState>.emitPreflightGateIfReady() {
         if (uiState.value.isEditingExistingContract) return
         val registration = uiState.value.registrationInfo ?: return
-        if (!uiState.value.hasLoadedTypedContracts) return
-        if (!uiState.value.hasLoadedAllContracts) return
+        if (!uiState.value.hasCompletedTypedContractsRefresh) return
+        if (!uiState.value.hasCompletedAllContractsRefresh) return
         if (uiState.value.allContractsLoadFailed) {
             emit(PartialState.PreflightGateError(getString(Res.string.contract_preflight_contracts_load_failed)))
             return
@@ -290,8 +293,8 @@ class ContractFlowViewModel(
             typedContracts = uiState.value.rawTypedContracts,
             allContracts = uiState.value.allContracts,
             currentPremiumTypeCode = config.premiumTypeCode,
-        ) ?: return
-        emit(PartialState.PreflightGateError(preflightMessage(block)))
+        )
+        emit(PartialState.PreflightGateError(block?.let { preflightMessage(it) }))
     }
 
     private suspend fun preflightMessage(block: ContractPreflightBlock): String = when (block) {
@@ -320,6 +323,9 @@ class ContractFlowViewModel(
             }
         } catch (e: Exception) {
             emitError(e.message)
+        } finally {
+            emit(PartialState.TypedContractsRefreshCompleted)
+            emitPreflightGateIfReady()
         }
     }
 
@@ -1179,6 +1185,12 @@ class ContractFlowViewModel(
         PartialState.AllContractsLoadFailed -> currentState.copy(
             hasLoadedAllContracts = true,
             allContractsLoadFailed = true,
+        )
+        PartialState.TypedContractsRefreshCompleted -> currentState.copy(
+            hasCompletedTypedContractsRefresh = true,
+        )
+        PartialState.AllContractsRefreshCompleted -> currentState.copy(
+            hasCompletedAllContractsRefresh = true,
         )
         is PartialState.EligibilityLoaded -> currentState.copy(
             eligibility = partialState.eligibility,
