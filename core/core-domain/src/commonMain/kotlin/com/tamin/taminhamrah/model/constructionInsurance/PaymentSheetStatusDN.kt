@@ -6,6 +6,10 @@ package com.tamin.taminhamrah.model.constructionInsurance
  * shape the live `getPaymentSheetConstructionInfo` service actually sends (a code or free text)
  * couldn't be confirmed from client code alone (MR !244 review item 9), so this also accepts the
  * literal legacy text as paid; every other non-null value is unpaid.
+ *
+ * [from] takes that legacy text as a parameter rather than hardcoding it here: this module has no
+ * access to the `payment_sheet_status_paid` Compose string resource (`core-ui` depends on
+ * `core-domain`, never the reverse), so the caller resolves it from `strings.xml` and passes it in.
  */
 enum class PaymentSheetStatusDN {
     PAID,
@@ -14,11 +18,10 @@ enum class PaymentSheetStatusDN {
 
     companion object {
         private const val PAID_CODE = "1"
-        private const val PAID_TEXT = "پرداخت شده"
 
-        fun from(status: String?): PaymentSheetStatusDN = when (status) {
+        fun from(status: String?, paidText: String): PaymentSheetStatusDN = when (status) {
             null -> UNKNOWN
-            PAID_CODE, PAID_TEXT -> PAID
+            PAID_CODE, paidText -> PAID
             else -> UNPAID
         }
     }

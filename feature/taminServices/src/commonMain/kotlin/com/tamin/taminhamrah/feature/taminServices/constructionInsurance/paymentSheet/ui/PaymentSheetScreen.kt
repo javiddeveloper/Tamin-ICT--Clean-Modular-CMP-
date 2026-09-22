@@ -290,13 +290,10 @@ fun PaymentSheetScreen(
 @Composable
 private fun paymentStatusDisplay(status: String?): Triple<String, Color, Color> {
     val colors = LocalTaminColors.current
-    return when (PaymentSheetStatusDN.from(status)) {
+    val paidText = stringResource(CoreRes.string.payment_sheet_status_paid)
+    return when (PaymentSheetStatusDN.from(status, paidText)) {
         PaymentSheetStatusDN.UNKNOWN -> Triple("-", colors.chipBg, colors.textSecondary)
-        PaymentSheetStatusDN.PAID -> Triple(
-            stringResource(CoreRes.string.payment_sheet_status_paid),
-            colors.greenBg,
-            colors.greenText,
-        )
+        PaymentSheetStatusDN.PAID -> Triple(paidText, colors.greenBg, colors.greenText)
         PaymentSheetStatusDN.UNPAID -> Triple(
             stringResource(CoreRes.string.payment_sheet_status_unpaid),
             colors.dangerBorder,
