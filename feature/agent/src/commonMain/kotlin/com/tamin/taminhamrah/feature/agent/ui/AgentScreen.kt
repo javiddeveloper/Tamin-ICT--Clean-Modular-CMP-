@@ -84,6 +84,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
@@ -247,24 +248,39 @@ private fun AgentContent(
     onRequestScroll: () -> Unit,
     onNavigateBack: () -> Unit,
 ) {
-    when {
-        uiState.isCheckingPermission -> PermissionCheckingIndicator()
-        uiState.isNotAllowed        -> NotAllowedMessage(message = uiState.notAllowedMessage)
-        else -> ChatLayout(
-            uiState = uiState,
-            listState = listState,
-            onIntent = onIntent,
-            onRequestScroll = onRequestScroll,
-            onNavigateBack = onNavigateBack,
-        )
+    // Owned here, not in ChatLayout, because the history drawer below blurs the chat
+    // through it and must sit *above* ChatLayout in the same Box.
+    val hazeState = remember { HazeState() }
+    val focusManager = LocalFocusManager.current
+
+    // The composer may still hold focus when the history tile is tapped; drop it so the
+    // keyboard does not stay up under the drawer.
+    LaunchedEffect(uiState.isHistoryVisible) {
+        if (uiState.isHistoryVisible) focusManager.clearFocus()
     }
 
-    // Saved conversations. Rendered here rather than inside ChatLayout so it stays
-    // reachable regardless of which state the screen is in.
-    if (uiState.isHistoryVisible) {
-        ChatHistorySheet(
+    Box(modifier = Modifier.fillMaxSize()) {
+        when {
+            uiState.isCheckingPermission -> PermissionCheckingIndicator()
+            uiState.isNotAllowed        -> NotAllowedMessage(message = uiState.notAllowedMessage)
+            else -> ChatLayout(
+                uiState = uiState,
+                listState = listState,
+                hazeState = hazeState,
+                onIntent = onIntent,
+                onRequestScroll = onRequestScroll,
+                onNavigateBack = onNavigateBack,
+            )
+        }
+
+        // Saved conversations: a right-edge drawer over the chat. Always composed (driven
+        // by `visible`) so its close animation plays; last child so it draws on top and
+        // its glass can blur the chat beneath.
+        ChatHistoryDrawer(
+            visible = uiState.isHistoryVisible,
             sessions = uiState.sessions,
             activeSessionId = uiState.activeSessionId,
+            hazeState = hazeState,
             onDismiss = { onIntent(AgentIntent.CloseChatHistory) },
             onOpenSession = { onIntent(AgentIntent.LoadChatSession(it)) },
             onDeleteSession = { onIntent(AgentIntent.DeleteChatSession(it)) },
@@ -278,11 +294,11 @@ private fun AgentContent(
 private fun ChatLayout(
     uiState: AgentUiState,
     listState: LazyListState,
+    hazeState: HazeState,
     onIntent: (AgentIntent) -> Unit,
     onRequestScroll: () -> Unit,
     onNavigateBack: () -> Unit,
 ) {
-    val hazeState = remember { HazeState() }
     val density = LocalDensity.current
     // Bars overlay the content, so the chat list must reserve space for them via
     // contentPadding. We measure the real bar heights (they vary with system insets)

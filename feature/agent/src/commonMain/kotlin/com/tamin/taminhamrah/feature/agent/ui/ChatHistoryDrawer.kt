@@ -82,6 +82,7 @@ import androidx.compose.ui.window.Dialog
 import com.tamin.taminhamrah.model.agent.AgentSessionDN
 import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.components.coloredShadow
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.toPersianDigits
@@ -128,6 +129,14 @@ private val DrawerScrimColor = Color.Black.copy(alpha = 0.55f)
 private val DrawerAccentGradient = Brush.linearGradient(listOf(Color(0xFF7C5CFF), Color(0xFF3B6FD4)))
 private val DrawerAccentSoft = Color(0xFFA78BFA)
 
+/** Fill of the open conversation's row — the accent gradient, faded so the text stays legible. */
+private val ActiveRowGradient = Brush.linearGradient(
+    listOf(Color(0xFF7C5CFF).copy(alpha = 0.34f), Color(0xFF3B6FD4).copy(alpha = 0.26f))
+)
+
+private val NewChatButtonRadius = 25.dp
+private val NewChatButtonShape = RoundedCornerShape(NewChatButtonRadius)
+
 private const val DRAWER_ANIM_MS = 320
 private const val SCRIM_ANIM_MS = 260
 private const val DRAG_SETTLE_ANIM_MS = 220
@@ -137,7 +146,7 @@ private const val DRAG_DISMISS_FRACTION = 0.35f
 
 /**
  * Right-edge drawer listing saved conversations. Each row can be opened, renamed or deleted;
- * the top row starts a new chat. Dismissed by the scrim, the close tile, the system back
+ * a gradient button pinned to the bottom starts a new chat. Dismissed by the scrim, the close tile, the system back
  * gesture, or swiping the panel back out to the right.
  *
  * Must be the last child of a full-screen `Box` that also contains the Haze *sources* the
@@ -319,11 +328,10 @@ private fun DrawerPanel(
             DrawerHeader(sessionsCount = sessions.size, onClose = onDismiss)
             Spacer(Modifier.height(16.dp))
 
-            NewChatRow(onClick = onStartNewChat)
-            Spacer(Modifier.height(16.dp))
-
+            // The list (or the empty note) takes whatever height is left, so the
+            // new-chat button below stays pinned to the bottom edge.
             if (sessions.isEmpty()) {
-                EmptyHistoryMessage()
+                EmptyHistoryMessage(modifier = Modifier.weight(1f))
             } else {
                 Text(
                     text = "گفتگوهای اخیر",
@@ -352,6 +360,17 @@ private fun DrawerPanel(
                     }
                 }
             }
+
+            // ── Pinned footer: hairline + the new-chat button ──
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(AgentGlass.borderColor)
+            )
+            Spacer(Modifier.height(14.dp))
+            NewChatButton(onClick = onStartNewChat)
+            Spacer(Modifier.height(14.dp))
         }
     }
 }
@@ -438,39 +457,39 @@ private fun GlassTile(
     }
 }
 
+/** Full-width gradient pill pinned to the drawer's bottom edge — the primary action here. */
 @Composable
-private fun NewChatRow(onClick: () -> Unit) {
+private fun NewChatButton(onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(DrawerRowShape)
-            .background(DrawerAccentSoft.copy(alpha = 0.16f))
-            .border(AgentGlass.borderWidth, DrawerAccentSoft.copy(alpha = 0.40f), DrawerRowShape)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 11.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(32.dp)
-                .clip(CircleShape)
-                .background(DrawerAccentGradient),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Rounded.Add,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(18.dp)
+            .height(50.dp)
+            .coloredShadow(
+                color = Color(0xFF5B46E4).copy(alpha = 0.45f),
+                borderRadius = NewChatButtonRadius,
+                blurRadius = 16.dp,
+                offsetY = 6.dp
             )
-        }
+            .clip(NewChatButtonShape)
+            .background(DrawerAccentGradient)
+            .border(AgentGlass.borderWidth, Color.White.copy(alpha = 0.22f), NewChatButtonShape)
+            .clickable(onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = Icons.Rounded.Add,
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.size(20.dp)
+        )
+        Spacer(Modifier.width(8.dp))
         Text(
             text = stringResource(Res.string.agent_new_chat),
             style = MaterialTheme.typography.bodyMedium.copy(
-                fontSize = 13.5.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFFD8CFFF)
+                fontSize = 14.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color.White
             )
         )
     }
@@ -484,19 +503,33 @@ private fun SessionRow(
     onRename: () -> Unit,
     onDelete: () -> Unit
 ) {
-    val background = if (isActive) AgentGlass.tileFill else AgentGlass.tileFillSubtle
-    val border = if (isActive) AgentGlass.accent.copy(alpha = 0.55f) else AgentGlass.borderColor
+    // The open conversation gets a tinted fill, a brighter/thicker border, an accent strip
+    // on its leading edge and a "جاری" pill — one cue alone was too easy to miss.
+    val background: Brush = if (isActive) ActiveRowGradient else SolidColor(AgentGlass.tileFillSubtle)
+    val borderColor = if (isActive) DrawerAccentSoft.copy(alpha = 0.75f) else AgentGlass.borderColor
+    val borderWidth = if (isActive) 1.5.dp else AgentGlass.borderWidth
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(DrawerRowShape)
             .background(background)
-            .border(AgentGlass.borderWidth, border, DrawerRowShape)
+            .border(borderWidth, borderColor, DrawerRowShape)
             .clickable(onClick = onOpen)
-            .padding(start = 12.dp, end = 8.dp, top = 10.dp, bottom = 10.dp),
+            .padding(end = 8.dp, top = 10.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Leading (right-edge) accent strip; kept as a transparent spacer on inactive rows
+        // so titles stay aligned across the list.
+        Box(
+            modifier = Modifier
+                .padding(start = 6.dp)
+                .width(3.dp)
+                .height(34.dp)
+                .clip(CircleShape)
+                .background(if (isActive) DrawerAccentGradient else SolidColor(Color.Transparent))
+        )
+        Spacer(Modifier.width(9.dp))
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(3.dp)
@@ -505,24 +538,35 @@ private fun SessionRow(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                if (isActive) {
-                    Box(
-                        modifier = Modifier
-                            .size(6.dp)
-                            .clip(CircleShape)
-                            .background(AgentGlass.accent)
-                    )
-                }
                 Text(
                     text = session.title,
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontSize = 13.5.sp,
-                        fontWeight = if (isActive) FontWeight.Bold else FontWeight.Medium,
-                        color = AgentGlass.textPrimary
+                        fontWeight = if (isActive) FontWeight.ExtraBold else FontWeight.Medium,
+                        color = if (isActive) Color.White else AgentGlass.textPrimary
                     ),
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false)
                 )
+                if (isActive) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(CornerRadius.lg))
+                            .background(DrawerAccentSoft.copy(alpha = 0.28f))
+                            .border(1.dp, DrawerAccentSoft.copy(alpha = 0.55f), RoundedCornerShape(CornerRadius.lg))
+                            .padding(horizontal = 7.dp, vertical = 1.dp)
+                    ) {
+                        Text(
+                            text = "جاری",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontSize = 9.5.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = Color(0xFFE6DEFF)
+                            )
+                        )
+                    }
+                }
             }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -566,13 +610,13 @@ private fun SessionRow(
 }
 
 @Composable
-private fun EmptyHistoryMessage() {
+private fun EmptyHistoryMessage(modifier: Modifier = Modifier) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 40.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically)
     ) {
         Box(
             modifier = Modifier
