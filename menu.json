@@ -592,6 +592,98 @@
                 3
             ],
             "active": true
+        },
+        {
+            "id": 3001,
+            "name": "تغییر شماره موبایل",
+            "icon": "mobile",
+            "status": "ACTIVE",
+            "showRole": [
+                1,
+                2
+            ],
+            "active": true
+        },
+        {
+            "id": 3002,
+            "name": "صندوق شخصی",
+            "icon": "inbox",
+            "status": "ACTIVE",
+            "showRole": [
+                1,
+                2,
+                3
+            ],
+            "active": true
+        },
+        {
+            "id": 3003,
+            "name": "لیست درخواست‌ها",
+            "icon": "list",
+            "status": "ACTIVE",
+            "showRole": [
+                1,
+                2,
+                3
+            ],
+            "active": true
+        },
+        {
+            "id": 3004,
+            "name": "تازه‌ها و ذخیره رویدادها",
+            "icon": "calendar",
+            "status": "ACTIVE",
+            "showRole": [
+                1,
+                2,
+                3
+            ],
+            "active": true
+        },
+        {
+            "id": 3005,
+            "name": "پرونده سلامت من",
+            "icon": "first-aid-kit",
+            "status": "ACTIVE",
+            "showRole": [
+                1,
+                2
+            ],
+            "active": true
+        },
+        {
+            "id": 3006,
+            "name": "مراکز درمانی طرف قرارداد",
+            "icon": "medical",
+            "status": "ACTIVE",
+            "showRole": [
+                1,
+                2
+            ],
+            "active": true
+        },
+        {
+            "id": 3007,
+            "name": "هزینه‌های سال جاری",
+            "icon": "budget",
+            "status": "ACTIVE",
+            "showRole": [
+                1,
+                2
+            ],
+            "active": true
+        },
+        {
+            "id": 3008,
+            "name": "آخرین درخواست‌ها",
+            "icon": "list",
+            "status": "ACTIVE",
+            "showRole": [
+                1,
+                2,
+                3
+            ],
+            "active": true
         }
     ]
 }

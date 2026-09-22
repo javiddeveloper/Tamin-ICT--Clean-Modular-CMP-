@@ -136,13 +136,13 @@ enum class FeatureFlag(val id: Int) {
     /** Controls the entry point for the Agent and chatbot access */
     AGENT(2000),
 
-    // ─── Client-only — no server menu id yet ────────────────────────────────
-    // Every flag above mirrors a row the server's menu already carries by this exact id.
-    // The ones below gate a screen the current menu says nothing about at all; each is
-    // resolved through `FeatureManager` exactly like any other flag (Enabled unless the
-    // server, or a "Feature flags" dev-screen override, says otherwise) so the day the
-    // server starts sending a real row for one of these, only the id here needs to change
-    // to that row's — nothing that reads the flag has to.
+    // ─── Provisional ids — pending real registration on the server ──────────
+    // The screens below don't have a row in the real backend's menu yet. Until they do, each
+    // has a row in `mockMenuData` under the placeholder id here (exactly like every other flag
+    // above — resolved through `FeatureManager`, dimmable/disable-able the same way, visible to
+    // the "Feature flags" dev screen the same way). Once the server registers a real id for one
+    // of these, only the id here and its `mockMenuData` row need to be removed — nothing that
+    // reads the flag does.
     CHANGE_MOBILE(3001),
     PERSONAL_INBOX(3002),
     /** «لیست درخواست‌ها» in profile's کارتابل section. */

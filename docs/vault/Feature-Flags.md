@@ -186,15 +186,17 @@ re-subscribing to a fresh status read only when the overrides themselves change 
 `FeatureManagerImplTest`'s `"a later override change reaches an already-subscribed collector"` for the
 regression test on this specific shape.
 
-## 5d. Client-only flags — screens the server menu says nothing about
+## 5d. Provisional flags — pending real registration on the server
 
-`FeatureFlag.kt` has a dedicated block, below `AGENT(2000)`, for screens the server's menu has no
-row for at all (no id to read a status from): `CHANGE_MOBILE(3001)`, `PERSONAL_INBOX(3002)`,
-`MY_REQUESTS(3003)`, `STORIES_AND_SAVE_EVENTS(3004)`, `HEALTH_PROFILE(3005)`,
-`CONTRACTED_CENTERS(3006)`, `CURRENT_YEAR_TREATMENT_COSTS(3007)`, `HOME_LAST_REQUESTS(3008)`. Each
-still goes through `FeatureManager` exactly like any server-backed flag — `Enabled` unless the
-"Feature flags" dev screen (§5c) overrides it — so the day the server starts sending a real row for
-one of these, only the id constant needs to change to that row's; nothing that reads the flag does.
+`FeatureFlag.kt` has a dedicated block, below `AGENT(2000)`, for screens the real backend has not
+registered an id for yet: `CHANGE_MOBILE(3001)`, `PERSONAL_INBOX(3002)`, `MY_REQUESTS(3003)`,
+`STORIES_AND_SAVE_EVENTS(3004)`, `HEALTH_PROFILE(3005)`, `CONTRACTED_CENTERS(3006)`,
+`CURRENT_YEAR_TREATMENT_COSTS(3007)`, `HOME_LAST_REQUESTS(3008)`. Each has a matching row in
+`MockMenuData.kt` (and the sample `menu.json`) under its placeholder id, so it behaves exactly like
+any server-backed flag today — resolved through `FeatureManager`, `Enabled` unless `mockMenuData`'s
+own row says otherwise or the "Feature flags" dev screen (§5c) overrides it. The day the real
+backend registers an id for one of these, only that flag's id here and its `mockMenuData` row need
+to change — nothing that reads the flag does.
 
 `STORIES_AND_SAVE_EVENTS` is shared on purpose: it gates both the home screen's «تازه‌ها» story rail
 and profile's «ذخیره رویدادها» row, one flag for both features per product decision, not two.

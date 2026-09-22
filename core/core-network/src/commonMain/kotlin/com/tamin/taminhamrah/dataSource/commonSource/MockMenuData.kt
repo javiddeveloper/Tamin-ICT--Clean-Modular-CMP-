@@ -63,5 +63,17 @@ val mockMenuData = listOf(
     MainServiceDto(id = 1010, name = "بیمه ساختمانی", showRole = listOf(3), icon = "workshop", status = MenuServiceStatus.ACTIVE),
     MainServiceDto(id = 1011, name = "اعلام حادثه", showRole = listOf(3), icon = "update", status = MenuServiceStatus.ACTIVE),
     MainServiceDto(id = 1012, name = "سامانه قوانین و مقررات", showRole = listOf(3), icon = "document", status = MenuServiceStatus.ACTIVE, url = "https://law.tamin.ir/"),
-    MainServiceDto(id = 2000, name = "دستیار هوشمند (آزمایشی)", showRole = listOf(1, 2, 3), icon = "bot", status = MenuServiceStatus.ACTIVE)
+    MainServiceDto(id = 2000, name = "دستیار هوشمند (آزمایشی)", showRole = listOf(1, 2, 3), icon = "bot", status = MenuServiceStatus.ACTIVE),
+
+    // ─── Provisional — pending real registration on the server ──────────────
+    // Mirrors FeatureFlag.kt's own "Provisional ids" block one for one. Remove a row here the
+    // same day its FeatureFlag id is replaced with the server's real one.
+    MainServiceDto(id = 3001, name = "تغییر شماره موبایل", showRole = listOf(1, 2), icon = "mobile", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 3002, name = "صندوق شخصی", showRole = listOf(1, 2, 3), icon = "inbox", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 3003, name = "لیست درخواست‌ها", showRole = listOf(1, 2, 3), icon = "list", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 3004, name = "تازه‌ها و ذخیره رویدادها", showRole = listOf(1, 2, 3), icon = "calendar", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 3005, name = "پرونده سلامت من", showRole = listOf(1, 2), icon = "first-aid-kit", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 3006, name = "مراکز درمانی طرف قرارداد", showRole = listOf(1, 2), icon = "medical", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 3007, name = "هزینه‌های سال جاری", showRole = listOf(1, 2), icon = "budget", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 3008, name = "آخرین درخواست‌ها", showRole = listOf(1, 2, 3), icon = "list", status = MenuServiceStatus.ACTIVE),
 )
