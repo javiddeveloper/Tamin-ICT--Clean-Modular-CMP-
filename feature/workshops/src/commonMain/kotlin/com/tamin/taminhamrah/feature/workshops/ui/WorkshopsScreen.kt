@@ -1,11 +1,13 @@
 ﻿package com.tamin.taminhamrah.feature.workshops.ui
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
@@ -44,6 +46,8 @@ import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.rideUpIntoHeader
+import com.tamin.taminhamrah.ui.pushBack
+import com.tamin.taminhamrah.ui.pushForward
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toparea.TopAreaState
@@ -99,50 +103,16 @@ fun WorkshopsScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // جزئیات کارگاه is the same destination in the design's own model: picking a workshop
-    // swaps the page, and back returns to the list. Everything it draws already traveled
-    // with the workshop, so it costs no request and needs no route of its own.
-    state.detailFor?.let { workshop ->
-        BackHandler { onIntent(WorkshopsIntent.DetailDismissed) }
-        Box(modifier = modifier) {
-            WorkshopDetailScreen(
-                workshop = workshop,
-                actions = state.availableActions,
-                onBack = { onIntent(WorkshopsIntent.DetailDismissed) },
-                onAction = { action -> onIntent(WorkshopsIntent.ActionSelected(action, workshop)) },
-            )
-            // رسیدگی به بدهی ماده ۱۶ asks for the workshop's debts before it opens.
-            if (state.isCheckingDebts) LoadingStateOverlay()
-        }
-        if (state.isNoDebtDialogOpen) {
-            TaminConfirmationDialog(
-                title = stringResource(Res.string.article_sixteen_no_debt_title),
-                description = stringResource(Res.string.article_sixteen_no_debt_body),
-                icon = Icons.Outlined.Info,
-                confirmButton = {
-                    TaminFilledButton(
-                        background = LocalTaminColors.current.buttonGradient,
-                        text = stringResource(Res.string.btn_understood),
-                        onClick = { onIntent(WorkshopsIntent.NoDebtDialogDismissed) },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                },
-                dismissButton = {},
-                onDismissRequest = { onIntent(WorkshopsIntent.NoDebtDialogDismissed) },
-            )
-        }
-        return
-    }
-
-    val workshops = state.workshops
     val stats = state.stats
     val isSearchOpen = state.isSearchOpen
-    val hasActiveFilter = state.hasActiveFilter
     val onSearchClick = { onIntent(WorkshopsIntent.SearchOpenChanged(!isSearchOpen)) }
 
     // The list's own drag folds the ring icon and subtitle away, snapping on release; the stats
     // strip is never wrapped in a topArea behavior, so it stays pinned, unchanged, under the slim
     // bar. Same shape as ObjectionStatusScreen — see docs/vault/TopArea-System.md.
+    //
+    // Both live above the swap below, because both have to outlive it: the list is torn down while
+    // a workshop is open, and back should land on the row it was opened from, header fold included.
     val topArea = rememberMeasuredTopAreaState { topAreaState ->
         WorkshopsTopArea(
             stats = stats,
@@ -153,12 +123,105 @@ fun WorkshopsScreen(
     }
     val listState = rememberLazyListState()
 
+    // جزئیات کارگاه is the same destination in the design's own model: picking a workshop
+    // swaps the page, and back returns to the list. Everything it draws already traveled
+    // with the workshop, so it costs no request and needs no route of its own — but it is a step
+    // deeper as far as the person tapping is concerned, so it moves with the app's own push.
+    // Keyed on open/closed only, so a refreshed copy of the open workshop never replays it.
+    AnimatedContent(
+        targetState = state.detailFor,
+        contentKey = { it != null },
+        transitionSpec = { if (targetState != null) pushForward() else pushBack() },
+        label = "workshop-detail",
+        modifier = modifier.fillMaxSize(),
+    ) { workshop ->
+        if (workshop != null) {
+            BackHandler { onIntent(WorkshopsIntent.DetailDismissed) }
+            Box(modifier = Modifier.fillMaxSize()) {
+                WorkshopDetailScreen(
+                    workshop = workshop,
+                    actions = state.availableActions,
+                    onBack = { onIntent(WorkshopsIntent.DetailDismissed) },
+                    onAction = { action -> onIntent(WorkshopsIntent.ActionSelected(action, workshop)) },
+                )
+                // رسیدگی به بدهی ماده ۱۶ asks for the workshop's debts before it opens.
+                if (state.isCheckingDebts) LoadingStateOverlay()
+            }
+        } else {
+            WorkshopsListPage(
+                list = state.list,
+                stats = stats,
+                hasActiveFilter = state.hasActiveFilter,
+                topArea = topArea,
+                listState = listState,
+                onSearchClick = onSearchClick,
+                onBack = onBack,
+                onIntent = onIntent,
+            )
+        }
+    }
+
+    if (state.detailFor != null && state.isNoDebtDialogOpen) {
+        TaminConfirmationDialog(
+            title = stringResource(Res.string.article_sixteen_no_debt_title),
+            description = stringResource(Res.string.article_sixteen_no_debt_body),
+            icon = Icons.Outlined.Info,
+            confirmButton = {
+                TaminFilledButton(
+                    background = LocalTaminColors.current.buttonGradient,
+                    text = stringResource(Res.string.btn_understood),
+                    onClick = { onIntent(WorkshopsIntent.NoDebtDialogDismissed) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            },
+            dismissButton = {},
+            onDismissRequest = { onIntent(WorkshopsIntent.NoDebtDialogDismissed) },
+        )
+    }
+    // Both belong to the list, so neither is offered while a workshop is open.
+    if (state.detailFor == null && isSearchOpen) {
+        WorkshopSearchDialog(
+            onDismiss = { onIntent(WorkshopsIntent.SearchOpenChanged(false)) },
+        ) {
+            WorkshopSearchPanel(
+                workshopId = state.workshopIdInput,
+                branchCode = state.branchCodeInput,
+                onWorkshopIdChange = { onIntent(WorkshopsIntent.WorkshopIdChanged(it)) },
+                onBranchCodeChange = { onIntent(WorkshopsIntent.BranchCodeChanged(it)) },
+                onSearch = { onIntent(WorkshopsIntent.ApplySearch) },
+                onClear = { onIntent(WorkshopsIntent.ClearSearch) },
+            )
+        }
+    }
+
+    if (state.detailFor == null && state.isFilterSheetOpen) {
+        WorkshopFilterSheet(
+            selected = state.statusFilter,
+            onDismiss = { onIntent(WorkshopsIntent.FilterSheetOpenChanged(false)) },
+            onSelect = { status -> onIntent(WorkshopsIntent.StatusFilterChanged(status)) },
+        )
+    }
+}
+
+/** کارگاه‌ها itself: the list, with its folding header floating over it. */
+@Composable
+private fun WorkshopsListPage(
+    list: PagedListState<WorkshopPR>,
+    stats: WorkshopStats?,
+    hasActiveFilter: Boolean,
+    topArea: TopAreaState,
+    listState: LazyListState,
+    onSearchClick: () -> Unit,
+    onBack: () -> Unit,
+    onIntent: (WorkshopsIntent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     // Overlaid rather than a Column, so the list passes underneath the header as it scrolls.
     Box(modifier = modifier.fillMaxSize()) {
         WorkshopListScaffold(
             emptyIcon = vectorResource(Res.drawable.ic_tamin_workshop),
             emptyMessage = stringResource(if (hasActiveFilter) Res.string.workshop_empty_list else Res.string.workshops_empty),
-            state = state.list,
+            state = list,
             listState = listState,
             modifier = Modifier.fillMaxSize().driveTopArea(topArea, listState),
             contentPadding = topAreaContentPadding(state = topArea, rest = WorkshopDimens.listContentPadding),
@@ -167,7 +230,7 @@ fun WorkshopsScreen(
             key = { "${it.workshopId}_${it.branchCode}" },
             header = {
                 WorkshopSectionHeader(
-                    count = workshops.size,
+                    count = list.items.size,
                     isFilterActive = hasActiveFilter,
                     onFilterClick = { onIntent(WorkshopsIntent.FilterSheetOpenChanged(true)) },
                 )
@@ -188,29 +251,6 @@ fun WorkshopsScreen(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .reportTopAreaHeight(topArea),
-        )
-    }
-
-    if (isSearchOpen) {
-        WorkshopSearchDialog(
-            onDismiss = { onIntent(WorkshopsIntent.SearchOpenChanged(false)) },
-        ) {
-            WorkshopSearchPanel(
-                workshopId = state.workshopIdInput,
-                branchCode = state.branchCodeInput,
-                onWorkshopIdChange = { onIntent(WorkshopsIntent.WorkshopIdChanged(it)) },
-                onBranchCodeChange = { onIntent(WorkshopsIntent.BranchCodeChanged(it)) },
-                onSearch = { onIntent(WorkshopsIntent.ApplySearch) },
-                onClear = { onIntent(WorkshopsIntent.ClearSearch) },
-            )
-        }
-    }
-
-    if (state.isFilterSheetOpen) {
-        WorkshopFilterSheet(
-            selected = state.statusFilter,
-            onDismiss = { onIntent(WorkshopsIntent.FilterSheetOpenChanged(false)) },
-            onSelect = { status -> onIntent(WorkshopsIntent.StatusFilterChanged(status)) },
         )
     }
 }
