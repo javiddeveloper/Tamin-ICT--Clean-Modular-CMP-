@@ -8,7 +8,8 @@ import org.jetbrains.compose.resources.StringResource
 
 @Immutable
 sealed interface PhotoDialogState {
-    data class Success(val message: String? = null) : PhotoDialogState
+    /** Fixed copy: the service answers `data: null`. */
+    data object Success : PhotoDialogState
     data class ValidationError(val message: StringResource) : PhotoDialogState
     data class ServerError(val message: String) : PhotoDialogState
     data object Guide : PhotoDialogState
@@ -24,37 +25,35 @@ data class EditProfilePhotoUiState(
     val isDependantMode: Boolean = false,
     val selectedDependant: SubdominantItemPR? = null,
     val dependants: ImmutableList<SubdominantItemPR> = persistentListOf(),
-    val isDependantsLoading: Boolean = false,
+    val isDependantsLoading: Boolean = true,
     val isDependantPickerOpen: Boolean = false,
     val isSerialError: Boolean = false,
     val isDependantError: Boolean = false,
-    val isLoading: Boolean = false,
     val isSubmitting: Boolean = false,
     val dialogState: PhotoDialogState? = null,
-)
-
-sealed interface EditProfilePhotoPartialState {
-    data class Loading(val isLoading: Boolean) : EditProfilePhotoPartialState
-    data class InitialDataLoaded(
-        val userName: String,
-        val nationalCode: String,
-        val insuranceNumber: String,
-        val branchCode: String,
-    ) : EditProfilePhotoPartialState
-    data class DependantsLoading(val isLoading: Boolean) : EditProfilePhotoPartialState
-    data class DependantsLoaded(val dependants: ImmutableList<SubdominantItemPR>) : EditProfilePhotoPartialState
-    data class SerialNumberChanged(val serial: String) : EditProfilePhotoPartialState
-    data class DependantModeToggled(val enabled: Boolean) : EditProfilePhotoPartialState
-    data class DependantSelected(val dependant: SubdominantItemPR) : EditProfilePhotoPartialState
-    data class DependantPickerVisibilityChanged(val isOpen: Boolean) : EditProfilePhotoPartialState
-    data class Submitting(val isSubmitting: Boolean) : EditProfilePhotoPartialState
-    data class ShowDialog(val dialogState: PhotoDialogState) : EditProfilePhotoPartialState
-    data object DismissDialog : EditProfilePhotoPartialState
-    data class ValidationErrors(val serialError: Boolean, val dependantError: Boolean) : EditProfilePhotoPartialState
+) {
+    sealed interface PartialState {
+        data class RelationLoaded(
+            val userName: String,
+            val nationalCode: String,
+            val insuranceNumber: String,
+            val branchCode: String,
+        ) : PartialState
+        data class DependantsLoaded(val dependants: ImmutableList<SubdominantItemPR>) : PartialState
+        data class SerialNumberChanged(val serial: String) : PartialState
+        data class DependantModeToggled(val enabled: Boolean) : PartialState
+        data class DependantSelected(val dependant: SubdominantItemPR) : PartialState
+        data class DependantPickerVisibilityChanged(val isOpen: Boolean) : PartialState
+        data class ValidationFailed(val serialError: Boolean, val dependantError: Boolean) : PartialState
+        data object Submitting : PartialState
+        data class DialogShown(val dialogState: PhotoDialogState) : PartialState
+        data object DialogDismissed : PartialState
+    }
 }
 
 sealed interface EditProfilePhotoIntent {
-    data object LoadInitialData : EditProfilePhotoIntent
+    data object LoadRelation : EditProfilePhotoIntent
+    data object LoadDependants : EditProfilePhotoIntent
     data class SerialNumberChanged(val serial: String) : EditProfilePhotoIntent
     data class DependantModeToggled(val enabled: Boolean) : EditProfilePhotoIntent
     data class DependantSelected(val dependant: SubdominantItemPR) : EditProfilePhotoIntent
@@ -66,7 +65,5 @@ sealed interface EditProfilePhotoIntent {
 }
 
 sealed interface EditProfilePhotoEvent {
-    data class ShowSnackbar(val message: StringResource) : EditProfilePhotoEvent
-    data object NavigateBackOnSuccess : EditProfilePhotoEvent
     data object NavigateBack : EditProfilePhotoEvent
 }
