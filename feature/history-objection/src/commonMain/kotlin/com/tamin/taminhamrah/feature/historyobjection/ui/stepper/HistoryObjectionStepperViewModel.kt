@@ -375,8 +375,9 @@ class HistoryObjectionStepperViewModel(
     }
 
     private fun loadProvinces(): Flow<PartialState> = flow {
-        val provinces = getProvincesUseCase().first().toProvincePresentation()
-        emit(PartialState.ProvincesLoaded(provinces.toPersistentList()))
+        getProvincesUseCase().collect { provinces ->
+            emit(PartialState.ProvincesLoaded(provinces.toProvincePresentation().toPersistentList()))
+        }
     }
 
     private fun loadInsuranceTypes(): Flow<PartialState> = flow {
