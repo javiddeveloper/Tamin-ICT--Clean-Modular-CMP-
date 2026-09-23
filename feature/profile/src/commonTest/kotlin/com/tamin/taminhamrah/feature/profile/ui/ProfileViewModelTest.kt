@@ -37,6 +37,7 @@ import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
 import com.tamin.taminhamrah.useCases.user.VerifyChangeMobileUseCase
 import com.tamin.taminhamrah.util.HeaderConstant
+import com.tamin.taminhamrah.util.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -67,11 +68,14 @@ class ProfileViewModelTest {
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
+        // Logout logs the server's answer, and android.util.Log throws in a JVM unit test.
+        Logger.enabled = false
     }
 
     @AfterTest
     fun tearDown() {
         Dispatchers.resetMain()
+        Logger.enabled = true
     }
 
     private fun createViewModel() = ProfileViewModel(
