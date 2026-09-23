@@ -361,11 +361,14 @@ fun TimelineFilterBar(
             )
             dateMenu(maxWidth)
         }
+        val searchShape = RoundedCornerShape(CornerRadius.lg)
         Box(
             modifier = Modifier
                 .size(TreatmentDimens.timelineActionSize)
-                .clip(RoundedCornerShape(CornerRadius.lg))
+                .clip(searchShape)
                 .background(TaminOnAccentFill)
+                // The same hairline the header's own buttons carry.
+                .border(Thickness.border, LocalTaminColors.current.onGradient.copy(alpha = SearchBorderAlpha), searchShape)
                 .clickable(onClick = onSearchClick),
             contentAlignment = Alignment.Center,
         ) {
@@ -521,3 +524,6 @@ fun CostSplitTiles(
         )
     }
 }
+
+/** How strongly the search button's hairline shows over the teal header. */
+private const val SearchBorderAlpha = 0.2f

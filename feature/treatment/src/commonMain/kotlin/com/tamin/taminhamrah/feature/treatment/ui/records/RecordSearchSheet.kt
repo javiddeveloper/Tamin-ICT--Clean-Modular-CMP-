@@ -154,8 +154,11 @@ fun RecordSearchSheet(
                     icon = vectorResource(Res.drawable.ic_tamin_cross),
                     contentDescription = stringResource(Res.string.btn_close),
                     onClick = onDismiss,
+                    bordered = true,
                     containerColor = colors.bgPage,
                     contentColor = colors.textSecondary,
+                    // The header's white hairline would be invisible on the sheet's own surface.
+                    borderColor = colors.border,
                 )
             }
 

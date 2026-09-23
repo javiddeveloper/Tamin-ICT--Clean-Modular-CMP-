@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -25,6 +27,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import com.tamin.taminhamrah.ui.components.TaminPageIndicator
 import androidx.compose.ui.layout.onSizeChanged
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentEvent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.TreatmentIntent
@@ -191,6 +194,17 @@ fun TreatmentContent(
                 .verticalScroll(scrollState, overscrollEffect = rememberJellyOverscroll()),
         ) {
             Spacer(modifier = Modifier.reservedHeight { headerHeightPx })
+            // The pager's dots belong to the page, not to the floating header above it: inside the
+            // header they stay put while the page moves, and content slides behind them.
+            if (cards.size > 1) {
+                TaminPageIndicator(
+                    pageCount = cards.size,
+                    pagerState = pagerState,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = TreatmentDimens.pageIndicatorTopGap),
+                )
+            }
             // Tighter than the gaps between the sections below: the carousel above already ends in
             // its own margin, and a full section gap on top of it read as a hole.
             Spacer(modifier = Modifier.height(Spacing.sm))
@@ -229,6 +243,7 @@ fun TreatmentContent(
                 pagerState = pagerState,
                 onRetry = handleRetry,
                 collapseProgress = collapse.progressProvider,
+                showIndicator = false,
             )
         }
     }

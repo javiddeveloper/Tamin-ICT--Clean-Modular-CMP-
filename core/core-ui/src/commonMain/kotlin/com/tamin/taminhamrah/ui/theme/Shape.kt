@@ -205,8 +205,6 @@ object CampaignDimens {
     val headerBottomGap = 11.dp
 
     val cardMinHeight = 146.dp
-    val cardShadowBlur = 26.dp               // box-shadow: 0 12px 26px
-    val cardShadowOffsetY = 12.dp
     val cardPaddingHorizontal = 15.dp        // padding: 13px 15px
     val cardPaddingVertical = 13.dp
     val cardContentGap = Spacing.smPlus
