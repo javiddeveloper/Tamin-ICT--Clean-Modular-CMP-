@@ -62,6 +62,9 @@ import androidx.room.TypeConverters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 
+import com.tamin.taminhamrah.data.local.entity.ConstructionFileEntity
+import com.tamin.taminhamrah.data.local.dao.ConstructionFileDao
+
 @Database(
     entities = [
         TestEntity::class,
@@ -97,9 +100,11 @@ import kotlinx.coroutines.IO
         HistoryJobInfoEntity::class,
         HistoryYearEntity::class,
         HistoryWageRowEntity::class,
+        ConstructionFileEntity::class,
         HomeContentEntity::class,
     ],
-    version = 4,
+    // v5: FeatureFlag ids changed; cached home_content stored the old flagId.
+    version = 5,
 )
 @ConstructedBy(TaminXDatabaseConstructor::class)
 @TypeConverters(TaminHamrahConverters::class)
@@ -120,9 +125,9 @@ expect abstract class TaminXDatabase : RoomDatabase {
     abstract fun agentChatDao(): AgentChatDao
     abstract fun versionHistoryDao(): VersionHistoryDao
     abstract fun historyJobInfoDao(): HistoryJobInfoDao
-
     abstract fun historyCacheDao(): HistoryCacheDao
     abstract fun homeContentDao(): HomeContentDao
+    abstract fun constructionFileDao(): ConstructionFileDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT")

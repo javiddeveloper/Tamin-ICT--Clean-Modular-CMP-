@@ -17,7 +17,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,7 +49,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isUnspecified
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -184,6 +189,12 @@ fun angledLinearGradient(
  * Numeric text. Amounts, national IDs and tracking codes are always laid out
  * left-to-right, matching the `dir="ltr"` the design puts on every number even inside an
  * otherwise right-to-left page.
+ *
+ * **Digits and punctuation only.** This flips the whole paragraph, not just the digits, so a
+ * Persian word anywhere in [text] is laid out relative to a left-to-right paragraph and lands on
+ * the far side of its own number — «۱۲ روز» prints as «روز ۱۲». A number *with a unit* is two
+ * pieces: a [NumericText] for the figure and an ordinary `Text` for the word beside it, the way
+ * `WageText` does it. A whole sentence that merely contains numbers is an ordinary `Text`.
  */
 @Composable
 fun NumericText(
@@ -191,22 +202,45 @@ fun NumericText(
     style: TextStyle,
     color: Color,
     modifier: Modifier = Modifier,
+    /**
+     * When set, a figure too wide for its space steps its font down toward this size instead of
+     * drawing past its bounds. Unspecified — the default — keeps the size fixed.
+     */
+    minFontSize: TextUnit = TextUnit.Unspecified,
 ) {
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-        Text(
-            text = text,
-            style = style,
-            color = color,
-            modifier = modifier,
-            // A number is one token: ۱۷ broken across two lines reads as ۱ and ۷, and ۱۷ clipped
-            // to its first digit reads as ۱ — both are a different number, and the second is worse
-            // because nothing about it looks wrong. So it never wraps, and it is allowed to draw
-            // past its bounds rather than lose a digit; the caller sizes the space (see
-            // Modifier.scaleOnCollapse) so that it does not have to.
-            maxLines = 1,
-            softWrap = false,
-            overflow = TextOverflow.Visible,
-        )
+        // A number is one token: ۱۷ broken across two lines reads as ۱ and ۷, and ۱۷ clipped to its
+        // first digit reads as ۱ — both are a different number, and the second is worse because
+        // nothing about it looks wrong. So it never wraps, and it is allowed to draw past its
+        // bounds rather than lose a digit; the caller sizes the space (see Modifier.scaleOnCollapse),
+        // or asks for [minFontSize] so the figure shrinks into it instead.
+        // The same style resolution Text does, which BasicText leaves to its caller.
+        val resolved = LocalTextStyle.current.merge(style)
+        if (minFontSize.isUnspecified || resolved.fontSize.isUnspecified) {
+            Text(
+                text = text,
+                style = style,
+                color = color,
+                modifier = modifier,
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Visible,
+            )
+        } else {
+            BasicText(
+                text = text,
+                style = resolved.merge(TextStyle(color = color)),
+                modifier = modifier,
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Visible,
+                autoSize = TextAutoSize.StepBased(
+                    // Shrinking is all this is for: a floor above the style's own size would grow it.
+                    minFontSize = if (minFontSize > resolved.fontSize) resolved.fontSize else minFontSize,
+                    maxFontSize = resolved.fontSize,
+                ),
+            )
+        }
     }
 }
 
@@ -343,6 +377,9 @@ fun StatTile(
                     else -> MaterialTheme.typography.titleMedium
                 },
                 color = contentColor,
+                // A tile is a third of a row, and a total runs to nine digits: it shrinks to stay on
+                // one line inside the tile rather than spilling past its edges.
+                minFontSize = MaterialTheme.typography.labelSmall.fontSize,
             )
         }
     }

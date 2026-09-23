@@ -21,8 +21,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.HelpOutline
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Assignment
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -54,9 +52,7 @@ import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
-import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
-import com.tamin.taminhamrah.ui.components.TaminFilledButton
-import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
+import com.tamin.taminhamrah.ui.components.TaminFormAbandonDialog
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
@@ -82,10 +78,7 @@ import taminx.core.core_ui.inspection_empty_subtitle
 import taminx.core.core_ui.inspection_empty_title
 import taminx.core.core_ui.inspection_report_filename_format
 import taminx.core.core_ui.inspection_request_button
-import taminx.core.core_ui.occurrence_exit_confirmation_confirm
-import taminx.core.core_ui.occurrence_exit_confirmation_desc
-import taminx.core.core_ui.occurrence_exit_confirmation_dismiss
-import taminx.core.core_ui.occurrence_exit_confirmation_title
+import taminx.core.core_ui.inspection_request_objection_title
 import com.tamin.taminhamrah.ui.toparea.driveTopArea
 import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
 import com.tamin.taminhamrah.ui.toparea.reportTopAreaHeight
@@ -127,36 +120,20 @@ fun InspectionRoute(
          BackHandler(onBack = { viewModel.sendIntent(InspectionIntent.GoToPreviousRequestStep) })
 
          if (uiState.showExitConfirmation) {
-             val taminColors = LocalTaminColors.current
-             TaminConfirmationDialog(
-                 title = stringResource(Res.string.occurrence_exit_confirmation_title),
-                 description = stringResource(Res.string.occurrence_exit_confirmation_desc),
-                 confirmButton = {
-                     TaminFilledButton(
-                         text = stringResource(Res.string.occurrence_exit_confirmation_confirm),
-                         onClick = { viewModel.sendIntent(InspectionIntent.SetExitConfirmationVisible(false)) },
-                         modifier = Modifier.fillMaxWidth(),
-                         height = 50.dp,
-                         shape = RoundedCornerShape(14.dp),
-                         icon = Icons.Default.Check,
-                     )
+             val formName = stringResource(
+                 if (uiState.isObjectionRequest) {
+                     Res.string.inspection_request_objection_title
+                 } else {
+                     Res.string.inspection_request_button
                  },
-                 dismissButton = {
-                     TaminOutlinedButton(
-                         text = stringResource(Res.string.occurrence_exit_confirmation_dismiss),
-                         onClick = {
-                             viewModel.sendIntent(InspectionIntent.SetExitConfirmationVisible(false))
-                             viewModel.sendIntent(InspectionIntent.CloseRequestFlow)
-                         },
-                         modifier = Modifier.fillMaxWidth(),
-                         height = 50.dp,
-                         shape = RoundedCornerShape(14.dp),
-                         borderWidth = 0.dp,
-                         contentColor = taminColors.textSecondary,
-                     )
+             )
+             TaminFormAbandonDialog(
+                 formName = formName,
+                 onStay = { viewModel.sendIntent(InspectionIntent.SetExitConfirmationVisible(false)) },
+                 onAbandon = {
+                     viewModel.sendIntent(InspectionIntent.SetExitConfirmationVisible(false))
+                     viewModel.sendIntent(InspectionIntent.CloseRequestFlow)
                  },
-                 onDismissRequest = { viewModel.sendIntent(InspectionIntent.SetExitConfirmationVisible(false)) },
-                 icon = Icons.AutoMirrored.Outlined.HelpOutline,
              )
          }
 

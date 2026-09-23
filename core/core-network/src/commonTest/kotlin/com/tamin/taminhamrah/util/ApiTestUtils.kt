@@ -440,3 +440,17 @@ object WorkersPaymentTestData {
         get() = readResourceFile("mocks/workers_payment_inspect_ticket_success.json")
 }
 
+object ConstructionInsuranceTestData {
+    val constructionFilesSuccess: String
+        get() = readResourceFile("mocks/construction_files_success.json")
+
+    val beneficiariesSuccess: String
+        get() = readResourceFile("mocks/construction_beneficiaries_success.json")
+
+    val paymentSheetsSuccess: String
+        get() = readResourceFile("mocks/construction_payment_sheets_success.json")
+
+    val installmentLettersSuccess: String
+        get() = readResourceFile("mocks/construction_installment_letters_success.json")
+}
+

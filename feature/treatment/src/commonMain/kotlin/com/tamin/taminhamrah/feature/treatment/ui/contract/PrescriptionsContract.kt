@@ -33,7 +33,7 @@ data class PrescriptionsUiState(
      *
      * The list endpoint carries no amount, so these are fetched one record at a time — see
      * [PrescriptionsIntent.LoadRecordPrices]. They feed both the «سهم شما» shown on each list card
-     * (`headSsoPayment`) and the advanced search's cost filter.
+     * (`headInsuPayment`) and the advanced search's cost filter.
      */
     val recordPrices: ImmutableMap<String, ElectronicPrescriptionPricePR> = persistentMapOf(),
     val isLoadingPrices: Boolean = false

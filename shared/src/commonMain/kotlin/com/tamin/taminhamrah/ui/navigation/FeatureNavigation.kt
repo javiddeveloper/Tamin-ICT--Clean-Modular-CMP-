@@ -18,6 +18,11 @@ import com.tamin.taminhamrah.feature.calculateWagePension.navigateToCalculateWag
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToEdict
+import com.tamin.taminhamrah.feature.girlSurvivor.navigateToGirlSurvivor
+import com.tamin.taminhamrah.feature.inquiryEducation.navigateToInquiryEducation
+import com.tamin.taminhamrah.feature.objectionInsurance.navigateToObjectionInsurance
+import com.tamin.taminhamrah.feature.weddingPresent.navigateToWeddingPresent
+import com.tamin.taminhamrah.feature.weddingPresent.navigateToWeddingPresentCalculate
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToIssuanceCertificate
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPayRoll
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.navigateToPensionStatusInquiry
@@ -27,7 +32,12 @@ import com.tamin.taminhamrah.feature.requestPaymentForIllDays.navigateToRequestP
 import com.tamin.taminhamrah.feature.retirementPension.navigateToRetirementPension
 import com.tamin.taminhamrah.feature.taminServices.navigateToEmployerOnlineServices
 import com.tamin.taminhamrah.feature.taminServices.navigateToInspection
+import com.tamin.taminhamrah.feature.treatment.navigateToPrescriptionDetail
+import com.tamin.taminhamrah.feature.treatment.navigateToPrescriptions
+import com.tamin.taminhamrah.feature.contracts.navigateToContractFlow
+import com.tamin.taminhamrah.feature.taminServices.navigateToConstructionInsurance
 import com.tamin.taminhamrah.feature.taminServices.navigateToOccurrence
+import com.tamin.taminhamrah.feature.taminServices.navigateToWorkshopInspection
 import com.tamin.taminhamrah.feature.taminServices.navigateToSendInsuranceHistoryToInstitutions
 import com.tamin.taminhamrah.feature.taminServices.navigateToWorkersPaymentInfo
 import com.tamin.taminhamrah.feature.treatment.navigateToPrescriptionDetail
@@ -70,16 +80,12 @@ fun NavController.navigateToDeepLink(key: DeepLinkKey, args: Map<String, String>
 fun NavController.navigateToFeature(flag: FeatureFlag, beforeOpen: () -> Unit = {}): Boolean {
     val open: () -> Unit = when (flag) {
         FeatureFlag.AGENT -> screen { navigateToAgent() }
-        // «مجموع سوابق» — the insured years added up. Menu id 8; it reached nothing before.
+        // «کلیه سوابق» — the one history row left after «سوابق تلفیقی» and «سوابق و دستمزد»
+        // were merged into it.
         FeatureFlag.COMBINED_RECORD -> screen { navigateToHistory() }
-        FeatureFlag.MERGE_HISTORY -> screen { navigateToHistory() }
-        // «سوابق و دستمزد» — menu id 7. The same page: it is where the wage rows are read, and it
-        // reached nothing before.
-        FeatureFlag.WAGE_AND_HISTORY -> screen { navigateToHistory() }
         FeatureFlag.WORKSHOPS -> screen { navigateToWorkshops() }
-        // «اطلاعات پیمان» in the server menu; the screen it opens is titled «ردیف‌های پیمان».
         FeatureFlag.CONTRACT_INFO -> screen { navigateToContractRows() }
-        // «واگذارندگان» (1003) — the پیمان‌ها this employer assigned out.
+        // «واگذارندگان» — the پیمان‌ها this employer assigned out.
         FeatureFlag.ASSIGNER_CONTRACT -> screen { navigateToAssignerContracts() }
         FeatureFlag.COMPLETE_WORKSHOP_INFO -> screen { navigateToCompleteEmployerInfo() }
         FeatureFlag.STACK_HOLDER_LIST -> screen { navigateToLegalRepresentativeWorkshops() }
@@ -91,20 +97,22 @@ fun NavController.navigateToFeature(flag: FeatureFlag, beforeOpen: () -> Unit = 
         FeatureFlag.HOUSEWIFE_INSURANCE -> screen { navigateToContractFlow(ContractType.HOUSEWIFE) }
         FeatureFlag.PENSION_INQUIRY -> screen { navigateToPensionStatusInquiry() }
         FeatureFlag.CALCULATE_WAGE_PENSION,
-        FeatureFlag.CALCULATE_WAGE_PENSION_109 -> screen { navigateToCalculateWagePension() }
+        FeatureFlag.CALCULATE_WAGE_PENSION_PENSIONER -> screen { navigateToCalculateWagePension() }
         FeatureFlag.RETIREMENT_PENSION -> screen { navigateToRetirementPension() }
         // «نسخه‌های الکترونیک» lives in the treatment tab; the pensioner module's PrescriptionScreen
         // is an empty placeholder and showed a blank page.
         FeatureFlag.PRESCRIPTION -> screen { navigateToPrescriptions() }
-        FeatureFlag.DESERVED_TREATMENT_101 -> screen { navigateToDeservedTreatment() }
+        FeatureFlag.DESERVED_TREATMENT_PENSIONER -> screen { navigateToDeservedTreatment() }
         FeatureFlag.PAY_ROLL -> screen { navigateToPayRoll() }
         FeatureFlag.EDICT_PENSIONER -> screen { navigateToEdict() }
         FeatureFlag.ISSUANCE_WAGE_CERTIFICATE -> screen { navigateToIssuanceCertificate() }
         FeatureFlag.DEFERRED_INSTALLMENT_CERTIFICATE -> screen { navigateToDeferredInstallment() }
         FeatureFlag.GIRL_SURVIVOR -> screen { navigateToGirlSurvivor() }
         FeatureFlag.REQUEST_PENSION_BY_SURVIVOR,
-        FeatureFlag.REQUEST_PENSION_BY_SURVIVOR_112 -> screen { navigateToPensionSurvivor() }
-        FeatureFlag.DISABILITY_PENSION -> screen { navigateToDisabilityPension() }
+        FeatureFlag.REQUEST_PENSION_BY_SURVIVOR_PENSIONER -> screen { navigateToPensionSurvivor() }
+        FeatureFlag.PERFORMED_INSPECTION -> screen { navigateToWorkshopInspection() }
+        FeatureFlag.DISABILITY_PENSION,
+        FeatureFlag.DISABILITY_PENSION_PENSIONER -> screen { navigateToDisabilityPension() }
         FeatureFlag.VIEW_TITLE_JOB -> screen { navigateToHistoryJobInfo() }
         FeatureFlag.SEND_INSURANCE_HISTORY_TO_INSTITUTION -> screen { navigateToSendInsuranceHistoryToInstitutions() }
         FeatureFlag.OROTEZ_PROTEZ -> screen { navigateToOrotezProtez() }
@@ -114,13 +122,15 @@ fun NavController.navigateToFeature(flag: FeatureFlag, beforeOpen: () -> Unit = 
         FeatureFlag.LIST_OF_INSPECTIONS_PERFORMED -> screen { navigateToInspection() }
         FeatureFlag.REGISTER_AGREEMENT -> screen { navigateToEmployerOnlineServices() }
         FeatureFlag.OBJECTION_NON_EXISTENT_HISTORY -> screen { navigateToHistoryObjection() }
+        FeatureFlag.OBJECTION_INSURANCE_HISTORY,
+        FeatureFlag.OBJECTION_INSURANCE_HISTORY_45 -> screen { navigateToObjectionInsurance() }
         FeatureFlag.INQUIRY_EDUCATION -> screen { navigateToInquiryEducation() }
-        // «کسری از ماه» has only an empty placeholder screen until its phase 2 UI is built; opening
-        // it showed a blank page, so it counts as not built yet.
         FeatureFlag.FRACTION_CONTRACT -> return false
         FeatureFlag.WEDDING_PRESENT -> screen { navigateToWeddingPresent() }
         FeatureFlag.CALCULATE_MARRIAGE_ALLOWANCE -> screen { navigateToWeddingPresentCalculate() }
         FeatureFlag.REQUEST_FOR_PREGNANCY_PAY -> screen { navigateToPregnancyPay() }
+        FeatureFlag.CONSTRUCTION_INSURANCE -> screen{ navigateToConstructionInsurance() }
+
         FeatureFlag.REQUEST_FUNERAL_GRANT -> screen {navigateToFuneralAllowance() }
         else -> return false
     }

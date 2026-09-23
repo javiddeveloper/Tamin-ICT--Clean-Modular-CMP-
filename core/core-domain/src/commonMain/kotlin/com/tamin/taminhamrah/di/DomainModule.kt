@@ -197,6 +197,11 @@ import com.tamin.taminhamrah.useCases.historyObjection.DeleteHistoryObjectionNot
 import com.tamin.taminhamrah.useCases.historyObjection.FinalConfirmHistoryObjectionNotExistUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.GetHistoryObjectionNotExistRequestsUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.SaveHistoryObjectionNotExistRequestUseCase
+import com.tamin.taminhamrah.useCases.objectionInsurance.CheckObjectionInsuranceStatusConflictUseCase
+import com.tamin.taminhamrah.useCases.objectionInsurance.ConfirmObjectionInsuranceConflictUseCase
+import com.tamin.taminhamrah.useCases.objectionInsurance.FinalConfirmObjectionInsuranceConflictUseCase
+import com.tamin.taminhamrah.useCases.objectionInsurance.GetObjectionInsuranceHistoriesUseCase
+import com.tamin.taminhamrah.useCases.objectionInsurance.SaveObjectionInsuranceConflictUseCase
 import com.tamin.taminhamrah.useCases.workshops.CheckObjectionDeadlineUseCase
 import com.tamin.taminhamrah.useCases.workshops.CheckNewMemberIsNewUseCase
 import com.tamin.taminhamrah.useCases.workshops.CreateNewMemberRegistrationUseCase
@@ -284,6 +289,15 @@ import com.tamin.taminhamrah.useCases.addDependent.InquiryRegistryUseCase
 import com.tamin.taminhamrah.useCases.addDependent.RefreshDependentsUseCase
 import com.tamin.taminhamrah.useCases.addDependent.UploadDependentImageUseCase
 import com.tamin.taminhamrah.useCases.user.mockUseCases.MockSubdominantUseCase
+import com.tamin.taminhamrah.useCases.constructionInsurance.GetConstructionFilesUseCase
+import com.tamin.taminhamrah.useCases.constructionInsurance.GetConstructionFilesPageUseCase
+import com.tamin.taminhamrah.useCases.constructionInsurance.GetBeneficiariesWorkshopPageUseCase
+import com.tamin.taminhamrah.useCases.constructionInsurance.GetPaymentSheetConstructionInfoUseCase
+import com.tamin.taminhamrah.useCases.constructionInsurance.GetCertificatePaymentSheetPdfUseCase
+import com.tamin.taminhamrah.useCases.constructionInsurance.IssuancePaymentSheetUseCase
+import com.tamin.taminhamrah.useCases.constructionInsurance.GetInstallmentLetterListPageUseCase
+import com.tamin.taminhamrah.useCases.constructionInsurance.GetDetailDebitListPageUseCase
+import com.tamin.taminhamrah.useCases.constructionInsurance.GetInstallmentConstructionListPageUseCase
 import com.tamin.taminhamrah.useCases.versionHistory.GetVersionHistoryUseCase
 import com.tamin.taminhamrah.useCases.contactUs.GetContactUsUseCase
 import com.tamin.taminhamrah.useCases.content.GetLegalDocumentUseCase
@@ -396,6 +410,11 @@ val domainModule = module {
     factoryOf(::DeleteHistoryObjectionNotExistRequestUseCase)
     factoryOf(::ConfirmHistoryObjectionNotExistUseCase)
     factoryOf(::FinalConfirmHistoryObjectionNotExistUseCase)
+    factoryOf(::CheckObjectionInsuranceStatusConflictUseCase)
+    factoryOf(::GetObjectionInsuranceHistoriesUseCase)
+    factoryOf(::SaveObjectionInsuranceConflictUseCase)
+    factoryOf(::ConfirmObjectionInsuranceConflictUseCase)
+    factoryOf(::FinalConfirmObjectionInsuranceConflictUseCase)
 
     factoryOf(::GetTalfighInfosUseCase)
     factoryOf(::GetUserInfosUseCase)
@@ -627,6 +646,17 @@ val domainModule = module {
     factoryOf(::SubmitLegalWorkshopInfoUseCase)
     factoryOf(::RequestRealTicketUseCase)
     factoryOf(::SubmitRealWorkshopInfoUseCase)
+
+    // Construction Insurance UseCase
+    factoryOf(::GetConstructionFilesUseCase)
+    factoryOf(::GetConstructionFilesPageUseCase)
+    factoryOf(::GetBeneficiariesWorkshopPageUseCase)
+    factoryOf(::GetPaymentSheetConstructionInfoUseCase)
+    factoryOf(::GetCertificatePaymentSheetPdfUseCase)
+    factoryOf(::IssuancePaymentSheetUseCase)
+    factoryOf(::GetInstallmentLetterListPageUseCase)
+    factoryOf(::GetDetailDebitListPageUseCase)
+    factoryOf(::GetInstallmentConstructionListPageUseCase)
 
     // Stories UseCases
     factoryOf(::GetStoryChannelsUseCase)

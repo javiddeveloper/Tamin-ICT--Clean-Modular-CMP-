@@ -31,6 +31,8 @@ import com.tamin.taminhamrah.dataSource.employerInfo.EmployerInfoRemoteDataSourc
 import com.tamin.taminhamrah.dataSource.employerInfo.EmployerInfoRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.historyObjection.HistoryObjectionRemoteDataSource
 import com.tamin.taminhamrah.dataSource.historyObjection.HistoryObjectionRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.objectionInsurance.ObjectionInsuranceRemoteDataSource
+import com.tamin.taminhamrah.dataSource.objectionInsurance.ObjectionInsuranceRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.historySource.HistoryRemoteDataSource
 import com.tamin.taminhamrah.dataSource.historySource.HistoryRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.inbox.PersonalInboxRemoteDataSource
@@ -71,6 +73,8 @@ import com.tamin.taminhamrah.dataSource.fractionContract.FractionContractRemoteD
 import com.tamin.taminhamrah.dataSource.fractionContract.FractionContractRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.funeralAllowance.FuneralAllowanceRemoteDataSource
 import com.tamin.taminhamrah.dataSource.funeralAllowance.FuneralAllowanceRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.constructionInsurance.ConstructionInsuranceRemoteDataSource
+import com.tamin.taminhamrah.dataSource.constructionInsurance.ConstructionInsuranceRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.inquiryEducation.InquiryEducationRemoteDataSource
 import com.tamin.taminhamrah.dataSource.inquiryEducation.InquiryEducationRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.workersPayment.WorkersPaymentRemoteDataSource
@@ -175,6 +179,14 @@ val remoteModule = module {
     single<HistoryObjectionRemoteDataSource> {
         HistoryObjectionRemoteDataSourceImpl(
             historyObjectionApiService = get(),
+            apiQueryBuilder = get(),
+            errorParser = get()
+        )
+    }
+
+    single<ObjectionInsuranceRemoteDataSource> {
+        ObjectionInsuranceRemoteDataSourceImpl(
+            objectionInsuranceApiService = get(),
             apiQueryBuilder = get(),
             errorParser = get()
         )
@@ -318,6 +330,14 @@ val remoteModule = module {
     single<FractionContractRemoteDataSource> {
         FractionContractRemoteDataSourceImpl(
             fractionContractApiService = get(),
+            errorParser = get()
+        )
+    }
+
+    single<ConstructionInsuranceRemoteDataSource> {
+        ConstructionInsuranceRemoteDataSourceImpl(
+            apiService = get(),
+            queryBuilder = get(),
             errorParser = get()
         )
     }

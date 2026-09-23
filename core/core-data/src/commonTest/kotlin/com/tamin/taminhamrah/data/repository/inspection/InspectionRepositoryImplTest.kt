@@ -22,6 +22,7 @@ import kotlin.test.assertFailsWith
 
 class FakeInspectionRemoteDataSource : InspectionRemoteDataSource {
     var allInsuranceResult: ListData<InspectionPerformedDTO> = ListData(total = 0, list = emptyList())
+    var allManagerResult: ListData<InspectionPerformedDTO> = ListData(total = 0, list = emptyList())
     var branchesResult: ListData<BranchDTO> = ListData(total = 0, list = emptyList())
     var jobsResult: ListData<JobDTO> = ListData(total = 0, list = emptyList())
     var submitResult: SubmitInspectionRequestModelDTO = SubmitInspectionRequestModelDTO()
@@ -29,6 +30,7 @@ class FakeInspectionRemoteDataSource : InspectionRemoteDataSource {
 
     var shouldThrowError: Exception? = null
     var lastAllInsuranceQuery: ApiQueryParamDN? = null
+    var lastAllManagerQuery: ApiQueryParamDN? = null
     var lastBranchesQuery: ApiQueryParamDN? = null
     var lastJobsQuery: ApiQueryParamDN? = null
     var lastSubmitRequest: SubmitInspectionRequestDTO? = null
@@ -38,6 +40,12 @@ class FakeInspectionRemoteDataSource : InspectionRemoteDataSource {
         shouldThrowError?.let { throw it }
         lastAllInsuranceQuery = query
         return allInsuranceResult
+    }
+
+    override suspend fun getAllManager(query: ApiQueryParamDN): ListData<InspectionPerformedDTO> {
+        shouldThrowError?.let { throw it }
+        lastAllManagerQuery = query
+        return allManagerResult
     }
 
     override suspend fun getBranches(query: ApiQueryParamDN): ListData<BranchDTO> {
@@ -90,6 +98,34 @@ class InspectionRepositoryImplTest {
         assertEquals(1, page.items.size)
         assertEquals("فعالیت تست", page.items.first().activityDesc)
         assertEquals(query, remoteDataSource.lastAllInsuranceQuery)
+    }
+
+    @Test
+    fun getWorkshopInspectionsPage_success_emitsMappedPageWithTotal() = runTest {
+        remoteDataSource.allManagerResult = ListData(
+            total = 3,
+            list = listOf(InspectionPerformedDTO(activityDesc = "فعالیت کارگاه"))
+        )
+        val query = ApiQueryParamDN(page = 1, start = 10, limit = 10)
+
+        val page = repository.getWorkshopInspectionsPage(query).first()
+
+        assertEquals(3, page.total)
+        assertEquals(1, page.items.size)
+        assertEquals("فعالیت کارگاه", page.items.first().activityDesc)
+        assertEquals(query, remoteDataSource.lastAllManagerQuery)
+    }
+
+    @Test
+    fun getWorkshopInspectionsPage_onError_throwsParsedException() = runTest {
+        val expectedError = RuntimeException("Network Error")
+        remoteDataSource.shouldThrowError = expectedError
+
+        val actualError = assertFailsWith<RuntimeException> {
+            repository.getWorkshopInspectionsPage(ApiQueryParamDN()).first()
+        }
+
+        assertEquals(expectedError.message, actualError.message)
     }
 
     @Test

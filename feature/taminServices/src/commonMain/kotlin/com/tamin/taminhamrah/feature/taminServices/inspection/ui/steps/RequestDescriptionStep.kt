@@ -18,13 +18,13 @@ import androidx.compose.ui.text.font.FontWeight
 import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionIntent
 import com.tamin.taminhamrah.feature.taminServices.inspection.contract.InspectionUiState
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.InspectionRequestStepScaffold
+import com.tamin.taminhamrah.feature.taminServices.inspection.ui.components.RequestDescriptionTextField
 import com.tamin.taminhamrah.feature.taminServices.occurrence.components.InfoBanner
 import com.tamin.taminhamrah.model.inspection.SubmitInspectionRequestDN
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.CustomChip
 import com.tamin.taminhamrah.ui.components.TaminText
-import com.tamin.taminhamrah.ui.components.TaminTextArea
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.toPersianDigits
@@ -115,28 +115,18 @@ internal fun RequestDescriptionStep(
 
             Spacer(Modifier.height(Spacing.xl))
 
-            TaminTextArea(
-                value = description,
-                onValueChange = { onIntent(InspectionIntent.UpdateRequestDescription(it)) },
-                placeholder = stringResource(
-                    if (uiState.isObjectionRequest) Res.string.inspection_request_description_placeholder_objection
-                    else Res.string.inspection_request_description_placeholder
-                ),
+            RequestDescriptionTextField(
+                description = description,
+                onDescriptionChange = { onIntent(InspectionIntent.UpdateRequestDescription(it)) },
                 label = stringResource(
                     if (uiState.isObjectionRequest) Res.string.inspection_request_description_label_objection
                     else Res.string.inspection_request_description_label
                 ),
+                placeholder = stringResource(
+                    if (uiState.isObjectionRequest) Res.string.inspection_request_description_placeholder_objection
+                    else Res.string.inspection_request_description_placeholder
+                ),
                 maxLength = MAX_DESCRIPTION_LENGTH,
-            )
-
-            Spacer(Modifier.height(Spacing.xs))
-
-            TaminText(
-                text = "${
-                    description.length.toString().toPersianDigits()
-                }/${MAX_DESCRIPTION_LENGTH.toString().toPersianDigits()}",
-                style = MaterialTheme.typography.labelSmall,
-                color = LocalTaminColors.current.textMuted,
             )
 
             Spacer(Modifier.height(Spacing.md))

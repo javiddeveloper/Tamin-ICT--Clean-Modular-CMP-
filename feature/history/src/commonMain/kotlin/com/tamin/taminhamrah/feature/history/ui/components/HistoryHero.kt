@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tamin.taminhamrah.feature.history.ui.HistoryConstants
 import com.tamin.taminhamrah.feature.history.ui.HistoryDimens
 import com.tamin.taminhamrah.feature.history.ui.model.HistoryScope
 import com.tamin.taminhamrah.feature.history.ui.model.YearChipPR
@@ -39,10 +40,12 @@ import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.collapsingBottomPadding
 import com.tamin.taminhamrah.ui.components.rideUpIntoHeader
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.TaminHistoryChipBg
 import com.tamin.taminhamrah.ui.theme.TaminHistoryChipBorder
 import com.tamin.taminhamrah.ui.theme.TaminHistoryChipSelectedBorder
 import com.tamin.taminhamrah.ui.theme.TaminHistoryChipSelectedText
+import com.tamin.taminhamrah.ui.theme.TaminHistoryChipShimmer
 import com.tamin.taminhamrah.ui.theme.TaminHistoryChipText
 import com.tamin.taminhamrah.ui.theme.TaminHistoryChipTextDisabled
 import com.tamin.taminhamrah.ui.theme.TaminHistoryHeroChipBg
@@ -75,6 +78,8 @@ fun HistoryHero(
     modifier: Modifier = Modifier,
     /** Read only inside the layout phase — see [HistoryTopArea]. */
     collapseProgress: () -> Float = { 0f },
+    /** The career has not answered yet, so the year strip stands in for itself. */
+    loading: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
     val heroBrush = colors.heroBrush
@@ -152,6 +157,7 @@ fun HistoryHero(
                 allLabel = allChipLabel,
                 onScopeChange = onScopeChange,
                 onMoreClick = onMoreClick,
+                loading = loading,
             )
         }
     }
@@ -181,6 +187,8 @@ fun HistoryTopArea(
     collapseProgress: () -> Float,
     modifier: Modifier = Modifier,
     hasYears: Boolean = true,
+    /** The career has not answered yet, so the year strip stands in for itself. */
+    loading: Boolean = false,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         HistoryHero(
@@ -194,6 +202,7 @@ fun HistoryTopArea(
             onMoreClick = onMoreClick,
             onBackClicked = onBackClicked,
             collapseProgress = collapseProgress,
+            loading = loading,
         )
 
         if (hasYears) {
@@ -229,7 +238,29 @@ private fun YearSwitchRow(
     allLabel: String,
     onScopeChange: (HistoryScope) -> Unit,
     onMoreClick: () -> Unit,
+    loading: Boolean,
 ) {
+    // The strip's own skeleton. Until the career arrives there are no years to offer, and the row
+    // used to draw «همه» alone stretched across all four slots — which then snapped back to a
+    // quarter of the width the moment the load answered.
+    if (loading) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(HistoryDimens.yearChipGap),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            repeat(HistoryConstants.YEAR_CHIP_SLOTS) {
+                ShimmerBlock(
+                    modifier = Modifier.weight(1f).height(HistoryDimens.yearChipHeight),
+                    cornerRadius = HistoryDimens.yearChipCorner,
+                    colorBase = TaminHistoryChipBg,
+                    colorHighlight = TaminHistoryChipShimmer,
+                )
+            }
+        }
+        return
+    }
+
     val isAll = scope is HistoryScope.All
     val hasMore = chips.size > 3
     val railYears = remember(chips, hasMore) {
@@ -253,7 +284,7 @@ private fun YearSwitchRow(
 
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        horizontalArrangement = Arrangement.spacedBy(HistoryDimens.yearChipGap),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // «همه»
@@ -301,7 +332,7 @@ private fun HeroChip(
     numeric: Boolean,
     onClick: () -> Unit,
 ) {
-    val shape = remember { RoundedCornerShape(16.dp) }
+    val shape = remember { RoundedCornerShape(HistoryDimens.yearChipCorner) }
     val bg = if (selected) Color.White else TaminHistoryChipBg
     val border = if (selected) TaminHistoryChipSelectedBorder else TaminHistoryChipBorder
     val textColor = when {
@@ -313,7 +344,7 @@ private fun HeroChip(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(34.dp)
+            .height(HistoryDimens.yearChipHeight)
             .clip(shape)
             .background(bg)
             .border(HistoryDimens.hairline, border, shape)
@@ -348,7 +379,7 @@ private fun HeroDropdownChip(
     selected: Boolean,
     onClick: () -> Unit,
 ) {
-    val shape = remember { RoundedCornerShape(16.dp) }
+    val shape = remember { RoundedCornerShape(HistoryDimens.yearChipCorner) }
     val bg = if (selected) Color.White else TaminHistoryChipBg
     val border = if (selected) TaminHistoryChipSelectedBorder else TaminHistoryChipBorder
     val textColor = if (selected) TaminHistoryChipSelectedText else TaminHistoryChipText
@@ -356,7 +387,7 @@ private fun HeroDropdownChip(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(34.dp)
+            .height(HistoryDimens.yearChipHeight)
             .clip(shape)
             .background(bg)
             .border(HistoryDimens.hairline, border, shape)

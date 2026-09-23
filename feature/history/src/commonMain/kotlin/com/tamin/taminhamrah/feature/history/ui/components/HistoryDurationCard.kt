@@ -98,10 +98,10 @@ fun HistoryDurationCard(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .shadow(elevation = 14.dp, shape = cardShape, spotColor = colors.historyCardShadow)
+            .shadow(elevation = 14.dp, shape = cardShape, spotColor = colors.historyDurationCardShadow)
             .clip(cardShape)
             .background(cardBg)
-            .border(HistoryDimens.hairline, colors.historyCardBorder, cardShape),
+            .border(HistoryDimens.hairline, colors.historyDurationCardBorder, cardShape),
     ) {
         // Top accent line
         Box(
@@ -153,7 +153,7 @@ fun HistoryDurationCard(
                         .collapseHeightAway(collapseProgress, rate = 1.4f)
                         .clip(CircleShape)
                         .background(colors.blueBg)
-                        .border(HistoryDimens.hairline, colors.historyCardBorder, CircleShape)
+                        .border(HistoryDimens.hairline, colors.historyDurationCardBorder, CircleShape)
                         .padding(horizontal = 11.dp, vertical = 3.dp),
                 ) {
                     Text(
@@ -213,7 +213,7 @@ private fun NavStepButton(
             .size(HistoryDimens.durationNavSize)
             .clip(CircleShape)
             .background(colors.blueBg.copy(alpha = alpha))
-            .border(HistoryDimens.hairline, colors.historyCardBorder.copy(alpha = alpha), CircleShape)
+            .border(HistoryDimens.hairline, colors.historyDurationCardBorder.copy(alpha = alpha), CircleShape)
             .then(if (enabled) Modifier.clickable(onClick = onClick) else Modifier),
         contentAlignment = Alignment.Center,
     ) {
@@ -368,7 +368,7 @@ private fun DurationSeparator() {
             fontSize = HistoryDimens.durationSeparator,
             fontWeight = FontWeight.Bold,
         ),
-        color = colors.historyCardBorder,
+        color = colors.historyDurationCardBorder,
         modifier = Modifier.padding(horizontal = HistoryDimens.durationSeparatorGap),
     )
 }

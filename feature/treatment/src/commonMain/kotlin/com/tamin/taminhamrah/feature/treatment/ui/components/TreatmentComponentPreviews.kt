@@ -20,6 +20,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import kotlinx.collections.immutable.persistentListOf
+import com.tamin.taminhamrah.feature.treatment.ui.model.CoverageStatus
+import com.tamin.taminhamrah.feature.treatment.ui.model.PatientItemPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.IconTile
@@ -31,6 +33,7 @@ import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.components.TaminSearchField
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.taminHeroGradient
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toPriceFormat
@@ -97,6 +100,37 @@ private fun InsuranceCardCarouselPreview() {
                     ),
                 )
             }
+        }
+    }
+}
+
+/** No dependants and no coverage: one centred card, wearing the refusal badge. */
+@PreviewRtlTheme
+@Composable
+private fun InsuranceCardSingleRejectedPreview() {
+    val patient = PatientItemPR(nationalId = "0079542318", fullName = "علی رضایی", isDependent = false)
+    PreviewRtlThemeContent {
+        Column(modifier = Modifier.background(LocalTaminColors.current.bgPage)) {
+            InsuranceCardCarousel(
+                pageCount = 1,
+                pagerState = rememberPagerState { 1 },
+            ) {
+                PatientCard(
+                    patient = patient,
+                    status = CoverageStatus.Rejected("وضعیت حمایت‌های درمانی: برخوردار نیستید"),
+                    dependantOrdinal = 0,
+                )
+            }
+        }
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun InsuranceCardCarouselSkeletonPreview() {
+    PreviewRtlThemeContent {
+        Column(modifier = Modifier.background(LocalTaminColors.current.bgPage)) {
+            InsuranceCardCarouselSkeleton()
         }
     }
 }
@@ -177,6 +211,7 @@ private fun TimelineChromePreview() {
         Column(modifier = Modifier.background(LocalTaminColors.current.bgPage)) {
             TaminTopAppBar(
                 title = "سوابق درمانی",
+                background = taminHeroGradient(LocalTaminColors.current.treatmentHubStops),
                 navigationIcon = {
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
@@ -302,6 +337,7 @@ private fun MedicalCentersPreview() {
         Column(modifier = Modifier.background(colors.bgPage)) {
             TaminTopAppBar(
                 title = "مراکز طرف قرارداد",
+                background = taminHeroGradient(colors.treatmentHubStops),
                 navigationIcon = {
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
