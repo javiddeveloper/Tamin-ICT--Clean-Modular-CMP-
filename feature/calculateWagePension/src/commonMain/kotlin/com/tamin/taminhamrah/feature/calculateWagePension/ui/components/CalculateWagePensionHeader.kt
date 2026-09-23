@@ -1,6 +1,5 @@
 package com.tamin.taminhamrah.feature.calculateWagePension.ui.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,12 +17,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.ui.components.CustomChip
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
@@ -32,11 +29,9 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.ui.toparea.TopAreaState
 import com.tamin.taminhamrah.ui.toparea.rememberTopAreaState
-import com.tamin.taminhamrah.ui.toparea.topAreaAlpha
 import com.tamin.taminhamrah.ui.toparea.topAreaHide
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
@@ -139,7 +134,7 @@ internal fun CalculateWagePensionHeader(
                 )
             } else {
                 Row(
-                    verticalAlignment = Alignment.Bottom,
+                    verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
                 ) {
                     Text(
