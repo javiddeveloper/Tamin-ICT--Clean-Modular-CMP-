@@ -255,6 +255,28 @@ directly: `feature:taminServices` may not import another feature module (see `CL
 module-boundary rule), so this core-domain list is the deliberate single source of truth instead.
 Update it by hand whenever profile or the treatment hub gains or drops a gated row.
 
+## 5f. Three ids with no mock row at all — and the tests that watch every flag
+
+`CALCULATE_WAGE_PENSION_109`(109), `OBJECTION_INSURANCE_HISTORY_45`(45) and `PRESCRIPTION_102`(102)
+are legacy/alias ids `mockMenuData` carries no row for — nothing currently routes to `109` on its
+own (`FeatureNavigation.kt` handles it in the same `when` branch as `CALCULATE_WAGE_PENSION`(23),
+which does have a row), and `45`/`102` are likewise alternates of `42`/`26`. A flag with no menu row
+resolves `Disabled(null)` (`MainServiceDN?.toFeatureStatus()`), which is correct for these three —
+not a bug, and not a reason to add a duplicate mock row for the same feature.
+
+Two tests exist specifically to catch the *actual* bug this can hide — a flag added without its
+matching `mockMenuData` row, which shipped once already for the "Provisional ids" block (§5d) before
+a follow-up commit fixed it:
+- `MockMenuDataCoverageTest` (core-network) — every `FeatureFlag` has a `mockMenuData` row, except
+  the three named above (`KnownAliasesWithNoOwnMockRow`).
+- `RealMenuFeatureCoverageTest` (core-data) — runs the *real* `mockMenuData` through
+  `FeatureManagerImpl` and `GetVisibleServicesUseCase` for every flag, asserting the exact status
+  (not just "truthy") each one resolves to, and that the services tab excludes exactly
+  `DedicatedScreenFlags.all` — no more, no less.
+
+Both keep their own copy of the three-id exception list (test source sets aren't shared across
+modules); update both by hand if that list ever changes.
+
 ## 6. The AI Agent flag
 
 The AI assistant is a standalone feature in the flag system.
