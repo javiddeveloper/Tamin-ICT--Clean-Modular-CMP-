@@ -55,7 +55,6 @@ import kotlin.math.round
  */
 @Composable
 internal fun CalculateWagePensionStatsCard(
-    hazeState: HazeState,
     premiumYears: Double,
     averageSalary: Long,
     modifier: Modifier = Modifier,
@@ -75,18 +74,7 @@ internal fun CalculateWagePensionStatsCard(
                 offsetY = Spacing.md,
             )
             .clip(RoundedCornerShape(CornerRadius.iconTile))
-            .background(colors.validationCardGradient)
-            .hazeEffect(
-                state = hazeState,
-                style = HazeStyle(
-                    noiseFactor = 0.02f,
-                    tint = HazeTint(
-                        color = colors.bgPage.copy(alpha = 0.8f),
-                        blendMode = BlendMode.Luminosity,
-                    ),
-                    blurRadius = Elevation.xxl,
-                ),
-            )
+            .background(colors.bgSurface)
             .border(Thickness.border, cardBorderColor, RoundedCornerShape(CornerRadius.iconTile)),
     ) {
         if (isLoading) {
@@ -207,12 +195,10 @@ private fun CalculateWagePensionStatsCardPreview() {
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
                 CalculateWagePensionStatsCard(
-                    hazeState = hazeState,
                     premiumYears = 7.34,
                     averageSalary = 185_000_000L,
                 )
                 CalculateWagePensionStatsCard(
-                    hazeState = hazeState,
                     premiumYears = 0.0,
                     averageSalary = 0L,
                     isLoading = true,

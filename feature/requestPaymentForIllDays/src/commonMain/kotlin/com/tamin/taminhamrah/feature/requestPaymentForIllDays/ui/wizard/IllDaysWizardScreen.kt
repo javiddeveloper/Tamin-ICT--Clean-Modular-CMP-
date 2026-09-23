@@ -715,6 +715,7 @@ private fun DoctorStep(
             label = stringResource(Res.string.ill_days_doctor_code_label),
             placeholder = stringResource(Res.string.ill_days_doctor_code_placeholder),
             keyboardType = KeyboardType.Number,
+            maxLength = 8
         )
 
         Column(
