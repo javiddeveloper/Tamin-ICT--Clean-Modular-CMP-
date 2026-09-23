@@ -26,14 +26,21 @@ fun NavGraphBuilder.developerOptionsScreen(
      * Passed in as a callback rather than imported: `:feature:payment` is another feature, and
      * feature modules do not depend on each other.
      */
-    onStartTestPayment: () -> Unit
+    onStartTestPayment: () -> Unit,
+    /**
+     * Opens the assistant directly, bypassing its availability-gated entry point, so the mock
+     * access modes (refused, offline) can be looked at. Same reasoning as [onStartTestPayment]:
+     * `:feature:agent` is another feature, so it is a callback.
+     */
+    onOpenAgent: () -> Unit
 ) {
     composableWithFadeTransitions<DeveloperOptionsRoute> {
         DeveloperOptionsScreen(
             onNavigateBack = onNavigateBack,
             onNavigateToDebugLogin = onNavigateToDebugLogin,
             onNavigateToTokenManager = onNavigateToTokenManager,
-            onStartTestPayment = onStartTestPayment
+            onStartTestPayment = onStartTestPayment,
+            onOpenAgent = onOpenAgent
         )
     }
 }

@@ -11,7 +11,9 @@ import com.tamin.taminhamrah.apiService.VersionHistoryApiServiceImpl
 import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSource
 import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSource
+import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSourceFakeImpl
 import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSourceSelector
 import com.tamin.taminhamrah.dataSource.paymentSource.FakePaymentGatewayRemoteDataSource
 import com.tamin.taminhamrah.dataSource.paymentSource.PaymentGatewayRemoteDataSource
 import com.tamin.taminhamrah.dataSource.paymentSource.PaymentGatewayRemoteDataSourceImpl
@@ -241,12 +243,23 @@ val remoteModule = module {
         )
     }
 
+    /**
+     * The live assistant, unless Developer Options → «شبیه‌سازی دستیار هوشمند» puts the
+     * fixture-backed fake in front of it (debug builds only; the mode is read per call).
+     */
     single<AgentRemoteDataSource> {
-        // The live assistant. AgentRemoteDataSourceFakeImpl serves local fixtures for offline work.
-        AgentRemoteDataSourceImpl(
-            agentApiService = get(named("agentApiService")),
-            errorParser = get(),
-            json = get()
+        val developerOptionsRepository = get<DeveloperOptionsRepository>()
+        AgentRemoteDataSourceSelector(
+            real = AgentRemoteDataSourceImpl(
+                agentApiService = get(named("agentApiService")),
+                errorParser = get(),
+                json = get()
+            ),
+            fake = AgentRemoteDataSourceFakeImpl(
+                json = get(),
+                mode = { developerOptionsRepository.getAgentMockMode() }
+            ),
+            developerOptionsRepository = developerOptionsRepository
         )
     }
 
