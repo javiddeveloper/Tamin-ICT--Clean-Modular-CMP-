@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -57,6 +58,7 @@ fun LoadingButton(
     contentColor: Color? = null,
     height: Dp = ButtonDimens.height,
     shape: Shape = RoundedCornerShape(CornerRadius.xl),
+    textStyle: TextStyle = MaterialTheme.typography.titleMedium,
     /**
      * Shows [isLoading] as a sheen passing over the button instead of a spinner, keeping the icon in
      * place. False — the default — keeps the spinner every existing caller shows.
@@ -109,7 +111,7 @@ fun LoadingButton(
             val label = @Composable {
                 Text(
                     text = text,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = textStyle,
                     color = contentColor
                 )
             }

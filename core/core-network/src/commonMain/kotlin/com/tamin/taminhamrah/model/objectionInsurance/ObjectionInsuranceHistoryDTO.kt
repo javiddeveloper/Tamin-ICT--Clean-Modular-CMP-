@@ -1,0 +1,47 @@
+package com.tamin.taminhamrah.model.objectionInsurance
+
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class ObjectionInsuranceHistoryDTO(
+    @SerialName("branchCode") val branchCode: String? = null,
+    @SerialName("branchname") val branchName: String? = null,
+    @SerialName("confirmed") val confirmed: Boolean? = null,
+    @SerialName("deleted") val deleted: Boolean? = null,
+    @SerialName("historyTypeCode") val historyTypeCode: String? = null,
+    @SerialName("historyTypeName") val historyTypeName: String? = null,
+    @SerialName("isDeleted") val isDeleted: Boolean? = null,
+    @SerialName("mm1") val newMonth1: String? = null,
+    @SerialName("mm2") val newMonth2: String? = null,
+    @SerialName("mm3") val newMonth3: String? = null,
+    @SerialName("mm4") val newMonth4: String? = null,
+    @SerialName("mm5") val newMonth5: String? = null,
+    @SerialName("mm6") val newMonth6: String? = null,
+    @SerialName("mm7") val newMonth7: String? = null,
+    @SerialName("mm8") val newMonth8: String? = null,
+    @SerialName("mm9") val newMonth9: String? = null,
+    @SerialName("mm10") val newMonth10: String? = null,
+    @SerialName("mm11") val newMonth11: String? = null,
+    @SerialName("mm12") val newMonth12: String? = null,
+    @SerialName("om1") val oldMonth1: String? = null,
+    @SerialName("om2") val oldMonth2: String? = null,
+    @SerialName("om3") val oldMonth3: String? = null,
+    @SerialName("om4") val oldMonth4: String? = null,
+    @SerialName("om5") val oldMonth5: String? = null,
+    @SerialName("om6") val oldMonth6: String? = null,
+    @SerialName("om7") val oldMonth7: String? = null,
+    @SerialName("om8") val oldMonth8: String? = null,
+    @SerialName("om9") val oldMonth9: String? = null,
+    @SerialName("om10") val oldMonth10: String? = null,
+    @SerialName("om11") val oldMonth11: String? = null,
+    @SerialName("om12") val oldMonth12: String? = null,
+    @SerialName("prow") val prow: String? = null,
+    @SerialName("reqno") val requestNumber: String? = null,
+    @SerialName("reqtype") val requestType: String? = null,
+    @SerialName("risuid") val insuredId: String? = null,
+    @SerialName("rwshid") val workshopId: String? = null,
+    @SerialName("userDesc") val userDesc: String? = null,
+    @SerialName("workShopName") val workshopName: String? = null,
+    @SerialName("year") val year: String? = null,
+)
