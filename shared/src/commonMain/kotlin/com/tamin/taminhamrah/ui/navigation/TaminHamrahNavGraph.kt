@@ -83,6 +83,11 @@ import com.tamin.taminhamrah.feature.history.historyScreen
 import com.tamin.taminhamrah.feature.historyobjection.historyObjectionScreen
 import com.tamin.taminhamrah.feature.historyobjection.historyObjectionStepperScreen
 import com.tamin.taminhamrah.feature.inquiryEducation.inquiryEducationScreen
+import com.tamin.taminhamrah.feature.objectionInsurance.objectionInsuranceScreen
+import com.tamin.taminhamrah.feature.weddingPresent.navigateToWeddingPresentCalculate
+import com.tamin.taminhamrah.feature.weddingPresent.weddingPresentCalculateScreen
+import com.tamin.taminhamrah.feature.weddingPresent.weddingPresentScreen
+import com.tamin.taminhamrah.feature.calculateWagePension.calculateWagePensionScreen
 import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
 import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
 import com.tamin.taminhamrah.feature.orotezprotez.orotezProtezScreen
@@ -118,6 +123,20 @@ import com.tamin.taminhamrah.feature.taminServices.employerOnlineServicesScreen
 import com.tamin.taminhamrah.feature.taminServices.inspectionScreen
 import com.tamin.taminhamrah.feature.taminServices.workshopInspectionScreen
 import com.tamin.taminhamrah.feature.taminServices.occurrenceScreen
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServicesScreen
+import com.tamin.taminhamrah.feature.taminServices.constructionInsuranceScreen
+import com.tamin.taminhamrah.feature.taminServices.viewDetailRequestScreen
+import com.tamin.taminhamrah.feature.taminServices.paymentSheetScreen
+import com.tamin.taminhamrah.feature.taminServices.installmentLetterScreen
+import com.tamin.taminhamrah.feature.taminServices.installmentManagementScreen
+import com.tamin.taminhamrah.feature.taminServices.installmentDebitListScreen
+import com.tamin.taminhamrah.feature.taminServices.beneficiariesScreen
+import com.tamin.taminhamrah.feature.taminServices.navigateToViewDetailRequest
+import com.tamin.taminhamrah.feature.taminServices.navigateToPaymentSheet
+import com.tamin.taminhamrah.feature.taminServices.navigateToInstallmentLetter
+import com.tamin.taminhamrah.feature.taminServices.navigateToInstallmentManagement
+import com.tamin.taminhamrah.feature.taminServices.navigateToInstallmentDebitList
+import com.tamin.taminhamrah.feature.taminServices.navigateToBeneficiaries
 import com.tamin.taminhamrah.feature.taminServices.sendInsuranceHistoryToInstitutionsScreen
 import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
 import com.tamin.taminhamrah.feature.taminServices.workersPaymentInfoScreen
@@ -520,6 +539,60 @@ internal fun TaminHamrahNavGraph(
                     onBack = { navController.popBackStack() }
                 )
 
+                constructionInsuranceScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToViewDetail = { fileNumber, requestNumber ->
+                        navController.navigateToViewDetailRequest(fileNumber, requestNumber)
+                    },
+                    onNavigateToPaymentSheet = { debitNumber, branchCode ->
+                        navController.navigateToPaymentSheet(debitNumber, branchCode)
+                    },
+                    onNavigateToInstallmentLetter = { fileNumber, workshopId, branchId ->
+                        navController.navigateToInstallmentLetter(fileNumber, workshopId, branchId)
+                    },
+                    onNavigateToBeneficiaries = { requestNumber, fileNumber, requestDate, workshopId, branchCode ->
+                        navController.navigateToBeneficiaries(
+                            requestNumber,
+                            fileNumber,
+                            requestDate,
+                            workshopId,
+                            branchCode,
+                        )
+                    },
+                )
+
+                viewDetailRequestScreen(
+                    onBack = { navController.popBackStack() }
+                )
+
+                paymentSheetScreen(
+                    onBack = { navController.popBackStack() }
+                )
+
+                installmentLetterScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToInstallmentManagement = { fileNumber, workshopId, branchId, debitNumber, debitStepDescription ->
+                        navController.navigateToInstallmentManagement(
+                            fileNumber, workshopId, branchId, debitNumber, debitStepDescription,
+                        )
+                    },
+                    onNavigateToInstallmentDebitList = { fileNumber, workshopId, branchId, debitNumber ->
+                        navController.navigateToInstallmentDebitList(fileNumber, workshopId, branchId, debitNumber)
+                    },
+                )
+
+                installmentManagementScreen(
+                    onBack = { navController.popBackStack() }
+                )
+
+                installmentDebitListScreen(
+                    onBack = { navController.popBackStack() }
+                )
+
+                beneficiariesScreen(
+                    onBack = { navController.popBackStack() }
+                )
+
                 pensionStatusInquiryGraph(
                     onBack = { navController.popBackStack() }
                 )
@@ -555,6 +628,7 @@ internal fun TaminHamrahNavGraph(
                 deferredInstallmentScreen(onBack = { navController.popBackStack() })
                 girlSurvivorScreen(onBack = { navController.popBackStack() })
                 inquiryEducationScreen(onBack = { navController.popBackStack() })
+                objectionInsuranceScreen(onBack = { navController.popBackStack() })
                 fractionContractScreen(
                     onBack = { navController.popBackStack() },
                     onNavigateToPremiumPayment = { contractNumber, premiumTypeCode, insuranceType ->
