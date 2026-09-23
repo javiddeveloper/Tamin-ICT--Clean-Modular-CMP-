@@ -245,7 +245,7 @@ class EditProfilePhotoViewModelTest {
     }
 }
 
-private class FakeProfileUserRepository : UserRepository {
+internal class FakeProfileUserRepository : UserRepository {
     var relationError: Throwable? = null
     var sendImageError: Throwable? = null
     var sendImageGate: CompletableDeferred<Unit>? = null
