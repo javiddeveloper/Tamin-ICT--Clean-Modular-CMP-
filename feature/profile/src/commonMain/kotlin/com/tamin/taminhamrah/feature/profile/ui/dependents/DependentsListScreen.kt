@@ -307,6 +307,24 @@ private fun DependentCard(
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Box(
+                modifier = Modifier
+                    .size(IconSize.textFieldIconContainer)
+                    .clip(RoundedCornerShape(CornerRadius.avatarTile))
+                    .background(colors.bgSurface)
+                    .border(Thickness.border, colors.blueText, RoundedCornerShape(CornerRadius.avatarTile)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowDown,
+                    contentDescription = null,
+                    tint = colors.blueText,
+                    modifier = Modifier
+                        .size(IconSize.medium)
+                        .rotate(rotation)
+                )
+            }
+
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(Spacing.xs)
@@ -334,24 +352,6 @@ private fun DependentCard(
                     text = nationalCodeLabel,
                     style = MaterialTheme.typography.bodySmall,
                     color = colors.textMuted
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .size(IconSize.textFieldIconContainer)
-                    .clip(RoundedCornerShape(CornerRadius.avatarTile))
-                    .background(colors.bgSurface)
-                    .border(Thickness.border, colors.border, RoundedCornerShape(CornerRadius.avatarTile)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowDown,
-                    contentDescription = null,
-                    tint = colors.blueText,
-                    modifier = Modifier
-                        .size(IconSize.medium)
-                        .rotate(rotation)
                 )
             }
         }
