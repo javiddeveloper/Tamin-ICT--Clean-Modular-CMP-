@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Work
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -60,9 +59,11 @@ import com.tamin.taminhamrah.ui.toparea.topAreaContentPadding
 import com.tamin.taminhamrah.ui.toparea.topAreaHide
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res as CoreRes
 import taminx.core.core_ui.action_back
+import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.feature.history.Res as HistoryRes
 import taminx.feature.history.history_job_info_empty_state
 import taminx.feature.history.history_job_info_list_header
@@ -188,6 +189,10 @@ fun HistoryJobInfoContent(
                     onCopy = { text -> copyToClipboard(text) }
                 )
             }
+
+            item {
+                Spacer(Modifier.height(Spacing.xxl))
+            }
         }
 
         // The floating top area sits on top so the list passes underneath it as it scrolls away.
@@ -233,7 +238,7 @@ private fun HistoryJobInfoTopArea(
             title = stringResource(HistoryRes.string.history_job_info_title),
             navigationIcon = {
                 TaminTopAppBarButton(
-                    icon = Icons.AutoMirrored.Filled.ArrowBack,
+                    icon = vectorResource(CoreRes.drawable.ic_tamin_chevron_back),
                     contentDescription = stringResource(CoreRes.string.action_back),
                     onClick = onBackClicked,
                     bordered = true
