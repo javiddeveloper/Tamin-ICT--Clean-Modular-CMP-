@@ -1,7 +1,7 @@
 package com.tamin.taminhamrah.ui.components.toast
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.EaseOutBack
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -38,6 +39,8 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.util.lerp
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -47,6 +50,7 @@ import com.tamin.taminhamrah.ui.theme.Easing
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -57,19 +61,40 @@ import kotlin.math.roundToInt
  * full capsule while the message fades in ([EXPAND_MS]), stays for the toast's duration, narrows
  * back to the disc while the message fades out ([COLLAPSE_MS]), and finally shrinks away
  * ([ICON_EXIT_MS]).
+ *
+ * Neighbouring phases overlap ([EXPAND_OVERLAP_MS], [EXIT_OVERLAP_MS]) so the motion flows from
+ * one phase into the next instead of pausing between them.
  */
 internal object MorphingToastDefaults {
-    const val ICON_ENTER_MS = 250
-    const val EXPAND_MS = 350
-    const val COLLAPSE_MS = 300
-    const val ICON_EXIT_MS = 200
+    const val ICON_ENTER_MS = 420
+    const val EXPAND_MS = 560
+    const val COLLAPSE_MS = 480
+    const val ICON_EXIT_MS = 320
+
+    /** How long before the disc settles the capsule already starts to widen. */
+    const val EXPAND_OVERLAP_MS = 120
+
+    /** How long before the capsule is fully narrowed the disc already starts to leave. */
+    const val EXIT_OVERLAP_MS = 100
+
+    /** A gentle back-out: the disc swells just past its size and eases back, no hard bounce. */
+    val EnterEasing = CubicBezierEasing(0.34f, 1.25f, 0.64f, 1f)
+
+    /** Quint-out: the capsule opens quickly, then glides into its full width. */
+    val ExpandEasing = CubicBezierEasing(0.22f, 1f, 0.36f, 1f)
+
+    /** Cubic in-out: the capsule eases into the collapse and eases out of it. */
+    val CollapseEasing = CubicBezierEasing(0.65f, 0f, 0.35f, 1f)
+
+    /** Cubic-in: the disc drifts off softly rather than snapping away. */
+    val ExitEasing = CubicBezierEasing(0.32f, 0f, 0.67f, 0f)
 
     /**
      * How far into the expansion the message starts to show. Below it the capsule is still too
      * narrow for the text to be anything but a clipped sliver, so it stays hidden until there is
      * room — and, mirrored, it is gone before the collapse gets that narrow again.
      */
-    const val MESSAGE_REVEAL_START = 0.35f
+    const val MESSAGE_REVEAL_START = 0.3f
 
     /** The collapsed disc — also the capsule's minimum height. */
     val DiscSize: Dp = Spacing.xxxxl
@@ -78,6 +103,11 @@ internal object MorphingToastDefaults {
     /** Half of [DiscSize], so the collapsed capsule is an exact circle. */
     val Shape = RoundedCornerShape(CornerRadius.x2l)
     val Elevation: Dp = com.tamin.taminhamrah.ui.theme.Elevation.md
+
+    /** A step under the title scale, kept at medium weight so the short message stays legible. */
+    val MessageTextStyle: TextStyle
+        @Composable @ReadOnlyComposable
+        get() = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium)
 }
 
 /** The colors one toast type is drawn in. */
@@ -151,23 +181,31 @@ internal fun MorphingToast(
     val currentOnInvisible by rememberUpdatedState(onInvisible)
 
     LaunchedEffect(dismissing) {
-        if (!dismissing) {
-            // Phase 1 — the disc pops in.
-            coroutineScope {
-                launch { iconAlpha.animateTo(1f, tween(MorphingToastDefaults.ICON_ENTER_MS)) }
-                iconScale.animateTo(1f, tween(MorphingToastDefaults.ICON_ENTER_MS, easing = EaseOutBack))
+        with(MorphingToastDefaults) {
+            if (!dismissing) {
+                coroutineScope {
+                    // Phase 1 — the disc swells in.
+                    launch { iconAlpha.animateTo(1f, tween(ICON_ENTER_MS, easing = Easing.decelerate)) }
+                    launch { iconScale.animateTo(1f, tween(ICON_ENTER_MS, easing = EnterEasing)) }
+                    // Phase 2 — it widens into the capsule, starting as the disc settles.
+                    // Phase 3, the stay, is the toaster's timer.
+                    delay((ICON_ENTER_MS - EXPAND_OVERLAP_MS).toLong())
+                    expansion.animateTo(1f, tween(EXPAND_MS, easing = ExpandEasing))
+                }
+            } else {
+                coroutineScope {
+                    // Phase 4 — back to the disc. Skipped when dismissed before it ever widened.
+                    if (expansion.value > 0f) {
+                        launch { expansion.animateTo(0f, tween(COLLAPSE_MS, easing = CollapseEasing)) }
+                        // Phase 5 starts just before the capsule has fully closed.
+                        delay((COLLAPSE_MS - EXIT_OVERLAP_MS).toLong())
+                    }
+                    // Phase 5 — the disc leaves.
+                    launch { iconAlpha.animateTo(0f, tween(ICON_EXIT_MS, easing = ExitEasing)) }
+                    launch { iconScale.animateTo(0f, tween(ICON_EXIT_MS, easing = ExitEasing)) }
+                }
+                currentOnInvisible()
             }
-            // Phase 2 — it widens into the capsule. Phase 3, the stay, is the toaster's timer.
-            expansion.animateTo(1f, tween(MorphingToastDefaults.EXPAND_MS, easing = Easing.standard))
-        } else {
-            // Phase 4 — back to the disc.
-            expansion.animateTo(0f, tween(MorphingToastDefaults.COLLAPSE_MS, easing = Easing.standard))
-            // Phase 5 — the disc leaves.
-            coroutineScope {
-                launch { iconAlpha.animateTo(0f, tween(MorphingToastDefaults.ICON_EXIT_MS)) }
-                iconScale.animateTo(0f, tween(MorphingToastDefaults.ICON_EXIT_MS, easing = Easing.accelerate))
-            }
-            currentOnInvisible()
         }
     }
 
@@ -307,7 +345,7 @@ private fun MorphingToastPhasesPreview(darkTheme: Boolean) {
 private fun PreviewMessage(toast: Toast) {
     Text(
         text = toast.message.toString(),
-        style = MaterialTheme.typography.titleSmall,
+        style = MorphingToastDefaults.MessageTextStyle,
         color = LocalToastContentColor.current,
     )
 }

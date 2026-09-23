@@ -1,7 +1,6 @@
 package com.tamin.taminhamrah.ui.components.toast // adjust to your actual core-ui package, e.g. ir.tamin.hamrah.core.ui.toast
 
 import kotlin.time.Duration
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -51,7 +50,7 @@ fun AppToastHost(
         messageSlot = { toast ->
             Text(
                 text = toast.message.toString(),
-                style = MaterialTheme.typography.titleSmall,
+                style = MorphingToastDefaults.MessageTextStyle,
                 color = LocalToastContentColor.current,
             )
         },
