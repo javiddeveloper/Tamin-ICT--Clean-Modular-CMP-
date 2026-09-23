@@ -35,12 +35,13 @@ import com.tamin.taminhamrah.ui.components.ListGroupView
 import com.tamin.taminhamrah.ui.components.ListItemBadge
 import com.tamin.taminhamrah.ui.components.ListItemColors
 import com.tamin.taminhamrah.ui.components.ListItemData
-import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.PhoneNumberField
 import com.tamin.taminhamrah.ui.components.SectionHeaderTitle
 import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toparea.TopAreaState
+import com.tamin.taminhamrah.ui.toparea.driveTopArea
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.painterResource
@@ -50,19 +51,20 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_arrow_down
 import taminx.core.core_ui.ic_mobile
 import taminx.core.core_ui.ic_privacy
-import taminx.core.core_ui.ic_send
 import taminx.core.core_ui.profile_change_mobile_banner_info
-import taminx.core.core_ui.profile_get_otp_code
 
 @Composable
 fun EnterMobileStep(
     uiState: ChangeMobileUiState,
+    topAreaState: TopAreaState,
     onIntent: (ChangeMobileIntent) -> Unit
 ) {
+    val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .driveTopArea(topAreaState, scrollState)
+            .verticalScroll(scrollState)
             .padding(Spacing.lg)
     ) {
         SectionHeaderTitle(title = "شماره همراه فعلی")
@@ -80,12 +82,6 @@ fun EnterMobileStep(
         BannerCard(
             message = stringResource(Res.string.profile_change_mobile_banner_info),
             type = BannerType.Info
-        )
-        Spacer(modifier = Modifier.height(Spacing.xl))
-        SubmitOtpButton(
-            newMobile = uiState.newMobile,
-            isLoading = uiState.isLoading,
-            onSubmit = { onIntent(ChangeMobileIntent.GetOtpCode) }
         )
     }
 }
@@ -172,21 +168,5 @@ private fun NewMobileSection(
         error = isMobileError,
         showClearButton = true,
         errorMessage = if (isMobileError) "شماره موبایل باید ۱۱ رقم و با ۰۹ شروع شود." else null,
-    )
-}
-
-@Composable
-private fun SubmitOtpButton(
-    newMobile: String,
-    isLoading: Boolean,
-    onSubmit: () -> Unit
-) {
-    LoadingButton(
-        text = stringResource(Res.string.profile_get_otp_code),
-        onClick = onSubmit,
-        enabled = newMobile.isNotEmpty() && !isLoading,
-        isLoading = isLoading && newMobile.isNotEmpty(),
-        icon = vectorResource(Res.drawable.ic_send),
-        modifier = Modifier.fillMaxWidth()
     )
 }
