@@ -307,13 +307,13 @@ class HomeRepositoryImplTest {
         val entities = buildQuickAccessEntities(menu)
 
         val historyMember = HomeServiceMembership.history.first()
-        val historyRow = entities.find { it.flagId == historyMember.id }
+        val historyRow = entities.find { it.flagId == historyMember.id && it.group == HomeQuickAccessGroup.HISTORY }
         assertNotNull(historyRow)
         assertEquals(HomeQuickAccessGroup.HISTORY, historyRow.group)
         assertEquals(MenuServiceStatusDN.ACTIVE, historyRow.status)
 
         val frequentMember = HomeServiceMembership.frequent.first()
-        val frequentRow = entities.find { it.flagId == frequentMember.id }
+        val frequentRow = entities.find { it.flagId == frequentMember.id && it.group == HomeQuickAccessGroup.FREQUENT }
         assertNotNull(frequentRow)
         assertEquals(HomeQuickAccessGroup.FREQUENT, frequentRow.group)
     }

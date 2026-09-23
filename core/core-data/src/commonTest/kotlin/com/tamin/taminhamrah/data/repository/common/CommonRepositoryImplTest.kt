@@ -79,6 +79,23 @@ class CommonRepositoryImplTest {
     }
 
     @Test
+    fun `getMainMenu drops a cached row the server no longer sends`() = runTest {
+        val menuDao = FakeMenuDao()
+        // Simulate a previous sync that cached a row (MERGE_HISTORY, id 6) the server has since
+        // retired — replaceAllMenuItems, not a plain insert, is what has to clear it.
+        menuDao.seed(MenuEntity(id = 6, name = "سوابق تلفیقی", subtitle = null, icon = null, active = true, newService = null, sorting = null, url = null, status = null, message = null, showRole = listOf(1), hiddenForVersions = emptyList()))
+        remoteDataSource.mainMenuResult = listOf(
+            MainServiceDto(id = 8, name = "کلیه سوابق", showRole = listOf(1), status = com.tamin.taminhamrah.model.common.MenuServiceStatus.ACTIVE),
+        )
+        val repository = CommonRepositoryImpl(remoteDataSource, menuDao, tokenStoreManager)
+
+        repository.getMainMenu("1", false).test {
+            assertEquals(listOf(8), awaitItem().map { it.id })
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun `getJobTitlePage fetches and maps to PageDN`() = runTest {
         remoteDataSource.jobTitleResult = ListData(
             list = listOf(
@@ -119,8 +136,10 @@ class CommonRepositoryImplTest {
         override suspend fun getInsuranceTypes(query: ApiQueryParamDN): ListData<InsuranceTypeDTO>? =
             throw NotImplementedError("not used by these tests")
 
+        var mainMenuResult: List<MainServiceDto>? = null
+
         override suspend fun getMainMenu(versionCode: String, forceUpdate: Boolean): List<MainServiceDto> =
-            throw NotImplementedError("not used by these tests")
+            mainMenuResult ?: throw NotImplementedError("not used by these tests")
 
         override suspend fun getBeneficiary(query: ApiQueryParamDN): ListData<BeneficiaryDTO> =
             throw NotImplementedError("not used by these tests")
@@ -137,10 +156,21 @@ class CommonRepositoryImplTest {
             jobTitleResult
     }
 
+    /** Backed by real in-memory state so `replaceAllMenuItems`'s default clear-then-insert body is
+     *  exercised for real, not stubbed away. */
     private class FakeMenuDao : MenuDao {
-        override fun getMenuItems(): Flow<List<MenuEntity>> = MutableStateFlow(emptyList())
-        override suspend fun insertMenuItems(menuItems: List<MenuEntity>) = Unit
-        override suspend fun clearMenu() = Unit
+        private val items = MutableStateFlow<List<MenuEntity>>(emptyList())
+
+        fun seed(vararg menuItems: MenuEntity) {
+            items.value = menuItems.toList()
+        }
+
+        override fun getMenuItems(): Flow<List<MenuEntity>> = items
+        override suspend fun insertMenuItems(menuItems: List<MenuEntity>) {
+            val byId = menuItems.associateBy { it.id }
+            items.value = items.value.filterNot { it.id in byId }.plus(menuItems)
+        }
+        override suspend fun clearMenu() { items.value = emptyList() }
     }
 
     private class FakeTokenStoreManager : TokenStoreManager {
