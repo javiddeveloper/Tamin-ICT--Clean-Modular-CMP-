@@ -122,15 +122,18 @@ class WorkshopsViewModel(
      * employer with hundreds of agreements pays that on opening. Ask for a server-side distinct
      * count if that ever shows.
      */
-    private fun countStats(firstPage: PagedListState<WorkshopPR>): Flow<PartialState> = flow {
+    private fun countStats(firstPage: PagedListState<WorkshopPR>): Flow<PartialState> {
+        // Outside the builder so the fallback below sees every page that arrived, not just the first.
         var all = firstPage
-        while (all.hasMore) {
-            val next = getEmployerAgreements(WorkshopListQuery(page = all.nextPage))
-            all = all.loaded(next, isFirstPage = false) { it.toPresentation() }
-        }
-        emit(PartialState.StatsLoaded(all.items.toStats()))
-        // A later page failing still leaves the figures of what did arrive, counted the same way.
-    }.catch { emit(PartialState.StatsLoaded(firstPage.items.toStats())) }
+        return flow {
+            while (all.hasMore) {
+                val next = getEmployerAgreements(WorkshopListQuery(page = all.nextPage))
+                all = all.loaded(next, isFirstPage = false) { it.toPresentation() }
+            }
+            emit(PartialState.StatsLoaded(all.items.toStats()))
+            // A later page failing still leaves the figures of what did arrive, counted the same way.
+        }.catch { emit(PartialState.StatsLoaded(all.items.toStats())) }
+    }
 
     private fun List<WorkshopPR>.toStats() = WorkshopStats(
         total = size,
