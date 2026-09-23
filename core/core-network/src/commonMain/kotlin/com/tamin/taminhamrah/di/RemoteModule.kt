@@ -71,6 +71,8 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
 import com.tamin.taminhamrah.dataSource.fractionContract.FractionContractRemoteDataSource
 import com.tamin.taminhamrah.dataSource.fractionContract.FractionContractRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.constructionInsurance.ConstructionInsuranceRemoteDataSource
+import com.tamin.taminhamrah.dataSource.constructionInsurance.ConstructionInsuranceRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.inquiryEducation.InquiryEducationRemoteDataSource
 import com.tamin.taminhamrah.dataSource.inquiryEducation.InquiryEducationRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.workersPayment.WorkersPaymentRemoteDataSource
@@ -319,6 +321,14 @@ val remoteModule = module {
     single<FractionContractRemoteDataSource> {
         FractionContractRemoteDataSourceImpl(
             fractionContractApiService = get(),
+            errorParser = get()
+        )
+    }
+
+    single<ConstructionInsuranceRemoteDataSource> {
+        ConstructionInsuranceRemoteDataSourceImpl(
+            apiService = get(),
+            queryBuilder = get(),
             errorParser = get()
         )
     }

@@ -21,6 +21,7 @@ import com.tamin.taminhamrah.data.local.dao.HistoryCacheDao
 import com.tamin.taminhamrah.data.local.dao.HistoryJobInfoDao
 import com.tamin.taminhamrah.data.local.dao.HomeContentDao
 import com.tamin.taminhamrah.data.local.dao.VersionHistoryDao
+import com.tamin.taminhamrah.data.local.dao.ConstructionFileDao
 
 @Suppress("ACTUAL_ANNOTATIONS_NOT_MATCH_EXPECT")
 actual abstract class TaminXDatabase : RoomDatabase() {
@@ -40,8 +41,8 @@ actual abstract class TaminXDatabase : RoomDatabase() {
     actual abstract fun agentChatDao(): AgentChatDao
     actual abstract fun versionHistoryDao(): VersionHistoryDao
     actual abstract fun historyJobInfoDao(): HistoryJobInfoDao
-
     actual abstract fun historyCacheDao(): HistoryCacheDao
+    actual abstract fun constructionFileDao(): ConstructionFileDao
     actual abstract fun homeContentDao(): HomeContentDao
 }
 
