@@ -88,7 +88,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -372,7 +371,16 @@ private fun ChatLayout(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 // Top-to-bottom: no reverseLayout, newest items at bottom
             ) {
-                itemsIndexed(uiState.chatItems, key = { _, it -> it.id }) { index, item ->
+                // contentType matters here more than on a typical list: a chat row can be any
+                // of a dozen quite different layouts (text, markdown, table, chart, image,
+                // video, voice, …). Without it every row shares one null type and the list
+                // will happily try to reuse, say, a table row's slot for a text bubble, which
+                // just throws the reuse away and composes from scratch.
+                itemsIndexed(
+                    uiState.chatItems,
+                    key = { _, it -> it.id },
+                    contentType = { _, it -> it.content::class },
+                ) { index, item ->
                     // SuggestedPrompts appear after their preceding text bubble finishes
                     // typing, so its reveal delay tracks that text's length. Only computed
                     // for that content type to avoid coupling neighbors' recomposition.
@@ -768,8 +776,16 @@ private fun ExtensionCard(
 ) {
     // Single shared shimmer clock for the whole card — the active step reads
     // this instead of each step spinning up its own infinite transition.
+    //
+    // Kept as the State itself, never unwrapped with `by` here: this card renders inside the
+    // chat LazyColumn, which is a Haze *source*, so anything that recomposes or redraws it
+    // makes every frosted surface on the screen re-blur. Reading the float in the composable
+    // body would recompose this whole card — and rebuild each step's modifier chain — sixty
+    // times a second for the entire time an answer is being prepared, which is exactly the
+    // moment the screen can least afford it. Passed down and read inside a graphicsLayer
+    // block instead, so the pulse only re-runs the layer block.
     val shimmer = rememberInfiniteTransition(label = "step_shimmer")
-    val pulseAlpha by shimmer.animateFloat(
+    val pulseAlpha = shimmer.animateFloat(
         initialValue = 0.4f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
@@ -848,7 +864,8 @@ private fun ExtensionCardStep(
     isActive: Boolean,
     isDone: Boolean,
     showLine: Boolean = false,
-    pulseAlpha: Float = 1f
+    /** The card's shared shimmer clock, as State: see the note in [ExtensionCard]. */
+    pulseAlpha: State<Float>
 ) {
 
     Row(
@@ -856,7 +873,15 @@ private fun ExtensionCardStep(
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .fillMaxWidth()
-            .then(if (isActive && !isDone) Modifier.alpha(pulseAlpha) else Modifier)
+            // graphicsLayer, not alpha(): the value is read in the layer block, at draw time,
+            // so the pulse never recomposes this row.
+            .then(
+                if (isActive && !isDone) {
+                    Modifier.graphicsLayer { alpha = pulseAlpha.value }
+                } else {
+                    Modifier
+                }
+            )
     ) {
         // Icon column with connector line
         Box(modifier = Modifier.width(20.dp), contentAlignment = Alignment.Center) {
@@ -1226,6 +1251,41 @@ private fun AgentMarkdown(
     )
 }
 
+// Every pattern below is compiled once, at class-init, not per line.
+//
+// They used to be written inline inside parseMarkdownLine/appendInlineStyles, which meant six
+// or more Pattern.compile calls for *every line* of *every* text bubble — and this runs again
+// each time a settled bubble scrolls back into view, so it showed up as scroll cost that grew
+// with the length of the conversation. MarkdownParser/MarkdownInlineParser in this module
+// already hold their patterns this way; this parser is now consistent with them.
+
+/** `1. ` / `2. ` … — the whole match is the prefix, so one pattern covers test and extract. */
+private val NumberedListPrefix = Regex("""^\d+\.\s+""")
+private val BulletListPrefix = Regex("""^[-*●•]\s+""")
+
+/**
+ * Inline spans, in priority order: bold+italic must be tried before bold, and bold before
+ * italic, or the shorter delimiter swallows the longer one's markers. The style of each is
+ * fixed, so the pairs carry the SpanStyle directly rather than a builder lambda.
+ */
+private val InlineMarkdownSpans: List<Pair<Regex, androidx.compose.ui.text.SpanStyle>> = listOf(
+    // ***bold+italic*** or ___bold+italic___
+    Regex("""(\*\*\*|___)(.*?)\1""") to androidx.compose.ui.text.SpanStyle(
+        fontWeight = FontWeight.Bold,
+        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+    ),
+    // **bold** or __bold__
+    Regex("""(\*\*|__)(.*?)\1""") to androidx.compose.ui.text.SpanStyle(fontWeight = FontWeight.Bold),
+    // *italic* or _italic_  (but not ** or __)
+    Regex("""(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)|(?<!_)_(?!_)(.*?)(?<!_)_(?!_)""") to
+        androidx.compose.ui.text.SpanStyle(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic),
+    // `inline code`
+    Regex("""`(.*?)`""") to androidx.compose.ui.text.SpanStyle(
+        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+        background = AgentColors.inlineCodeFill
+    ),
+)
+
 /**
  * Parses a single line of markdown into a styled AnnotatedString.
  *
@@ -1263,14 +1323,13 @@ private fun parseMarkdownLine(line: String): androidx.compose.ui.text.AnnotatedS
                     androidx.compose.ui.text.SpanStyle(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
             }
             // Numbered list: 1. / 2. / … — keep the number, add indent
-            Regex("^\\d+\\.\\s+").containsMatchIn(trimmed) -> {
-                val match = Regex("^(\\d+\\.\\s+)").find(trimmed)
-                val prefix = match?.value ?: ""
+            NumberedListPrefix.containsMatchIn(trimmed) -> {
+                val prefix = NumberedListPrefix.find(trimmed)?.value ?: ""
                 "  $prefix" + trimmed.removePrefix(prefix) to null
             }
             // Bullet list: -, *, ●, •
-            Regex("^[-*●•]\\s+").containsMatchIn(trimmed) -> {
-                "● " + Regex("^[-*●•]\\s+").replace(trimmed, "") to null
+            BulletListPrefix.containsMatchIn(trimmed) -> {
+                "● " + BulletListPrefix.replace(trimmed, "") to null
             }
             else -> line to null
         }
@@ -1291,41 +1350,16 @@ private fun parseMarkdownLine(line: String): androidx.compose.ui.text.AnnotatedS
  * Called from [parseMarkdownLine] after block-level prefix handling.
  */
 private fun androidx.compose.ui.text.AnnotatedString.Builder.appendInlineStyles(text: String) {
-    // Regex order matters: bold+italic must come before bold and italic.
-    val inlinePatterns = listOf(
-        // ***bold+italic*** or ___bold+italic___
-        Regex("(\\*\\*\\*|___)(.*?)\\1") to { _: String, content: String ->
-            androidx.compose.ui.text.SpanStyle(
-                fontWeight = FontWeight.Bold,
-                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
-            ) to content
-        },
-        // **bold** or __bold__
-        Regex("(\\*\\*|__)(.*?)\\1") to { _: String, content: String ->
-            androidx.compose.ui.text.SpanStyle(fontWeight = FontWeight.Bold) to content
-        },
-        // *italic* or _italic_  (but not ** or __)
-        Regex("(?<!\\*)\\*(?!\\*)(.*?)(?<!\\*)\\*(?!\\*)|(?<!_)_(?!_)(.*?)(?<!_)_(?!_)") to { _: String, content: String ->
-            androidx.compose.ui.text.SpanStyle(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic) to content
-        },
-        // `inline code`
-        Regex("`(.*?)`") to { _: String, content: String ->
-            androidx.compose.ui.text.SpanStyle(
-                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                background = AgentColors.inlineCodeFill
-            ) to content
-        }
-    )
-
     // Build a flat list of (range, style, content) from all patterns
     data class Span(val start: Int, val end: Int, val style: androidx.compose.ui.text.SpanStyle, val content: String)
 
+    // Patterns come from InlineMarkdownSpans, which is compiled once — see the note there.
+    // Their order is the priority order: bold+italic before bold before italic.
     val spans = mutableListOf<Span>()
-    for ((regex, styleBuilder) in inlinePatterns) {
+    for ((regex, style) in InlineMarkdownSpans) {
         for (match in regex.findAll(text)) {
             // Extract the actual content (group 2 for bold+italic/bold, or 1/2 for italic)
             val content = match.groupValues.drop(1).firstOrNull { it.isNotEmpty() } ?: continue
-            val (style, _) = styleBuilder("", content)
             // Avoid overlapping spans from earlier (higher-priority) patterns
             val overlaps = spans.any { it.start < match.range.last + 1 && it.end > match.range.first }
             if (!overlaps) spans.add(Span(match.range.first, match.range.last + 1, style, content))
@@ -1510,6 +1544,21 @@ private fun UserBubbleCard(content: @Composable (contentColor: Color) -> Unit) {
 
 // ─── Bubble Content Renderer ──────────────────────────────────────────────────
 
+/**
+ * Reports "the reveal is done" for a bubble type that has no reveal animation to wait for.
+ *
+ * Must not be a bare call from the composition: [onAnimationFinished] writes
+ * `isAnimationFinished`, which the enclosing [ChatBubbleItem] has already read, so writing it
+ * during composition schedules a second composition pass for that row — and it also sends an
+ * intent into the ViewModel from composition. Both used to happen for every media/data bubble,
+ * every time one scrolled into view. An effect keyed on the row's id does it once instead.
+ */
+@Composable
+private fun ReportAnimationFinished(itemId: String, onAnimationFinished: () -> Unit) {
+    val callback by rememberUpdatedState(onAnimationFinished)
+    LaunchedEffect(itemId) { callback() }
+}
+
 @Composable
 private fun BubbleContentRenderer(
     content: ChatBubbleContent,
@@ -1527,7 +1576,7 @@ private fun BubbleContentRenderer(
 
     when (content) {
         is ChatBubbleContent.Voice -> {
-            onAnimationFinished()
+            ReportAnimationFinished(itemId, onAnimationFinished)
             VoiceChatBubble(
                 filePath = content.source,
                 durationMs = content.durationMs ?: 0L,
@@ -1542,26 +1591,32 @@ private fun BubbleContentRenderer(
 
         // A plain message carrying a link (e.g. a general_response in CLIENT mode) is drawn as
         // markdown, so its links become buttons instead of raw `[label](@key)` text.
-        is ChatBubbleContent.Text -> if (MarkdownParser.containsLink(content.message)) {
-            AgentMarkdown(
-                text = content.message,
-                isAnimating = isTypingAnimating,
-                contentColor = contentColor,
-                onIntent = onIntent,
-                onRequestScroll = onRequestScroll,
-                onAnimationFinished = onAnimationFinished,
-            )
-        } else {
-            val textStyle = MaterialTheme.typography.bodyMedium.copy(
-                color = contentColor,
-                lineHeight = 22.sp,
-                fontWeight = if (isUser) FontWeight.Medium else FontWeight.Normal,
-            )
-            if (isTypingAnimating) {
-                TypewriterText(text = content.message, style = textStyle, onRequestScroll = onRequestScroll, onAnimationFinished = onAnimationFinished)
+        is ChatBubbleContent.Text -> {
+            val hasLink = remember(content.message) { MarkdownParser.containsLink(content.message) }
+            if (hasLink) {
+                AgentMarkdown(
+                    text = content.message,
+                    isAnimating = isTypingAnimating,
+                    contentColor = contentColor,
+                    onIntent = onIntent,
+                    onRequestScroll = onRequestScroll,
+                    onAnimationFinished = onAnimationFinished,
+                )
             } else {
-                Text(text = parseMarkdownBlock(content.message), style = textStyle)
-                onAnimationFinished()
+                val textStyle = MaterialTheme.typography.bodyMedium.copy(
+                    color = contentColor,
+                    lineHeight = 22.sp,
+                    fontWeight = if (isUser) FontWeight.Medium else FontWeight.Normal,
+                )
+                if (isTypingAnimating) {
+                    TypewriterText(text = content.message, style = textStyle, onRequestScroll = onRequestScroll, onAnimationFinished = onAnimationFinished)
+                } else {
+                    // Remembered: a settled bubble is re-composed every time it scrolls back
+                    // into view, and parsing is not free (see the note on InlineMarkdownSpans).
+                    val parsed = remember(content.message) { parseMarkdownBlock(content.message) }
+                    Text(text = parsed, style = textStyle)
+                    ReportAnimationFinished(itemId, onAnimationFinished)
+                }
             }
         }
 
@@ -1697,32 +1752,32 @@ private fun BubbleContentRenderer(
         }
 
         is ChatBubbleContent.Image -> {
-            onAnimationFinished()
+            ReportAnimationFinished(itemId, onAnimationFinished)
             ImageBubble(content)
         }
 
         is ChatBubbleContent.Chart -> {
-            onAnimationFinished()
+            ReportAnimationFinished(itemId, onAnimationFinished)
             ChartBubble(content)
         }
 
         is ChatBubbleContent.Table -> {
-            onAnimationFinished()
+            ReportAnimationFinished(itemId, onAnimationFinished)
             TableBubble(content)
         }
 
         is ChatBubbleContent.RichText -> {
-            onAnimationFinished()
+            ReportAnimationFinished(itemId, onAnimationFinished)
             RichTextBubble(content = content, contentColor = contentColor)
         }
 
         is ChatBubbleContent.Video -> {
-            onAnimationFinished()
+            ReportAnimationFinished(itemId, onAnimationFinished)
             VideoBubble(content = content)
         }
 
         is ChatBubbleContent.DynamicForm -> {
-            onAnimationFinished()
+            ReportAnimationFinished(itemId, onAnimationFinished)
             // Rendered once the generative-form handlers land; until then the schema is
             // carried through untouched so nothing is lost.
             Text("📝 فرم پویا", color = AgentGlass.accent)

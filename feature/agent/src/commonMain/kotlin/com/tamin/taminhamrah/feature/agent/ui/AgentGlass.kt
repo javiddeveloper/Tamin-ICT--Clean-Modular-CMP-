@@ -10,6 +10,8 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.blur.safeHazeEffect
+import dev.chrisbanes.haze.ExperimentalHazeApi
+import dev.chrisbanes.haze.HazeInputScale
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
@@ -92,6 +94,7 @@ internal fun Modifier.agentGlassCard(shape: Shape): Modifier =
  * A glass card that floats *over* the haze source (the top/input bars): frosted blur of
  * whatever scrolls beneath, then the same sheen and border as [agentGlassCard].
  */
+@OptIn(ExperimentalHazeApi::class)
 internal fun Modifier.agentFrostedGlassCard(
     shape: Shape,
     hazeState: HazeState,
@@ -104,6 +107,13 @@ internal fun Modifier.agentFrostedGlassCard(
             state = hazeState,
             style = AgentGlass.frostStyle,
             fallbackColor = AgentGlass.frostFallbackColor,
+            // The frost tint sits at 72% opacity on top of the blur, so what is underneath
+            // already reads as a glow rather than as detail — computing that blur at full
+            // screen resolution buys nothing visible. `Auto` resolves to a 0.33 scale factor
+            // at this blur radius, i.e. roughly a ninth of the pixels. It matters because
+            // every frosted surface here (top bar, composer, history drawer) floats over the
+            // chat list, so the blur is recomputed on every scrolled frame.
+            inputScale = HazeInputScale.Auto,
         )
         .background(AgentGlass.sheen)
         .border(borderWidth, borderColor, shape)

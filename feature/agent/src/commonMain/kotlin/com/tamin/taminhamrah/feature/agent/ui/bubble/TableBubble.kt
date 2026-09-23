@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.AnnotatedString
@@ -82,9 +83,17 @@ fun TableBubble(
             // readable minimum and the whole grid scrolls.
             val columnWidth: Dp? = if (fitsWidth) null else MIN_COLUMN_WIDTH
 
+            // The header is rendered through [renderCell], which for a markdown table runs the
+            // inline parser over each column title — worth doing once per table rather than on
+            // every recomposition of the bubble it sits in. Body cells already come through
+            // [cellContent], which memoizes per cell.
+            val headerCells = remember(content.columns, renderCell) {
+                content.columns.map(renderCell)
+            }
+
             val grid: @Composable () -> Unit = {
                 Column {
-                    TableHeader(content.columns.map(renderCell), columnWidth)
+                    TableHeader(headerCells, columnWidth)
                     content.rows.forEachIndexed { index, row ->
                         TableBodyRow(
                             cells = row.cells,

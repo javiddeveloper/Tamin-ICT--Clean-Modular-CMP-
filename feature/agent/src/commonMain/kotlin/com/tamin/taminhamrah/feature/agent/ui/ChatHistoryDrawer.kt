@@ -15,6 +15,7 @@ import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -27,7 +28,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -279,7 +279,9 @@ private fun DrawerPanel(
             .fillMaxHeight()
             .width(width)
             .onSizeChanged { panelWidthPx = it.width }
-            .offset { IntOffset(dragOffsetPx.value.roundToInt(), 0) }
+            // absoluteOffset, not offset: the plain one is RTL-aware (placeRelative) and would
+            // mirror this into a leftwards slide, tearing the panel off the right edge.
+            .absoluteOffset { IntOffset(dragOffsetPx.value.roundToInt(), 0) }
             .pointerInput(Unit) {
                 detectHorizontalDragGestures(
                     onDragEnd = {

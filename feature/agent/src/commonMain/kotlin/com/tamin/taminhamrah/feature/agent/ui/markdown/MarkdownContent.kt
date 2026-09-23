@@ -84,6 +84,7 @@ import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.agent_markdown_formula
 import taminx.core.core_ui.agent_markdown_table
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Draws an assistant markdown answer, block by block, in the app's design system: prose in the
@@ -106,11 +107,21 @@ fun MarkdownContent(
     val blocks = remember(text) { MarkdownParser.parse(text) }
     var revealed by remember(text) { mutableIntStateOf(if (isAnimating) 0 else blocks.size) }
 
+    // Whether this message has a reveal to play at all, decided once when it first appears.
+    //
+    // A message restored from history arrives with every block already revealed, and wrapping
+    // each of them in an AnimatedVisibility that will never animate still costs a Transition
+    // and an extra layout node per block — paid again on every scroll back into view, and a
+    // long answer is easily twenty blocks. Latched rather than read live from `isAnimating`:
+    // that flag flips to false once the reveal ends, and swapping the wrapper out underneath a
+    // visible block would tear down and rebuild it mid-conversation.
+    val animateBlocks = remember(text) { isAnimating }
+
     LaunchedEffect(text) {
         while (revealed < blocks.size) {
             revealed++
             onRequestScroll()
-            delay(BLOCK_REVEAL_DELAY_MS)
+            delay(BLOCK_REVEAL_DELAY_MS.milliseconds)
         }
         onAnimationFinished()
     }
@@ -118,10 +129,14 @@ fun MarkdownContent(
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
             blocks.forEachIndexed { index, block ->
-                AnimatedVisibility(
-                    visible = index < revealed,
-                    enter = fadeIn(tween(BLOCK_FADE_MS)) + expandVertically(tween(BLOCK_FADE_MS)),
-                ) {
+                if (animateBlocks) {
+                    AnimatedVisibility(
+                        visible = index < revealed,
+                        enter = fadeIn(tween(BLOCK_FADE_MS)) + expandVertically(tween(BLOCK_FADE_MS)),
+                    ) {
+                        MarkdownBlockView(block = block, contentColor = contentColor, onLinkClick = onLinkClick)
+                    }
+                } else {
                     MarkdownBlockView(block = block, contentColor = contentColor, onLinkClick = onLinkClick)
                 }
             }
