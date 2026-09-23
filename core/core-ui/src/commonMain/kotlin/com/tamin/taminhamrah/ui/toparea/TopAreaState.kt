@@ -97,6 +97,12 @@ class TopAreaState internal constructor(
         animateTo(maxOffsetPx)
     }
 
+    /** Springs to the fully expanded edge. No-op when already expanded. */
+    fun expandFully() {
+        if (rawOffsetPx <= 0f) return
+        animateTo(0f)
+    }
+
     private fun animateTo(target: Float, initialVelocity: Float = 0f) {
         settleJob?.cancel()
         settleJob = scope.launch {

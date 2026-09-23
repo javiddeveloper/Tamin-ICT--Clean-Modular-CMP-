@@ -19,7 +19,6 @@ import com.tamin.taminhamrah.feature.profile.ui.bankAccount.model.BankAccountDra
 import com.tamin.taminhamrah.feature.profile.ui.bankAccount.model.BankAccountFormError
 import com.tamin.taminhamrah.ui.components.BannerCard
 import com.tamin.taminhamrah.ui.components.BannerType
-import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.PickerRow
 import com.tamin.taminhamrah.ui.components.SectionHeaderTitle
 import com.tamin.taminhamrah.ui.components.SegmentedInputField
@@ -41,7 +40,6 @@ import taminx.core.core_ui.bank_account_form_title
 import taminx.core.core_ui.bank_account_help_mobile_bank
 import taminx.core.core_ui.bank_account_help_ussd
 import taminx.core.core_ui.bank_account_number_hint
-import taminx.core.core_ui.bank_account_submit
 import taminx.core.core_ui.ic_tamin_calendar
 
 private const val PARAGRAPH_BREAK = "\n\n"
@@ -60,10 +58,8 @@ private const val WIDEST_ACCOUNT = 13
 fun BankAccountForm(
     draft: BankAccountDraftPR,
     showValidation: Boolean,
-    isSubmitting: Boolean,
     onPickerRequested: (BankAccountPicker) -> Unit,
     onAccountNumberChanged: (String) -> Unit,
-    onSubmit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
@@ -196,20 +192,6 @@ fun BankAccountForm(
             Spacer(Modifier.height(Spacing.sm))
             BannerCard(message = numberError, type = BannerType.Error)
         }
-
-        Spacer(Modifier.height(Spacing.lg))
-        // Carries its own spinner and disabled tone, so the screen needs no overlay while the
-        // request is in flight.
-        LoadingButton(
-            text = stringResource(Res.string.bank_account_submit),
-            onClick = {
-                focusManager.clearFocus()
-                onSubmit()
-            },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isSubmitting,
-            isLoading = isSubmitting,
-        )
     }
 }
 

@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -63,6 +64,7 @@ import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.CopyIconButton
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
+import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.StaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
@@ -81,6 +83,10 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminNavy300
 import com.tamin.taminhamrah.ui.theme.TaminNavy900
+import com.tamin.taminhamrah.ui.toparea.TopAreaState
+import com.tamin.taminhamrah.ui.toparea.driveTopArea
+import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
+import com.tamin.taminhamrah.ui.toparea.topAreaHide
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.ImmutableList
@@ -99,6 +105,7 @@ import taminx.core.core_ui.bank_account_picker_bank
 import taminx.core.core_ui.bank_account_picker_type
 import taminx.core.core_ui.bank_account_registered
 import taminx.core.core_ui.bank_account_registered_description
+import taminx.core.core_ui.bank_account_submit
 import taminx.core.core_ui.bank_account_subtitle
 import taminx.core.core_ui.bank_account_title
 import taminx.core.core_ui.bank_account_tracking_code
@@ -189,9 +196,32 @@ fun BankAccountScreen(
     // slide. Keyed as before, so a reload that changes the list still animates it in.
     val staggerState = rememberStaggeredEntranceState(state.accounts.size)
 
+    // Folds from the add-form's own drag; the list and loading panes never drive it, so it always
+    // reads as expanded there. Measured against the real header so the drag budget can't drift out
+    // of sync with a copy or font change.
+    val topArea = rememberMeasuredTopAreaState { probeState ->
+        BankAccountHeader(onBack = {}, topAreaState = probeState)
+    }
+    LaunchedEffect(state.pane) {
+        if (state.pane != BankAccountPane.ADD) topArea.expandFully()
+    }
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        topBar = { BankAccountHeader(onBack = { onIntent(BankAccountIntent.OnBackClicked) }) },
+        topBar = {
+            BankAccountHeader(
+                onBack = { onIntent(BankAccountIntent.OnBackClicked) },
+                topAreaState = topArea,
+            )
+        },
+        bottomBar = {
+            if (state.pane == BankAccountPane.ADD) {
+                BankAccountBottomBar(
+                    isSubmitting = state.isSubmitting,
+                    onSubmit = { onIntent(BankAccountIntent.OnSubmitClicked) },
+                )
+            }
+        },
     ) { padding ->
         // The header stays put and only the body travels, which is what makes the form read as a
         // second view of this page rather than a page of its own.
@@ -212,16 +242,20 @@ fun BankAccountScreen(
             label = "bank-account-pane",
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = padding.calculateTopPadding())
-                .navigationBarsPadding(),
+                .padding(
+                    top = padding.calculateTopPadding(),
+                    bottom = padding.calculateBottomPadding(),
+                ),
         ) { pane ->
             when (pane) {
-                BankAccountPane.LOADING -> BankAccountListSkeleton()
+                BankAccountPane.LOADING -> BankAccountListSkeleton(
+                    modifier = Modifier.navigationBarsPadding(),
+                )
 
                 BankAccountPane.ADD -> AddView(
                     draft = state.draft,
                     showValidation = state.showValidation,
-                    isSubmitting = state.isSubmitting,
+                    topArea = topArea,
                     onIntent = onIntent,
                 )
 
@@ -254,7 +288,7 @@ fun BankAccountScreen(
  * so typing no longer re-runs the gradient bar, the decorative circle and the ring icon.
  */
 @Composable
-private fun BankAccountHeader(onBack: () -> Unit) {
+private fun BankAccountHeader(onBack: () -> Unit, topAreaState: TopAreaState) {
     val taminColors = LocalTaminColors.current
     val profileGradientBrush = remember(taminColors.profileGradientStops) {
         Brush.horizontalGradient(taminColors.profileGradientStops)
@@ -274,7 +308,13 @@ private fun BankAccountHeader(onBack: () -> Unit) {
             )
         },
     ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
+        // Only this furniture folds away as the add-form scrolls; the title row above stays put
+        // so the bar reads the same as the rest of the app once collapsed.
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .topAreaHide(topAreaState),
+        ) {
             DecorativeBackgroundCircle(
                 size = DecorCircleSize,
                 xOffset = DecorCircleX,
@@ -284,7 +324,10 @@ private fun BankAccountHeader(onBack: () -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                AnimatedRingHeaderIcon(icon = vectorResource(Res.drawable.ic_number))
+                AnimatedRingHeaderIcon(
+                    icon = vectorResource(Res.drawable.ic_number),
+                    animated = !topAreaState.isMeasureProbe,
+                )
                 Spacer(Modifier.height(Spacing.md))
                 Text(
                     text = stringResource(Res.string.bank_account_subtitle),
@@ -307,7 +350,7 @@ private fun ListView(
     // The add button is the first row of the list and scrolls with it, as in the design -- not a
     // floating bar, which would sit on top of the last card.
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().navigationBarsPadding(),
         contentPadding = PaddingValues(Spacing.page),
         verticalArrangement = Arrangement.spacedBy(CardSpacing),
         overscrollEffect = rememberJellyOverscroll(),
@@ -357,10 +400,11 @@ private fun ListView(
 private fun AddView(
     draft: BankAccountDraftPR,
     showValidation: Boolean,
-    isSubmitting: Boolean,
+    topArea: TopAreaState,
     onIntent: (BankAccountIntent) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
+    val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -369,22 +413,51 @@ private fun AddView(
                     focusManager.clearFocus()
                 })
             }
-            .verticalScroll(rememberScrollState(), overscrollEffect = rememberJellyOverscroll())
+            // Folds the shared header from this form's own drag; the list and loading panes never
+            // attach this, so the header only ever collapses while the form is on screen.
+            .driveTopArea(topArea, scrollState)
+            .verticalScroll(scrollState, overscrollEffect = rememberJellyOverscroll())
             .padding(Spacing.page),
     ) {
         BankAccountForm(
             draft = draft,
             showValidation = showValidation,
-            isSubmitting = isSubmitting,
             onPickerRequested = {
                 focusManager.clearFocus()
                 onIntent(BankAccountIntent.OnPickerRequested(it))
             },
             onAccountNumberChanged = { onIntent(BankAccountIntent.OnAccountNumberChanged(it)) },
-            onSubmit = {
+        )
+    }
+}
+
+/** The form's submit action, pinned to the bottom of the scaffold instead of scrolling with it. */
+@Composable
+private fun BankAccountBottomBar(
+    isSubmitting: Boolean,
+    onSubmit: () -> Unit,
+) {
+    val colors = LocalTaminColors.current
+    val focusManager = LocalFocusManager.current
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(colors.bgPage)
+            .navigationBarsPadding()
+            .imePadding()
+            .padding(horizontal = Spacing.page, vertical = Spacing.md),
+    ) {
+        // Carries its own spinner and disabled tone, so the screen needs no overlay while the
+        // request is in flight.
+        LoadingButton(
+            text = stringResource(Res.string.bank_account_submit),
+            onClick = {
                 focusManager.clearFocus()
-                onIntent(BankAccountIntent.OnSubmitClicked)
+                onSubmit()
             },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !isSubmitting,
+            isLoading = isSubmitting,
         )
     }
 }
