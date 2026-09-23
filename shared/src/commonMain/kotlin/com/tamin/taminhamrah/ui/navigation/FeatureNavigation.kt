@@ -18,6 +18,11 @@ import com.tamin.taminhamrah.feature.calculateWagePension.navigateToCalculateWag
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDeservedTreatment
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToDisabilityPension
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToEdict
+import com.tamin.taminhamrah.feature.girlSurvivor.navigateToGirlSurvivor
+import com.tamin.taminhamrah.feature.inquiryEducation.navigateToInquiryEducation
+import com.tamin.taminhamrah.feature.objectionInsurance.navigateToObjectionInsurance
+import com.tamin.taminhamrah.feature.weddingPresent.navigateToWeddingPresent
+import com.tamin.taminhamrah.feature.weddingPresent.navigateToWeddingPresentCalculate
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToIssuanceCertificate
 import com.tamin.taminhamrah.feature.pensionInquiry.navigateToPayRoll
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.navigateToPensionStatusInquiry
@@ -112,6 +117,8 @@ fun NavController.navigateToFeature(flag: FeatureFlag, beforeOpen: () -> Unit = 
         FeatureFlag.LIST_OF_INSPECTIONS_PERFORMED -> screen { navigateToInspection() }
         FeatureFlag.REGISTER_AGREEMENT -> screen { navigateToEmployerOnlineServices() }
         FeatureFlag.OBJECTION_NON_EXISTENT_HISTORY -> screen { navigateToHistoryObjection() }
+        FeatureFlag.OBJECTION_INSURANCE_HISTORY,
+        FeatureFlag.OBJECTION_INSURANCE_HISTORY_45 -> screen { navigateToObjectionInsurance() }
         FeatureFlag.INQUIRY_EDUCATION -> screen { navigateToInquiryEducation() }
         FeatureFlag.FRACTION_CONTRACT -> return false
         FeatureFlag.WEDDING_PRESENT -> screen { navigateToWeddingPresent() }

@@ -30,6 +30,7 @@ import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.currentTimeMillis
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
@@ -256,6 +257,8 @@ class HistoryObjectionStepperViewModel(
             getCitiesByProvinceUseCase(province.provinceCode).collect { result ->
                 emit(PartialState.CitiesLoaded(result.cities.toCityPresentation().toPersistentList(), isStale = result.isStale))
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
         } finally {
@@ -271,6 +274,8 @@ class HistoryObjectionStepperViewModel(
             getBranchesUseCase(city.cityCode).collect { page ->
                 emit(PartialState.BranchesLoaded(page.items.toPersistentList()))
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
         } finally {
@@ -297,6 +302,8 @@ class HistoryObjectionStepperViewModel(
         try {
             saveHistoryObjectionNotExistRequestUseCase(request).first()
             emit(PartialState.SubmitSucceeded)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
         } finally {
@@ -368,6 +375,8 @@ class HistoryObjectionStepperViewModel(
                     emitAll(loadEditModeCitiesAndBranches(editData.provinceCode, editData.cityCode))
                 }
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
         }
@@ -391,6 +400,8 @@ class HistoryObjectionStepperViewModel(
                 getCitiesByProvinceUseCase(provinceCode).collect { result ->
                     emit(PartialState.CitiesLoaded(result.cities.toCityPresentation().toPersistentList(), isStale = result.isStale))
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 emit(PartialState.Error(e.toSingleLineMessage()))
             } finally {
@@ -403,6 +414,8 @@ class HistoryObjectionStepperViewModel(
                 getBranchesUseCase(cityCode).collect { page ->
                     emit(PartialState.BranchesLoaded(page.items.toPersistentList()))
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 emit(PartialState.Error(e.toSingleLineMessage()))
             } finally {

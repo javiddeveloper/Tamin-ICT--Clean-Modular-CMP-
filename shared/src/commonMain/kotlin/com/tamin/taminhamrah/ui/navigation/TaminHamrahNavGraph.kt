@@ -83,6 +83,11 @@ import com.tamin.taminhamrah.feature.history.historyScreen
 import com.tamin.taminhamrah.feature.historyobjection.historyObjectionScreen
 import com.tamin.taminhamrah.feature.historyobjection.historyObjectionStepperScreen
 import com.tamin.taminhamrah.feature.inquiryEducation.inquiryEducationScreen
+import com.tamin.taminhamrah.feature.objectionInsurance.objectionInsuranceScreen
+import com.tamin.taminhamrah.feature.weddingPresent.navigateToWeddingPresentCalculate
+import com.tamin.taminhamrah.feature.weddingPresent.weddingPresentCalculateScreen
+import com.tamin.taminhamrah.feature.weddingPresent.weddingPresentScreen
+import com.tamin.taminhamrah.feature.calculateWagePension.calculateWagePensionScreen
 import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
 import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
 import com.tamin.taminhamrah.feature.orotezprotez.orotezProtezScreen
@@ -555,6 +560,7 @@ internal fun TaminHamrahNavGraph(
                 deferredInstallmentScreen(onBack = { navController.popBackStack() })
                 girlSurvivorScreen(onBack = { navController.popBackStack() })
                 inquiryEducationScreen(onBack = { navController.popBackStack() })
+                objectionInsuranceScreen(onBack = { navController.popBackStack() })
                 fractionContractScreen(
                     onBack = { navController.popBackStack() },
                     onNavigateToPremiumPayment = { contractNumber, premiumTypeCode, insuranceType ->
