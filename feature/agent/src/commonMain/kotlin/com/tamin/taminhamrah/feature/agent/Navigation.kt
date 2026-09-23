@@ -14,9 +14,12 @@ data object AgentRoute
 
 /**
  * Helper method to navigate to the Agent screen.
+ *
+ * `launchSingleTop` because the entry point is a button that stays tappable while the opening
+ * transition runs — without it a double tap stacks two assistants on the back stack.
  */
 fun NavController.navigateToAgent() {
-    navigate(AgentRoute)
+    navigate(AgentRoute) { launchSingleTop = true }
 }
 
 /**

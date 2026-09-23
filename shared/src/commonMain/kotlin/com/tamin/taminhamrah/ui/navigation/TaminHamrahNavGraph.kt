@@ -136,6 +136,7 @@ import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.openUrl
 import com.tamin.taminhamrah.ui.blur.AppBarScrim
+import com.tamin.taminhamrah.ui.components.AgentOrb
 import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
 import com.tamin.taminhamrah.ui.blur.NavigationBarItemContent
 import com.tamin.taminhamrah.ui.blur.TopBarScrim
@@ -332,8 +333,10 @@ internal fun TaminHamrahNavGraph(
                         isBlurEnabled = isBottomBarVisible,
                         trailingButton = if (isAgentEnabled) {
                             {
-                                AgentOrbButton(
-                                    onClick = { deepLinkHandler.open(AGENT_DEEP_LINK, DeepLinkSource.APP_CONTENT) },
+                                AgentOrb(
+                                    onClick = {
+                                        deepLinkHandler.open(AGENT_DEEP_LINK, DeepLinkSource.APP_CONTENT)
+                                    },
                                     contentDescription = agentLabel,
                                 )
                             }
@@ -682,7 +685,8 @@ internal fun TaminHamrahNavGraph(
                         onNavigateBack = { navController.popBackStack() },
                         onNavigateToDebugLogin = { navController.navigate(DebugLoginRoute) },
                         onNavigateToTokenManager = { navController.navigate(TokenManagerRoute) },
-                        onStartTestPayment = { navController.navigate(PaymentRoute.Sandbox) }
+                        onStartTestPayment = { navController.navigate(PaymentRoute.Sandbox) },
+                        onOpenAgent = { navController.navigateToAgent() }
                     )
                     paymentSandboxScreen(
                         navController = navController,

@@ -1,10 +1,18 @@
 package com.tamin.taminhamrah.dataSource.agent
 
+import com.tamin.taminhamrah.model.agent.AgentActionKey
+import com.tamin.taminhamrah.model.agent.AgentMockMode
+import com.tamin.taminhamrah.model.agent.AgentPromptTypeDTO
+import com.tamin.taminhamrah.model.agent.AgentRequestDTO
+import com.tamin.taminhamrah.model.agent.ChatTokenExpiredException
 import com.tamin.taminhamrah.model.agent.PollingDataDTO
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -77,5 +85,103 @@ class AgentFakeDataTest {
         val entities = assertNotNull(response.data?.result?.entities, "entities must be present")
         assertTrue(entities.isNotEmpty(), "a fixture with no entities renders an empty chat")
         assertTrue(entities.all { !it.key.isNullOrBlank() }, "every entity needs an action key")
+    }
+
+    @Test
+    fun `edge case fixture decodes and covers the shapes the other fixtures miss`() {
+        val data = json.decodeFromString<PollingDataDTO>(FAKE_AGENT_EDGE_CASES_RESPONSE)
+
+        val entities = assertNotNull(data.result?.entities)
+        val keys = entities.map { it.key }
+        // Data-driven client services and the unknown-key fallbacks, none of which need a backend.
+        assertTrue(keys.containsAll(listOf("law", "appoinmet", "general_response", "message", "disability_pension")))
+        assertTrue(keys.any { it !in KNOWN_KEYS }, "an unknown key must be part of the tour")
+        val payloadTypes = entities.mapNotNull { (it.payload as? JsonObject)?.get("type")?.let { t -> (t as? JsonPrimitive)?.content } }
+        assertTrue(payloadTypes.containsAll(listOf("throw", "hologram")), "a throwing service and an unknown payload type")
+        assertTrue(payloadTypes.count { it == "error" } >= 1)
+    }
+
+    @Test
+    fun `a prompt without a keyword gets every fixture in one answer, renumbered`() = runTest {
+        val source = AgentRemoteDataSourceFakeImpl(json)
+        source.sendServicePrompt(request("سوابق من را نشان بده"))
+
+        val entities = assertNotNull(source.trackRequest("id").data?.result?.entities)
+
+        val expected = listOf(FAKE_AGENT_MARKDOWN_RESPONSE, FAKE_AGENT_SHOWCASE_RESPONSE, FAKE_AGENT_EDGE_CASES_RESPONSE)
+            .sumOf { json.decodeFromString<PollingDataDTO>(it).result?.entities?.size ?: 0 }
+        assertEquals(expected, entities.size)
+        // The repository sorts on step_number; every fixture starts at 1, so they must be renumbered.
+        assertEquals((1..expected).toList(), entities.map { it.stepNumber })
+    }
+
+    @Test
+    fun `keywords pick the polling outcome`() = runTest {
+        suspend fun statusFor(prompt: String): String? {
+            val source = AgentRemoteDataSourceFakeImpl(json)
+            source.sendServicePrompt(request(prompt))
+            return source.trackRequest("id").data?.status
+        }
+
+        assertEquals("FAILED", statusFor("failed"))
+        assertEquals("FAILED", statusFor("یک خطای سرور بده"))
+        assertEquals("CANCEL", statusFor("لغو"))
+        assertEquals("PENDING", statusFor("timeout"))
+        assertEquals("DONE", statusFor("راهنما"))
+    }
+
+    @Test
+    fun `a failed silent prompt carries no server message but failed does`() = runTest {
+        val silent = AgentRemoteDataSourceFakeImpl(json)
+        silent.sendServicePrompt(request("failed-silent"))
+        assertEquals(null, silent.trackRequest("id").data?.message)
+
+        val loud = AgentRemoteDataSourceFakeImpl(json)
+        loud.sendServicePrompt(request("failed"))
+        assertTrue(!loud.trackRequest("id").data?.message.isNullOrBlank())
+    }
+
+    @Test
+    fun `token scenario rejects the first send and answers the resend`() = runTest {
+        val source = AgentRemoteDataSourceFakeImpl(json)
+
+        assertFailsWith<ChatTokenExpiredException> { source.sendServicePrompt(request("توکن")) }
+
+        assertEquals("PENDING", source.sendServicePrompt(request("توکن")).data?.status)
+        assertEquals("DONE", source.trackRequest("id").data?.status)
+    }
+
+    @Test
+    fun `chat allowed follows the mock mode`() = runTest {
+        var mode = AgentMockMode.RESPONSES
+        val source = AgentRemoteDataSourceFakeImpl(json) { mode }
+
+        assertEquals(true, source.checkChatAllowed().data?.canSendVoice)
+
+        mode = AgentMockMode.NO_VOICE
+        assertEquals(false, source.checkChatAllowed().data?.canSendVoice)
+
+        mode = AgentMockMode.ACCESS_DENIED
+        val refused = assertNotNull(source.checkChatAllowed().data)
+        assertEquals(false, refused.canStartChat)
+        assertTrue(!refused.errorMessage.isNullOrBlank(), "a refusal needs a reason to show")
+
+        mode = AgentMockMode.OFFLINE
+        assertFailsWith<IllegalStateException> { source.checkChatAllowed() }
+    }
+
+    private fun request(prompt: String) = AgentRequestDTO(
+        prompt = prompt,
+        sessionId = "category_test",
+        lastEntity = "",
+        chatToken = "fake-token-0",
+        userType = "INSURED",
+        personalInfo = null,
+        promptType = AgentPromptTypeDTO.TEXT,
+        state = null,
+    )
+
+    private companion object {
+        val KNOWN_KEYS = AgentActionKey.entries.map { it.key }.toSet()
     }
 }
