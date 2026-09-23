@@ -38,6 +38,8 @@ import com.tamin.taminhamrah.apiService.personal.PersonalApiService
 import com.tamin.taminhamrah.apiService.personal.createPersonalApiService
 import com.tamin.taminhamrah.apiService.historyObjection.HistoryObjectionApiService
 import com.tamin.taminhamrah.apiService.historyObjection.createHistoryObjectionApiService
+import com.tamin.taminhamrah.apiService.objectionInsurance.ObjectionInsuranceApiService
+import com.tamin.taminhamrah.apiService.objectionInsurance.createObjectionInsuranceApiService
 import com.tamin.taminhamrah.apiService.userRequest.createUserRequestApiService
 import com.tamin.taminhamrah.apiService.treatment.TreatmentApiService
 import com.tamin.taminhamrah.apiService.treatment.createTreatmentApiService
@@ -48,6 +50,8 @@ import com.tamin.taminhamrah.apiService.calculateWagePension.CalculateWagePensio
 import com.tamin.taminhamrah.apiService.calculateWagePension.createCalculateWagePensionApiService
 import com.tamin.taminhamrah.apiService.inspection.InspectionApiService
 import com.tamin.taminhamrah.apiService.inspection.createInspectionApiService
+import com.tamin.taminhamrah.apiService.constructionInsurance.ConstructionInsuranceApiService
+import com.tamin.taminhamrah.apiService.constructionInsurance.createConstructionInsuranceApiService
 import com.tamin.taminhamrah.apiService.occurrence.OccurrenceApiService
 import com.tamin.taminhamrah.apiService.occurrence.createOccurrenceApiService
 import com.tamin.taminhamrah.apiService.workersPayment.WorkersPaymentApiService
@@ -161,6 +165,11 @@ val ApiClientsModule = module {
         ktorfit.createHistoryObjectionApiService()
     }
 
+    single<ObjectionInsuranceApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createObjectionInsuranceApiService()
+    }
+
     single<PersonalInboxApiService>(named("personalInboxApiService")) {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.createPersonalInboxApiService()
@@ -226,6 +235,11 @@ val ApiClientsModule = module {
     single<FractionContractApiService> {
         val ktorfit: Ktorfit = get(named("mainKtorfit"))
         ktorfit.createFractionContractApiService()
+    }
+
+    single<ConstructionInsuranceApiService> {
+        val ktorfit: Ktorfit = get(named("mainKtorfit"))
+        ktorfit.createConstructionInsuranceApiService()
     }
 
     single<WorkersPaymentApiService> {

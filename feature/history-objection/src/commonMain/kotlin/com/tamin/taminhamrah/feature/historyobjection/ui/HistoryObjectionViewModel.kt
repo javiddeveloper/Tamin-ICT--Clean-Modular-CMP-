@@ -15,6 +15,7 @@ import com.tamin.taminhamrah.useCases.historyObjection.DeleteHistoryObjectionNot
 import com.tamin.taminhamrah.useCases.historyObjection.FinalConfirmHistoryObjectionNotExistUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.GetHistoryObjectionNotExistRequestsUseCase
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
@@ -105,6 +106,8 @@ class HistoryObjectionViewModel(
                 )
                 UserType.INSURED, UserType.TEMPORARY -> emitAll(merge(checkStatusNotExist(), loadNotExistRequests()))
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
         }
@@ -115,6 +118,8 @@ class HistoryObjectionViewModel(
         try {
             val hasActiveRequest = checkHistoryObjectionStatusNotExistUseCase().first()
             emit(PartialState.StatusChecked(hasActiveRequest))
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
         }
@@ -124,6 +129,8 @@ class HistoryObjectionViewModel(
         try {
             val requests = getHistoryObjectionNotExistRequestsUseCase().first().toPresentation()
             emit(PartialState.RequestsLoaded(requests.toPersistentList()))
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
         }
@@ -142,6 +149,8 @@ class HistoryObjectionViewModel(
         try {
             deleteHistoryObjectionNotExistRequestUseCase(requestNumber, rowIndex).first()
             emitAll(loadHistoryObjectionData())
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
         } finally {
@@ -163,6 +172,8 @@ class HistoryObjectionViewModel(
             } else {
                 emit(PartialState.Error(getString(Res.string.history_objection_confirm_send_rejected_error)))
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
         } finally {
