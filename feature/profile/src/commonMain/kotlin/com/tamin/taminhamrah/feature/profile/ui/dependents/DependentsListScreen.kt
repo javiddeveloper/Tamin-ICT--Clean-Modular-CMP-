@@ -308,11 +308,11 @@ private fun DependentCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
-                modifier = Modifier
+                modifier = Modifier.align(Alignment.Top)
                     .size(IconSize.textFieldIconContainer)
                     .clip(RoundedCornerShape(CornerRadius.avatarTile))
                     .background(colors.bgSurface)
-                    .border(Thickness.border, colors.blueText, RoundedCornerShape(CornerRadius.avatarTile)),
+                    .border(Thickness.border, colors.blueBorder, RoundedCornerShape(CornerRadius.avatarTile)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
