@@ -208,21 +208,36 @@ class WorkshopsViewModelTest {
         }
     }
 
+    /**
+     * The count failing part-way: pages 0 and 1 arrived, page 2 did not. The strip still prints
+     * figures, and they are those of *every* page that arrived — falling back to the first page
+     * alone would throw away one that was already paid for.
+     */
     @Test
-    fun `a later page failing still counts what arrived`() = runTest(testDispatcher) {
-        repository.employerAgreements = PagedListDN(
+    fun `a later page failing still counts every page that arrived`() = runTest(testDispatcher) {
+        val firstPage = PagedListDN(
             items = List(WORKSHOP_PAGE_SIZE) { agreement(it, if (it < 4) ACTIVE_CODE else INACTIVE_CODE) },
-            total = 15,
+            total = 25,
         )
+        // Two of the second page's rows repeat workshops from the first.
+        val secondPage = PagedListDN(
+            items = listOf(agreement(0, ACTIVE_CODE), agreement(1, ACTIVE_CODE)) +
+                List(8) { agreement(WORKSHOP_PAGE_SIZE + it, ACTIVE_CODE) },
+            total = 25,
+        )
+        val pages = PagedAgreements(repository, listOf(firstPage, secondPage), failFrom = 2)
+
         val viewModel = WorkshopsViewModel(
-            GetEmployerAgreementsUseCase(FailAfterFirstCall(repository)),
+            GetEmployerAgreementsUseCase(pages),
             featureManager,
             GetArticleSixteenDebtsUseCase(repository),
         )
 
-        assertEquals(WorkshopStats(total = WORKSHOP_PAGE_SIZE, active = 4), viewModel.uiState.value.stats)
+        assertEquals(listOf(0, 1, 2), pages.requestedPages)
+        assertEquals(WorkshopStats(total = 18, active = 12), viewModel.uiState.value.stats)
         // The list itself is untouched by the count failing.
         assertNull(viewModel.uiState.value.list.error)
+        assertEquals(WORKSHOP_PAGE_SIZE, viewModel.uiState.value.list.items.size)
     }
 
     @Test
@@ -517,10 +532,14 @@ private val ACTIVE_CODE = WorkshopActivityStatus.ACTIVE.code
 private val SEMI_ACTIVE_CODE = WorkshopActivityStatus.SEMI_ACTIVE.code
 private val INACTIVE_CODE = WorkshopActivityStatus.INACTIVE.code
 
-/** Answers each page from its own list, the way the service pages; past the last, nothing. */
+/**
+ * Answers each page from its own list, the way the service pages; past the last, nothing.
+ * From page [failFrom] on it refuses instead — the count failing part-way.
+ */
 private class PagedAgreements(
     private val delegate: FakeWorkShopsRepository,
     private val pages: List<PagedListDN<EmployerAgreementDN>>,
+    private val failFrom: Int = Int.MAX_VALUE,
 ) : com.tamin.taminhamrah.repository.WorkShopsRepository by delegate {
     val requestedPages = mutableListOf<Int>()
 
@@ -528,25 +547,7 @@ private class PagedAgreements(
         query: com.tamin.taminhamrah.model.workshop.WorkshopListQuery,
     ): PagedListDN<EmployerAgreementDN> {
         requestedPages += query.page
+        if (query.page >= failFrom) throw TaminApiException(title = "شمارش ناموفق")
         return pages.getOrElse(query.page) { PagedListDN(total = pages.first().total) }
-    }
-}
-
-/**
- * Answers the first call and refuses every one after it.
- *
- * Stands in for the count failing part-way: the first page is on screen, a later one the count
- * needed is not, and the strip must still print figures rather than nothing.
- */
-private class FailAfterFirstCall(
-    private val delegate: FakeWorkShopsRepository,
-) : com.tamin.taminhamrah.repository.WorkShopsRepository by delegate {
-    private var calls = 0
-
-    override suspend fun getEmployerAgreements(
-        query: com.tamin.taminhamrah.model.workshop.WorkshopListQuery,
-    ): PagedListDN<EmployerAgreementDN> {
-        if (calls++ > 0) throw TaminApiException(title = "شمارش ناموفق")
-        return delegate.getEmployerAgreements(query)
     }
 }

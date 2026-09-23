@@ -1942,7 +1942,6 @@
     <string name="member_nationality">ملیت</string>
     <string name="member_leaving_status">وضعیت</string>
     <string name="member_leaving_date">تاریخ ترک کار</string>
-    <string name="beneficiaries_empty">ذینفعی برای این کارگاه ثبت نشده است.</string>
     <string name="stackholder_type">نوع ذینفع</string>
     <string name="stackholder_birth_date">تاریخ تولد</string>
     <string name="stackholder_role_board_member">اعضای هیئت مدیره</string>
