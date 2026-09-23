@@ -92,7 +92,7 @@
         },
         {
             "id": 10,
-            "name": "اعتراض به سوابق ناموجود",
+            "name": "اعتراض سابقه ناموجود",
             "icon": "protest",
             "status": "ACTIVE",
             "showRole": [
@@ -112,7 +112,7 @@
         },
         {
             "id": 13,
-            "name": "درخواست‌های تعهدات کوتاه مدت",
+            "name": "تعهدات کوتاه‌مدت",
             "icon": "obligation",
             "status": "ACTIVE",
             "showRole": [
@@ -133,7 +133,7 @@
         },
         {
             "id": 15,
-            "name": "کمک هزینه اروتز پروتز",
+            "name": "اروتز و پروتز",
             "icon": "crutch",
             "status": "WEB_VIEW",
             "url": "https://tamin.ir/ortez",
@@ -144,7 +144,7 @@
         },
         {
             "id": 16,
-            "name": "کمک هزینه ایام بارداری",
+            "name": "کمک‌هزینه بارداری",
             "icon": "pregnancystp",
             "status": "COMPLETELY_DISABLED",
             "message": "این سرویس کلا غیر فعال است",
@@ -155,7 +155,7 @@
         },
         {
             "id": 17,
-            "name": "غرامت دستمزد ایام بیماری",
+            "name": "غرامت بیماری",
             "icon": "medical",
             "status": "ACTIVE",
             "showRole": [
@@ -165,7 +165,7 @@
         },
         {
             "id": 18,
-            "name": "کمک هزینه مراسم ترحیم",
+            "name": "کمک‌هزینه ترحیم",
             "icon": "death",
             "status": "ACTIVE",
             "showRole": [
@@ -195,7 +195,7 @@
         },
         {
             "id": 21,
-            "name": "محاسبه غرامت ایام بیماری",
+            "name": "محاسبه غرامت بیماری",
             "icon": "medicine",
             "status": "ACTIVE",
             "showRole": [
@@ -205,7 +205,7 @@
         },
         {
             "id": 22,
-            "name": "محاسبه غرامت ایام بارداری",
+            "name": "محاسبه غرامت بارداری",
             "icon": "scan",
             "status": "ACTIVE",
             "showRole": [
@@ -215,7 +215,7 @@
         },
         {
             "id": 23,
-            "name": "نحوه محاسبه مبلغ مستمری",
+            "name": "محاسبه مستمری",
             "icon": "calc",
             "status": "ACTIVE",
             "showRole": [
@@ -226,7 +226,7 @@
         },
         {
             "id": 25,
-            "name": "وضعیت حمایت درمانی",
+            "name": "حمایت درمانی",
             "icon": "first-aid-kit",
             "status": "ACTIVE",
             "showRole": [
@@ -247,7 +247,7 @@
         },
         {
             "id": 33,
-            "name": "بیمه صاحبان حرف و مشاغل آزاد",
+            "name": "بیمه مشاغل آزاد",
             "icon": "agreement-freelance",
             "status": "TEMPORARY_DISABLED",
             "message": "سرویس موقتاً در دسترس نیست",
@@ -268,7 +268,7 @@
         },
         {
             "id": 35,
-            "name": "امور قراردادها و پرداخت",
+            "name": "قراردادها و پرداخت",
             "icon": "contract_payment",
             "status": "ENABLED_WITH_ERROR",
             "message": "ارتباط با سامانه با کندی مواجه است",
@@ -300,7 +300,7 @@
         },
         {
             "id": 38,
-            "name": "استعلام گواهی اشتغال به تحصیل",
+            "name": "گواهی اشتغال به تحصیل",
             "icon": "student_inquiry",
             "status": "ACTIVE",
             "showRole": [
@@ -310,7 +310,7 @@
         },
         {
             "id": 39,
-            "name": "تکمیل سوابق کسری از ماه",
+            "name": "تکمیل کسری ماه",
             "icon": "employer_info",
             "status": "COMPLETELY_DISABLED",
             "message": "غیرفعال",
@@ -321,7 +321,7 @@
         },
         {
             "id": 40,
-            "name": "درخواست مستمری بازماندگان",
+            "name": "مستمری بازماندگان",
             "icon": "survivors",
             "status": "ACTIVE",
             "showRole": [
@@ -341,7 +341,7 @@
         },
         {
             "id": 42,
-            "name": "اعتراض به سابقه کسری دار",
+            "name": "اعتراض سابقه کسری‌دار",
             "icon": "objecting_history_bugs",
             "status": "ACTIVE",
             "showRole": [
@@ -351,7 +351,7 @@
         },
         {
             "id": 46,
-            "name": "پرونده الکترونیک من",
+            "name": "پرونده الکترونیک",
             "icon": "student_inquiry",
             "status": "ACTIVE",
             "showRole": [
@@ -361,7 +361,7 @@
         },
         {
             "id": 47,
-            "name": "پرداخت حق بیمه کارگران ساختمانی",
+            "name": "حق بیمه ساختمانی",
             "icon": "worker-insurance-payment",
             "status": "ACTIVE",
             "showRole": [
@@ -381,7 +381,7 @@
         },
         {
             "id": 104,
-            "name": "استعلام وضعیت مستمری",
+            "name": "وضعیت مستمری",
             "icon": "insurance",
             "status": "TEMPORARY_DISABLED",
             "message": "سرویس استعلام وضعیت مستمری در حال بروزرسانی است",
@@ -392,7 +392,7 @@
         },
         {
             "id": 105,
-            "name": "مشاهده فیش حقوقی",
+            "name": "فیش حقوقی",
             "icon": "ticket",
             "status": "ACTIVE",
             "showRole": [
@@ -402,7 +402,7 @@
         },
         {
             "id": 106,
-            "name": "مشاهده حکم",
+            "name": "حکم مستمری",
             "icon": "announcement",
             "status": "ACTIVE",
             "showRole": [
@@ -412,7 +412,7 @@
         },
         {
             "id": 107,
-            "name": "صدور گواهی حقوق",
+            "name": "گواهی حقوق",
             "icon": "stamp",
             "status": "ACTIVE",
             "showRole": [
@@ -422,7 +422,7 @@
         },
         {
             "id": 108,
-            "name": "گواهی کسر اقساط معوق",
+            "name": "گواهی کسر اقساط",
             "icon": "document",
             "status": "ACTIVE",
             "showRole": [
@@ -432,7 +432,7 @@
         },
         {
             "id": 110,
-            "name": "تعهدنامه فرزندان دختر",
+            "name": "تعهدنامه فرزند دختر",
             "icon": "agreement",
             "status": "ACTIVE",
             "showRole": [
@@ -442,7 +442,7 @@
         },
         {
             "id": 112,
-            "name": "برقراری مستمری توسط بازماندگان",
+            "name": "مستمری بازماندگان",
             "icon": "survivors",
             "status": "ACTIVE",
             "showRole": [
@@ -452,7 +452,7 @@
         },
         {
             "id": 113,
-            "name": "مستمری از کارافتادگی",
+            "name": "مستمری ازکارافتادگی",
             "icon": "disability",
             "status": "ACTIVE",
             "showRole": [
@@ -493,7 +493,7 @@
         },
         {
             "id": 1004,
-            "name": "تکمیل اطلاعات کارفرمایی",
+            "name": "اطلاعات کارفرما",
             "icon": "employer_info",
             "status": "ACTIVE",
             "showRole": [
@@ -503,7 +503,7 @@
         },
         {
             "id": 1005,
-            "name": "لیست ذینفعان",
+            "name": "نماینده حقوقی",
             "icon": "relationship",
             "status": "ACTIVE",
             "showRole": [
@@ -513,7 +513,7 @@
         },
         {
             "id": 1006,
-            "name": "پیگیری وضعیت اعتراض",
+            "name": "پیگیری اعتراض",
             "icon": "protest",
             "status": "ACTIVE",
             "showRole": [
@@ -523,7 +523,7 @@
         },
         {
             "id": 1007,
-            "name": "درخواست خدمات غیرحضوری",
+            "name": "خدمات غیرحضوری",
             "icon": "onlineServiceReq",
             "status": "ACTIVE",
             "showRole": [
@@ -533,7 +533,7 @@
         },
         {
             "id": 1008,
-            "name": "بازرسی انجام شده",
+            "name": "سوابق بازرسی",
             "icon": "cctv",
             "status": "ACTIVE",
             "showRole": [
@@ -563,7 +563,7 @@
         },
         {
             "id": 1011,
-            "name": "بروزرسانی",
+            "name": "اعلام حادثه",
             "icon": "update",
             "status": "ACTIVE",
             "showRole": [
@@ -573,7 +573,7 @@
         },
         {
             "id": 1012,
-            "name": "قوانین",
+            "name": "قوانین و مقررات",
             "icon": "document",
             "status": "ACTIVE",
             "showRole": [
@@ -583,7 +583,7 @@
         },
         {
             "id": 2000,
-            "name": "دستیار هوشمند (ایجنت)",
+            "name": "دستیار هوشمند",
             "icon": "bot",
             "status": "ACTIVE",
             "showRole": [
