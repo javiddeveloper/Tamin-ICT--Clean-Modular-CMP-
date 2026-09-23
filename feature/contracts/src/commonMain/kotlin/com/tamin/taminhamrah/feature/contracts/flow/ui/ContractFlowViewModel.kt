@@ -13,6 +13,7 @@ import com.tamin.taminhamrah.feature.contracts.flow.specialjob.SpecialFreeJobOut
 import com.tamin.taminhamrah.feature.contracts.flow.specialjob.SpecialFreeJobRejectReason
 import com.tamin.taminhamrah.feature.contracts.flow.specialjob.resolveSpecialFreeJob
 import com.tamin.taminhamrah.model.contracts.ContractDN
+import com.tamin.taminhamrah.model.contracts.RegistrationInfoPR
 import com.tamin.taminhamrah.model.contracts.FreelanceSpecialJobCode
 import com.tamin.taminhamrah.feature.contracts.flow.ui.contract.ContractFlowEvent
 import com.tamin.taminhamrah.feature.contracts.flow.ui.contract.ContractFlowIntent
@@ -78,6 +79,7 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.contract_error_medical_student_not_allowed
@@ -121,6 +123,7 @@ class ContractFlowViewModel(
     private val saveContactUseCase: SaveContactUseCase,
     private val uploadImageUseCase: UploadImageUseCase,
     private val subdominantUseCase: SubdominantUseCase,
+    private val resolveString: suspend (StringResource) -> String = { getString(it) },
 ) : BaseViewModel<
     ContractFlowUiState,
     PartialState,
@@ -250,12 +253,13 @@ class ContractFlowViewModel(
         try {
             getRegistrationInfoUseCase().collect { info ->
                 val presentation = info.toPresentation()
+                notePreflight { it.copy(registration = presentation) }
                 emit(PartialState.RegistrationInfoLoaded(presentation))
                 emit(PartialState.UserInfoChanged(UserInfoFormPR.fromRegistration(presentation)))
                 if (!uiState.value.isEditingExistingContract &&
                     isFemaleOnlyServiceBlocked(config.requiresFemaleGender, presentation.isFemale)
                 ) {
-                    emit(PartialState.GenderGateError(getString(Res.string.contract_female_only_service)))
+                    emit(PartialState.GenderGateError(resolveString(Res.string.contract_female_only_service)))
                 }
                 emitPreflightGateIfReady()
             }
@@ -267,43 +271,70 @@ class ContractFlowViewModel(
     private fun loadAllContracts(): Flow<PartialState> = flow {
         try {
             getContractsUseCase().collect { page ->
+                notePreflight { it.copy(allContracts = page.items, allContractsLoadFailed = false) }
                 emit(PartialState.AllContractsLoaded(page.items))
                 emitPreflightGateIfReady()
             }
         } catch (e: Exception) {
+            notePreflight { it.copy(allContractsLoadFailed = true) }
             emit(PartialState.AllContractsLoadFailed)
             emitPreflightGateIfReady()
         } finally {
+            notePreflight { it.copy(allRefreshCompleted = true) }
             emit(PartialState.AllContractsRefreshCompleted)
             emitPreflightGateIfReady()
         }
     }
 
+    /**
+     * Facts for the registration gate, updated in the producer before [emitPreflightGateIfReady].
+     * [uiState] is not safe to read here: [handleLoadInitialData] merges several flows into a
+     * buffered channel, so a partial just emitted is not reduced yet.
+     */
+    private var preflightFacts = PreflightFacts()
+
+    private data class PreflightFacts(
+        val registration: RegistrationInfoPR? = null,
+        val typedContracts: List<ContractDN> = emptyList(),
+        val allContracts: List<ContractDN> = emptyList(),
+        val typedRefreshCompleted: Boolean = false,
+        val allRefreshCompleted: Boolean = false,
+        val allContractsLoadFailed: Boolean = false,
+        val generation: Int = 0,
+    )
+
+    private fun notePreflight(transform: (PreflightFacts) -> PreflightFacts) {
+        val current = preflightFacts
+        preflightFacts = transform(current).copy(generation = current.generation + 1)
+    }
+
     private suspend fun kotlinx.coroutines.flow.FlowCollector<PartialState>.emitPreflightGateIfReady() {
         if (uiState.value.isEditingExistingContract) return
-        val registration = uiState.value.registrationInfo ?: return
-        if (!uiState.value.hasCompletedTypedContractsRefresh) return
-        if (!uiState.value.hasCompletedAllContractsRefresh) return
-        if (uiState.value.allContractsLoadFailed) {
-            emit(PartialState.PreflightGateError(getString(Res.string.contract_preflight_contracts_load_failed)))
-            return
+        val facts = preflightFacts
+        val registration = facts.registration ?: return
+        if (!facts.typedRefreshCompleted || !facts.allRefreshCompleted) return
+        val message = if (facts.allContractsLoadFailed) {
+            resolveString(Res.string.contract_preflight_contracts_load_failed)
+        } else {
+            val block = resolvePreflightBlock(
+                registration = registration,
+                typedContracts = facts.typedContracts,
+                allContracts = facts.allContracts,
+                currentPremiumTypeCode = config.premiumTypeCode,
+            )
+            block?.let { preflightMessage(it) }
         }
-        val block = resolvePreflightBlock(
-            registration = registration,
-            typedContracts = uiState.value.rawTypedContracts,
-            allContracts = uiState.value.allContracts,
-            currentPremiumTypeCode = config.premiumTypeCode,
-        )
-        emit(PartialState.PreflightGateError(block?.let { preflightMessage(it) }))
+        if (facts.generation != preflightFacts.generation) return
+        emit(PartialState.PreflightGateError(message))
     }
 
     private suspend fun preflightMessage(block: ContractPreflightBlock): String = when (block) {
-        ContractPreflightBlock.NOT_REGISTERED -> getString(Res.string.contract_preflight_not_registered)
-        ContractPreflightBlock.ACTIVE_CONTRACT -> getString(Res.string.contract_preflight_active_contract)
-        ContractPreflightBlock.UNDER_AGE -> getString(Res.string.contract_preflight_under_age)
-        ContractPreflightBlock.CANCELLED_OVER_20_DAYS -> getString(Res.string.contract_preflight_cancelled_20_days)
-        ContractPreflightBlock.CANCELLED_OVER_3_MONTHS -> getString(Res.string.contract_preflight_cancelled_3_months)
-        ContractPreflightBlock.OTHER_ACTIVE_CONTRACT -> getString(Res.string.contract_preflight_other_contract)
+        ContractPreflightBlock.NOT_REGISTERED -> resolveString(Res.string.contract_preflight_not_registered)
+        ContractPreflightBlock.ACTIVE_CONTRACT -> resolveString(Res.string.contract_preflight_active_contract)
+        ContractPreflightBlock.UNDER_AGE -> resolveString(Res.string.contract_preflight_under_age)
+        ContractPreflightBlock.CANCELLED_OVER_20_DAYS -> resolveString(Res.string.contract_preflight_cancelled_20_days)
+        ContractPreflightBlock.CANCELLED_OVER_3_MONTHS -> resolveString(Res.string.contract_preflight_cancelled_3_months)
+        ContractPreflightBlock.OTHER_ACTIVE_CONTRACT -> resolveString(Res.string.contract_preflight_other_contract)
     }
 
     private suspend fun kotlinx.coroutines.flow.FlowCollector<PartialState>.emitError(message: String?) {
@@ -315,6 +346,7 @@ class ContractFlowViewModel(
         try {
             getContractsUseCase.contractsByPremiumType(config.premiumTypeCode).collect { page ->
                 val contracts = page.items
+                notePreflight { it.copy(typedContracts = contracts) }
                 emit(PartialState.RawTypedContractsLoaded(contracts))
                 emit(PartialState.EligibilityLoaded(contracts.resolveEligibility()))
                 emit(PartialState.ContractsLoaded(contracts.toPresentation()))
@@ -324,6 +356,7 @@ class ContractFlowViewModel(
         } catch (e: Exception) {
             emitError(e.message)
         } finally {
+            notePreflight { it.copy(typedRefreshCompleted = true) }
             emit(PartialState.TypedContractsRefreshCompleted)
             emitPreflightGateIfReady()
         }
@@ -607,7 +640,7 @@ class ContractFlowViewModel(
 
     private fun handleUploadGuardianImage(fileName: String, bytes: ByteArray): Flow<PartialState> = flow {
         if (!isJpegFileName(fileName)) {
-            val errorMsg = getString(Res.string.contract_upload_jpeg_only_error)
+            val errorMsg = resolveString(Res.string.contract_upload_jpeg_only_error)
             emit(PartialState.GuardianFormChanged(uiState.value.guardianForm.copy(uploadError = errorMsg)))
             sendEvent(ContractFlowEvent.ShowMessage(errorMsg))
             return@flow
@@ -617,13 +650,13 @@ class ContractFlowViewModel(
             val request = UploadImageRequestDN(
                 fileName = fileName,
                 bytes = bytes,
-                description = getString(Res.string.contract_guardian_document_description),
+                description = resolveString(Res.string.contract_guardian_document_description),
             )
             uploadImageUseCase(request).collect { imageId ->
                 emit(PartialState.GuardianDocumentUploaded(guid = imageId, name = fileName, bytes = bytes))
             }
         } catch (e: Exception) {
-            val message = e.message ?: getString(Res.string.contract_upload_failed_error)
+            val message = e.message ?: resolveString(Res.string.contract_upload_failed_error)
             emit(PartialState.GuardianFormChanged(uiState.value.guardianForm.copy(uploadError = message, isUploadingDocument = false)))
             sendEvent(ContractFlowEvent.ShowMessage(message))
         }
@@ -668,7 +701,7 @@ class ContractFlowViewModel(
     private fun handleUploadPickedImage(fileName: String, bytes: ByteArray): Flow<PartialState> = flow {
         emit(PartialState.UploadDocumentError(null))
         if (!isJpegFileName(fileName)) {
-            emit(PartialState.UploadDocumentError(getString(Res.string.contract_upload_jpeg_only_error)))
+            emit(PartialState.UploadDocumentError(resolveString(Res.string.contract_upload_jpeg_only_error)))
             return@flow
         }
         emit(PartialState.DocumentPreviewSet(bytes))
@@ -691,7 +724,7 @@ class ContractFlowViewModel(
                 )
             }
         } catch (e: Exception) {
-            val message = e.message ?: getString(Res.string.contract_upload_failed_error)
+            val message = e.message ?: resolveString(Res.string.contract_upload_failed_error)
             emit(PartialState.UploadDocumentError(message))
             sendEvent(ContractFlowEvent.ShowMessage(message))
         } finally {
@@ -743,7 +776,7 @@ class ContractFlowViewModel(
                         )
                     ) {
                         is SpecialFreeJobOutcome.Rejected ->
-                            emitError(getString(outcome.reason.toMessageRes()))
+                            emitError(resolveString(outcome.reason.toMessageRes()))
                         is SpecialFreeJobOutcome.Accepted ->
                             emitAll(
                                 specialFreeJobSelected(
@@ -774,7 +807,7 @@ class ContractFlowViewModel(
                         )
                     ) {
                         is SpecialFreeJobOutcome.Rejected ->
-                            emitError(getString(outcome.reason.toMessageRes()))
+                            emitError(resolveString(outcome.reason.toMessageRes()))
                         is SpecialFreeJobOutcome.Accepted ->
                             emitAll(
                                 specialFreeJobSelected(
@@ -962,7 +995,7 @@ class ContractFlowViewModel(
         } catch (e: Exception) {
             emit(
                 PartialState.DependentsError(
-                    e.message ?: getString(Res.string.contract_treatment_dependents_load_error),
+                    e.message ?: resolveString(Res.string.contract_treatment_dependents_load_error),
                 ),
             )
         }
@@ -989,7 +1022,7 @@ class ContractFlowViewModel(
                 } catch (e: Exception) {
                     sendEvent(
                         ContractFlowEvent.ShowSubmitFailure(
-                            e.message ?: getString(Res.string.contract_submit_failure_message_fallback),
+                            e.message ?: resolveString(Res.string.contract_submit_failure_message_fallback),
                         ),
                     )
                 } finally {
@@ -1005,7 +1038,7 @@ class ContractFlowViewModel(
                 } catch (e: Exception) {
                     sendEvent(
                         ContractFlowEvent.ShowSubmitFailure(
-                            e.message ?: getString(Res.string.contract_submit_failure_message_fallback),
+                            e.message ?: resolveString(Res.string.contract_submit_failure_message_fallback),
                         ),
                     )
                 } finally {
@@ -1024,7 +1057,7 @@ class ContractFlowViewModel(
         } catch (e: Exception) {
             sendEvent(
                 ContractFlowEvent.ShowSubmitFailure(
-                    e.message ?: getString(Res.string.contract_submit_failure_message_fallback),
+                    e.message ?: resolveString(Res.string.contract_submit_failure_message_fallback),
                 ),
             )
         } finally {
@@ -1057,7 +1090,7 @@ class ContractFlowViewModel(
         } catch (e: Exception) {
             sendEvent(
                 ContractFlowEvent.ShowSubmitFailure(
-                    e.message ?: getString(Res.string.contract_submit_failure_message_fallback),
+                    e.message ?: resolveString(Res.string.contract_submit_failure_message_fallback),
                 ),
             )
         } finally {
@@ -1092,7 +1125,7 @@ class ContractFlowViewModel(
             premiumRateCode = "",
             guardianForm = uiState.value.guardianForm,
             wardNationalId = uiState.value.registrationInfo?.nationalId.orEmpty(),
-            documentDescription = getString(Res.string.contract_guardian_document_description),
+            documentDescription = resolveString(Res.string.contract_guardian_document_description),
         )
     }
 
@@ -1110,7 +1143,7 @@ class ContractFlowViewModel(
             freeJobCode = freeJobCode,
             guardianForm = uiState.value.guardianForm,
             wardNationalId = uiState.value.registrationInfo?.nationalId.orEmpty(),
-            documentDescription = getString(Res.string.contract_guardian_document_description),
+            documentDescription = resolveString(Res.string.contract_guardian_document_description),
         )
     }
 
