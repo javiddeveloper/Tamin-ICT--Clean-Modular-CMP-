@@ -231,6 +231,30 @@ closest existing concept). See `AgentActionKeyFeatureFlagTest` for the regressio
 `EDIT_ADDRESS*` remains unmapped — there is no address-editing screen or flag anywhere in this
 codebase to gate it against yet.
 
+## 5e. Keeping «خدمات» from repeating profile/treatment's own screens
+
+Profile and the treatment hub are permanent bottom-bar tabs — never hidden by a role or a flag — so
+any flag with a dedicated row in one of them showing up *again* as a generic card in «خدمات» is the
+same destination reachable twice, not two different things. `GetVisibleServicesUseCase`
+(`core-domain/useCases/common/`) is what the services tab reads instead of the raw
+`GetMainMenuUseCase`: it takes a `ServiceCatalogAudience` (today just `TAMIN_SERVICES_TAB`, more can
+be added the same way if another screen ever needs its own view of the menu) and filters the real
+menu through `DedicatedScreenFlags` — the union of every flag `ProfileMenuItem` and
+`TreatmentFeatureFlags` gate on. `TamminServicesViewModel` calls it in place of `GetMainMenuUseCase`;
+every other caller of the menu (contracts, contract affairs, home, …) is unaffected.
+
+The exclusion does not depend on role — `PRESCRIPTION`(26) has `showRole:[1,2]` (both insured and
+pensioner see «نسخ الکترونیک» in the raw menu) but is dropped from every role's services tab alike,
+since the treatment hub it belongs to is reachable by any role regardless of which tab they searched
+from. `EDIT_IMAGE`(4) and `HOME_LAST_REQUESTS`(3008) are deliberately **not** in `DedicatedScreenFlags`
+— `EDIT_IMAGE` has no `ProfileMenuItem` row yet (in progress on another branch), and
+`HOME_LAST_REQUESTS` is a dashboard widget, not a duplicate of anything services would show.
+
+`DedicatedScreenFlags` is hand-maintained, not derived from `ProfileMenuItem`/`TreatmentFeatureFlags`
+directly: `feature:taminServices` may not import another feature module (see `CLAUDE.md`'s
+module-boundary rule), so this core-domain list is the deliberate single source of truth instead.
+Update it by hand whenever profile or the treatment hub gains or drops a gated row.
+
 ## 6. The AI Agent flag
 
 The AI assistant is a standalone feature in the flag system.
