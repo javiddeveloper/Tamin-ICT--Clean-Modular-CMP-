@@ -3592,4 +3592,11 @@
     <string name="fraction_contract_submit_conclude">انعقاد قرارداد</string>
     <string name="fraction_contract_submit_commitment">اینجانب %1$s دارای کد ملی شماره %2$s با آگاهی کامل از مفاد آئین نامه و مقررات تکمیل سوابق کسری از ماه، و با سلامت کامل عقل، صحت اطلاعات و اسناد مربوطه را تایید می‌نمایم و چنانچه در هر زمان خلاف آن ثابت گردد، قرارداد منعقده باطل بوده و از این نظر هیچ‌گونه حقی نخواهم داشت و ملزم به جبران خسارات احتمالی وارده به سازمان تأمین‌ اجتماعی خواهم بود.\nدرخواست تکمیل سوابق کسری از ماه با نرخ %3$s و تاریخ شروع %4$s را تایید می‌نمایم.</string>
 
+    <!-- ===================== Tamin Services (خدمات) landing screen ===================== -->
+    <string name="tamin_services_title">خدمات</string>
+    <string name="tamin_services_section_title">خدمات %1$s</string>
+    <string name="tamin_services_search_placeholder">جست‌وجو در میان خدمات ...</string>
+    <string name="tamin_services_badge_count">%1$s خدمت</string>
+    <string name="tamin_services_no_results_title">نتیجه‌ای یافت نشد</string>
+
 </resources>
