@@ -2,13 +2,15 @@ package com.tamin.taminhamrah.feature.profile.ui
 
 import app.cash.turbine.test
 import com.tamin.taminhamrah.feature.FeatureManager
+import com.tamin.taminhamrah.feature.profile.fake.FakeProfileUserRepository
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
-import com.tamin.taminhamrah.feature.profile.ui.editPhoto.FakeProfileUserRepository
+import com.tamin.taminhamrah.feature.profile.ui.model.ProfileMenuItem
 import com.tamin.taminhamrah.model.BaseUrlKey
 import com.tamin.taminhamrah.model.DarkThemeConfig
 import com.tamin.taminhamrah.model.FontSizeOption
 import com.tamin.taminhamrah.model.UserData
+import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDN
 import com.tamin.taminhamrah.model.auth.DebugLoginResultDN
 import com.tamin.taminhamrah.model.auth.TokenSlot
 import com.tamin.taminhamrah.model.common.CityDN
@@ -16,6 +18,7 @@ import com.tamin.taminhamrah.model.common.CityListResultDN
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.common.ProvinceDN
+import com.tamin.taminhamrah.model.identity.IdentityInfoDN
 import com.tamin.taminhamrah.model.payment.PaymentMockMode
 import com.tamin.taminhamrah.repository.AuthRepository
 import com.tamin.taminhamrah.repository.CityProvinceRepository
@@ -33,6 +36,7 @@ import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
 import com.tamin.taminhamrah.useCases.user.VerifyChangeMobileUseCase
+import com.tamin.taminhamrah.util.HeaderConstant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -46,13 +50,19 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
 
-/** Covers the camera badge's `EDIT_IMAGE` gate: one test per [FeatureStatus] branch. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProfileViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val featureManager = FakeFeatureManager()
+    private val userRepository = FakeProfileUserRepository()
+    private val tokenStore = FakeTokenStoreManager()
+    private val authRepository = FakeAuthRepository()
+    private val developerOptions = FakeDeveloperOptionsRepository()
+    private val preferences = FakeUserPreferencesRepository()
 
     @BeforeTest
     fun setUp() {
@@ -64,24 +74,194 @@ class ProfileViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun createViewModel(): ProfileViewModel {
-        val userRepository = FakeProfileUserRepository()
-        return ProfileViewModel(
-            tokenStoreManager = UnusedTokenStoreManager,
-            identityInfoUseCase = IdentityInfoUseCase(userRepository, UnusedCityProvinceRepository),
-            getUserProfileImageUseCase = UserProfileImageUseCase(userRepository),
-            taminRelationUseCase = TaminRelationUseCase(userRepository),
-            subdominantUseCase = SubdominantUseCase(userRepository),
-            signOutUseCase = SignOutUseCase(UnusedAuthRepository),
-            getSignOutUrlUseCase = GetSignOutUrlUseCase(UnusedDeveloperOptionsRepository),
-            getInsuredActiveBranchUseCase = GetInsuredActiveBranchUseCase(userRepository),
-            getRelationTaminAllUseCase = GetRelationTaminAllUseCase(userRepository),
-            changeMobileUseCase = ChangeMobileUseCase(userRepository),
-            verifyChangeMobileUseCase = VerifyChangeMobileUseCase(userRepository),
-            setThemeUseCase = SetThemeUseCase(UnusedUserPreferencesRepository),
-            featureManager = featureManager,
+    private fun createViewModel() = ProfileViewModel(
+        tokenStoreManager = tokenStore,
+        identityInfoUseCase = IdentityInfoUseCase(userRepository, UnusedCityProvinceRepository),
+        getUserProfileImageUseCase = UserProfileImageUseCase(userRepository),
+        taminRelationUseCase = TaminRelationUseCase(userRepository),
+        subdominantUseCase = SubdominantUseCase(userRepository),
+        signOutUseCase = SignOutUseCase(authRepository),
+        getSignOutUrlUseCase = GetSignOutUrlUseCase(developerOptions),
+        getInsuredActiveBranchUseCase = GetInsuredActiveBranchUseCase(userRepository),
+        getRelationTaminAllUseCase = GetRelationTaminAllUseCase(userRepository),
+        changeMobileUseCase = ChangeMobileUseCase(userRepository),
+        verifyChangeMobileUseCase = VerifyChangeMobileUseCase(userRepository),
+        setThemeUseCase = SetThemeUseCase(preferences),
+        featureManager = featureManager,
+    )
+
+    // --- Loading the profile -------------------------------------------------------------------
+
+    @Test
+    fun loadProfile_fillsEveryCardFromItsSource() = runTest(testDispatcher) {
+        tokenStore.storedUserId = "stored-user"
+        userRepository.profileImage = "base64-image"
+        userRepository.identityInfo = identity(firstName = "سعید", lastName = "نامی")
+        userRepository.activeRelations = listOf(
+            relation(id = 1, relationDescription = "شاغل"),
+            relation(id = 2, relationDescription = "شاغل"),
+            relation(id = 3, relationDescription = null),
         )
+        val viewModel = createViewModel()
+
+        viewModel.sendIntent(ProfileIntent.LoadProfile())
+
+        val state = viewModel.uiState.value
+        assertEquals("stored-user", state.userId)
+        assertEquals("base64-image", state.profileImage)
+        assertFalse(state.isProfileImageLoading)
+        assertEquals("سعید نامی", state.identityInfo?.fullName)
+        assertEquals("0020939111", state.taminRelation?.nationalId)
+        assertEquals(2, state.dependentsCount)
+        assertEquals(2, state.activeRelationCount)
+        assertEquals(1, state.inactiveRelationCount)
+        assertFalse(state.isActiveRelationLoading)
+        assertFalse(state.isLoading)
+        assertNull(state.error)
     }
+
+    @Test
+    fun loadProfile_prefersTheProvidedUserIdOverTheStoredOne() = runTest(testDispatcher) {
+        tokenStore.storedUserId = "stored-user"
+        val viewModel = createViewModel()
+
+        viewModel.sendIntent(ProfileIntent.LoadProfile(userId = "provided-user"))
+
+        assertEquals("provided-user", viewModel.uiState.value.userId)
+    }
+
+    @Test
+    fun loadProfile_identityFailure_endsLoadingWithItsMessage() = runTest(testDispatcher) {
+        userRepository.identityError = RuntimeException("سرویس هویت در دسترس نیست")
+        val viewModel = createViewModel()
+
+        viewModel.sendIntent(ProfileIntent.LoadProfile())
+
+        val state = viewModel.uiState.value
+        assertFalse(state.isLoading)
+        assertEquals("سرویس هویت در دسترس نیست", state.error)
+    }
+
+    // --- Logout --------------------------------------------------------------------------------
+
+    @Test
+    fun logout_withToken_signsOutOnTheServer_thenOpensSignOutPageAndLeaves() = runTest(testDispatcher) {
+        tokenStore.storedToken = "access-token"
+        val viewModel = createViewModel()
+
+        viewModel.events.test {
+            viewModel.sendIntent(ProfileIntent.Logout)
+
+            assertEquals(ProfileEvent.OpenUrl(GetSignOutUrlUseCase(developerOptions)()), awaitItem())
+            assertEquals(ProfileEvent.NavigateBack, awaitItem())
+            expectNoEvents()
+        }
+        assertEquals(HeaderConstant.AUTHORIZATION_TYPE + "access-token", authRepository.signedOutWith)
+    }
+
+    @Test
+    fun logout_withoutToken_clearsTheSessionLocally_andSkipsTheServer() = runTest(testDispatcher) {
+        tokenStore.storedToken = null
+        tokenStore.storedRefreshToken = "refresh"
+        tokenStore.storedUserId = "stored-user"
+        tokenStore.tokenValid = true
+        val viewModel = createViewModel()
+
+        viewModel.events.test {
+            viewModel.sendIntent(ProfileIntent.Logout)
+
+            assertEquals(ProfileEvent.OpenUrl(GetSignOutUrlUseCase(developerOptions)()), awaitItem())
+            assertEquals(ProfileEvent.NavigateBack, awaitItem())
+            expectNoEvents()
+        }
+        assertNull(authRepository.signedOutWith)
+        assertNull(tokenStore.storedRefreshToken)
+        assertNull(tokenStore.storedUserId)
+        assertFalse(tokenStore.tokenValid)
+    }
+
+    @Test
+    fun logoutMenuItem_runsTheLogout() = runTest(testDispatcher) {
+        tokenStore.storedToken = "access-token"
+        val viewModel = createViewModel()
+
+        viewModel.events.test {
+            viewModel.sendIntent(ProfileIntent.OnItemClick(ProfileMenuItem.LOGOUT))
+
+            assertEquals(ProfileEvent.OpenUrl(GetSignOutUrlUseCase(developerOptions)()), awaitItem())
+            assertEquals(ProfileEvent.NavigateBack, awaitItem())
+        }
+        assertEquals(HeaderConstant.AUTHORIZATION_TYPE + "access-token", authRepository.signedOutWith)
+    }
+
+    // --- Menu ----------------------------------------------------------------------------------
+
+    @Test
+    fun menuItems_eachSendTheirOwnEvent() = runTest(testDispatcher) {
+        val expected = mapOf(
+            ProfileMenuItem.SETTINGS to ProfileEvent.NavigateToSettings,
+            ProfileMenuItem.IDENTITY_INFO to ProfileEvent.NavigateToIdentity,
+            ProfileMenuItem.ELECTRONIC_FILE to ProfileEvent.NavigateToElectronicFile,
+            ProfileMenuItem.VERSION_HISTORY to ProfileEvent.NavigateToVersionHistory,
+            ProfileMenuItem.ACTIVE_RELATION to ProfileEvent.NavigateToActiveRelation,
+            ProfileMenuItem.CHANGE_MOBILE to ProfileEvent.NavigateToChangeMobile,
+            ProfileMenuItem.BANK_ACCOUNTS to ProfileEvent.NavigateToBankAccount,
+            ProfileMenuItem.CONTACT_ME to ProfileEvent.NavigateToContactUs,
+            ProfileMenuItem.PERSONAL_INBOX to ProfileEvent.NavigateToMyInbox,
+            ProfileMenuItem.SECURITY to ProfileEvent.NavigateToSecurity,
+            ProfileMenuItem.DEVELOPER_OPTIONS to ProfileEvent.NavigateToDeveloperOptions,
+            ProfileMenuItem.SHARE to ProfileEvent.ShareAppLink("https://hamrah.tamin.ir/"),
+            ProfileMenuItem.SUPPORT to ProfileEvent.Support("1420"),
+            ProfileMenuItem.REQUESTS to ProfileEvent.NavigateToUserContracts,
+            ProfileMenuItem.SAVE_EVENTS to ProfileEvent.NavigateToSaveEvents,
+        )
+        val viewModel = createViewModel()
+
+        viewModel.events.test {
+            expected.forEach { (item, event) ->
+                viewModel.sendIntent(ProfileIntent.OnItemClick(item))
+                assertEquals(event, awaitItem(), "menu item $item")
+            }
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun unmappedMenuItem_showsComingSoon() = runTest(testDispatcher) {
+        val viewModel = createViewModel()
+
+        viewModel.events.test {
+            viewModel.sendIntent(ProfileIntent.OnItemClick(ProfileMenuItem.DEPENDENTS))
+
+            assertEquals(ProfileEvent.ShowToast("به زودی: DEPENDENTS"), awaitItem())
+        }
+    }
+
+    @Test
+    fun dependentsShortcut_navigatesToTheList() = runTest(testDispatcher) {
+        val viewModel = createViewModel()
+
+        viewModel.events.test {
+            viewModel.sendIntent(ProfileIntent.NavigateToDependentsList)
+
+            assertEquals(ProfileEvent.NavigateToDependentsList, awaitItem())
+        }
+    }
+
+    // --- Theme ---------------------------------------------------------------------------------
+
+    @Test
+    fun toggleTheme_savesDarkOrLight() = runTest(testDispatcher) {
+        val viewModel = createViewModel()
+
+        viewModel.sendIntent(ProfileIntent.ToggleTheme(isDark = true))
+        assertEquals(DarkThemeConfig.DARK, preferences.savedTheme)
+
+        viewModel.sendIntent(ProfileIntent.ToggleTheme(isDark = false))
+        assertEquals(DarkThemeConfig.LIGHT, preferences.savedTheme)
+    }
+
+    // --- Camera badge: the EDIT_IMAGE gate, one test per FeatureStatus branch ------------------
 
     @Test
     fun editPhoto_enabled_navigatesToTheForm() = runTest(testDispatcher) {
@@ -163,6 +343,41 @@ class ProfileViewModelTest {
     }
 }
 
+private fun identity(firstName: String, lastName: String) = IdentityInfoDN(
+    cityOfBirthId = null,
+    cityOfIssueId = null,
+    countryId = null,
+    dateOfBirth = null,
+    fatherName = null,
+    firstName = firstName,
+    gender = null,
+    id = 1,
+    idCardNumber = null,
+    idCardSerial1 = null,
+    idCardSerial2 = null,
+    lastName = lastName,
+    nationalId = "0020939111",
+    ssn = null,
+)
+
+/** A relation counts as active when it has a description — see `ActiveRelationDN.toUiModel`. */
+private fun relation(id: Int, relationDescription: String?) = ActiveRelationDN(
+    id = id,
+    firstName = null,
+    lastName = null,
+    nationalId = null,
+    insuranceId = null,
+    birthDate = null,
+    relationWithTaminId = null,
+    startDate = null,
+    endDate = null,
+    workshopId = null,
+    workshopName = null,
+    organizationId = null,
+    organizationName = null,
+    relationDescription = relationDescription,
+)
+
 private class FakeFeatureManager(var status: FeatureStatus = FeatureStatus.Enabled) : FeatureManager {
     var lastFlag: FeatureFlag? = null
 
@@ -175,45 +390,50 @@ private class FakeFeatureManager(var status: FeatureStatus = FeatureStatus.Enabl
     override suspend fun getDisabledMessage(flag: FeatureFlag): String? = null
 }
 
-// The edit-photo gate touches none of the collaborators below; they exist only so the ViewModel
-// can be constructed, and fail loudly if a test ever starts reaching them.
-private fun unused(): Nothing = error("not used by the edit-photo gate")
+// Members ProfileViewModel never reaches fail loudly, so a test that starts relying on one says so.
+private fun unused(): Nothing = error("not used by ProfileViewModel")
 
-private object UnusedTokenStoreManager : TokenStoreManager {
-    override fun saveToken(token: String?) = unused()
-    override fun getToken(): String = unused()
-    override fun saveRefreshToken(refreshToken: String?) = unused()
-    override fun getRefreshToken(): String = unused()
-    override fun getToken(slot: TokenSlot): String = unused()
+/** Only the single-slot session members the ViewModel reads and clears are real. */
+private class FakeTokenStoreManager : TokenStoreManager {
+    var storedToken: String? = null
+    var storedRefreshToken: String? = null
+    var storedUserId: String? = null
+    var tokenValid = false
+
+    override fun saveToken(token: String?) { storedToken = token }
+    override fun getToken(): String? = storedToken
+    override fun saveRefreshToken(refreshToken: String?) { storedRefreshToken = refreshToken }
+    override fun getRefreshToken(): String? = storedRefreshToken
+    override fun saveUserId(userId: String?) { storedUserId = userId }
+    override fun getUserId(): String? = storedUserId
+    override suspend fun setTokenValid(isValid: Boolean) { tokenValid = isValid }
+
+    override fun getToken(slot: TokenSlot): String? = unused()
     override fun saveToken(slot: TokenSlot, token: String?) = unused()
-    override fun getRefreshToken(slot: TokenSlot): String = unused()
+    override fun getRefreshToken(slot: TokenSlot): String? = unused()
     override fun saveRefreshToken(slot: TokenSlot, refreshToken: String?) = unused()
     override fun getActiveSlot(): TokenSlot = unused()
     override fun activeSlotFlow(): Flow<TokenSlot> = unused()
     override suspend fun setActiveSlot(slot: TokenSlot) = unused()
-    override fun saveUserId(userId: String?) = unused()
-    override fun getUserId(): String = unused()
     override fun saveUserType(userType: String?) = unused()
-    override fun getUserType(): String = unused()
+    override fun getUserType(): String? = unused()
     override fun saveCodeVerifier(codeVerifier: String?) = unused()
-    override fun getCodeVerifier(): String = unused()
+    override fun getCodeVerifier(): String? = unused()
     override fun tokenValidFlow(): Flow<Boolean> = unused()
-    override suspend fun setTokenValid(isValid: Boolean) = unused()
     override fun isAuthProcessingFlow(): Flow<Boolean> = unused()
     override fun setAuthProcessing(isProcessing: Boolean) = unused()
 }
 
-private object UnusedCityProvinceRepository : CityProvinceRepository {
-    override fun getCity(cityId: String): Flow<CityDN> = unused()
-    override fun getProvince(provinceId: String): Flow<ProvinceDN> = unused()
-    override fun getProvinces(): Flow<List<ProvinceDN>> = unused()
-    override fun getCities(cityName: String?, provinceCode: String?): Flow<List<CityDN>> = unused()
-    override fun getCitiesByProvince(provinceCode: String): Flow<CityListResultDN> = unused()
-}
+private class FakeAuthRepository : AuthRepository {
+    var signedOutWith: String? = null
 
-private object UnusedAuthRepository : AuthRepository {
+    override suspend fun signOut(token: String): Flow<String> {
+        signedOutWith = token
+        return flowOf("OK")
+    }
+
     override val isLoggedIn: Flow<Boolean> get() = unused()
-    override suspend fun getAccessToken(): String = unused()
+    override suspend fun getAccessToken(): String? = unused()
     override suspend fun exchangeCodeForTokens(
         code: String,
         codeVerifier: String,
@@ -226,12 +446,12 @@ private object UnusedAuthRepository : AuthRepository {
     override suspend fun refreshTokenSlot(slot: TokenSlot): Boolean = unused()
     override suspend fun switchTokenSlot(slot: TokenSlot) = unused()
     override suspend fun logout() = unused()
-    override suspend fun signOut(token: String): Flow<String> = unused()
     override suspend fun revokeToken(): Boolean = unused()
 }
 
-private object UnusedDeveloperOptionsRepository : DeveloperOptionsRepository {
-    override fun getEffectiveBaseUrl(key: BaseUrlKey): String = unused()
+private class FakeDeveloperOptionsRepository : DeveloperOptionsRepository {
+    override fun getEffectiveBaseUrl(key: BaseUrlKey): String = "https://account.test/"
+
     override fun observeOverrides(): Flow<Map<BaseUrlKey, String>> = unused()
     override fun setOverride(key: BaseUrlKey, url: String) = unused()
     override fun clearOverride(key: BaseUrlKey) = unused()
@@ -240,13 +460,24 @@ private object UnusedDeveloperOptionsRepository : DeveloperOptionsRepository {
     override fun setPaymentMockMode(mode: PaymentMockMode) = unused()
 }
 
-private object UnusedUserPreferencesRepository : UserPreferencesRepository {
+private class FakeUserPreferencesRepository : UserPreferencesRepository {
+    var savedTheme: DarkThemeConfig? = null
+
+    override suspend fun setDarkThemeConfig(darkThemeConfig: DarkThemeConfig) { savedTheme = darkThemeConfig }
+
     override val userData: StateFlow<UserData> get() = unused()
     override val observeDarkThemeConfig: Flow<DarkThemeConfig> get() = unused()
     override val observeBiometricEnabled: Flow<Boolean> get() = unused()
     override val observeFontSize: Flow<FontSizeOption> get() = unused()
-    override suspend fun setDarkThemeConfig(darkThemeConfig: DarkThemeConfig) = unused()
     override suspend fun setBiometricEnabled(enabled: Boolean) = unused()
     override suspend fun completeBiometricEnrollmentPrompt(enabled: Boolean) = unused()
     override suspend fun setFontSize(fontSize: FontSizeOption) = unused()
+}
+
+private object UnusedCityProvinceRepository : CityProvinceRepository {
+    override fun getCity(cityId: String): Flow<CityDN> = unused()
+    override fun getProvince(provinceId: String): Flow<ProvinceDN> = unused()
+    override fun getProvinces(): Flow<List<ProvinceDN>> = unused()
+    override fun getCities(cityName: String?, provinceCode: String?): Flow<List<CityDN>> = unused()
+    override fun getCitiesByProvince(provinceCode: String): Flow<CityListResultDN> = unused()
 }
