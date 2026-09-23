@@ -1,11 +1,5 @@
 package com.tamin.taminhamrah.ui.components.toast // adjust to your actual core-ui package, e.g. ir.tamin.hamrah.core.ui.toast
 
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Warning
 import kotlin.time.Duration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -52,10 +46,8 @@ fun AppToastHost(
     Toaster(
         state = toaster,
         modifier = modifier,
-        showCloseButton = true,
         alignment = Alignment.TopCenter,
-        richColors = true,
-        darkTheme = isSystemInDarkTheme(),
+        colors = { taminToastColors(it.type) },
         messageSlot = { toast ->
             Text(
                 text = toast.message.toString(),
@@ -63,16 +55,7 @@ fun AppToastHost(
                 color = LocalToastContentColor.current,
             )
         },
-        iconSlot = { toast ->
-            val tint = LocalToastContentColor.current
-            when (toast.type) {
-                ToastType.Success -> androidx.compose.material3.Icon(Icons.Default.CheckCircle, contentDescription = null, tint = tint)
-                ToastType.Error   -> androidx.compose.material3.Icon(Icons.Default.Error, contentDescription = null, tint = tint)
-                ToastType.Info    -> androidx.compose.material3.Icon(Icons.Default.Info, contentDescription = null, tint = tint)
-                ToastType.Warning -> androidx.compose.material3.Icon(Icons.Default.Warning, contentDescription = null, tint = tint)
-                ToastType.Normal  -> {} // no icon
-            }
-        },
+        iconSlot = { toast -> TaminToastIcon(toast.type) },
     )
 }
 
