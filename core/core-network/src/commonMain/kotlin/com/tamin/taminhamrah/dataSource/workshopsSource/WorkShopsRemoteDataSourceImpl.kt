@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.dataSource.workshopsSource
 
-import com.tamin.taminhamrah.tools.safeCall
+import kotlinx.coroutines.CancellationException
+import io.ktor.serialization.JsonConvertException
 import com.tamin.taminhamrah.apiService.WorkShopsApiService
 import com.tamin.taminhamrah.model.BaseUrlKey
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
@@ -52,6 +53,8 @@ import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDTO
 import com.tamin.taminhamrah.repository.DeveloperOptionsRepository
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
+import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
+import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
 import com.tamin.taminhamrah.tools.readPdfChannel
@@ -452,25 +455,45 @@ internal class WorkShopsRemoteDataSourceImpl(
 
     /**
      * The one error contract every call in this source shares: business failures keep the server's
-     * own message; anything else is classified by [safeCall] (transport → connection, bad reply → server).
+     * own message, a reply that cannot be read is a server error, anything else a connection error.
      */
-    private suspend fun <T> call(block: suspend () -> T): T = errorParser.safeCall("call") {
+    private suspend fun <T> call(block: suspend () -> T): T = try {
         block()
+    } catch (e: TaminErrorUriException) {
+        throw errorParser.parseGeneralError(e)
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: JsonConvertException) {
+        throw errorParser.parseGeneralError(
+            TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+        )
+    } catch (e: Exception) {
+        throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
     }
 
-    override suspend fun getLegalRepresentativeWorkshops(): ListData<LegalRepresentativeWorkshopDTO> {
-        return errorParser.safeCall("getLegalRepresentativeWorkshops") {
+    override suspend fun getLegalRepresentativeWorkshops(): ListData<LegalRepresentativeWorkshopDTO>? {
+        return try {
             val queries = queryBuilder.buildQuery(legalRepresentativeListQuery)
             val response = apiService.getLegalRepresentativeWorkshops(queries)
             response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
     override suspend fun getLegalRepresentatives(
         workshopId: String,
         branchCode: String
-    ): ListData<LegalRepresentativeDTO> {
-        return errorParser.safeCall("getLegalRepresentatives") {
+    ): ListData<LegalRepresentativeDTO>? {
+        return try {
             val queries = queryBuilder.buildQuery(legalRepresentativeListQuery) + mapOf(
                 "stackType" to "4",
                 "workshopId" to workshopId,
@@ -478,46 +501,106 @@ internal class WorkShopsRemoteDataSourceImpl(
             )
             val response = apiService.getLegalRepresentatives(queries)
             response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
     override suspend fun getLegalRepresentativeWorkshopContracts(
         workshopId: String,
         branchCode: String
-    ): ListData<LegalRepresentativeContractDTO> {
-        return errorParser.safeCall("getLegalRepresentativeWorkshopContracts") {
+    ): ListData<LegalRepresentativeContractDTO>? {
+        return try {
             val queries = queryBuilder.buildQuery(legalRepresentativeListQuery)
             val response = apiService.getLegalRepresentativeWorkshopContracts(workshopId, branchCode, queries)
             response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
     override suspend fun requestLegalRepresentativeTicket(nationalCode: String?) {
-        errorParser.safeCall("requestLegalRepresentativeTicket") {
+        try {
             val response = if (nationalCode.isNullOrEmpty()) {
                 apiService.requestLegalTicket()
             } else {
                 apiService.requestLegalTicketWithNationalCode(nationalCode)
             }
             response.extractMessage()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
     override suspend fun verifyLegalRepresentativeTicket(ticket: String) {
-        errorParser.safeCall("verifyLegalRepresentativeTicket") {
+        try {
             apiService.validateLegalTicket(ticket).extractMessage()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
     override suspend fun submitLegalRepresentative(ticket: String, request: LegalRepresentativeRequestDTO) {
-        errorParser.safeCall("submitLegalRepresentative") {
+        try {
             apiService.submitLegalRepresentative(ticket, request).extractMessage()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
     override suspend fun deleteLegalRepresentative(ticket: String, stackId: Long) {
-        errorParser.safeCall("deleteLegalRepresentative") {
+        try {
             apiService.deleteLegalRepresentative(ticket, stackId).extractMessage()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 }

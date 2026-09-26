@@ -27,8 +27,8 @@ class RequestPaymentForIllDaysRemoteDataSourceImplTest {
 
         val result = dataSource.getLatestInsuranceInfo()
 
-        assertEquals("1234567890", result.risuid)
-        assertEquals("0012345678", result.nationalCode)
+        assertEquals("1234567890", result?.risuid)
+        assertEquals("0012345678", result?.nationalCode)
     }
 
     @Test
@@ -40,7 +40,7 @@ class RequestPaymentForIllDaysRemoteDataSourceImplTest {
 
         val result = dataSource.getCovidResult()
 
-        assertEquals(listOf("1700000000", "1700086400"), result.list)
+        assertEquals(listOf("1700000000", "1700086400"), result?.list)
     }
 
     @Test
@@ -52,7 +52,7 @@ class RequestPaymentForIllDaysRemoteDataSourceImplTest {
 
         val result = dataSource.sendRequestForIllDay(SaveShortTermIllnessRequestDTO())
 
-        assertEquals("ok", result.shorttermRequest?.resultMessage)
+        assertEquals("ok", result?.shorttermRequest?.resultMessage)
     }
 
     @Test
