@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -31,6 +30,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tamin.taminhamrah.feature.requestPaymentForIllDays.ui.intro.components.IllDaysIntroSkeleton
 import com.tamin.taminhamrah.model.requestPaymentForIllDays.IllDaysInsuredMainInfoPR
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.DetailRow
@@ -166,14 +166,11 @@ private fun IllDaysIntroContent(
     ) { padding ->
         when {
             state.isLoading -> {
-                Box(
+                IllDaysIntroSkeleton(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(padding),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator(color = colors.blueText)
-                }
+                )
             }
             state.errorMessage != null && state.insuredInfo == null -> {
                 ErrorStateView(

@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.repository
 
 import com.tamin.taminhamrah.model.BaseUrlKey
+import com.tamin.taminhamrah.model.agent.AgentMockMode
 import com.tamin.taminhamrah.model.payment.PaymentMockMode
 import kotlinx.coroutines.flow.Flow
 
@@ -20,4 +21,15 @@ interface DeveloperOptionsRepository {
     fun observePaymentMockMode(): Flow<PaymentMockMode>
 
     fun setPaymentMockMode(mode: PaymentMockMode)
+
+    /**
+     * Whether the assistant's backend is being stood in for, and how.
+     *
+     * Always [AgentMockMode.DISABLED] in a release build, whatever is stored.
+     */
+    fun getAgentMockMode(): AgentMockMode
+
+    fun observeAgentMockMode(): Flow<AgentMockMode>
+
+    fun setAgentMockMode(mode: AgentMockMode)
 }

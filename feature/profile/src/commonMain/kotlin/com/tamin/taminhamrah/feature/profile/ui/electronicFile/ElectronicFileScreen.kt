@@ -1,17 +1,16 @@
 package com.tamin.taminhamrah.feature.profile.ui.electronicFile
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.tamin.taminhamrah.feature.profile.ui.electronicFile.components.DocumentGrid
 import com.tamin.taminhamrah.feature.profile.ui.electronicFile.components.ElectronicFileHeader
@@ -24,20 +23,14 @@ import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.TaminImageViewer
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
-import com.tamin.taminhamrah.ui.components.TaminTopAppBar
-import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
-import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toparea.driveTopArea
+import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
+import com.tamin.taminhamrah.ui.toparea.reportTopAreaHeight
+import com.tamin.taminhamrah.ui.toparea.topAreaContentPadding
 import kotlinx.coroutines.flow.Flow
-import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
-import taminx.core.core_ui.Res
-import taminx.core.core_ui.action_back
-import taminx.core.core_ui.electronic_file_section
-import taminx.core.core_ui.electronic_file_title
-import taminx.core.core_ui.ic_tamin_chevron_back
 
 @Composable
 fun ElectronicFileRoute(
@@ -91,41 +84,44 @@ fun ElectronicFileScreen(
     val onRetry = remember(onIntent) { { onIntent(ElectronicFileIntent.LoadDocuments) } }
 
     val colors = LocalTaminColors.current
-
-    Column(modifier = Modifier.fillMaxSize()) {
-        TaminTopAppBar(
-            title = stringResource(Res.string.electronic_file_title),
-            centerTitle = true,
-            background = taminTopAppBarGradient(colors.profileGradientStops),
-            cornerRadius = CornerRadius.sheet,
-            navigationIcon = {
-                TaminTopAppBarButton(
-                    icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                    contentDescription = stringResource(Res.string.action_back),
-                    onClick = onBack,
-                    bordered = true,
-                )
-            },
-        ) {
-            Spacer(modifier = Modifier.height(Spacing.md))
-            ElectronicFileHeader()
-        }
-
-        Text(
-            text = stringResource(Res.string.electronic_file_section),
-            style = MaterialTheme.typography.labelMedium,
-            color = colors.textTertiary,
-            modifier = Modifier.padding(start = Spacing.page, end = Spacing.page, top = Spacing.md, bottom = Spacing.xs),
+    val topArea = rememberMeasuredTopAreaState { probeState ->
+        ElectronicFileHeader(
+            topAreaState = probeState,
+            onBackClicked = {},
         )
+    }
+    val gridState = rememberLazyGridState()
 
-        // Narrow arguments rather than the whole state: the grid must not recompose when the
-        // viewer opens, and the viewer's fields change on every download tick.
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colors.bgPage),
+    ) {
         DocumentGrid(
             documents = state.documents,
             isLoading = state.isLoading,
             hasError = state.errorMessage != null,
             onOpen = onOpen,
-            modifier = Modifier.fillMaxSize(),
+            gridState = gridState,
+            modifier = Modifier
+                .fillMaxSize()
+                .driveTopArea(topArea, gridState),
+            contentPadding = topAreaContentPadding(
+                state = topArea,
+                rest = PaddingValues(
+                    start = Spacing.page,
+                    end = Spacing.page,
+                    bottom = Spacing.page,
+                ),
+            ),
+        )
+
+        ElectronicFileHeader(
+            topAreaState = topArea,
+            onBackClicked = onBack,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .reportTopAreaHeight(topArea),
         )
     }
 

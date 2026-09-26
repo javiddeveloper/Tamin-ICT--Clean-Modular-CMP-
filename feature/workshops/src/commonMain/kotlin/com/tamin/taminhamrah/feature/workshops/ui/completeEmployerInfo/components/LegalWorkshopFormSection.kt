@@ -22,7 +22,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DateRange
-import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -57,7 +56,6 @@ import com.tamin.taminhamrah.util.PersianDateFormatter
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.employer_info_btn_send_otp
 import taminx.core.core_ui.employer_info_ceo_birth_label
 import taminx.core.core_ui.employer_info_ceo_birth_picker_title
 import taminx.core.core_ui.employer_info_ceo_name_prefix
@@ -103,9 +101,6 @@ fun LegalWorkshopFormSection(
     ceoBirthError: String?,
     mobileError: String?,
     emailError: String?,
-    isSubmitting: Boolean,
-    canSubmit: Boolean,
-    onSubmit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
@@ -121,7 +116,10 @@ fun LegalWorkshopFormSection(
     val isEmailError = emailError != null
 
     Column(
-        modifier = modifier.fillMaxWidth().padding(horizontal = Spacing.lg),
+        modifier = modifier
+            .fillMaxWidth()
+            // Room under the hero, so the first heading does not sit against its edge.
+            .padding(start = Spacing.lg, end = Spacing.lg, top = Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(11.dp),
     ) {
         // Section 1: Legal Workshop Info Card
@@ -151,14 +149,9 @@ fun LegalWorkshopFormSection(
         ) {
             // Legal National ID
             Column {
-                Text(
+                EmployerInfoFieldLabel(
                     text = stringResource(Res.string.employer_info_legal_nid_label),
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = colors.textSecondary,
-                        fontSize = 11.sp,
-                    ),
-                    modifier = Modifier.padding(bottom = 5.dp),
+                    isRequired = true,
                 )
                 SegmentedInputField(
                     value = legalNationalId,
@@ -212,14 +205,9 @@ fun LegalWorkshopFormSection(
 
             // Company Type Picker
             Column {
-                Text(
+                EmployerInfoFieldLabel(
                     text = stringResource(Res.string.employer_info_company_type_label),
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = colors.textSecondary,
-                        fontSize = 11.sp,
-                    ),
-                    modifier = Modifier.padding(bottom = 5.dp),
+                    isRequired = true,
                 )
                 SelectPickerChip(
                     text = selectedCompanyType?.titleRes?.let { stringResource(it) }
@@ -266,34 +254,65 @@ fun LegalWorkshopFormSection(
             ) {
                 // CEO National ID
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
+                    EmployerInfoFieldLabel(
                         text = stringResource(Res.string.employer_info_ceo_nid_label),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            color = colors.textSecondary,
-                            fontSize = 11.sp,
-                        ),
-                        modifier = Modifier.padding(bottom = 5.dp),
+                        isRequired = true,
                     )
-                    SegmentedInputField(
-                        value = ceoNationalId,
-                        onValueChange = onCeoNationalIdChanged,
-                        slotCount = CEO_NATIONAL_ID_SLOTS,
-                        error = isCeoNidError,
-                        errorMessage = ceoNationalIdError,
-                    )
+                    // A plain field rather than ten segmented slots: it shares a row with the
+                    // birth-date picker, so it takes that field's height and text size.
+                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                        BasicTextField(
+                            value = ceoNationalId,
+                            onValueChange = {
+                                onCeoNationalIdChanged(it.filter { c -> c.isDigit() }.take(CEO_NATIONAL_ID_SLOTS))
+                            },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            singleLine = true,
+                            textStyle = MaterialTheme.typography.bodySmall.copy(
+                                fontSize = 11.5.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = colors.textPrimary,
+                            ),
+                            cursorBrush = SolidColor(colors.blueText),
+                            decorationBox = { innerTextField ->
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(44.dp)
+                                        .clip(RoundedCornerShape(13.dp))
+                                        .background(colors.bgPage)
+                                        .animatedErrorBorder(
+                                            isError = isCeoNidError,
+                                            errorColor = colors.dangerText,
+                                            normalColor = colors.border,
+                                            borderWidth = Thickness.border,
+                                            cornerRadius = FieldCorner,
+                                        )
+                                        .padding(horizontal = 11.dp),
+                                    contentAlignment = Alignment.CenterStart,
+                                ) {
+                                    if (ceoNationalId.isEmpty()) {
+                                        Text(
+                                            text = "۰۰۰۰۰۰۰۰۰۰",
+                                            style = MaterialTheme.typography.bodySmall.copy(
+                                                color = colors.textMuted,
+                                                fontSize = 11.5.sp,
+                                            ),
+                                        )
+                                    }
+                                    innerTextField()
+                                }
+                            },
+                        )
+                    }
+                    FieldErrorText(ceoNationalIdError)
                 }
 
                 // Date of Birth Picker
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
+                    EmployerInfoFieldLabel(
                         text = stringResource(Res.string.employer_info_ceo_birth_label),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            color = colors.textSecondary,
-                            fontSize = 11.sp,
-                        ),
-                        modifier = Modifier.padding(bottom = 5.dp),
+                        isRequired = true,
                     )
                     Row(
                         modifier = Modifier
@@ -385,14 +404,9 @@ fun LegalWorkshopFormSection(
             ) {
                 // Fixed Phone
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
+                    EmployerInfoFieldLabel(
                         text = stringResource(Res.string.employer_info_tel_label),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            color = colors.textSecondary,
-                            fontSize = 11.sp,
-                        ),
-                        modifier = Modifier.padding(bottom = 5.dp),
+                        isRequired = true,
                     )
                     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                         BasicTextField(
@@ -434,14 +448,9 @@ fun LegalWorkshopFormSection(
 
                 // Mobile Phone
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
+                    EmployerInfoFieldLabel(
                         text = stringResource(Res.string.employer_info_mobile),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            color = colors.textSecondary,
-                            fontSize = 11.sp,
-                        ),
-                        modifier = Modifier.padding(bottom = 5.dp),
+                        isRequired = true,
                     )
                     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                         BasicTextField(
@@ -491,14 +500,9 @@ fun LegalWorkshopFormSection(
 
             // Email
             Column {
-                Text(
+                EmployerInfoFieldLabel(
                     text = stringResource(Res.string.employer_info_email),
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = colors.textSecondary,
-                        fontSize = 11.sp,
-                    ),
-                    modifier = Modifier.padding(bottom = 5.dp),
+                    isRequired = true,
                 )
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                     BasicTextField(
@@ -541,22 +545,11 @@ fun LegalWorkshopFormSection(
                             }
                         },
                     )
-                    FieldErrorText(emailError)
                 }
+                // Outside the LTR block: the reason is Persian and reads right to left.
+                FieldErrorText(emailError)
             }
         }
-
-        // Error message line
-        Spacer(modifier = Modifier.height(2.dp))
-
-        // Submit Button
-        EmployerInfoSubmitButton(
-            text = stringResource(Res.string.employer_info_btn_send_otp),
-            icon = Icons.Outlined.Email,
-            enabled = canSubmit,
-            isSubmitting = isSubmitting,
-            onSubmit = onSubmit,
-        )
     }
 
     if (showDatePicker) {

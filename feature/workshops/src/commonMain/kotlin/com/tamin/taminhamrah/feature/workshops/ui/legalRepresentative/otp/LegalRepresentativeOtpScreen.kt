@@ -157,6 +157,7 @@ fun LegalRepresentativeOtpScreen(
             onDismissRequest = { viewModel.sendIntent(LegalRepresentativeOtpIntent.DismissExpiredDialog) },
             confirmButton = {
                 TaminFilledButton(
+                    background = LocalTaminColors.current.buttonGradient,
                     text = stringResource(Res.string.legal_representative_otp_retry_action),
                     onClick = { viewModel.sendIntent(LegalRepresentativeOtpIntent.DismissExpiredDialog) },
                     modifier = Modifier.fillMaxWidth(),

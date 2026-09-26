@@ -80,6 +80,7 @@ fun WorkshopScreenShell(
                     icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                     contentDescription = null,
                     onClick = onBack,
+                    bordered = true,
                 )
             },
             action = action,

@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
@@ -59,7 +60,9 @@ fun WorkshopRecordCard(
                 start = WorkshopDimens.cardHorizontalPadding,
                 end = WorkshopDimens.cardHorizontalPadding,
                 top = WorkshopDimens.cardTopPadding,
-                bottom = WorkshopDimens.cardBottomPadding,
+                // A toggle carries its own bottom padding, so its label sits centred between the
+                // dashed rule and the card's edge; without one, the card's padding closes it.
+                bottom = if (isExpanded != null) 0.dp else WorkshopDimens.cardBottomPadding,
             ),
     ) {
         cells()

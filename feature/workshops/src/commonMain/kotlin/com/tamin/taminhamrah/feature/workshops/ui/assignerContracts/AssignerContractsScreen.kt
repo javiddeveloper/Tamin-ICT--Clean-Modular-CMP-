@@ -1,14 +1,17 @@
 package com.tamin.taminhamrah.feature.workshops.ui.assignerContracts
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -26,6 +29,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.Ass
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractsUiState
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopListScaffold
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
+import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
 import com.tamin.taminhamrah.model.workshop.AssignerContractDN
 import com.tamin.taminhamrah.model.workshop.AssignerContractPR
@@ -44,6 +48,12 @@ import com.tamin.taminhamrah.ui.components.toast.info
 import com.tamin.taminhamrah.ui.components.toast.success
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toparea.TopAreaState
+import com.tamin.taminhamrah.ui.toparea.driveTopArea
+import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
+import com.tamin.taminhamrah.ui.toparea.reportTopAreaHeight
+import com.tamin.taminhamrah.ui.toparea.topAreaContentPadding
+import com.tamin.taminhamrah.ui.toparea.topAreaHide
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -138,11 +148,6 @@ fun AssignerContractsContent(
     onRequestSettlement: (AssignerContractPR) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val colors = LocalTaminColors.current
-    val headerGradient = remember(colors.profileGradientStops) {
-        Brush.horizontalGradient(colors.profileGradientStops)
-    }
-
     // Read off state once, so no child is handed the whole thing and recomposed by a field it does
     // not draw — the list must not rebuild because the search sheet opened.
     val list = state.list
@@ -163,32 +168,17 @@ fun AssignerContractsContent(
         "${filter?.workshopId}|${filter?.branchCode}|${filter?.contractRow}|$tab"
     }
 
-    Column(modifier = modifier.fillMaxSize()) {
-        TaminTopAppBar(
-            title = stringResource(Res.string.assigner_contracts_title),
-            background = headerGradient,
-            bottomPadding = Spacing.page,
-            navigationIcon = {
-                TaminTopAppBarButton(
-                    icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                    contentDescription = null,
-                    onClick = onBack,
-                )
-            },
-            action = {
-                TaminTopAppBarButton(
-                    icon = vectorResource(Res.drawable.ic_tamin_search),
-                    contentDescription = stringResource(Res.string.assigner_select_workshop),
-                    onClick = { onIntent(AssignerContractsIntent.SearchOpenChanged(isOpen = true)) },
-                )
-            },
-        ) {
-            AnimatedRingHeaderIcon(
-                icon = vectorResource(Res.drawable.ic_tamin_assigner_contracts),
-                modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
-            )
-        }
+    val onSearchClick = { onIntent(AssignerContractsIntent.SearchOpenChanged(isOpen = true)) }
 
+    // The list's own drag folds the ring icon away, snapping on release, and the bar settles into
+    // its title row — the same fold ActiveRelationScreen does. See docs/vault/TopArea-System.md.
+    val topArea = rememberMeasuredTopAreaState { topAreaState ->
+        AssignerContractsTopArea(onBack = onBack, onSearchClick = onSearchClick, topAreaState = topAreaState)
+    }
+    val listState = rememberLazyListState()
+
+    // Overlaid rather than a Column, so the list passes underneath the header as it scrolls.
+    Box(modifier = modifier.fillMaxSize()) {
         // Keeps its place in every list state — skeleton, empty, failed — so switching tab or
         // clearing the search never takes the tabs off the screen while the rows below settle.
         val count = list.items.size
@@ -215,6 +205,9 @@ fun AssignerContractsContent(
 
         WorkshopListScaffold(
             state = visible,
+            listState = listState,
+            modifier = Modifier.fillMaxSize().driveTopArea(topArea, listState),
+            contentPadding = topAreaContentPadding(state = topArea, rest = WorkshopDimens.listContentPadding),
             // Every page is fetched up front (AssignerContractsViewModel.loadAll), so the scroll
             // position has nothing left to ask for.
             onLoadMore = {},
@@ -243,9 +236,7 @@ fun AssignerContractsContent(
                     title = title,
                     subtitle = body,
                     actionLabel = stringResource(Res.string.assigner_select_workshop),
-                    onAction = {
-                        onIntent(AssignerContractsIntent.SearchOpenChanged(isOpen = true))
-                    },
+                    onAction = onSearchClick,
                     showIconTile = true,
                 )
             },
@@ -261,6 +252,15 @@ fun AssignerContractsContent(
                 modifier = itemModifier,
             )
         }
+
+        AssignerContractsTopArea(
+            onBack = onBack,
+            onSearchClick = onSearchClick,
+            topAreaState = topArea,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .reportTopAreaHeight(topArea),
+        )
     }
 
     if (state.isSearchOpen) {
@@ -285,6 +285,50 @@ fun AssignerContractsContent(
             onDismiss = {
                 onIntent(AssignerContractsIntent.SearchOpenChanged(isOpen = false))
             },
+        )
+    }
+}
+
+/** The list's floating gradient bar; its ring icon folds away as the list is dragged. */
+@Composable
+private fun AssignerContractsTopArea(
+    onBack: () -> Unit,
+    onSearchClick: () -> Unit,
+    topAreaState: TopAreaState,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+    val headerGradient = remember(colors.profileGradientStops) {
+        Brush.horizontalGradient(colors.profileGradientStops)
+    }
+    TaminTopAppBar(
+        title = stringResource(Res.string.assigner_contracts_title),
+        modifier = modifier,
+        background = headerGradient,
+        bottomPadding = Spacing.page,
+        navigationIcon = {
+            TaminTopAppBarButton(
+                icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                contentDescription = null,
+                onClick = onBack,
+                bordered = true,
+            )
+        },
+        action = {
+            TaminTopAppBarButton(
+                icon = vectorResource(Res.drawable.ic_tamin_search),
+                contentDescription = stringResource(Res.string.assigner_select_workshop),
+                onClick = onSearchClick,
+                bordered = true,
+            )
+        },
+    ) {
+        // Hidden together with its top gap, so the folded bar closes up under the title row.
+        // Static while this is one of rememberMeasuredTopAreaState's off-screen probes.
+        AnimatedRingHeaderIcon(
+            icon = vectorResource(Res.drawable.ic_tamin_assigner_contracts),
+            animated = !topAreaState.isMeasureProbe,
+            modifier = Modifier.fillMaxWidth().topAreaHide(topAreaState).padding(top = Spacing.sm),
         )
     }
 }

@@ -49,6 +49,7 @@ import com.tamin.taminhamrah.useCases.agent.SaveCachedMessageUseCase
 import com.tamin.taminhamrah.useCases.agent.SendAgentPromptUseCase
 import com.tamin.taminhamrah.useCases.agent.StartAgentSessionUseCase
 import com.tamin.taminhamrah.useCases.agent.UpdateAgentSessionUseCase
+import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
@@ -60,10 +61,12 @@ import taminx.core.core_ui.agent_request_failed
 import taminx.core.core_ui.agent_service_unavailable
 import taminx.core.core_ui.deep_link_feature_unavailable
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.transformWhile
 import java.util.UUID
@@ -99,13 +102,20 @@ class AgentViewModel(
     private val saveCachedMessageUseCase: SaveCachedMessageUseCase,
     private val getCachedMessagesUseCase: GetCachedMessagesUseCase,
     private val deletePendingAgentMessagesUseCase: DeletePendingAgentMessagesUseCase,
-    private val updateAgentSessionUseCase: UpdateAgentSessionUseCase
+    private val updateAgentSessionUseCase: UpdateAgentSessionUseCase,
+    private val identityInfoUseCase: IdentityInfoUseCase
 ) : BaseViewModel<AgentUiState, PartialState, AgentEvent, AgentIntent>(
     initialState = AgentUiState()
 ) {
 
-    /** Session context shared across pipeline steps */
-    private val sessionContext = AgentSessionContext()
+    /**
+     * Session context shared across the pipeline steps of the conversation on screen.
+     *
+     * Swapped for a fresh instance — never cleared in place — when the user switches
+     * conversations, so a prompt still in flight keeps the context it started with instead of
+     * reading and writing the context of the conversation that replaced it.
+     */
+    private var sessionContext = AgentSessionContext()
 
     /** Local conversation id used for cache rows — distinct from the server session id. */
     private var cacheSessionId: String? = null
@@ -121,6 +131,15 @@ class AgentViewModel(
 
     /** The coroutine collecting the prompt in flight, so cancelling really stops it. */
     private var generationJob: Job? = null
+
+    /**
+     * Bumped every time the conversation on screen is replaced (new chat, opening one from
+     * history, deleting the active one). A prompt in flight captures the value it started with
+     * and compares against it, which is what tells it that it has been left behind. Comparing
+     * conversation ids instead would race: the ids are swapped a few suspension points into the
+     * switch, and the old prompt could emit into the new chat in between.
+     */
+    private var conversationEpoch = 0
 
     /** Bubbles whose reveal animation already played, so recycling never replays it. */
     private val completedTypingIds = mutableSetOf<String>()
@@ -156,6 +175,7 @@ class AgentViewModel(
         }
         is AgentIntent.ExecuteServiceAction    -> handleServiceAction(intent.actionKey, intent.payload)
         is AgentIntent.OnTypingFinished        -> handleTypingFinished(intent.itemId)
+        is AgentIntent.OnEnterAnimationFinished -> handleEnterAnimationFinished(intent.itemId)
         is AgentIntent.OpenChatHistory         -> handleOpenHistory()
         is AgentIntent.CloseChatHistory        -> flow {
             emit(PartialState.HistoryVisibilityChanged(false))
@@ -244,6 +264,15 @@ class AgentViewModel(
         if (uiState.value.activeSessionId == null) {
             startEmptySession().forEach { emit(it) }
         }
+
+        // ── Step 4: Personalize the empty-state greeting ──────────────────────
+        // Best-effort: identity is cached, but a failure here must not block the
+        // rest of the screen — the greeting simply falls back to no name.
+        val firstName = runCatching { identityInfoUseCase().firstOrNull()?.firstName }.getOrNull()
+        emit(PartialState.IdentityLoaded(firstName))
+
+        // ── Step 5: Session count for the history icon's badge ────────────────
+        emitAll(loadSessions())
     }
 
     private fun handleSendPrompt(
@@ -263,15 +292,33 @@ class AgentViewModel(
         emit(PartialState.Loading(true))
         generationJob = currentCoroutineContext()[Job]
 
+        // The conversation this prompt belongs to. If the user starts a new chat, or opens
+        // another one from history, while the answer is still on its way, this flow keeps
+        // running but "detaches": nothing lands on screen any more, and every bubble is written
+        // into the cache of the conversation it was asked in, so it is waiting there when that
+        // chat is reopened. Without this the late answer leaked into whatever chat was on
+        // screen, which is the bug this guard exists for.
+        val originSessionId = cacheSessionId
+        val originEpoch = conversationEpoch
+        val promptContext = sessionContext
+        fun isDetached(): Boolean = conversationEpoch != originEpoch
+        suspend fun emitUi(partialState: PartialState) {
+            if (!isDetached()) emit(partialState)
+        }
+        fun sendUiEvent(event: AgentEvent) {
+            if (!isDetached()) sendEvent(event)
+        }
+
         if (!isRetry && addUserBubble) {
             // Append the user's message to the chat
             val userItem = ChatItem(
                 id = UUID.randomUUID().toString(),
                 sender = ChatSender.User,
-                content = ChatBubbleContent.Text(message)
+                content = ChatBubbleContent.Text(message),
+                isEntering = true
             )
             emit(PartialState.NewChatItems(listOf(userItem)))
-            cacheBubble(userItem)
+            cacheBubble(userItem, targetSessionId = originSessionId)
             sendEvent(AgentEvent.ScrollToBottom)
         }
 
@@ -291,17 +338,17 @@ class AgentViewModel(
             when (pollingState) {
                 is AgentPollingState.Pending -> {
                     // Update the Extension Card with the ETA information
-                    emit(PartialState.PendingReceived(
+                    emitUi(PartialState.PendingReceived(
                         requestId = pollingState.requestId,
                         etaSeconds = pollingState.etaSeconds
                     ))
-                    
+
                     val steps = listOf(
                         "درحال بررسی درخواست...",
                         "درحال ارسال درخواست (${pollingState.attempt}/${pollingState.maxAttempts})"
                     )
-                    
-                    emit(PartialState.ProcessingStateUpdated(
+
+                    emitUi(PartialState.ProcessingStateUpdated(
                         AgentProcessingState(
                             steps = steps,
                             currentActiveIndex = 1,
@@ -318,9 +365,10 @@ class AgentViewModel(
                         state = response.state ?: currentState.conversationState,
                         history = response.history ?: currentState.conversationHistory,
                     )
-                    emit(context)
-                    // Persist the context so a resumed conversation keeps its thread.
-                    cacheSessionId?.let { id ->
+                    emitUi(context)
+                    // Persist the context so a resumed conversation keeps its thread. It belongs
+                    // to the conversation the prompt was sent from, not the one on screen now.
+                    originSessionId?.let { id ->
                         runCatching {
                             updateAgentSessionUseCase.context(id, context.lastEntity, context.state, context.history)
                         }
@@ -332,14 +380,14 @@ class AgentViewModel(
                     allSteps.addAll(serviceSteps)
                     allSteps.add("در حال آماده‌سازی پاسخ...")
 
-                    emit(PartialState.ProcessingStateUpdated(
+                    emitUi(PartialState.ProcessingStateUpdated(
                         AgentProcessingState(steps = allSteps, currentActiveIndex = 1.coerceAtMost(allSteps.size - 1), isCompleted = false)
                     ))
 
                     // --- Phase 1: Show the ProcessingSteps bubble and run all steps ---
                     var currentStepIndex = 1
                     val processingBubbleId = "processing_${UUID.randomUUID()}"
-                    sendEvent(AgentEvent.ScrollToBottom)
+                    sendUiEvent(AgentEvent.ScrollToBottom)
 
                     // Collect all result bubbles while animating steps
                     val allResultItems = mutableListOf<ChatItem>()
@@ -356,13 +404,13 @@ class AgentViewModel(
                                     currentActiveIndex = currentStepIndex,
                                     isCompleted = false
                                 )
-                                emit(PartialState.ProcessingStateUpdated(updatedState))
-                                kotlinx.coroutines.delay(500L)
+                                emitUi(PartialState.ProcessingStateUpdated(updatedState))
+                                if (!isDetached()) kotlinx.coroutines.delay(500L)
                             }
                         }
 
                         // Dispatch entity and COLLECT results (don't emit yet)
-                        val result = dispatchEntity(entity)
+                        val result = dispatchEntity(entity, promptContext)
                         val newItems = result.map { bubble ->
                             ChatItem(
                                 id = "${entity.action.key}_${UUID.randomUUID()}",
@@ -375,17 +423,17 @@ class AgentViewModel(
                     }
 
                     // --- Phase 2: Mark steps as complete ---
-                    emit(PartialState.ProcessingStateUpdated(null))
+                    emitUi(PartialState.ProcessingStateUpdated(null))
 
                     // Brief pause so user sees the completed stepper before content appears
-                    kotlinx.coroutines.delay(400L)
+                    if (!isDetached()) kotlinx.coroutines.delay(400L)
 
                     // --- Phase 3: Emit all result bubbles sequentially ---
                     allResultItems.foldSuggestionsIntoReplies().forEach { item ->
-                        emit(PartialState.NewChatItems(listOf(item)))
-                        cacheBubble(item)
-                        sendEvent(AgentEvent.ScrollToBottom)
-                        
+                        emitUi(PartialState.NewChatItems(listOf(item)))
+                        cacheBubble(item, targetSessionId = originSessionId)
+                        sendUiEvent(AgentEvent.ScrollToBottom)
+
                         // Calculate how long this bubble takes to animate
                         val typingDuration = when (val content = item.content) {
                             is ChatBubbleContent.Text -> {
@@ -403,34 +451,54 @@ class AgentViewModel(
                             }
                             else -> 500L
                         }
-                        
-                        // Wait for this bubble to finish before emitting the next
-                        kotlinx.coroutines.delay(typingDuration + 200L)
+
+                        // Wait for this bubble to finish before emitting the next. A detached
+                        // answer only fills the cache, so it does not pay the animation delay.
+                        if (!isDetached()) kotlinx.coroutines.delay(typingDuration + 200L)
                     }
 
                 }
 
                 is AgentPollingState.Failed -> {
-                    emit(PartialState.ProcessingStateUpdated(null))
+                    emitUi(PartialState.ProcessingStateUpdated(null))
                     val message = pollingState.message ?: getString(Res.string.agent_request_failed)
                     val errorItem = ChatItem(
                         id = UUID.randomUUID().toString(),
                         sender = ChatSender.Agent,
-                        content = ChatBubbleContent.ServiceError(message, canRetryPrompt = true)
+                        content = ChatBubbleContent.ServiceError(message, canRetryPrompt = true),
+                        isEntering = true
                     )
-                    emit(PartialState.NewChatItems(listOf(errorItem)))
-                    sendEvent(AgentEvent.ShowError(message))
+                    emitUi(PartialState.NewChatItems(listOf(errorItem)))
+                    sendUiEvent(AgentEvent.ShowError(message))
                 }
-                
+
                 is AgentPollingState.Cancelled -> {
-                    emit(PartialState.GenerationCancelled)
-                    emit(PartialState.ProcessingStateUpdated(null))
+                    emitUi(PartialState.GenerationCancelled)
+                    emitUi(PartialState.ProcessingStateUpdated(null))
                 }
             }
         }
 
-        emit(PartialState.Loading(false))
+        emitUi(PartialState.Loading(false))
+        // A detached generation no longer owns the job field — a newer prompt may.
+        if (!isDetached()) generationJob = null
+    }
+
+    /**
+     * Leaves the prompt in flight running, but cuts it off from the screen.
+     *
+     * Used when the user switches conversations mid-answer: the request is *not* cancelled —
+     * it finishes and writes its bubbles into the cache of the chat it was asked in, so the
+     * answer is there when that chat is reopened — while the chat now on screen shows no
+     * generating state at all. Bumping [conversationEpoch] is what the in-flight flow checks.
+     */
+    private suspend fun FlowCollector<PartialState>.detachInFlightGeneration() {
+        conversationEpoch++
+        // The detached flow must not be stoppable by a Stop tap in the new conversation.
         generationJob = null
+        if (!uiState.value.isGenerating && uiState.value.processingState == null) return
+        emit(PartialState.GenerationCancelled)
+        emit(PartialState.ProcessingStateUpdated(null))
     }
 
     /**
@@ -466,7 +534,11 @@ class AgentViewModel(
     }
 
     private fun handleStartNewSession(): Flow<PartialState> = flow {
-        sessionContext.clear()
+        // A prompt still in flight is not cancelled: it detaches and keeps writing into the
+        // conversation it was asked in (see handleSendPrompt). Only the on-screen generating
+        // state is reset, and the job field is released so Stop in the new chat cannot kill it.
+        detachInFlightGeneration()
+        sessionContext = AgentSessionContext()
         completedTypingIds.clear()
         uncachedSessionId = newSessionId()
         emit(PartialState.SessionUpdated(lastEntity = null))
@@ -523,6 +595,14 @@ class AgentViewModel(
         val item = uiState.value.chatItems.firstOrNull { it.id == itemId } ?: return@flow
         if (!item.isTypingAnimating) return@flow
         emit(PartialState.UpdateChatItem(item.copy(isTypingAnimating = false)))
+    }
+
+    /** Same reasoning as [handleTypingFinished]: owning the flag here keeps the entrance
+     *  animation from replaying when a row is recomposed after scrolling back into view. */
+    private fun handleEnterAnimationFinished(itemId: String): Flow<PartialState> = flow {
+        val item = uiState.value.chatItems.firstOrNull { it.id == itemId } ?: return@flow
+        if (!item.isEntering) return@flow
+        emit(PartialState.UpdateChatItem(item.copy(isEntering = false)))
     }
 
     // ─── Conversation cache ───────────────────────────────────────────────────
@@ -582,6 +662,10 @@ class AgentViewModel(
      * so old content does not replay the typewriter.
      */
     private fun handleLoadSession(sessionId: String): Flow<PartialState> = flow {
+        // Detach first, so an answer landing right now still goes to its own conversation and
+        // the list we are about to read is not overtaken by it.
+        detachInFlightGeneration()
+
         val cached = runCatching { getCachedMessagesUseCase(sessionId) }.getOrDefault(emptyList())
         val items = cached.mapNotNull { row ->
             val content = ChatBubbleCodec.decode(row.contentType, row.contentJson)
@@ -597,7 +681,7 @@ class AgentViewModel(
         // Prune the empty chat we are leaving behind, then switch over.
         resolveNationalCode()?.let { runCatching { pruneEmptyAgentSessionUseCase(it) } }
         cacheSessionId = sessionId
-        sessionContext.clear()
+        sessionContext = AgentSessionContext()
         completedTypingIds.clear()
 
         val session = runCatching { getAgentSessionUseCase(sessionId) }.getOrNull()
@@ -613,6 +697,11 @@ class AgentViewModel(
         runCatching { deleteAgentSessionUseCase(sessionId) }
         // Deleting the conversation on screen leaves the user on a fresh empty one.
         if (sessionId == cacheSessionId) {
+            // Its answer, if one is still coming, has nowhere to go: stop it for real.
+            conversationEpoch++
+            handleCancelGeneration().collect { emit(it) }
+            sessionContext = AgentSessionContext()
+            completedTypingIds.clear()
             emit(PartialState.ChatItemsReplaced(emptyList()))
             uncachedSessionId = newSessionId()
             emit(PartialState.SessionUpdated(lastEntity = null))
@@ -635,9 +724,11 @@ class AgentViewModel(
     /** Persists one bubble. Silently skips types the codec cannot serialize. */
     private suspend fun cacheBubble(
         item: ChatItem,
-        status: CachedStatus = CachedStatus.SUCCESS
+        status: CachedStatus = CachedStatus.SUCCESS,
+        /** Defaults to the conversation on screen; a detached generation passes its own. */
+        targetSessionId: String? = cacheSessionId
     ) {
-        val sessionId = cacheSessionId ?: return
+        val sessionId = targetSessionId ?: return
         val (type, payload) = ChatBubbleCodec.encode(item.content) ?: return
         runCatching {
             val order = saveCachedMessageUseCase.nextOrder(sessionId)
@@ -734,7 +825,8 @@ class AgentViewModel(
                 source = preview.filePath,
                 durationMs = preview.durationMs.toLong(),
                 amplitudes = preview.amplitudes
-            )
+            ),
+            isEntering = true
         )
         emit(PartialState.VoicePreviewUpdated(null))
         emit(PartialState.NewChatItems(listOf(userItem)))
@@ -874,8 +966,11 @@ class AgentViewModel(
 
     // ─── Helpers ──────────────────────────────────────────────────────────────
 
-    private suspend fun dispatchEntity(entity: AiEntityDN): List<ChatBubbleContent> {
-        return when (val result = actionDispatcher.dispatch(entity, sessionContext)) {
+    private suspend fun dispatchEntity(
+        entity: AiEntityDN,
+        context: AgentSessionContext = sessionContext
+    ): List<ChatBubbleContent> {
+        return when (val result = actionDispatcher.dispatch(entity, context)) {
             is AgentServiceResult.Success -> result.bubbles
 
             is AgentServiceResult.FeatureDisabled ->
@@ -931,8 +1026,8 @@ class AgentViewModel(
 
         is PartialState.UpdateChatItem -> {
             currentState.copy(
-                chatItems = currentState.chatItems.map { 
-                    if (it.id == partialState.item.id) partialState.item else it 
+                chatItems = currentState.chatItems.map {
+                    if (it.id == partialState.item.id) partialState.item else it
                 }
             )
         }
@@ -964,6 +1059,9 @@ class AgentViewModel(
 
         is PartialState.SessionsLoaded ->
             currentState.copy(sessions = partialState.sessions)
+
+        is PartialState.IdentityLoaded ->
+            currentState.copy(userFirstName = partialState.firstName)
 
         is PartialState.HistoryVisibilityChanged ->
             currentState.copy(isHistoryVisible = partialState.isVisible)
