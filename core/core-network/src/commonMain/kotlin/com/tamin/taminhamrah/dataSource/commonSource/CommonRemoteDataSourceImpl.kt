@@ -25,7 +25,6 @@ import com.tamin.taminhamrah.model.common.JobTitleDTO
 import com.tamin.taminhamrah.model.common.UserInsuredInfoDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
-import io.ktor.client.statement.HttpResponse
 
 internal class CommonRemoteDataSourceImpl(
     private val commonApiService: CommonApiService,
