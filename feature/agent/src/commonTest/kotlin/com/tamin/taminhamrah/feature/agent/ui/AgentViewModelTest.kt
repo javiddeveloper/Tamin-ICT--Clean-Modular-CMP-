@@ -134,6 +134,45 @@ class FakeAgentChatCacheRepository : com.tamin.taminhamrah.repository.AgentChatC
         (messages.filter { it.sessionId == sessionId }.maxOfOrNull { it.messageOrder } ?: -1) + 1
 }
 
+/** Only [getIdentityInfo] is exercised by [AgentViewModel] — everything else is unused. */
+class FakeIdentityUserRepository(
+    private val identity: com.tamin.taminhamrah.model.identity.IdentityInfoDN? = null
+) : com.tamin.taminhamrah.repository.UserRepository {
+    override fun getIdentityInfo() = flow { identity?.let { emit(it) } }
+    override suspend fun getUserProfileImage() = TODO("not used in AgentViewModelTest")
+    override suspend fun fetchTaminRelation() = TODO("not used in AgentViewModelTest")
+    override suspend fun sendImageRequest(branchCode: String, serialId: String) = TODO("not used in AgentViewModelTest")
+    override suspend fun changeMobile(mobileNumber: String) = TODO("not used in AgentViewModelTest")
+    override suspend fun verifyChangeMobileCode(mobile: String, otp: String, otpHashCode: String) = TODO("not used in AgentViewModelTest")
+    override suspend fun getSubDominantsInfo(filters: List<com.tamin.taminhamrah.model.request.ApiFilterDN>) = TODO("not used in AgentViewModelTest")
+    override suspend fun getBankAccountList(filters: List<com.tamin.taminhamrah.model.request.ApiFilterDN>) = TODO("not used in AgentViewModelTest")
+    override suspend fun getInsuredActiveBranch() = TODO("not used in AgentViewModelTest")
+    override suspend fun getRelationTaminAll(filters: List<com.tamin.taminhamrah.model.request.ApiFilterDN>) = TODO("not used in AgentViewModelTest")
+    override fun getElectronicFile(filters: List<com.tamin.taminhamrah.model.request.ApiFilterDN>) = TODO("not used in AgentViewModelTest")
+    override suspend fun downloadDocument(url: String) = TODO("not used in AgentViewModelTest")
+    override suspend fun getUserProfile() = TODO("not used in AgentViewModelTest")
+    override suspend fun getCurrentUser() = TODO("not used in AgentViewModelTest")
+    override fun checkUserIsNew(nationalId: String) = TODO("not used in AgentViewModelTest")
+    override suspend fun registerBankAccount(
+        accountNumber: String,
+        bankCode: String,
+        accountTypeCode: String,
+        startDateMillis: Long,
+    ) = TODO("not used in AgentViewModelTest")
+    override suspend fun getStatusCertificateReport(filters: List<com.tamin.taminhamrah.model.request.ApiFilterDN>) = TODO("not used in AgentViewModelTest")
+    override suspend fun getWageCertificateReport(filters: List<com.tamin.taminhamrah.model.request.ApiFilterDN>) = TODO("not used in AgentViewModelTest")
+    override suspend fun getRecipients(filters: List<com.tamin.taminhamrah.model.request.ApiFilterDN>) = TODO("not used in AgentViewModelTest")
+}
+
+/** Never called: the test identity has no city ids, so [IdentityInfoUseCase] never reaches it. */
+class FakeIdentityCityProvinceRepository : com.tamin.taminhamrah.repository.CityProvinceRepository {
+    override fun getCity(cityId: String) = TODO("not used in AgentViewModelTest")
+    override fun getProvince(provinceId: String) = TODO("not used in AgentViewModelTest")
+    override fun getProvinces() = TODO("not used in AgentViewModelTest")
+    override fun getCities(cityName: String?, provinceCode: String?) = TODO("not used in AgentViewModelTest")
+    override fun getCitiesByProvince(provinceCode: String) = TODO("not used in AgentViewModelTest")
+}
+
 class FakeAgentRepository : AgentRepository {
     var checkChatAllowedResult: Result<ChatAllowedDN> = Result.success(ChatAllowedDN(canStartChat = true, chatToken = "fake-token", errorMessage = null))
     var sendPromptFlow: kotlinx.coroutines.flow.Flow<AgentPollingState> = flowOf()
@@ -271,7 +310,11 @@ class AgentViewModelTest {
             com.tamin.taminhamrah.useCases.agent.SaveCachedMessageUseCase(cache),
             com.tamin.taminhamrah.useCases.agent.GetCachedMessagesUseCase(cache),
             com.tamin.taminhamrah.useCases.agent.DeletePendingAgentMessagesUseCase(cache),
-            com.tamin.taminhamrah.useCases.agent.UpdateAgentSessionUseCase(cache)
+            com.tamin.taminhamrah.useCases.agent.UpdateAgentSessionUseCase(cache),
+            com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase(
+                FakeIdentityUserRepository(),
+                FakeIdentityCityProvinceRepository()
+            )
         )
     }
 

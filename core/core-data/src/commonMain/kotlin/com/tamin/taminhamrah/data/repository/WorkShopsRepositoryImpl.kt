@@ -383,10 +383,9 @@ class WorkShopsRepositoryImpl(
         val filters = buildFilters {
             add(FilterProperty.WORKSHOPID_ID, query.workshopId)
             add(FilterProperty.WORKSHOPID_BRANCH_CODE, query.branchCode)
-            // The old client crossed these two over, so a stakeholder search filtered on the wrong
-            // column. Each value goes to the property that names it.
-            add(FilterProperty.INSURANCE_ID, query.insuranceNumber)
-            add(FilterProperty.INSURANCE_NATIONAL_ID, query.nationalId)
+            // The row's own national-code column — see FilterProperty.STAKEHOLDER_NATIONAL_ID for
+            // why not `workshopId.*`, which is the workshop entity and answers 500.
+            add(FilterProperty.STAKEHOLDER_NATIONAL_ID, query.nationalId)
         }
         return remoteDataSource
             .getWorkshopStackHolders(pageQuery(query.page, query.pageSize, filters))

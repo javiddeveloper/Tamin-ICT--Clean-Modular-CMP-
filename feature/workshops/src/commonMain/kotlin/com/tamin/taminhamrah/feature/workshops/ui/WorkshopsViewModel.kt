@@ -2,13 +2,13 @@ package com.tamin.taminhamrah.feature.workshops.ui
 
 import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.FeatureManager
-import com.tamin.taminhamrah.feature.workshops.ui.contract.WORKSHOP_STATS_PAGE_SIZE
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopSearch
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopStats
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsEvent
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsIntent
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopsUiState.PartialState
+import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAction
 import com.tamin.taminhamrah.mapper.workshop.toPresentation
 import com.tamin.taminhamrah.model.workshop.ArticleSixteenDebtQuery
@@ -99,26 +99,46 @@ class WorkshopsViewModel(
                 page = page,
             )
         )
-        emit(
-            PartialState.Loaded(
-                uiState.value.list.loaded(result, isFirstPage = page == 0) { it.toPresentation() }
-            )
-        )
+        val list = uiState.value.list.loaded(result, isFirstPage = page == 0) { it.toPresentation() }
+        emit(PartialState.Loaded(list))
 
         if (page == 0 && !search.isNotEmpty && status == null && uiState.value.stats == null) {
-            emitAll(countStats(result.total))
+            emitAll(countStats(firstPage = list))
         }
     }.catch { emit(PartialState.Error(it.toSingleLineMessage())) }
 
-    private fun countStats(total: Int): Flow<PartialState> = flow {
-        val active = getEmployerAgreements(
-            WorkshopListQuery(
-                status = WorkshopActivityStatus.ACTIVE,
-                pageSize = WORKSHOP_STATS_PAGE_SIZE,
-            )
-        ).total
-        emit(PartialState.StatsLoaded(WorkshopStats(total = total, active = active)))
-    }.catch { emit(PartialState.StatsLoaded(WorkshopStats(total = total))) }
+    /**
+     * The strip's figures, counted the way the list counts its rows.
+     *
+     * The service answers one row per agreement, so a workshop held under nine agreements is nine
+     * rows and nine in its `total` — while the list shows it once, because [PagedListState.loaded]
+     * keeps only the first of identical rows. Taking the service's totals put ۹ over a list of ۱.
+     * So the rest of the pages are folded through that same `loaded`, and the figures are read off
+     * the rows it keeps: one rule for what counts as a workshop, not two that drift apart.
+     *
+     * A list that fits on its first page — the usual case — costs no request at all.
+     *
+     * ponytail: one request per further page of ten, bounded by the service's own total; an
+     * employer with hundreds of agreements pays that on opening. Ask for a server-side distinct
+     * count if that ever shows.
+     */
+    private fun countStats(firstPage: PagedListState<WorkshopPR>): Flow<PartialState> {
+        // Outside the builder so the fallback below sees every page that arrived, not just the first.
+        var all = firstPage
+        return flow {
+            while (all.hasMore) {
+                val next = getEmployerAgreements(WorkshopListQuery(page = all.nextPage))
+                all = all.loaded(next, isFirstPage = false) { it.toPresentation() }
+            }
+            emit(PartialState.StatsLoaded(all.items.toStats()))
+            // A later page failing still leaves the figures of what did arrive, counted the same way.
+        }.catch { emit(PartialState.StatsLoaded(all.items.toStats())) }
+    }
+
+    private fun List<WorkshopPR>.toStats() = WorkshopStats(
+        total = size,
+        active = count { it.status == WorkshopActivityStatus.ACTIVE },
+    )
 
     private fun loadMore(): Flow<PartialState> {
         val list = uiState.value.list

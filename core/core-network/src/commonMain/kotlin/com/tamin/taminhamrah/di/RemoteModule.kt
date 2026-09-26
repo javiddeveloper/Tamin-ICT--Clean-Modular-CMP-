@@ -11,7 +11,9 @@ import com.tamin.taminhamrah.apiService.VersionHistoryApiServiceImpl
 import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSource
 import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSource
+import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSourceFakeImpl
 import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSourceSelector
 import com.tamin.taminhamrah.dataSource.paymentSource.FakePaymentGatewayRemoteDataSource
 import com.tamin.taminhamrah.dataSource.paymentSource.PaymentGatewayRemoteDataSource
 import com.tamin.taminhamrah.dataSource.paymentSource.PaymentGatewayRemoteDataSourceImpl
@@ -31,6 +33,8 @@ import com.tamin.taminhamrah.dataSource.employerInfo.EmployerInfoRemoteDataSourc
 import com.tamin.taminhamrah.dataSource.employerInfo.EmployerInfoRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.historyObjection.HistoryObjectionRemoteDataSource
 import com.tamin.taminhamrah.dataSource.historyObjection.HistoryObjectionRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.objectionInsurance.ObjectionInsuranceRemoteDataSource
+import com.tamin.taminhamrah.dataSource.objectionInsurance.ObjectionInsuranceRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.historySource.HistoryRemoteDataSource
 import com.tamin.taminhamrah.dataSource.historySource.HistoryRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.inbox.PersonalInboxRemoteDataSource
@@ -69,6 +73,8 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
 import com.tamin.taminhamrah.dataSource.fractionContract.FractionContractRemoteDataSource
 import com.tamin.taminhamrah.dataSource.fractionContract.FractionContractRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.constructionInsurance.ConstructionInsuranceRemoteDataSource
+import com.tamin.taminhamrah.dataSource.constructionInsurance.ConstructionInsuranceRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.inquiryEducation.InquiryEducationRemoteDataSource
 import com.tamin.taminhamrah.dataSource.inquiryEducation.InquiryEducationRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.workersPayment.WorkersPaymentRemoteDataSource
@@ -178,6 +184,14 @@ val remoteModule = module {
         )
     }
 
+    single<ObjectionInsuranceRemoteDataSource> {
+        ObjectionInsuranceRemoteDataSourceImpl(
+            objectionInsuranceApiService = get(),
+            apiQueryBuilder = get(),
+            errorParser = get()
+        )
+    }
+
     single<PersonalInboxRemoteDataSource> {
         PersonalInboxRemoteDataSourceImpl(
             personalInboxApiService = get(named("personalInboxApiService")),
@@ -229,12 +243,23 @@ val remoteModule = module {
         )
     }
 
+    /**
+     * The live assistant, unless Developer Options → «شبیه‌سازی دستیار هوشمند» puts the
+     * fixture-backed fake in front of it (debug builds only; the mode is read per call).
+     */
     single<AgentRemoteDataSource> {
-        // The live assistant. AgentRemoteDataSourceFakeImpl serves local fixtures for offline work.
-        AgentRemoteDataSourceImpl(
-            agentApiService = get(named("agentApiService")),
-            errorParser = get(),
-            json = get()
+        val developerOptionsRepository = get<DeveloperOptionsRepository>()
+        AgentRemoteDataSourceSelector(
+            real = AgentRemoteDataSourceImpl(
+                agentApiService = get(named("agentApiService")),
+                errorParser = get(),
+                json = get()
+            ),
+            fake = AgentRemoteDataSourceFakeImpl(
+                json = get(),
+                mode = { developerOptionsRepository.getAgentMockMode() }
+            ),
+            developerOptionsRepository = developerOptionsRepository
         )
     }
 
@@ -309,6 +334,14 @@ val remoteModule = module {
     single<FractionContractRemoteDataSource> {
         FractionContractRemoteDataSourceImpl(
             fractionContractApiService = get(),
+            errorParser = get()
+        )
+    }
+
+    single<ConstructionInsuranceRemoteDataSource> {
+        ConstructionInsuranceRemoteDataSourceImpl(
+            apiService = get(),
+            queryBuilder = get(),
             errorParser = get()
         )
     }

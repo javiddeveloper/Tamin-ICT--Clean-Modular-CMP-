@@ -15,6 +15,7 @@ import taminx.core.core_ui.ic_tamin_workshop_inquiry
 import taminx.core.core_ui.ic_tamin_workshop_members
 import taminx.core.core_ui.ic_tamin_workshop_new_member
 import taminx.core.core_ui.ic_tamin_workshop_payment
+import taminx.core.core_ui.ic_tamin_workshop_stackholders
 import taminx.core.core_ui.ic_tamin_workshop_objection
 import taminx.core.core_ui.ic_tamin_workshop_turnover
 import taminx.core.core_ui.ic_tamin_workshop_article_sixteen
@@ -32,6 +33,8 @@ import taminx.core.core_ui.workshop_action_objection
 import taminx.core.core_ui.workshop_action_objection_desc
 import taminx.core.core_ui.workshop_action_payment_sheets
 import taminx.core.core_ui.workshop_action_payment_sheets_desc
+import taminx.core.core_ui.workshop_action_stackholders
+import taminx.core.core_ui.workshop_action_stackholders_desc
 
 /**
  * The services a picked کارگاه can be taken to, in the order the menu lists them.
@@ -98,6 +101,12 @@ enum class WorkshopAction(
         description = Res.string.workshop_action_members_desc,
         icon = Res.drawable.ic_tamin_workshop_members,
         tint = StatusTint.TEAL,
+    ),
+    STACKHOLDERS(
+        label = Res.string.workshop_action_stackholders,
+        description = Res.string.workshop_action_stackholders_desc,
+        icon = Res.drawable.ic_tamin_workshop_stackholders,
+        tint = StatusTint.WARNING,
     ),
 
     CONTRACT_ROWS(

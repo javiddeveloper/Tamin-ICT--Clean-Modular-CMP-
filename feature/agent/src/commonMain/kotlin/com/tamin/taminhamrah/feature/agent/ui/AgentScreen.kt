@@ -10,14 +10,12 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.style.TextOverflow
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.vectorResource
+import com.tamin.taminhamrah.ui.components.AgentOrb
 import com.tamin.taminhamrah.ui.components.IconTile
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
-import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.IconSize
-import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import taminx.core.core_ui.agent_screen_title
 import taminx.core.core_ui.agent_processing
@@ -62,14 +60,23 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material.icons.filled.Redeem
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.input.InputTransformation.Companion.keyboardOptions
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.rounded.OpenInNew
+import androidx.compose.material.icons.rounded.ErrorOutline
 import kotlinx.coroutines.delay
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -77,16 +84,22 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -114,18 +127,27 @@ import com.tamin.taminhamrah.feature.agent.ui.contract.AgentProcessingState
 import com.tamin.taminhamrah.feature.agent.ui.contract.AgentUiState
 import com.tamin.taminhamrah.feature.agent.ui.contract.ChatItem
 import com.tamin.taminhamrah.feature.agent.ui.contract.ChatSender
+import com.tamin.taminhamrah.ui.PreviewRtlTheme
+import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.blur.AppBarScrim
-import com.tamin.taminhamrah.ui.blur.safeHazeEffect
 import com.tamin.taminhamrah.ui.blur.safeHazeSource
-import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.components.toast.LocalToaster
+import com.tamin.taminhamrah.ui.components.toast.info
+import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.TaminCardPurpleStart
+import com.tamin.taminhamrah.ui.theme.TaminCardPurpleMid
+import com.tamin.taminhamrah.ui.theme.TaminCardPurpleEnd
+import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.components.coloredShadow
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.ThumbDown
 import androidx.compose.material.icons.outlined.ThumbUp
+import androidx.compose.ui.text.font.FontVariation.weight
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.HazeTint
+import kotlinx.coroutines.NonCancellable.start
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
@@ -228,42 +250,39 @@ private fun AgentContent(
     onRequestScroll: () -> Unit,
     onNavigateBack: () -> Unit,
 ) {
-    when {
-        // The header stays on every state, so the screen always has its title and a way back.
-        uiState.isCheckingPermission || uiState.isNotAllowed -> Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(LocalTaminColors.current.bgPage)
-        ) {
-            AgentTopBar(
-                isGenerating = false,
-                onIntent = onIntent,
-                onNavigateBack = onNavigateBack,
-                showSessionActions = false,
-            )
-            Box(modifier = Modifier.weight(1f)) {
-                if (uiState.isCheckingPermission) {
-                    PermissionCheckingIndicator()
-                } else {
-                    NotAllowedMessage(message = uiState.notAllowedMessage)
-                }
-            }
-        }
-        else -> ChatLayout(
-            uiState = uiState,
-            listState = listState,
-            onIntent = onIntent,
-            onRequestScroll = onRequestScroll,
-            onNavigateBack = onNavigateBack,
-        )
+    // Owned here, not in ChatLayout, because the history drawer below blurs the chat
+    // through it and must sit *above* ChatLayout in the same Box.
+    val hazeState = remember { HazeState() }
+    val focusManager = LocalFocusManager.current
+
+    // The composer may still hold focus when the history tile is tapped; drop it so the
+    // keyboard does not stay up under the drawer.
+    LaunchedEffect(uiState.isHistoryVisible) {
+        if (uiState.isHistoryVisible) focusManager.clearFocus()
     }
 
-    // Saved conversations. Rendered here rather than inside ChatLayout so it stays
-    // reachable regardless of which state the screen is in.
-    if (uiState.isHistoryVisible) {
-        ChatHistorySheet(
+    Box(modifier = Modifier.fillMaxSize()) {
+        when {
+            uiState.isCheckingPermission -> PermissionCheckingIndicator()
+            uiState.isNotAllowed        -> NotAllowedMessage(message = uiState.notAllowedMessage)
+            else -> ChatLayout(
+                uiState = uiState,
+                listState = listState,
+                hazeState = hazeState,
+                onIntent = onIntent,
+                onRequestScroll = onRequestScroll,
+                onNavigateBack = onNavigateBack,
+            )
+        }
+
+        // Saved conversations: a right-edge drawer over the chat. Always composed (driven
+        // by `visible`) so its close animation plays; last child so it draws on top and
+        // its glass can blur the chat beneath.
+        ChatHistoryDrawer(
+            visible = uiState.isHistoryVisible,
             sessions = uiState.sessions,
             activeSessionId = uiState.activeSessionId,
+            hazeState = hazeState,
             onDismiss = { onIntent(AgentIntent.CloseChatHistory) },
             onOpenSession = { onIntent(AgentIntent.LoadChatSession(it)) },
             onDeleteSession = { onIntent(AgentIntent.DeleteChatSession(it)) },
@@ -277,11 +296,11 @@ private fun AgentContent(
 private fun ChatLayout(
     uiState: AgentUiState,
     listState: LazyListState,
+    hazeState: HazeState,
     onIntent: (AgentIntent) -> Unit,
     onRequestScroll: () -> Unit,
     onNavigateBack: () -> Unit,
 ) {
-    val hazeState = remember { HazeState() }
     val density = LocalDensity.current
     // Bars overlay the content, so the chat list must reserve space for them via
     // contentPadding. We measure the real bar heights (they vary with system insets)
@@ -296,15 +315,43 @@ private fun ChatLayout(
         layoutScope.launch { listState.animateScrollToItem(index) }
     }
 
+    val isEmptyState = uiState.chatItems.isEmpty() && !uiState.isGenerating
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(LocalTaminColors.current.bgPage)
+            // The app runs edge-to-edge (MainActivity.enableEdgeToEdge()), so the
+            // manifest's windowSoftInputMode="adjustResize" is not honored by the
+            // system — Compose must consume the IME inset itself, same as every other
+            // screen in the app (see the imePadding() usages elsewhere under feature/*).
+            // Without this the keyboard simply overlaps the bottom bar/content instead
+            // of pushing them up.
+            .imePadding()
     ) {
+        // Full-bleed backdrop (Figma 90:14), behind the top bar too — otherwise its
+        // glass blur has nothing colorful to sample and washes out to the plain page.
+        // Always drawn, not just for the empty/orb state, so the message list matches it.
+        AgentBackground(
+            modifier = Modifier
+                .fillMaxSize()
+                .safeHazeSource(state = hazeState)
+        )
+
         // ── Scrolling content: the haze source, sitting behind both bars ──
-        if (uiState.chatItems.isEmpty() && !uiState.isGenerating) {
+        // Cross-fade + gentle scale between the greeting and the message list, so
+        // starting a new chat (or sending the first message) doesn't cut abruptly.
+        AnimatedContent(
+            targetState = isEmptyState,
+            transitionSpec = {
+                (fadeIn(tween(280)) + scaleIn(initialScale = 0.96f, animationSpec = tween(280)))
+                    .togetherWith(fadeOut(tween(150)))
+            },
+            label = "agent_chat_content"
+        ) { targetIsEmptyState ->
+        if (targetIsEmptyState) {
             EmptyState(
-                onPromptClick = { onIntent(AgentIntent.SendTextPrompt(it)) },
+                userFirstName = uiState.userFirstName,
+                onSuggestionClick = { onIntent(AgentIntent.SendTextPrompt(it)) },
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(top = topPad, bottom = bottomPad)
@@ -324,7 +371,16 @@ private fun ChatLayout(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 // Top-to-bottom: no reverseLayout, newest items at bottom
             ) {
-                itemsIndexed(uiState.chatItems, key = { _, it -> it.id }) { index, item ->
+                // contentType matters here more than on a typical list: a chat row can be any
+                // of a dozen quite different layouts (text, markdown, table, chart, image,
+                // video, voice, …). Without it every row shares one null type and the list
+                // will happily try to reuse, say, a table row's slot for a text bubble, which
+                // just throws the reuse away and composes from scratch.
+                itemsIndexed(
+                    uiState.chatItems,
+                    key = { _, it -> it.id },
+                    contentType = { _, it -> it.content::class },
+                ) { index, item ->
                     // SuggestedPrompts appear after their preceding text bubble finishes
                     // typing, so its reveal delay tracks that text's length. Only computed
                     // for that content type to avoid coupling neighbors' recomposition.
@@ -334,45 +390,27 @@ private fun ChatLayout(
                         if (prevLen > 0) (prevLen * 15L) + 200L else 1500L
                     } else 1500L
 
-                    val isVoicePlaying = uiState.playingVoiceId == item.id
+                    // playingVoiceId stays set while the clip is paused (so the pinned player
+                    // survives), so the bubble's play/pause icon must follow isVoicePlaying —
+                    // the id alone only says which clip is loaded.
+                    val isVoiceLoaded = uiState.playingVoiceId == item.id
                     ChatBubbleItem(
                         item = item,
                         typingDelay = typingDelay,
                         onIntent = onIntent,
                         onRequestScroll = onRequestScroll,
-                        isVoicePlaying = isVoicePlaying,
-                        voicePositionMs = if (isVoicePlaying) uiState.voicePlaybackPositionMs else 0
+                        isVoicePlaying = isVoiceLoaded && uiState.isVoicePlaying,
+                        voicePositionMs = if (isVoiceLoaded) uiState.voicePlaybackPositionMs else 0
                     )
                 }
 
-                // Only the processing card stays inline with the conversation; the bare
-                // 3-dot indicator is lifted out into a floating chip (see overlay below).
-                if (uiState.isGenerating && uiState.processingState != null) {
+                // Both the bare 3-dot indicator and the processing card render inline,
+                // directly under the last message, instead of floating elsewhere.
+                if (uiState.isGenerating) {
                     item { TypingIndicatorBubble(processingState = uiState.processingState) }
                 }
             }
         }
-
-        // ── Pinned voice player: keeps a playing message reachable while scrolling ──
-        uiState.playingVoiceId?.let { playingId ->
-            PinnedVoicePlayer(
-                isPlaying = uiState.isVoicePlaying,
-                positionMs = uiState.voicePlaybackPositionMs,
-                durationMs = uiState.voicePlaybackDurationMs,
-                onTogglePlay = {
-                    uiState.chatItems.firstOrNull { it.id == playingId }
-                        ?.let { it.content as? ChatBubbleContent.Voice }
-                        ?.let { onIntent(AgentIntent.ToggleVoicePlayback(playingId, it.source)) }
-                },
-                onStop = { onIntent(AgentIntent.StopVoicePlayback) },
-                onClick = {
-                    val index = uiState.chatItems.indexOfFirst { it.id == playingId }
-                    if (index >= 0) scrollToIndex(index)
-                },
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = topPad + 8.dp, start = 16.dp, end = 16.dp)
-            )
         }
 
         // ── Offline notice: the cached conversation stays readable, sending is off ──
@@ -384,35 +422,68 @@ private fun ChatLayout(
             )
         }
 
-        // ── Floating 3-dot indicator: separated from the list, pinned top-center ──
-        AnimatedVisibility(
-            visible = uiState.isGenerating && uiState.processingState == null,
-            enter = fadeIn() + scaleIn(initialScale = 0.8f),
-            exit = fadeOut() + scaleOut(targetScale = 0.8f),
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = topPad + 12.dp)
-        ) {
-            FloatingTypingIndicator()
-        }
-
         // ── Top toolbar: blurred, overlays the content, seen-through from the top ──
-        AgentTopBar(
-            isGenerating = uiState.isGenerating,
-            onIntent = onIntent,
-            onNavigateBack = onNavigateBack,
+        // The pinned voice player shares the toolbar's measured column, so its height flows
+        // into topPad and the chat list is pushed down beneath it instead of being covered —
+        // and because the reveal is an expand/shrink, that push animates along with it.
+        Column(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .onSizeChanged { topBarHeightPx = it.height }
-        )
+        ) {
+            AgentTopBar(
+                isGenerating = uiState.isGenerating,
+                isOffline = uiState.isOffline,
+                sessionsCount = uiState.sessions.size,
+                hazeState = hazeState,
+                onIntent = onIntent,
+                onNavigateBack = onNavigateBack,
+            )
+
+            // ── Pinned voice player: keeps a playing message reachable while scrolling ──
+            // The last playing id is kept so the strip still has something to act on while
+            // it animates out after playback ends (uiState.playingVoiceId is null by then).
+            var lastPlayingVoiceId by remember { mutableStateOf<String?>(null) }
+            uiState.playingVoiceId?.let { lastPlayingVoiceId = it }
+            AnimatedVisibility(
+                visible = uiState.playingVoiceId != null,
+                enter = expandVertically(tween(PINNED_PLAYER_ANIM_MS), expandFrom = Alignment.Top) +
+                    fadeIn(tween(PINNED_PLAYER_ANIM_MS)),
+                exit = shrinkVertically(tween(PINNED_PLAYER_ANIM_MS), shrinkTowards = Alignment.Top) +
+                    fadeOut(tween(PINNED_PLAYER_ANIM_MS)),
+                label = "pinned_voice_player"
+            ) {
+                val playingId = lastPlayingVoiceId
+                PinnedVoicePlayer(
+                    isPlaying = uiState.isVoicePlaying,
+                    positionMs = uiState.voicePlaybackPositionMs,
+                    durationMs = uiState.voicePlaybackDurationMs,
+                    hazeState = hazeState,
+                    onTogglePlay = {
+                        if (playingId == null) return@PinnedVoicePlayer
+                        uiState.chatItems.firstOrNull { it.id == playingId }
+                            ?.let { it.content as? ChatBubbleContent.Voice }
+                            ?.let { onIntent(AgentIntent.ToggleVoicePlayback(playingId, it.source)) }
+                    },
+                    onStop = { onIntent(AgentIntent.StopVoicePlayback) },
+                    onClick = {
+                        val index = uiState.chatItems.indexOfFirst { it.id == playingId }
+                        if (index >= 0) scrollToIndex(index)
+                    },
+                    // Same 14dp gutter as the toolbar card so the two read as one stack.
+                    modifier = Modifier.padding(start = 14.dp, end = 14.dp, bottom = 5.dp)
+                )
+            }
+        }
 
         // ── Bottom input: global scrim gradient behind, solid pill on top ──
         // The typing/processing indicator is rendered once inside the LazyColumn above.
         //
-        // Inset handling: the activity is edge-to-edge, so the window is NOT resized for the
-        // keyboard (adjustResize has no effect) and the bar must lift itself. The union of the
-        // keyboard and navigation-bar insets is the larger of the two: above the keyboard while
-        // it is open, above the navigation bar otherwise — never both added together.
+        // Inset handling: the outer Box already consumes the IME inset via imePadding(),
+        // so this bar must NOT add its own `ime` padding — doing so would apply the
+        // keyboard height twice. Only the navigation bar is padded here; while the
+        // keyboard is open that inset is 0 (the IME covers it), so the bar lands
+        // directly on top of the keyboard.
         //
         // onSizeChanged sits before the padding so it reports the bar's *total* occupied
         // height (content + insets); the chat list reserves exactly that much space.
@@ -423,106 +494,277 @@ private fun ChatLayout(
                 .fillMaxWidth()
                 .onSizeChanged { inputBarHeightPx = it.height }
                 .background(AppBarScrim.bottomGradient)
-                .windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars))
+                .windowInsetsPadding(WindowInsets.navigationBars)
         ) {
-            val barPadding = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 8.dp)
-            when {
-                uiState.voiceRecording != null -> VoiceRecorderBar(
-                    state = uiState.voiceRecording,
-                    onStop = { onIntent(AgentIntent.StopVoiceRecording) },
-                    modifier = barPadding
-                )
-                uiState.voicePreview != null -> VoicePreviewBar(
-                    state = uiState.voicePreview,
-                    onDelete = { onIntent(AgentIntent.DeleteVoiceRecording) },
-                    onTogglePlay = { onIntent(AgentIntent.TogglePreviewPlayback) },
-                    onSeek = { onIntent(AgentIntent.SeekPreview(it)) },
-                    onSend = { onIntent(AgentIntent.SendVoiceRecording) },
-                    modifier = barPadding
-                )
-                else -> AgentInputBar(
-                    isGenerating = uiState.isGenerating,
-                    isEnabled = !uiState.isOffline,
-                    isVoiceEnabled = uiState.canSendVoice,
-                    onSend = { onIntent(AgentIntent.SendTextPrompt(it)) },
-                    onCancel = { onIntent(AgentIntent.CancelGeneration) },
-                    onStartVoice = {
-                        if (micPermission.granted) {
-                            onIntent(AgentIntent.StartVoiceRecording)
-                        } else {
-                            micPermission.request { granted ->
-                                if (granted) onIntent(AgentIntent.StartVoiceRecording)
+            // The composer pill in whichever mode applies, then the one-line disclaimer under
+            // it — part of this Box so the chat list reserves room for both.
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // The voice bars carry the same outer padding as AgentInputBar themselves, so the
+                // glass pill stays exactly in place when the composer swaps mode.
+                when {
+                    uiState.voiceRecording != null -> VoiceRecorderBar(
+                        state = uiState.voiceRecording,
+                        hazeState = hazeState,
+                        onStop = { onIntent(AgentIntent.StopVoiceRecording) }
+                    )
+                    uiState.voicePreview != null -> VoicePreviewBar(
+                        state = uiState.voicePreview,
+                        hazeState = hazeState,
+                        onDelete = { onIntent(AgentIntent.DeleteVoiceRecording) },
+                        onTogglePlay = { onIntent(AgentIntent.TogglePreviewPlayback) },
+                        onSeek = { onIntent(AgentIntent.SeekPreview(it)) },
+                        onSend = { onIntent(AgentIntent.SendVoiceRecording) }
+                    )
+                    else -> AgentInputBar(
+                        isGenerating = uiState.isGenerating,
+                        hazeState = hazeState,
+                        isEnabled = !uiState.isOffline,
+                        isVoiceEnabled = uiState.canSendVoice,
+                        onSend = { onIntent(AgentIntent.SendTextPrompt(it)) },
+                        onCancel = { onIntent(AgentIntent.CancelGeneration) },
+                        onStartVoice = {
+                            if (micPermission.granted) {
+                                onIntent(AgentIntent.StartVoiceRecording)
+                            } else {
+                                micPermission.request { granted ->
+                                    if (granted) onIntent(AgentIntent.StartVoiceRecording)
+                                }
                             }
                         }
-                    }
-                )
+                    )
+                }
+                ComposerDisclaimer()
             }
         }
     }
 }
 
+// Exact values pulled from the Figma node (90:87 "Background+Border+Shadow+OverlayBlur") —
+// this card has no equivalent in the shared TaminColors palette, so its glass/gradient/shadow
+// colors are reproduced literally rather than approximated from existing tokens.
+private val TopBarCardRadius = 22.dp
+private val TopBarCardShape = RoundedCornerShape(TopBarCardRadius)
+private val TopBarTileShape = RoundedCornerShape(13.dp)
+private val TopBarIconTint = AgentGlass.iconTint
+private val TopBarSubtitleColor = AgentGlass.textSecondary
+private val TopBarShadowColor = AgentGlass.shadowColor
+private val TopBarBadgeGradient = AgentColors.brandGradient
+
+/** One blink half-cycle for the online/offline status dot (fade out, then back in). */
+private const val TOP_BAR_STATUS_DOT_BLINK_DURATION_MS = 900
+// Pinned voice player reveal/dismiss under the toolbar (expand + fade, both directions).
+private const val PINNED_PLAYER_ANIM_MS = 260
+
+private val TopBarOnlineDotColor = AgentColors.onlineDot
+
 /**
- * The app's header: [TaminTopAppBar] on the brand gradient with its round-cornered bottom, the
- * back chevron in the start cap and the conversation actions in the end cap, as
- * [TaminTopAppBarButton]s. While a reply is generating the title carries a status line.
+ * Rich persona header replacing the old plain title bar: assistant name + online status on
+ * one side, history (with a saved-conversation-count badge) and new-chat actions on the
+ * other, and a back chevron at the far edge — matches the Figma "یارا" top bar card
+ * (node 90:87), reproduced at 1:1 spacing/color fidelity rather than approximated.
  */
 @Composable
 private fun AgentTopBar(
     isGenerating: Boolean,
+    isOffline: Boolean,
+    sessionsCount: Int,
+    hazeState: HazeState,
     onIntent: (AgentIntent) -> Unit,
     onNavigateBack: () -> Unit,
-    modifier: Modifier = Modifier,
-    showSessionActions: Boolean = true,
+    modifier: Modifier = Modifier
 ) {
-    val taminColors = LocalTaminColors.current
-    val title = stringResource(Res.string.agent_screen_title)
-    TaminTopAppBar(
-        title = title,
-        modifier = modifier,
-        navigationIcon = {
-            TaminTopAppBarButton(
-                icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                contentDescription = stringResource(Res.string.action_back),
-                onClick = onNavigateBack,
-            )
-        },
-        action = if (showSessionActions) {
-            {
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                    TaminTopAppBarButton(
-                        icon = vectorResource(Res.drawable.ic_history),
-                        contentDescription = stringResource(Res.string.agent_history),
-                        onClick = { onIntent(AgentIntent.OpenChatHistory) },
-                    )
-                    TaminTopAppBarButton(
-                        icon = Icons.Rounded.Add,
-                        contentDescription = stringResource(Res.string.agent_new_chat),
-                        onClick = { onIntent(AgentIntent.StartNewSession) },
-                    )
-                }
-            }
-        } else {
-            null
-        },
-        titleContent = {
-            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = taminColors.onGradient,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .windowInsetsPadding(WindowInsets.statusBars)
+            .padding(horizontal = 14.dp, vertical = 5.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(67.dp)
+                // Drop shadow from the Figma node ("Background+Border+Shadow+OverlayBlur").
+                // Its color was already captured as TopBarShadowColor but never drawn, so
+                // the card read as flat against the backdrop. Applied before clip() so the
+                // blur spills outside the rounded bounds instead of being cut off by them.
+                .coloredShadow(
+                    color = TopBarShadowColor.copy(alpha = 0.55f),
+                    borderRadius = TopBarCardRadius,
+                    blurRadius = 24.dp,
+                    offsetY = 10.dp
                 )
-                AnimatedVisibility(visible = isGenerating) {
-                    Text(
-                        text = stringResource(Res.string.agent_processing),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = taminColors.textHeaderSubtitle,
+                // Frosted blur of the chat scrolling underneath, then the sheen + hairline
+                // border. Without the blur the 16%-white sheen alone was see-through and
+                // the messages stayed legible behind the bar.
+                .agentFrostedGlassCard(TopBarCardShape, hazeState)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                // Two groups pinned to the two edges — not one flat spacedBy row. The Figma
+                // frame's fixed 10dp gaps only sum to exactly the card width at its own
+                // reference size; on a real device's width, spacedBy alone would just pack
+                // every icon to one side and leave a stray gap at the other (the "empty
+                // space next to the history icon" bug) instead of distributing it. Pinning
+                // the two logical clusters to opposite edges puts any leftover width where
+                // the design already shows the one flexible-looking gap: between the persona
+                // block and the add button.
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Right-edge cluster (RTL start): chevron, persona block.
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    // Chevron (back) — rightmost under RTL, matching the Figma layout exactly.
+                    TopBarGlassTile(
+                        icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                        contentDescription = "بازگشت",
+                        onClick = onNavigateBack
                     )
+
+                    // Persona block: name + "AI" pill, then the online-status row beneath it.
+                    Column(horizontalAlignment = Alignment.Start, verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(7.dp)
+                        ) {
+                            Text(
+                                text = "یارا",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = AgentColors.ink
+                                )
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .background(AgentColors.chipFill, RoundedCornerShape(CornerRadius.lg))
+                                    .border(1.dp, AgentColors.chipBorder, RoundedCornerShape(CornerRadius.lg))
+                                    .padding(top = 2.dp, bottom = 0.dp, start = 8.dp, end = 7.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "AI",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontSize = 8.5.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = AgentColors.onChip
+                                    )
+                                )
+                            }
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp)
+                        ) {
+                            val statusDotBlinkAlpha by rememberInfiniteTransition(label = "top_bar_status_dot_blink").animateFloat(
+                                initialValue = 1f,
+                                targetValue = 0.25f,
+                                animationSpec = infiniteRepeatable(
+                                    animation = tween(TOP_BAR_STATUS_DOT_BLINK_DURATION_MS, easing = LinearEasing),
+                                    repeatMode = RepeatMode.Reverse
+                                ),
+                                label = "top_bar_status_dot_blink_alpha"
+                            )
+                            val statusDotColor = if (isOffline) AgentColors.ink.copy(alpha = 0.4f) else TopBarOnlineDotColor
+                            Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .graphicsLayer { alpha = statusDotBlinkAlpha }
+                                    .coloredShadow(
+                                        color = statusDotColor.copy(alpha = 0.9f),
+                                        borderRadius = 3.dp,
+                                        blurRadius = 8.dp
+                                    )
+                                    .clip(CircleShape)
+                                    .background(statusDotColor)
+                            )
+                            Text(
+                                text = if (isGenerating) "در حال پردازش..."
+                                       else if (isOffline) "دستیار هوشمند · آفلاین"
+                                       else "دستیار هوشمند · آنلاین",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 11.sp,
+                                    color = TopBarSubtitleColor
+                                )
+                            )
+                        }
+                    }
+                }
+
+                // Left-edge cluster (RTL end): new chat, history+badge.
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    TopBarGlassTile(
+                        icon = Icons.Default.Add,
+                        contentDescription = "گفتگوی جدید",
+                        onClick = { onIntent(AgentIntent.StartNewSession) }
+                    )
+
+                    // History — leftmost under RTL, with the saved-conversation-count badge.
+                    Box {
+                        TopBarGlassTile(
+                            icon = Icons.Outlined.History,
+                            contentDescription = "گفتگوهای من",
+                            onClick = { onIntent(AgentIntent.OpenChatHistory) }
+                        )
+                        if (sessionsCount > 0) {
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .offset(x = 3.dp, y = (-3).dp)
+                                    .size(16.dp)
+                                    .clip(CircleShape)
+                                    .background(TopBarBadgeGradient)
+                                    .border(1.dp, AgentColors.ink.copy(alpha = 0.35f), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                NumericText(
+                                    text = (if (sessionsCount > 9) "9+" else sessionsCount.toString()).toPersianDigits(),
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.ExtraBold
+                                ),
+                                color = AgentColors.ink
+                            )
+                        }
+                    }
                 }
             }
-        },
-    )
+        }
+    }
+    }
+}
+
+/** One 34dp glass icon tile — the history/new-chat/back buttons on the top bar card. */
+@Composable
+private fun TopBarGlassTile(
+    icon: ImageVector,
+    contentDescription: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .size(34.dp)
+            .clip(TopBarTileShape)
+            .background(AgentColors.ink.copy(alpha = 0.10f))
+            .border(1.dp, AgentColors.ink.copy(alpha = 0.18f), TopBarTileShape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            tint = TopBarIconTint,
+            modifier = Modifier.size(18.dp)
+        )
+    }
 }
 
 // ─── Extension Card ───────────────────────────────────────────────────────────
@@ -532,11 +774,18 @@ private fun ExtensionCard(
     state: AgentProcessingState,
     modifier: Modifier = Modifier
 ) {
-    val taminColors = LocalTaminColors.current
     // Single shared shimmer clock for the whole card — the active step reads
     // this instead of each step spinning up its own infinite transition.
+    //
+    // Kept as the State itself, never unwrapped with `by` here: this card renders inside the
+    // chat LazyColumn, which is a Haze *source*, so anything that recomposes or redraws it
+    // makes every frosted surface on the screen re-blur. Reading the float in the composable
+    // body would recompose this whole card — and rebuild each step's modifier chain — sixty
+    // times a second for the entire time an answer is being prepared, which is exactly the
+    // moment the screen can least afford it. Passed down and read inside a graphicsLayer
+    // block instead, so the pulse only re-runs the layer block.
     val shimmer = rememberInfiniteTransition(label = "step_shimmer")
-    val pulseAlpha by shimmer.animateFloat(
+    val pulseAlpha = shimmer.animateFloat(
         initialValue = 0.4f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
@@ -569,14 +818,16 @@ private fun ExtensionCard(
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
-                        tint = taminColors.greenText,
+                        tint = AgentColors.success,
                         modifier = Modifier.size(16.dp)
                     )
                 }
                 Text(
                     text = stringResource(if (state.isCompleted) Res.string.agent_processing_done else Res.string.agent_processing),
                     style = MaterialTheme.typography.labelMedium.copy(
-                        color = if (state.isCompleted) taminColors.greenText else taminColors.blueText,
+                        // Transparent card straight on AgentBackground — the theme's
+                        // blueText is too dark to read there, white keeps it legible.
+                        color = if (state.isCompleted) AgentColors.success else AgentColors.ink,
                         fontWeight = FontWeight.SemiBold
                     )
                 )
@@ -613,16 +864,24 @@ private fun ExtensionCardStep(
     isActive: Boolean,
     isDone: Boolean,
     showLine: Boolean = false,
-    pulseAlpha: Float = 1f
+    /** The card's shared shimmer clock, as State: see the note in [ExtensionCard]. */
+    pulseAlpha: State<Float>
 ) {
-    val taminColors = LocalTaminColors.current
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .fillMaxWidth()
-            .then(if (isActive && !isDone) Modifier.alpha(pulseAlpha) else Modifier)
+            // graphicsLayer, not alpha(): the value is read in the layer block, at draw time,
+            // so the pulse never recomposes this row.
+            .then(
+                if (isActive && !isDone) {
+                    Modifier.graphicsLayer { alpha = pulseAlpha.value }
+                } else {
+                    Modifier
+                }
+            )
     ) {
         // Icon column with connector line
         Box(modifier = Modifier.width(20.dp), contentAlignment = Alignment.Center) {
@@ -632,7 +891,7 @@ private fun ExtensionCardStep(
                         .width(2.dp)
                         .height(24.dp)
                         .offset(y = 16.dp)
-                        .background(taminColors.divider)
+                        .background(AgentColors.ink.copy(alpha = 0.14f))
                 )
             }
             androidx.compose.animation.AnimatedVisibility(
@@ -643,7 +902,7 @@ private fun ExtensionCardStep(
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = stringResource(Res.string.agent_step_done),
-                    tint = taminColors.greenText,
+                    tint = AgentColors.success,
                     modifier = Modifier.size(14.dp)
                 )
             }
@@ -654,7 +913,7 @@ private fun ExtensionCardStep(
             ) {
                 IosSpinner(
                     modifier = Modifier.size(14.dp),
-                    color = taminColors.blueText
+                    color = AgentColors.ink
                 )
             }
             androidx.compose.animation.AnimatedVisibility(
@@ -666,21 +925,24 @@ private fun ExtensionCardStep(
                     modifier = Modifier
                         .size(6.dp)
                         .clip(CircleShape)
-                        .background(taminColors.chevron)
+                        .background(AgentColors.ink.copy(alpha = 0.35f))
                 )
             }
         }
 
         Spacer(Modifier.width(10.dp))
 
+        // Transparent card straight on AgentBackground — white-based tones instead
+        // of the theme's textPrimary/textSecondary/textMuted, which are too dark
+        // to read against that fixed-dark backdrop.
         Text(
             text = label,
             modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.bodySmall.copy(
                 color = when {
-                    isDone   -> taminColors.textSecondary
-                    isActive -> taminColors.textPrimary
-                    else     -> taminColors.textMuted
+                    isDone   -> AgentColors.ink.copy(alpha = 0.7f)
+                    isActive -> AgentColors.ink
+                    else     -> AgentColors.ink.copy(alpha = 0.4f)
                 }
             )
         )
@@ -689,7 +951,7 @@ private fun ExtensionCardStep(
             Icon(
                 imageVector = Icons.Default.KeyboardArrowLeft,
                 contentDescription = null,
-                tint = taminColors.greenText.copy(alpha = 0.7f),
+                tint = AgentColors.success.copy(alpha = 0.7f),
                 modifier = Modifier.size(16.dp)
             )
         }
@@ -701,7 +963,7 @@ private fun ExtensionCardStep(
 @Composable
 private fun IosSpinner(
     modifier: Modifier = Modifier,
-    color: Color = Color.White,
+    color: Color = AgentColors.ink,
     petalCount: Int = 8
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "ios_spinner")
@@ -751,7 +1013,6 @@ private fun IosSpinner(
 @Composable
 private fun TypingIndicatorBubble(processingState: AgentProcessingState?) {
     val currentLayoutDirection = LocalLayoutDirection.current
-    val taminColors = LocalTaminColors.current
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
@@ -785,7 +1046,6 @@ private fun SuggestedPromptChips(
     onPromptClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val taminColors = LocalTaminColors.current
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(Spacing.sm)
@@ -793,7 +1053,7 @@ private fun SuggestedPromptChips(
         Text(
             text = stringResource(Res.string.agent_suggestions_label),
             style = MaterialTheme.typography.labelMedium,
-            color = taminColors.textMuted,
+            color = AgentColors.ink.copy(alpha = 0.6f),
         )
         androidx.compose.foundation.layout.FlowRow(
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
@@ -804,21 +1064,23 @@ private fun SuggestedPromptChips(
     }
 }
 
-/** A prompt the user can send with one tap, in the app's blue chip style. */
+/**
+ * A prompt the user can send with one tap. A glass chip rather than the gradient action button:
+ * suggestions are options, and should not compete with the reply's real calls to action.
+ */
 @Composable
 private fun PromptChip(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val taminColors = LocalTaminColors.current
     val shape = RoundedCornerShape(CornerRadius.chip)
     Text(
         text = text,
         style = MaterialTheme.typography.bodySmall,
-        color = taminColors.blueText,
+        color = AgentGlass.textPrimary,
         fontWeight = FontWeight.Medium,
         textAlign = TextAlign.Center,
         modifier = modifier
             .clip(shape)
-            .background(taminColors.blueBg)
-            .border(Thickness.border, taminColors.blueBorder, shape)
+            .background(AgentGlass.tileFill)
+            .border(AgentGlass.borderWidth, AgentGlass.borderColor, shape)
             .clickable(onClick = onClick)
             .padding(horizontal = Spacing.md, vertical = Spacing.sm),
     )
@@ -830,47 +1092,26 @@ private fun PromptChip(text: String, onClick: () -> Unit, modifier: Modifier = M
  */
 @Composable
 private fun OfflineBanner(modifier: Modifier = Modifier) {
-    val taminColors = LocalTaminColors.current
     val shape = RoundedCornerShape(CornerRadius.lg)
     Text(
         text = stringResource(Res.string.agent_offline_banner),
         style = MaterialTheme.typography.labelMedium,
-        color = taminColors.dangerText,
+        color = AgentGlass.dangerText,
         modifier = modifier
             .clip(shape)
-            .background(taminColors.dangerBg)
-            .border(Thickness.border, taminColors.dangerBorder, shape)
+            .background(AgentGlass.dangerFill)
+            .border(Thickness.border, AgentGlass.dangerBorder, shape)
             .padding(horizontal = Spacing.md, vertical = Spacing.sm),
     )
 }
 
-/**
- * Standalone "thinking" indicator shown floating at the top-center of the chat, separate
- * from the message list. Used while the agent is generating but has no processing card yet.
- */
-@Composable
-private fun FloatingTypingIndicator() {
-    val taminColors = LocalTaminColors.current
-    Box(
-        modifier = Modifier
-            .shadow(
-                elevation = Elevation.md,
-                shape = CircleShape,
-                ambientColor = taminColors.shadowSubtle,
-                spotColor = taminColors.shadowSubtle
-            )
-            .clip(CircleShape)
-            .background(taminColors.bgSurface)
-            .border(Thickness.border, taminColors.border, CircleShape)
-            .padding(horizontal = Spacing.xlg, vertical = Spacing.smd)
-    ) {
-        TypingDotsIndicator()
-    }
-}
+// Same three-stop purple used for a dependant's insurance card (see
+// InsuranceCardComponents.kt) — reused here so each dot carries one stop of that
+// gradient instead of a single flat tint.
+private val TypingDotColors = listOf(TaminCardPurpleStart, TaminCardPurpleMid, TaminCardPurpleEnd)
 
 @Composable
 private fun TypingDotsIndicator() {
-    val taminColors = LocalTaminColors.current
     val transition = rememberInfiniteTransition(label = "typing")
     val dots = List(3) { index ->
         transition.animateFloat(
@@ -886,15 +1127,15 @@ private fun TypingDotsIndicator() {
     val density = LocalDensity.current
     val maxOffsetPx = with(density) { (-4).dp.toPx() }
     Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
-        dots.forEach { anim ->
+        dots.forEachIndexed { index, anim ->
             Box(
                 modifier = Modifier
-                    .size(6.dp)
+                    .size(8.dp)
                     // Lambda-based offset: reads the animated value at layout time so
                     // each frame only re-lays-out/redraws instead of recomposing.
                     .offset { IntOffset(x = 0, y = (maxOffsetPx * anim.value).roundToInt()) }
                     .clip(CircleShape)
-                    .background(taminColors.blueText.copy(alpha = 0.4f + (anim.value * 0.6f)))
+                    .background(TypingDotColors[index].copy(alpha = 0.5f + (anim.value * 0.5f)))
             )
         }
     }
@@ -1010,6 +1251,41 @@ private fun AgentMarkdown(
     )
 }
 
+// Every pattern below is compiled once, at class-init, not per line.
+//
+// They used to be written inline inside parseMarkdownLine/appendInlineStyles, which meant six
+// or more Pattern.compile calls for *every line* of *every* text bubble — and this runs again
+// each time a settled bubble scrolls back into view, so it showed up as scroll cost that grew
+// with the length of the conversation. MarkdownParser/MarkdownInlineParser in this module
+// already hold their patterns this way; this parser is now consistent with them.
+
+/** `1. ` / `2. ` … — the whole match is the prefix, so one pattern covers test and extract. */
+private val NumberedListPrefix = Regex("""^\d+\.\s+""")
+private val BulletListPrefix = Regex("""^[-*●•]\s+""")
+
+/**
+ * Inline spans, in priority order: bold+italic must be tried before bold, and bold before
+ * italic, or the shorter delimiter swallows the longer one's markers. The style of each is
+ * fixed, so the pairs carry the SpanStyle directly rather than a builder lambda.
+ */
+private val InlineMarkdownSpans: List<Pair<Regex, androidx.compose.ui.text.SpanStyle>> = listOf(
+    // ***bold+italic*** or ___bold+italic___
+    Regex("""(\*\*\*|___)(.*?)\1""") to androidx.compose.ui.text.SpanStyle(
+        fontWeight = FontWeight.Bold,
+        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+    ),
+    // **bold** or __bold__
+    Regex("""(\*\*|__)(.*?)\1""") to androidx.compose.ui.text.SpanStyle(fontWeight = FontWeight.Bold),
+    // *italic* or _italic_  (but not ** or __)
+    Regex("""(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)|(?<!_)_(?!_)(.*?)(?<!_)_(?!_)""") to
+        androidx.compose.ui.text.SpanStyle(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic),
+    // `inline code`
+    Regex("""`(.*?)`""") to androidx.compose.ui.text.SpanStyle(
+        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+        background = AgentColors.inlineCodeFill
+    ),
+)
+
 /**
  * Parses a single line of markdown into a styled AnnotatedString.
  *
@@ -1047,14 +1323,13 @@ private fun parseMarkdownLine(line: String): androidx.compose.ui.text.AnnotatedS
                     androidx.compose.ui.text.SpanStyle(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
             }
             // Numbered list: 1. / 2. / … — keep the number, add indent
-            Regex("^\\d+\\.\\s+").containsMatchIn(trimmed) -> {
-                val match = Regex("^(\\d+\\.\\s+)").find(trimmed)
-                val prefix = match?.value ?: ""
+            NumberedListPrefix.containsMatchIn(trimmed) -> {
+                val prefix = NumberedListPrefix.find(trimmed)?.value ?: ""
                 "  $prefix" + trimmed.removePrefix(prefix) to null
             }
             // Bullet list: -, *, ●, •
-            Regex("^[-*●•]\\s+").containsMatchIn(trimmed) -> {
-                "● " + Regex("^[-*●•]\\s+").replace(trimmed, "") to null
+            BulletListPrefix.containsMatchIn(trimmed) -> {
+                "● " + BulletListPrefix.replace(trimmed, "") to null
             }
             else -> line to null
         }
@@ -1075,41 +1350,16 @@ private fun parseMarkdownLine(line: String): androidx.compose.ui.text.AnnotatedS
  * Called from [parseMarkdownLine] after block-level prefix handling.
  */
 private fun androidx.compose.ui.text.AnnotatedString.Builder.appendInlineStyles(text: String) {
-    // Regex order matters: bold+italic must come before bold and italic.
-    val inlinePatterns = listOf(
-        // ***bold+italic*** or ___bold+italic___
-        Regex("(\\*\\*\\*|___)(.*?)\\1") to { _: String, content: String ->
-            androidx.compose.ui.text.SpanStyle(
-                fontWeight = FontWeight.Bold,
-                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
-            ) to content
-        },
-        // **bold** or __bold__
-        Regex("(\\*\\*|__)(.*?)\\1") to { _: String, content: String ->
-            androidx.compose.ui.text.SpanStyle(fontWeight = FontWeight.Bold) to content
-        },
-        // *italic* or _italic_  (but not ** or __)
-        Regex("(?<!\\*)\\*(?!\\*)(.*?)(?<!\\*)\\*(?!\\*)|(?<!_)_(?!_)(.*?)(?<!_)_(?!_)") to { _: String, content: String ->
-            androidx.compose.ui.text.SpanStyle(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic) to content
-        },
-        // `inline code`
-        Regex("`(.*?)`") to { _: String, content: String ->
-            androidx.compose.ui.text.SpanStyle(
-                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                background = androidx.compose.ui.graphics.Color(0x18000000)
-            ) to content
-        }
-    )
-
     // Build a flat list of (range, style, content) from all patterns
     data class Span(val start: Int, val end: Int, val style: androidx.compose.ui.text.SpanStyle, val content: String)
 
+    // Patterns come from InlineMarkdownSpans, which is compiled once — see the note there.
+    // Their order is the priority order: bold+italic before bold before italic.
     val spans = mutableListOf<Span>()
-    for ((regex, styleBuilder) in inlinePatterns) {
+    for ((regex, style) in InlineMarkdownSpans) {
         for (match in regex.findAll(text)) {
             // Extract the actual content (group 2 for bold+italic/bold, or 1/2 for italic)
             val content = match.groupValues.drop(1).firstOrNull { it.isNotEmpty() } ?: continue
-            val (style, _) = styleBuilder("", content)
             // Avoid overlapping spans from earlier (higher-priority) patterns
             val overlaps = spans.any { it.start < match.range.last + 1 && it.end > match.range.first }
             if (!overlaps) spans.add(Span(match.range.first, match.range.last + 1, style, content))
@@ -1145,12 +1395,28 @@ private fun ChatBubbleItem(
     onIntent: (AgentIntent) -> Unit = {},
     onRequestScroll: () -> Unit = {},
     isVoicePlaying: Boolean = false,
-    voicePositionMs: Int = 0
+    voicePositionMs: Int = 0,
+    modifier: Modifier = Modifier
 ) {
     val isUser = item.sender == ChatSender.User
     val currentLayoutDirection = LocalLayoutDirection.current
 
     var isAnimationFinished by rememberSaveable(item.id) { mutableStateOf(!item.isTypingAnimating) }
+
+    // Entrance: bubbles that just landed in the live session (user message, voice note,
+    // error card, ...) slide up + fade in once. Rows loaded from history, or already
+    // settled, start at full opacity/position — no replay when a row is recomposed after
+    // scrolling back into view, since the ViewModel is the source of truth for isEntering.
+    val enterProgress = remember(item.id) { Animatable(if (item.isEntering) 0f else 1f) }
+    LaunchedEffect(item.id, item.isEntering) {
+        if (item.isEntering) {
+            enterProgress.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = 280, easing = FastOutSlowInEasing)
+            )
+            onIntent(AgentIntent.OnEnterAnimationFinished(item.id))
+        }
+    }
 
     // Shared renderer for all three layouts — only the wrapper (user surface / agent
     // full-width / processing box) differs. Content itself is drawn in the caller's
@@ -1180,7 +1446,12 @@ private fun ChatBubbleItem(
 
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = modifier
+                .graphicsLayer {
+                    alpha = enterProgress.value
+                    translationY = (1f - enterProgress.value) * ENTER_SLIDE_DISTANCE.toPx()
+                }
+                .fillMaxWidth(),
             horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
         ) {
             // Full-width bubbles: system notes and data views draw their own container.
@@ -1188,45 +1459,29 @@ private fun ChatBubbleItem(
                                          item.content is ChatBubbleContent.DataView
 
             when {
-                // Voice draws its own container (with waveform + progress), so it must
-                // not be wrapped in the plain text Surface — otherwise the bar is hidden.
-                item.content is ChatBubbleContent.Voice -> {
-                    Box { renderContent(MaterialTheme.colorScheme.onSurface) }
+                // The assistant's voice draws its own container (with waveform + progress), so
+                // it must not be wrapped in the plain text Surface — otherwise the bar is hidden.
+                // The user's voice, by contrast, sits in the same gradient card as their text.
+                item.content is ChatBubbleContent.Voice && !isUser -> {
+                    Box { renderContent(AgentGlass.textPrimary) }
                 }
 
                 isProcessingOrEmbedded -> {
                     Box(modifier = Modifier.fillMaxWidth()) {
-                        renderContent(MaterialTheme.colorScheme.onSurface)
+                        renderContent(AgentGlass.textPrimary)
                     }
                 }
 
-                isUser -> {
-                    // The user's words on the app's brand gradient, like its primary buttons; the
-                    // corner nearest the screen edge is tucked in to point at the sender.
-                    val taminColors = LocalTaminColors.current
-                    Box(
-                        modifier = Modifier
-                            .widthIn(max = USER_BUBBLE_MAX_WIDTH)
-                            .clip(
-                                RoundedCornerShape(
-                                    topStart = CornerRadius.xl,
-                                    topEnd = CornerRadius.sm,
-                                    bottomStart = CornerRadius.xl,
-                                    bottomEnd = CornerRadius.xl,
-                                )
-                            )
-                            .background(taminTopAppBarGradient())
-                            .padding(vertical = Spacing.smPlus, horizontal = Spacing.smd)
-                    ) {
-                        renderContent(taminColors.onGradient)
-                    }
-                }
+                isUser -> UserBubbleCard { contentColor -> renderContent(contentColor) }
 
                 else -> {
-                    // Agent: full width, no Surface card background, no avatar padding
+                    // Agent: full width, no Surface card background, no avatar padding.
+                    // Renders directly on AgentBackground (no card of its own), so its
+                    // text follows that backdrop's fixed-dark palette rather than the
+                    // light/dark app theme's textPrimary — same reasoning as EmptyState.
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Box(modifier = Modifier.padding(vertical = Spacing.xs)) {
-                            renderContent(LocalTaminColors.current.textPrimary)
+                            renderContent(AgentColors.ink)
                         }
                         // Follow-up suggestions belong to this reply, so they render inside
                         // the same bubble instead of forming their own chat row.
@@ -1249,7 +1504,60 @@ private fun ChatBubbleItem(
     }
 }
 
+/**
+ * The user's card — text or voice — on the app's brand gradient, like its primary buttons;
+ * the corner nearest the screen edge is tucked in slightly to point at the sender. [content]
+ * receives the on-gradient color to draw with; the send time is appended underneath.
+ */
+@Composable
+private fun UserBubbleCard(content: @Composable (contentColor: Color) -> Unit) {
+    val userBubbleShape = RoundedCornerShape(
+        topStart = CornerRadius.xl,
+        topEnd = CornerRadius.xl,
+        bottomStart = CornerRadius.xl,
+        bottomEnd = CornerRadius.sm,
+    )
+    val userBubbleBorderBrush = Brush.linearGradient(
+        colors = listOf(AgentColors.ink.copy(alpha = 0.05f), AgentColors.ink.copy(alpha = 0.3f))
+    )
+    Box(
+        modifier = Modifier
+            .widthIn(max = USER_BUBBLE_MAX_WIDTH)
+            .clip(userBubbleShape)
+            .background(AgentColors.bubbleGradient)
+            .border(Thickness.border, userBubbleBorderBrush, userBubbleShape)
+            .padding(vertical = Spacing.smPlus, horizontal = Spacing.smd)
+    ) {
+        Column {
+            content(AgentColors.onBubble)
+            Text(
+                text = rememberChatTimeString(),
+                style = MaterialTheme.typography.labelSmall,
+                color = AgentColors.onBubble.copy(alpha = 0.5f),
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(top = Spacing.sm)
+            )
+        }
+    }
+}
+
 // ─── Bubble Content Renderer ──────────────────────────────────────────────────
+
+/**
+ * Reports "the reveal is done" for a bubble type that has no reveal animation to wait for.
+ *
+ * Must not be a bare call from the composition: [onAnimationFinished] writes
+ * `isAnimationFinished`, which the enclosing [ChatBubbleItem] has already read, so writing it
+ * during composition schedules a second composition pass for that row — and it also sends an
+ * intent into the ViewModel from composition. Both used to happen for every media/data bubble,
+ * every time one scrolled into view. An effect keyed on the row's id does it once instead.
+ */
+@Composable
+private fun ReportAnimationFinished(itemId: String, onAnimationFinished: () -> Unit) {
+    val callback by rememberUpdatedState(onAnimationFinished)
+    LaunchedEffect(itemId) { callback() }
+}
 
 @Composable
 private fun BubbleContentRenderer(
@@ -1257,7 +1565,7 @@ private fun BubbleContentRenderer(
     isTypingAnimating: Boolean = false,
     typingDelay: Long = 1500L,
     onIntent: (AgentIntent) -> Unit = {},
-    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+    contentColor: Color = AgentGlass.textPrimary,
     onRequestScroll: () -> Unit = {},
     onAnimationFinished: () -> Unit = {},
     itemId: String = "",
@@ -1265,11 +1573,10 @@ private fun BubbleContentRenderer(
     isVoicePlaying: Boolean = false,
     voicePositionMs: Int = 0
 ) {
-    val taminColors = LocalTaminColors.current
 
     when (content) {
         is ChatBubbleContent.Voice -> {
-            onAnimationFinished()
+            ReportAnimationFinished(itemId, onAnimationFinished)
             VoiceChatBubble(
                 filePath = content.source,
                 durationMs = content.durationMs ?: 0L,
@@ -1284,25 +1591,32 @@ private fun BubbleContentRenderer(
 
         // A plain message carrying a link (e.g. a general_response in CLIENT mode) is drawn as
         // markdown, so its links become buttons instead of raw `[label](@key)` text.
-        is ChatBubbleContent.Text -> if (MarkdownParser.containsLink(content.message)) {
-            AgentMarkdown(
-                text = content.message,
-                isAnimating = isTypingAnimating,
-                contentColor = contentColor,
-                onIntent = onIntent,
-                onRequestScroll = onRequestScroll,
-                onAnimationFinished = onAnimationFinished,
-            )
-        } else {
-            val textStyle = MaterialTheme.typography.bodyMedium.copy(
-                color = contentColor,
-                lineHeight = 22.sp
-            )
-            if (isTypingAnimating) {
-                TypewriterText(text = content.message, style = textStyle, onRequestScroll = onRequestScroll, onAnimationFinished = onAnimationFinished)
+        is ChatBubbleContent.Text -> {
+            val hasLink = remember(content.message) { MarkdownParser.containsLink(content.message) }
+            if (hasLink) {
+                AgentMarkdown(
+                    text = content.message,
+                    isAnimating = isTypingAnimating,
+                    contentColor = contentColor,
+                    onIntent = onIntent,
+                    onRequestScroll = onRequestScroll,
+                    onAnimationFinished = onAnimationFinished,
+                )
             } else {
-                Text(text = parseMarkdownBlock(content.message), style = textStyle)
-                onAnimationFinished()
+                val textStyle = MaterialTheme.typography.bodyMedium.copy(
+                    color = contentColor,
+                    lineHeight = 22.sp,
+                    fontWeight = if (isUser) FontWeight.Medium else FontWeight.Normal,
+                )
+                if (isTypingAnimating) {
+                    TypewriterText(text = content.message, style = textStyle, onRequestScroll = onRequestScroll, onAnimationFinished = onAnimationFinished)
+                } else {
+                    // Remembered: a settled bubble is re-composed every time it scrolls back
+                    // into view, and parsing is not free (see the note on InlineMarkdownSpans).
+                    val parsed = remember(content.message) { parseMarkdownBlock(content.message) }
+                    Text(text = parsed, style = textStyle)
+                    ReportAnimationFinished(itemId, onAnimationFinished)
+                }
             }
         }
 
@@ -1323,12 +1637,12 @@ private fun BubbleContentRenderer(
                     Text(
                         text = title,
                         style = MaterialTheme.typography.labelLarge.copy(
-                            color = MaterialTheme.colorScheme.primary,
+                            color = AgentGlass.accent,
                             fontWeight = FontWeight.Bold
                         )
                     )
                     HorizontalDivider(
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f),
+                        color = AgentGlass.borderColor,
                         thickness = 0.5.dp,
                         modifier = Modifier.padding(vertical = 2.dp)
                     )
@@ -1358,14 +1672,14 @@ private fun BubbleContentRenderer(
                             Box(modifier = androidx.compose.ui.Modifier.graphicsLayer { this.alpha = alpha.value }) {
                                 if (key.startsWith("----") || key.startsWith("────")) {
                                     HorizontalDivider(
-                                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                                        color = AgentGlass.borderColor,
                                         thickness = 0.5.dp,
                                         modifier = Modifier.padding(vertical = 3.dp)
                                     )
                                 } else {
                                     Text(
                                         text = androidx.compose.ui.text.buildAnnotatedString {
-                                            withStyle(style = androidx.compose.ui.text.SpanStyle(color = taminColors.textSecondary)) {
+                                            withStyle(style = androidx.compose.ui.text.SpanStyle(color = AgentGlass.textSecondary)) {
                                                 append("${key.toPersianDigits()}: ")
                                             }
                                             withStyle(style = androidx.compose.ui.text.SpanStyle(
@@ -1388,25 +1702,27 @@ private fun BubbleContentRenderer(
             }
         }
 
+        // Both are the reply's gradient action button, like a markdown link button; the deep
+        // link gate applies the target's feature flag and the web host allow-list on tap.
         is ChatBubbleContent.DeepLink -> {
             val deepLinkHandler = LocalDeepLinkHandler.current
-            OutlinedButton(
+            AgentActionButton(
+                label = content.title,
                 onClick = { deepLinkHandler.open(content.destination.toAgentDeepLink(), DeepLinkSource.AGENT) },
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
-            ) {
-                Text(content.title)
-            }
+            )
         }
 
         is ChatBubbleContent.WebLink -> {
-            OutlinedButton(
-                onClick = { /* open browser */ },
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
-            ) {
-                Text("🔗 ${content.title}")
+            val deepLinkHandler = LocalDeepLinkHandler.current
+            val isActionable = remember(content.url) {
+                DeepLinkParser.parse(content.url, DeepLinkSource.AGENT) != ParsedDeepLink.Invalid
             }
+            AgentActionButton(
+                label = content.title,
+                onClick = { deepLinkHandler.open(content.url, DeepLinkSource.AGENT) },
+                enabled = isActionable,
+                trailingIcon = Icons.AutoMirrored.Rounded.OpenInNew,
+            )
         }
 
         is ChatBubbleContent.SuggestedPrompts -> {
@@ -1436,42 +1752,51 @@ private fun BubbleContentRenderer(
         }
 
         is ChatBubbleContent.Image -> {
-            onAnimationFinished()
+            ReportAnimationFinished(itemId, onAnimationFinished)
             ImageBubble(content)
         }
 
         is ChatBubbleContent.Chart -> {
-            onAnimationFinished()
+            ReportAnimationFinished(itemId, onAnimationFinished)
             ChartBubble(content)
         }
 
         is ChatBubbleContent.Table -> {
-            onAnimationFinished()
+            ReportAnimationFinished(itemId, onAnimationFinished)
             TableBubble(content)
         }
 
         is ChatBubbleContent.RichText -> {
-            onAnimationFinished()
+            ReportAnimationFinished(itemId, onAnimationFinished)
             RichTextBubble(content = content, contentColor = contentColor)
         }
 
         is ChatBubbleContent.Video -> {
-            onAnimationFinished()
+            ReportAnimationFinished(itemId, onAnimationFinished)
             VideoBubble(content = content)
         }
 
         is ChatBubbleContent.DynamicForm -> {
-            onAnimationFinished()
+            ReportAnimationFinished(itemId, onAnimationFinished)
             // Rendered once the generative-form handlers land; until then the schema is
             // carried through untouched so nothing is lost.
-            Text("📝 فرم پویا", color = MaterialTheme.colorScheme.primary)
+            Text("📝 فرم پویا", color = AgentGlass.accent)
         }
 
+        // A tinted glass note. The theme's error red is for light surfaces and read as a dark
+        // smear on the backdrop; AgentGlass.danger* is the same hue at the glass palette's
+        // lightness. A retryable note is the whole tile, with the retry icon as its cue.
         is ChatBubbleContent.ServiceError -> {
+            val canAct = content.canRetryPrompt || content.actionKey != null
+            val noteShape = RoundedCornerShape(CornerRadius.lg)
             Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(noteShape)
+                    .background(AgentGlass.dangerFill)
+                    .border(Thickness.border, AgentGlass.dangerBorder, noteShape)
                     .run {
                         when {
                             content.canRetryPrompt ->
@@ -1481,32 +1806,59 @@ private fun BubbleContentRenderer(
                             else -> this
                         }
                     }
-                    .padding(4.dp)
+                    .padding(horizontal = Spacing.md, vertical = Spacing.smPlus)
             ) {
-                if (content.canRetryPrompt || content.actionKey != null) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = "تلاش مجدد",
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(20.dp)
-                    )
-                } else {
-                    Text("⚠️", fontSize = 16.sp)
-                }
+                Icon(
+                    imageVector = if (canAct) Icons.Default.Refresh else Icons.Rounded.ErrorOutline,
+                    contentDescription = if (canAct) "تلاش مجدد" else null,
+                    tint = AgentGlass.danger,
+                    modifier = Modifier.size(IconSize.small)
+                )
                 Text(
                     text = content.message,
-                    style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.error)
+                    style = MaterialTheme.typography.bodySmall.copy(color = AgentGlass.dangerText, lineHeight = 20.sp),
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
     }
 }
 
-// ─── Input Bar ────────────────────────────────────────────────────────────────
+// ─── Input Bar ──────────────────────────────────────────────────────────────
 
+// Exact values pulled from the Figma node (90:120 "Background+Border+Shadow+OverlayBlur") —
+// same glass-card family as the top bar, reproduced literally rather than approximated.
+// Card/button metrics are shared with the voice bars: see ComposerCardShape & co. in VoiceUi.kt.
+private val InputBarTextColor = AgentColors.composerText
+private val InputBarPlaceholderColor = AgentColors.composerPlaceholder
+/** Inset between the field's text and the pill's start edge (inside ComposerContentPadding). */
+private val InputFieldStartPadding = 10.dp
+/** Vertical inset of the buttons in the resting 60dp pill: (60 − 38) / 2. */
+private val InputBarButtonInset = (ComposerBarHeight - ComposerButtonSize) / 2
+/** Top inset of a wrapped message, so the first line clears the pill's rounded top. */
+private val InputBarExpandedTopInset = 14.dp
+/** Gap between the last text line and the buttons row once the composer has expanded. */
+private val InputBarExpandedRowGap = 6.dp
+
+/**
+ * Bottom composer, matching the Figma "یارا" input bar card (node 90:120) at 1:1
+ * spacing/color fidelity: a glass pill (26dp radius, diagonal white sheen, blurred
+ * background, dark drop shadow) holding the message field, a mic button and a fixed
+ * left-pointing send button (not RTL-mirrored — the design always points it left). All
+ * buttons are the same [ComposerButtonSize] circle.
+ *
+ * The pill rests at 60dp with the buttons inline beside the field. Once the message no
+ * longer fits on the single line beside them — it wraps or contains a newline — the
+ * composer expands the way ChatGPT's does: the field takes the pill's full width and grows
+ * up to [INPUT_MAX_LINES] lines (scrolling internally past that), and the buttons drop to
+ * their own row under the text. The two arrangements are the *same* nodes placed
+ * differently by [ComposerLayout], never a Row swapped for a Column, so the field keeps its
+ * focus and the keyboard stays up through the transition.
+ */
 @Composable
 private fun AgentInputBar(
     isGenerating: Boolean,
+    hazeState: HazeState,
     onSend: (String) -> Unit,
     onCancel: () -> Unit,
     onStartVoice: () -> Unit = {},
@@ -1516,192 +1868,384 @@ private fun AgentInputBar(
     isVoiceEnabled: Boolean = true
 ) {
     var text by remember { mutableStateOf("") }
-    var isFocused by remember { mutableStateOf(false) }
-    val taminColors = LocalTaminColors.current
-    val neon = rememberNeonFocus(isFocused)
-    // Same box as TaminTextField — surface fill and hairline border — lit with the assistant's neon
-    // (a glow and a turning gradient border) while it has focus.
-    val shape = RoundedCornerShape(CornerRadius.lg)
-    val send = {
-        if (text.isNotBlank() && !isGenerating) {
-            onSend(text.trim())
-            text = ""
-        }
-    }
+    val textStyle = MaterialTheme.typography.bodyMedium.copy(
+        fontSize = 13.5.sp,
+        color = InputBarTextColor,
+        textAlign = TextAlign.Right
+    )
 
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = Spacing.lg, end = Spacing.lg, bottom = Spacing.lg, top = Spacing.sm)
-            // Glow first: the shadow below clips whatever follows it, and the glow draws outside the box.
-            .neonGlow(neon, color = taminColors.aiAssistantNeonStops.first(), cornerRadius = CornerRadius.lg)
-            .shadow(elevation = Elevation.sm, shape = shape, ambientColor = taminColors.shadowSubtle, spotColor = taminColors.shadowSubtle)
-            .clip(shape)
-            .background(taminColors.bgSurface)
-            .neonBorder(
-                state = neon,
-                neonColors = taminColors.aiAssistantNeonStops,
-                restingColor = taminColors.border,
-                cornerRadius = CornerRadius.lg,
-                restingWidth = Thickness.border,
-            )
-            .padding(start = Spacing.md, end = Spacing.sm, top = Spacing.sm, bottom = Spacing.sm),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+            .padding(ComposerOuterPadding)
     ) {
-        BasicTextField(
-            value = text,
-            onValueChange = { text = it },
+        Box(
             modifier = Modifier
-                .weight(1f)
-                .onFocusChanged { isFocused = it.isFocused },
-            enabled = !isGenerating && isEnabled,
-            maxLines = INPUT_MAX_LINES,
-            textStyle = MaterialTheme.typography.bodyMedium.copy(color = taminColors.textPrimary),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
-            keyboardActions = KeyboardActions(onSend = { send() }),
-            cursorBrush = androidx.compose.ui.graphics.SolidColor(taminColors.blueText),
-            decorationBox = { innerTextField ->
-                if (text.isEmpty()) {
-                    Text(
-                        text = stringResource(Res.string.agent_input_placeholder),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = taminColors.textMuted,
+                .fillMaxWidth()
+                .heightIn(min = ComposerBarHeight)
+                // Grow/shrink smoothly as lines are added or removed.
+                .animateContentSize(animationSpec = tween(INPUT_BAR_RESIZE_ANIM_MS))
+                .composerShadow()
+                // Same frosted glass as the top bar — see AgentGlass.
+                .agentFrostedGlassCard(ComposerCardShape, hazeState)
+        ) {
+            ComposerLayout(
+                text = text,
+                textStyle = textStyle,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(ComposerContentPadding),
+                field = {
+                    BasicTextField(
+                        value = text,
+                        onValueChange = { text = it },
+                        enabled = !isGenerating && isEnabled,
+                        maxLines = INPUT_MAX_LINES,
+                        textStyle = textStyle,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+                        keyboardActions = KeyboardActions(
+                            onSend = {
+                                if (text.isNotBlank() && !isGenerating) {
+                                    onSend(text.trim())
+                                    text = ""
+                                }
+                            }
+                        ),
+                        cursorBrush = androidx.compose.ui.graphics.SolidColor(AgentColors.ink),
+                        decorationBox = { innerTextField ->
+                            Box(modifier = Modifier.fillMaxWidth().padding(start = InputFieldStartPadding)) {
+                                if (text.isEmpty()) {
+                                    Text(
+                                        text = "پیام خود را بنویسید…",
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            fontSize = 13.5.sp,
+                                            color = InputBarPlaceholderColor.copy(alpha = 0.45f)
+                                        ),
+                                        modifier = Modifier.align(Alignment.CenterStart)
+                                    )
+                                }
+                                // Same anchor as the placeholder above (CenterStart = right edge
+                                // under the app's global RTL) — otherwise the placeholder sits on
+                                // the right but typed text jumps to anchor on the left, appearing
+                                // to start from the middle of the field the moment you type.
+                                Box(modifier = Modifier.align(Alignment.CenterStart)) { innerTextField() }
+                            }
+                        }
                     )
-                }
-                innerTextField()
-            }
-        )
+                },
+                buttons = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(ComposerButtonGap)
+                    ) {
+                        // Mic — always available on its own, independent of the send button.
+                        // Hidden behind isVoiceEnabled: the server decides per user whether
+                        // voice prompts are allowed at all.
+                        if (isVoiceEnabled) {
+                            InputBarGlassButton(
+                                icon = Icons.Default.Mic,
+                                contentDescription = "ضبط صدا",
+                                size = ComposerButtonSize,
+                                backgroundAlpha = 0.09f,
+                                borderAlpha = 0.14f,
+                                iconTint = ComposerMutedIconTint,
+                                onClick = onStartVoice,
+                                enabled = !isGenerating && isEnabled
+                            )
+                        }
 
-        val isTyping = text.isNotBlank()
-        val mode = when {
-            isGenerating -> InputAction.Stop
-            isTyping || !isVoiceEnabled -> InputAction.Send
-            else -> InputAction.Voice
-        }
-        InputActionButton(
-            mode = mode,
-            enabled = isEnabled || isGenerating,
-            onClick = {
-                when (mode) {
-                    InputAction.Stop -> onCancel()
-                    InputAction.Send -> send()
-                    InputAction.Voice -> onStartVoice()
+                        // Send/Cancel — a fixed, never-mirrored left arrow (the design's own
+                        // send glyph, not a "back" affordance), the same size as the mic but
+                        // more opaque. Only reacts once there is text to send or a request to
+                        // cancel; otherwise it sits at the design's neutral idle glass look.
+                        val isTyping = text.isNotBlank()
+                        Box(
+                            modifier = Modifier
+                                .size(ComposerButtonSize)
+                                .clip(CircleShape)
+                                .background(
+                                    when {
+                                        isGenerating -> AgentGlass.danger.copy(alpha = 0.18f)
+                                        isTyping -> AgentColors.composerSendActive
+                                        else -> AgentColors.ink.copy(alpha = 0.10f)
+                                    }
+                                )
+                                .border(
+                                    1.dp,
+                                    if (isGenerating || isTyping) AgentColors.ink.copy(alpha = 0.30f) else AgentColors.ink.copy(alpha = 0.20f),
+                                    CircleShape
+                                )
+                                .clickable(enabled = isGenerating || isTyping) {
+                                    if (isGenerating) onCancel() else if (isTyping) { onSend(text.trim()); text = "" }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            AnimatedContent(
+                                targetState = if (isGenerating) 2 else 1,
+                                label = "send_cancel_anim"
+                            ) { state ->
+                                when (state) {
+                                    2 -> Icon(Icons.Default.Close, contentDescription = "توقف", tint = AgentGlass.danger)
+                                    else -> Icon(
+                                        Icons.Default.ArrowBack,
+                                        contentDescription = "ارسال",
+                                        tint = AgentColors.ink
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
-            },
-        )
+            )
+        }
     }
 }
 
-private enum class InputAction { Send, Voice, Stop }
-
 /**
- * The input's square action: send on the brand gradient, voice on the subtle icon tile, stop on
- * the danger tint — the same shapes as the app's icon tiles.
+ * Places the composer's [field] and [buttons] either inline (buttons beside the field,
+ * everything centred in the resting pill height) or expanded (field across the full width
+ * on top, buttons in a row underneath at the pill's end edge).
+ *
+ * Which arrangement applies is decided *here*, from [text] measured against the width the
+ * field would get inline, not from what the live field reports: measuring the field itself
+ * would flip-flop (a message that wraps inline fits on one line at full width, which would
+ * collapse it, which would wrap it again…). Inline width is known only at measure time, so
+ * the decision is made inside the measure policy, and the policy re-runs whenever [text]
+ * changes because it captures it.
+ *
+ * Layout-direction aware: the field hugs the start edge and the buttons the end edge in
+ * both arrangements, so under the app's RTL the send arrow is at the far left as designed.
  */
 @Composable
-private fun InputActionButton(mode: InputAction, enabled: Boolean, onClick: () -> Unit) {
-    val taminColors = LocalTaminColors.current
-    val shape = RoundedCornerShape(CornerRadius.md)
-    val background = when (mode) {
-        InputAction.Send -> Modifier.background(taminTopAppBarGradient(), shape)
-        InputAction.Voice -> Modifier.background(taminColors.iconBgSubtle, shape)
-        // The danger tint alone barely shows on the white field, so stop also gets its border.
-        InputAction.Stop -> Modifier
-            .background(taminColors.dangerBg, shape)
-            .border(Thickness.border, taminColors.dangerBorder, shape)
-    }
-    Box(
-        modifier = Modifier
-            .size(IconSize.largePlus)
-            .alpha(if (enabled) 1f else taminColors.disabledAlpha)
-            .clip(shape)
-            .then(background)
-            .clickable(enabled = enabled, onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        AnimatedContent(targetState = mode, label = "input_action") { target ->
-            when (target) {
-                InputAction.Send -> Icon(
-                    painter = painterResource(Res.drawable.ic_send),
-                    contentDescription = stringResource(Res.string.agent_send),
-                    tint = taminColors.onGradient,
-                    modifier = Modifier.size(IconSize.banner),
-                )
-                InputAction.Voice -> Icon(
-                    imageVector = Icons.Rounded.Mic,
-                    contentDescription = stringResource(Res.string.agent_record_voice),
-                    tint = taminColors.blueText,
-                    modifier = Modifier.size(IconSize.medium),
-                )
-                InputAction.Stop -> Icon(
-                    imageVector = Icons.Rounded.Close,
-                    contentDescription = stringResource(Res.string.agent_stop),
-                    tint = taminColors.dangerText,
-                    modifier = Modifier.size(IconSize.medium),
-                )
+private fun ComposerLayout(
+    text: String,
+    textStyle: TextStyle,
+    field: @Composable () -> Unit,
+    buttons: @Composable () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val textMeasurer = rememberTextMeasurer()
+    Layout(
+        contents = listOf(field, buttons),
+        modifier = modifier
+    ) { (fieldMeasurables, buttonsMeasurables), constraints ->
+        val width = constraints.maxWidth
+        val gap = ComposerButtonGap.roundToPx()
+        val buttonsPlaceable = buttonsMeasurables.first().measure(Constraints())
+        val inlineFieldWidth = (width - buttonsPlaceable.width - gap).coerceAtLeast(0)
+
+        // Would the message fit on one line in the inline slot? The measured width matches
+        // what the field's text actually gets: the slot minus the decoration's start inset.
+        val inlineTextWidth = (inlineFieldWidth - InputFieldStartPadding.roundToPx()).coerceAtLeast(0)
+        val isExpanded = text.contains('\n') || (
+            text.isNotEmpty() && textMeasurer.measure(
+                text = text,
+                style = textStyle,
+                constraints = Constraints(maxWidth = inlineTextWidth)
+            ).lineCount > 1
+        )
+
+        val fieldWidth = if (isExpanded) width else inlineFieldWidth
+        val fieldPlaceable = fieldMeasurables.first().measure(
+            Constraints(minWidth = fieldWidth, maxWidth = fieldWidth)
+        )
+        // placeRelative mirrors x under RTL, so positions are given in the LTR frame: field
+        // at the start edge, buttons at the end edge.
+        val buttonsX = width - buttonsPlaceable.width
+
+        if (!isExpanded) {
+            val inset = InputBarButtonInset.roundToPx()
+            val height = maxOf(ComposerBarHeight.roundToPx(), fieldPlaceable.height + inset * 2)
+            layout(width, height) {
+                fieldPlaceable.placeRelative(0, (height - fieldPlaceable.height) / 2)
+                buttonsPlaceable.placeRelative(buttonsX, (height - buttonsPlaceable.height) / 2)
+            }
+        } else {
+            val top = InputBarExpandedTopInset.roundToPx()
+            val rowGap = InputBarExpandedRowGap.roundToPx()
+            val bottom = InputBarButtonInset.roundToPx()
+            val buttonsY = top + fieldPlaceable.height + rowGap
+            val height = buttonsY + buttonsPlaceable.height + bottom
+            layout(width, height) {
+                fieldPlaceable.placeRelative(0, top)
+                buttonsPlaceable.placeRelative(buttonsX, buttonsY)
             }
         }
+    }
+}
+
+/** One glass icon button on the input bar — the mic button ([ComposerButtonSize] per spec). */
+@Composable
+private fun InputBarGlassButton(
+    icon: ImageVector,
+    contentDescription: String?,
+    size: Dp,
+    backgroundAlpha: Float,
+    borderAlpha: Float,
+    iconTint: Color,
+    onClick: (() -> Unit)?,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
+) {
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(AgentColors.ink.copy(alpha = backgroundAlpha))
+            .border(1.dp, AgentColors.ink.copy(alpha = borderAlpha), CircleShape)
+            .then(if (onClick != null) Modifier.clickable(enabled = enabled, onClick = onClick) else Modifier),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            tint = iconTint,
+            modifier = Modifier.size(18.dp)
+        )
     }
 }
 
 // ─── Empty State ──────────────────────────────────────────────────────────────
 
+/** The welcome sphere's size — the footprint the old Figma orb (90:41) occupied. */
+private val WelcomeOrbSize = 148.dp
+
 @Composable
-private fun EmptyState(onPromptClick: (String) -> Unit, modifier: Modifier = Modifier) {
-    val taminColors = LocalTaminColors.current
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = Spacing.page),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Box(
+private fun EmptyState(
+    userFirstName: String?,
+    onSuggestionClick: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier) {
+        Column(
             modifier = Modifier
-                .size(IconSize.xxxlarge)
-                .clip(RoundedCornerShape(CornerRadius.card))
-                .background(taminColors.aiAssistantGradient),
-            contentAlignment = Alignment.Center
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(start = Spacing.lg, end = Spacing.lg, top = Spacing.xxxxl, bottom = Spacing.xl),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
         ) {
-            Icon(
-                imageVector = Icons.Rounded.AutoAwesome,
-                contentDescription = null,
-                tint = taminColors.onGradient,
-                modifier = Modifier.size(IconSize.large),
+            // The same orb as the bottom bar's assistant button, at welcome-screen size.
+            AgentOrb(size = WelcomeOrbSize)
+            Spacer(Modifier.height(Spacing.xxl))
+            Text(
+                text = if (userFirstName.isNullOrBlank()) {
+                    "سلام، من یارا هستم"
+                } else {
+                    "سلام $userFirstName، من یارا هستم"
+                },
+                style = MaterialTheme.typography.titleLarge.copy(
+                    color = AgentColors.ink,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+            )
+            Spacer(Modifier.height(Spacing.sm))
+            Text(
+                text = "دستیار هوشمند سازمان تأمین اجتماعی. دربارهٔ سوابق بیمه، مستمری، درمان و خدمات از من بپرسید.",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = AgentColors.ink.copy(alpha = 0.75f),
+                    textAlign = TextAlign.Center
+                ),
+                modifier = Modifier.padding(horizontal = Spacing.lg)
+            )
+            Spacer(Modifier.height(Spacing.xl))
+            AgentSuggestions(onSuggestionClick = onSuggestionClick)
+        }
+    }
+}
+
+/** One welcome-screen suggestion: its prompt text and the colored icon badge beside it. */
+private data class AgentSuggestion(
+    val text: String,
+    val icon: ImageVector?,
+    val iconTint: Color,
+    val iconBackground: Color
+)
+
+@Composable
+private fun AgentSuggestions(
+    onSuggestionClick: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    // The tints are the feature's own accents at a tenth opacity, not the theme's `*Bg`
+    // tokens: those are pale fills for a white page and all but vanished on the backdrop.
+    val suggestions = remember {
+        val (blue, teal, violet, green) = AgentColors.suggestionTints
+        listOf(
+            AgentSuggestion(
+                text = "سابقهٔ بیمهٔ من چقدر است؟",
+                icon = null,
+                iconTint = AgentGlass.iconTint,
+                iconBackground = blue.copy(alpha = 0.1f)
+            ),
+            AgentSuggestion(
+                text = "مستمری این ماه چه زمانی واریز می‌شود؟",
+                icon = null,
+                iconTint = AgentGlass.iconTint,
+                iconBackground = teal.copy(alpha = 0.1f)
+            ),
+            AgentSuggestion(
+                text = "شرایط دریافت هدیهٔ ازدواج چیست؟",
+                icon = null,
+                iconTint = AgentGlass.iconTint,
+                iconBackground = violet.copy(alpha = 0.1f)
+            ),
+            AgentSuggestion(
+                text = "آخرین نسخهٔ الکترونیک من",
+                icon = null,
+                iconTint = AgentGlass.iconTint,
+                iconBackground = green.copy(alpha = 0.1f)
+            )
+        )
+    }
+    Column(
+        modifier = modifier.fillMaxWidth()
+            .padding(vertical = Spacing.lg),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+    ) {
+        suggestions.forEach { suggestion ->
+            AgentSuggestionRow(
+                suggestion = suggestion,
+                onClick = { onSuggestionClick(suggestion.text) }
             )
         }
-        Spacer(Modifier.height(Spacing.xlg))
-        Text(
-            text = stringResource(Res.string.agent_screen_title),
-            style = MaterialTheme.typography.titleLarge,
-            color = taminColors.textPrimary,
-        )
-        Spacer(Modifier.height(Spacing.sm))
-        Text(
-            text = stringResource(Res.string.agent_empty_subtitle),
-            style = MaterialTheme.typography.bodyMedium,
-            color = taminColors.textSecondary,
-            textAlign = TextAlign.Center,
-        )
-        Spacer(Modifier.height(Spacing.xl))
-        AgentSuggestions(onPromptClick = onPromptClick)
     }
 }
 
 @Composable
-private fun AgentSuggestions(onPromptClick: (String) -> Unit) {
-    val suggestions = listOf(
-        stringResource(Res.string.agent_suggestion_history),
-        stringResource(Res.string.agent_suggestion_pension),
-        stringResource(Res.string.agent_suggestion_prescription),
-        stringResource(Res.string.agent_suggestion_early_retirement),
-    )
-    Column(
-        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
-        horizontalAlignment = Alignment.CenterHorizontally
+private fun AgentSuggestionRow(
+    suggestion: AgentSuggestion,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val shape = RoundedCornerShape(CornerRadius.xl)
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(AgentColors.ink.copy(alpha = 0.08f))
+            .border(1.dp, AgentColors.ink.copy(alpha = 0.14f), shape)
+            .clickable(onClick = onClick)
+            .padding(horizontal = Spacing.md, vertical = Spacing.lg),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
     ) {
-        suggestions.forEach { suggestion -> PromptChip(text = suggestion, onClick = { onPromptClick(suggestion) }) }
+        Text(
+            text = suggestion.text,
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.bodyMedium.copy(
+                color = AgentColors.ink,
+                fontWeight = FontWeight.ExtraBold,
+                textAlign = TextAlign.Start
+            )
+        )
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = AgentColors.ink.copy(alpha = 0.5f),
+            modifier = Modifier.size(18.dp)
+        )
     }
 }
 
@@ -1709,48 +2253,57 @@ private fun AgentSuggestions(onPromptClick: (String) -> Unit) {
 
 @Composable
 private fun PermissionCheckingIndicator() {
-    val taminColors = LocalTaminColors.current
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(Spacing.md)
-        ) {
-            CircularProgressIndicator(color = taminColors.blueText)
-            Text(
-                text = stringResource(Res.string.agent_checking_permission),
-                style = MaterialTheme.typography.bodyMedium,
-                color = taminColors.textSecondary,
-            )
+    Box(modifier = Modifier.fillMaxSize()) {
+        AgentBackground(modifier = Modifier.fillMaxSize())
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(Spacing.md)
+            ) {
+                // Straight on AgentBackground — see the EmptyState greeting for the
+                // same white/0.75-alpha split used on that fixed-dark backdrop.
+                CircularProgressIndicator(color = AgentColors.ink)
+                Text(
+                    text = stringResource(Res.string.agent_checking_permission),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = AgentColors.ink.copy(alpha = 0.75f),
+                )
+            }
         }
     }
 }
 
 @Composable
 private fun NotAllowedMessage(message: String?) {
-    val taminColors = LocalTaminColors.current
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(Spacing.md),
-            modifier = Modifier.padding(Spacing.xxl)
-        ) {
-            IconTile(
-                icon = Icons.Rounded.Block,
-                tint = taminColors.onGradient,
-                background = taminColors.iconGradientDanger,
-                size = IconSize.xxlarge,
-            )
-            Text(
-                text = stringResource(Res.string.agent_not_allowed_title),
-                style = MaterialTheme.typography.titleLarge,
-                color = taminColors.textPrimary,
-            )
-            Text(
-                text = message ?: stringResource(Res.string.agent_not_allowed_default),
-                style = MaterialTheme.typography.bodyMedium,
-                color = taminColors.textSecondary,
-                textAlign = TextAlign.Center,
-            )
+    Box(modifier = Modifier.fillMaxSize()) {
+        AgentBackground(modifier = Modifier.fillMaxSize())
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(Spacing.md),
+                modifier = Modifier.padding(Spacing.xxl)
+            ) {
+                IconTile(
+                    icon = Icons.Rounded.Block,
+                    tint = AgentColors.ink,
+                    background = AgentColors.dangerGradient,
+                    size = IconSize.xxlarge,
+                )
+                // Straight on AgentBackground — theme's textPrimary/textSecondary are
+                // too dark to read there, so white/0.75-alpha is used instead (same
+                // split as the EmptyState greeting).
+                Text(
+                    text = stringResource(Res.string.agent_not_allowed_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = AgentColors.ink,
+                )
+                Text(
+                    text = message ?: stringResource(Res.string.agent_not_allowed_default),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = AgentColors.ink.copy(alpha = 0.75f),
+                    textAlign = TextAlign.Center,
+                )
+            }
         }
     }
 }
@@ -1758,11 +2311,14 @@ private fun NotAllowedMessage(message: String?) {
 // ─── Agent Bubble Footer ──────────────────────────────────────────────────────
 
 @Composable
+private fun rememberChatTimeString(): String = rememberSaveable {
+    val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+    "${now.hour.toString().padStart(2, '0')}:${now.minute.toString().padStart(2, '0')}".toPersianDigits()
+}
+
+@Composable
 private fun AgentBubbleFooter(item: ChatItem, onIntent: (AgentIntent) -> Unit) {
-    val timeString = rememberSaveable {
-        val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-        "${now.hour.toString().padStart(2, '0')}:${now.minute.toString().padStart(2, '0')}".toPersianDigits()
-    }
+    val timeString = rememberChatTimeString()
 
     // State for like/dislike toggle
     var liked    by rememberSaveable { mutableStateOf<Boolean?>(null) }
@@ -1771,9 +2327,10 @@ private fun AgentBubbleFooter(item: ChatItem, onIntent: (AgentIntent) -> Unit) {
     @Suppress("DEPRECATION")
                     val clipboardManager = androidx.compose.ui.platform.LocalClipboardManager.current
 
-    val taminColors = LocalTaminColors.current
-    val iconTint = taminColors.textMuted
-    val activeTint = taminColors.blueText
+    // Sits directly on AgentBackground (no card), so it follows that fixed-dark
+    // backdrop's white-based palette rather than the theme's textMuted/blueText.
+    val iconTint = AgentColors.ink.copy(alpha = 0.5f)
+    val activeTint = AgentColors.ink
 
     Row(
         modifier = Modifier
@@ -1782,12 +2339,8 @@ private fun AgentBubbleFooter(item: ChatItem, onIntent: (AgentIntent) -> Unit) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = timeString,
-            style = MaterialTheme.typography.labelSmall,
-            color = taminColors.textMuted,
-        )
-
+        // The row is laid out LTR (see ChatBubbleItem): actions sit on the left edge, the
+        // send time on the right edge, lined up under the start of the reply's RTL text.
         Row(
             horizontalArrangement = Arrangement.spacedBy(Spacing.xxs),
             verticalAlignment = Alignment.CenterVertically
@@ -1801,7 +2354,7 @@ private fun AgentBubbleFooter(item: ChatItem, onIntent: (AgentIntent) -> Unit) {
             FooterAction(
                 icon = rememberVectorPainter(Icons.Outlined.ThumbDown),
                 description = stringResource(Res.string.agent_dislike),
-                tint = if (liked == false) taminColors.dangerText else iconTint,
+                tint = if (liked == false) AgentGlass.dangerText else iconTint,
                 onClick = { liked = if (liked == false) null else false },
             )
             Box(
@@ -1809,7 +2362,7 @@ private fun AgentBubbleFooter(item: ChatItem, onIntent: (AgentIntent) -> Unit) {
                     .padding(horizontal = Spacing.xs)
                     .height(Spacing.md)
                     .width(Thickness.border)
-                    .background(taminColors.divider)
+                    .background(AgentColors.ink.copy(alpha = 0.14f))
             )
             FooterAction(
                 icon = painterResource(Res.drawable.ic_tamin_copy),
@@ -1827,6 +2380,12 @@ private fun AgentBubbleFooter(item: ChatItem, onIntent: (AgentIntent) -> Unit) {
                 onClick = { onIntent(AgentIntent.ShareContent(extractTextFromItem(item))) },
             )
         }
+
+        Text(
+            text = timeString,
+            style = MaterialTheme.typography.labelSmall,
+            color = AgentColors.ink.copy(alpha = 0.6f),
+        )
     }
 }
 
@@ -1862,6 +2421,39 @@ private fun extractTextFromItem(item: ChatItem): String {
     }
 }
 
+@PreviewRtlTheme
+@Composable
+private fun AgentTopBarOnlinePreview() {
+    PreviewRtlThemeContent {
+        AgentTopBar(
+            isGenerating = false,
+            isOffline = false,
+            sessionsCount = 3,
+            hazeState = remember { HazeState() },
+            onIntent = {},
+            onNavigateBack = {}
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun AgentTopBarOfflinePreview() {
+    PreviewRtlThemeContent {
+        AgentTopBar(
+            isGenerating = true,
+            isOffline = true,
+            sessionsCount = 0,
+            hazeState = remember { HazeState() },
+            onIntent = {},
+            onNavigateBack = {}
+        )
+    }
+}
+
 private val USER_BUBBLE_MAX_WIDTH = 300.dp
 private val FOOTER_ACTION_SIZE = 28.dp
-private const val INPUT_MAX_LINES = 4
+private val ENTER_SLIDE_DISTANCE = 16.dp
+private const val INPUT_MAX_LINES = 10
+/** How long the composer pill takes to grow or shrink between line counts. */
+private const val INPUT_BAR_RESIZE_ANIM_MS = 160

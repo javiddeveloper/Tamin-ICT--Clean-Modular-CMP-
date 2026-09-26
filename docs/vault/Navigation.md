@@ -59,18 +59,19 @@ val vm = backStackEntry.sharedViewModel<XViewModel>(navController) // shared acr
 
 `navigateToFeature` does **not** check the flag and returns `false` when no screen exists. Menu taps check the flag in their view models; every link (OS, stories, assistant) goes through `ResolveDeepLinkUseCase` via `LocalDeepLinkHandler` — see [[Deep-Links]]. Never call `navigateToFeature` from a link directly.
 
-## The bottom bar's centre slot
+## The bottom bar's trailing slot
 
-`FloatingGlassNavigationBar` clips its content to the glass pill, so a row item **cannot** rise
-above the bar's top edge. To raise anything (the Agent orb) it must go through the bar's
-`centerOverlay` slot, which is placed outside that clip.
+`FloatingGlassNavigationBar` renders the Agent orb through its `trailingButton` slot — a sibling
+of the glass pill, not a row item inside it. That keeps the pill's tab layout and its animated
+highlight maths independent of whether the orb is there: `itemCount` and `selectedIndex` describe
+the tabs only. (The bar mirrors `selectedIndex` for RTL internally, so callers pass the plain LTR
+index.)
 
-Two things must stay in sync when the centre slot is occupied: `itemCount` gains one, and any tab
-whose index is at or past the centre shifts one place right for `selectedIndex` — otherwise the
-animated border highlight lands under the wrong tab. The bar also mirrors `selectedIndex` for RTL
-internally, so callers pass the plain LTR index.
+The orb itself is `AgentOrb` in `core-ui/ui/components/` — the same composable the assistant's
+welcome screen draws at 148 dp. Every metric in it is a fraction of its diameter, so one `size`
+parameter covers both places.
 
-The orb is gated on `FeatureFlag.AGENT`; when the flag is off the bar falls back to four even slots
-and the overlay is not composed at all.
+It is gated on `ObserveAgentAvailabilityUseCase` (the `AGENT` menu flag **and** the server's chat
+permission); when that is off, `trailingButton` is null and the pill takes the full width back.
 
-Related: [[Modules]] · [[Feature-Flags]]
+Related: [[Modules]] · [[Feature-Flags]] · [[AI-Agent]]

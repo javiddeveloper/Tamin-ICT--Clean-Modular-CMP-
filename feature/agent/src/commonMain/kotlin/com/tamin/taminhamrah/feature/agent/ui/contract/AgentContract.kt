@@ -54,7 +54,9 @@ data class AgentUiState(
     /** Total length (ms) of that clip, for the pinned player's progress. */
     val voicePlaybackDurationMs: Int = 0,
     /** Whether that clip is actually sounding, as opposed to paused mid-way. */
-    val isVoicePlaying: Boolean = false
+    val isVoicePlaying: Boolean = false,
+    /** Logged-in user's first name, for the empty-state greeting. Null while unresolved. */
+    val userFirstName: String? = null
 ) {
     sealed interface PartialState {
         data class Loading(val isGenerating: Boolean) : PartialState
@@ -89,6 +91,7 @@ data class AgentUiState(
             val durationMs: Int = 0,
             val isPlaying: Boolean = false
         ) : PartialState
+        data class IdentityLoaded(val firstName: String?) : PartialState
     }
 }
 
@@ -140,12 +143,15 @@ data class AgentProcessingState(
  * @param sender The sender of the message
  * @param content The content of the bubble
  * @param isTypingAnimating Whether the typing animation is active
+ * @param isEntering Whether this bubble just landed in the live session (as opposed to
+ *   being loaded from history) and should play its slide/fade entrance once.
  */
 data class ChatItem(
     val id: String,
     val sender: ChatSender,
     val content: ChatBubbleContent,
     val isTypingAnimating: Boolean = false,
+    val isEntering: Boolean = false,
     /**
      * Follow-up suggestions belonging to this reply. They render inside the same bubble
      * rather than as their own chat row, so one answer stays one item in the list.
@@ -181,6 +187,12 @@ sealed interface AgentIntent {
      * the animation does not restart when the list recycles the row while scrolling.
      */
     data class OnTypingFinished(val itemId: String) : AgentIntent
+
+    /**
+     * A bubble finished its entrance animation. Same reasoning as [OnTypingFinished]: the
+     * ViewModel owns it so the slide/fade does not replay when the row is recycled.
+     */
+    data class OnEnterAnimationFinished(val itemId: String) : AgentIntent
 
     /** Execute a service action triggered by user click (e.g., suggested prompts) */
     data class ExecuteServiceAction(
