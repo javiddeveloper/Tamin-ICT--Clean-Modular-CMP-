@@ -7,23 +7,21 @@
 package com.tamin.taminhamrah.dataSource.commonSource
 
 import com.tamin.core.network.model.common.CityNameDto
-import com.tamin.taminhamrah.model.common.InsuranceTypeDTO
-import com.tamin.taminhamrah.model.common.MainServiceDto
 import com.tamin.core.network.model.common.ProvinceNameDto
-import com.tamin.taminhamrah.model.common.RecipientDTO
-import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
-import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
-import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
-import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
-import com.tamin.taminhamrah.tools.extractData
-import io.ktor.client.statement.HttpStatement
 import com.tamin.taminhamrah.apiService.CommonApiService
 import com.tamin.taminhamrah.model.common.BeneficiaryDTO
+import com.tamin.taminhamrah.model.common.InsuranceTypeDTO
 import com.tamin.taminhamrah.model.common.JobTitleDTO
+import com.tamin.taminhamrah.model.common.MainServiceDto
+import com.tamin.taminhamrah.model.common.RecipientDTO
 import com.tamin.taminhamrah.model.common.UserInsuredInfoDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
-import io.ktor.client.statement.HttpResponse
+import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
+import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
+import com.tamin.taminhamrah.tools.extractData
+import com.tamin.taminhamrah.tools.safeCall
+import io.ktor.client.statement.HttpStatement
 
 internal class CommonRemoteDataSourceImpl(
     private val commonApiService: CommonApiService,
@@ -32,50 +30,38 @@ internal class CommonRemoteDataSourceImpl(
 ) : CommonRemoteDataSource {
 
     override suspend fun getCityName(cityNameRequest: ApiQueryParamDN): CityNameDto {
-        return try {
+        return errorParser.safeCall("getCityName") {
             val response = commonApiService.getCityName(
                 queryBuilder.buildQuery(cityNameRequest)
             )
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
         }
     }
 
     override suspend fun getProvinceName(provinceNameRequest: ApiQueryParamDN): ProvinceNameDto {
-        return try {
+        return errorParser.safeCall("getProvinceName") {
             val response = commonApiService.getProvinceName(
                 queryBuilder.buildQuery(provinceNameRequest)
             )
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
         }
     }
 
     override suspend fun getCitiesByProvince(query: ApiQueryParamDN): CityNameDto {
-        return try {
+        return errorParser.safeCall("getCitiesByProvince") {
             val response = commonApiService.getCitiesByProvince(
                 queryBuilder.buildQuery(query)
             )
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
-    override suspend fun getInsuranceTypes(query: ApiQueryParamDN): ListData<InsuranceTypeDTO>? {
-        return try {
+    override suspend fun getInsuranceTypes(query: ApiQueryParamDN): ListData<InsuranceTypeDTO> {
+        return errorParser.safeCall("getInsuranceTypes") {
             val response = commonApiService.getInsuranceTypes(
                 queryBuilder.buildQuery(query)
             )
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
@@ -83,7 +69,7 @@ internal class CommonRemoteDataSourceImpl(
         versionCode: String,
         forceUpdate: Boolean
     ): List<MainServiceDto> {
-        return try {
+        return errorParser.safeCall("getMainMenu") {
             // Temporarily returning local data as requested
             mockMenuData
             /*
@@ -95,69 +81,45 @@ internal class CommonRemoteDataSourceImpl(
             val response = commonApiService.getMainMenu(serviceUrl)
             response.extractData()
             */
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.UNKNOWN)
-            )
         }
     }
 
     override suspend fun getBeneficiary(query: ApiQueryParamDN): ListData<BeneficiaryDTO> {
-        return try {
+        return errorParser.safeCall("getBeneficiary") {
             val response = commonApiService.getBeneficiary(
                 queryBuilder.buildQuery(query)
             )
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
         }
     }
 
     override suspend fun getRecipientList(query: ApiQueryParamDN): ListData<RecipientDTO> {
-        return try {
+        return errorParser.safeCall("getRecipientList") {
             val response = commonApiService.getRecipientList(
                 queryBuilder.buildQuery(query)
             )
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.UNKNOWN)
-            )
         }
     }
 
     override suspend fun getRegistrationDeclarationForm(): HttpStatement {
-        return try {
+        return errorParser.safeCall("getRegistrationDeclarationForm") {
             commonApiService.getRegistrationDeclarationForm()
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
-    override suspend fun getJobTitle(query: ApiQueryParamDN): ListData<JobTitleDTO>? {
+    override suspend fun getJobTitle(query: ApiQueryParamDN): ListData<JobTitleDTO> {
         val queries = queryBuilder.buildQuery(query)
-        return try {
+        return errorParser.safeCall("getJobTitle") {
             val response = commonApiService.getJobTitle(queries)
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
     override suspend fun checkInsuredInfo(): UserInsuredInfoDTO {
-        return try {
+        return errorParser.safeCall("checkInsuredInfo") {
             val response = commonApiService.checkInsuredInfo()
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 }

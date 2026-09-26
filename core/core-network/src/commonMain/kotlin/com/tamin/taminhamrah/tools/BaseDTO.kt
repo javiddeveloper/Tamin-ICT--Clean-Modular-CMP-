@@ -90,6 +90,14 @@ fun <T> BaseDTO<T>.extractData(): T {
 }
 
 /**
+ * For calls whose reply has nothing to read: a non-2xx status throws the same status-mapped failure
+ * as [extractData] — server message included — instead of an error that names nothing.
+ */
+fun BaseDTO<*>.requireSuccessStatus() {
+    if (status !in 200..299) handleCommonErrors()
+}
+
+/**
  * Extracts a success message from the response.
  * If data is a primitive (like String), it returns its content.
  * If data is null or an object, it returns the 'reason' field as the message.
@@ -150,7 +158,7 @@ private fun <T> BaseDTO<T>.handleCommonErrors(): Nothing {
  *           2. problems envelope
  *           3. reason field
  */
-private fun <T> BaseDTO<T>.rawErrorText(): String? {
+private fun <T> BaseDTO<T>.rawErrorText(): String {
     val fromData = when (val d = data) {
         is ErrorCarrier -> d.message
         is JsonObject -> d["message"]?.jsonPrimitive?.contentOrNull
@@ -171,7 +179,7 @@ private fun <T> BaseDTO<T>.errorCause(): String? = when (val d = data) {
  * Used by the `hasError`/`problems` envelope, which is already localized when present.
  */
 private fun <T> BaseDTO<T>.getServerMessage(): String? =
-    rawErrorText()?.takeIf { it.looksLikeArabicScript() }
+    rawErrorText().takeIf { it.looksLikeArabicScript() }
 
 /**
  * Outcome of a [BaseDTO] extraction that does not throw when the backend
@@ -227,11 +235,11 @@ fun <T> BaseDTO<JsonElement?>.extractTypedData(json: Json, deserializer: Deseria
         status in 200..299 && data != null -> json.decodeFromJsonElement(deserializer, data)
         status in 400..599 -> {
             val serverMessage = (data as? JsonObject)?.get("message")?.jsonPrimitive?.contentOrNull
-            val errorPrefix = if (status in 400..499) "CLIENT_ERROR" else "SERVER_ERROR"
-            println("BaseDTO: $errorPrefix: $reason, serverMessage=$serverMessage")
+            val mapped = HttpStatusErrorMapper.map(status = status, rawMessage = serverMessage, cause = errorCause())
+            println("BaseDTO: HTTP $status -> ${mapped.uri}: $reason, serverMessage=$serverMessage")
             throw TaminErrorUriException(
-                uri = ErrorUri.fromString("$errorPrefix: $reason"),
-                serverMessage = serverMessage
+                uri = mapped.uri,
+                serverMessage = serverMessage ?: mapped.userMessage,
             )
         }
         else -> handleCommonErrors()
