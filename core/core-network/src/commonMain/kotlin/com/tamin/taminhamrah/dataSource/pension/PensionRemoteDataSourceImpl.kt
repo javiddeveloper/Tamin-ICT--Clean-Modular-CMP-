@@ -1,5 +1,7 @@
 package com.tamin.taminhamrah.dataSource.pension
 
+import kotlinx.coroutines.CancellationException
+import io.ktor.serialization.JsonConvertException
 import com.tamin.taminhamrah.apiService.pension.PensionApiService
 import com.tamin.taminhamrah.model.pension.EdictPensionerDTO
 import com.tamin.taminhamrah.model.pension.PensionIdDTO
@@ -29,6 +31,8 @@ import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
+import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
+import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
 import com.tamin.taminhamrah.tools.readPdfChannel
@@ -174,21 +178,45 @@ class PensionRemoteDataSourceImpl(
     }
 
     override suspend fun sendPayRollToInbox(filter: List<ApiFilterDN>): String? {
-        return errorParser.safeCall("sendPayRollToInbox") {
+        return try {
             val filterJson = apiQueryBuilder.buildFilterJson(filter)
             val response = pensionApiService.sendPayRollToInbox(filterJson)
             response?.extractMessage()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
     override suspend fun sendRequestInquirePensionCertificate(filter: List<ApiFilterDN>) :String? {
-        return errorParser.safeCall("sendRequestInquirePensionCertificate") {
+        return try {
             val filterJson = apiQueryBuilder.buildFilterJson(filter)
 
             val response = pensionApiService.sendRequestInquirePensionCertificate(
                 mapOf("filter" to filterJson)
             )
             response.extractMessage()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
@@ -208,7 +236,7 @@ class PensionRemoteDataSourceImpl(
     override suspend fun saveDocumentDisability(
         requestId: Long,
         body: DisabilitySaveDocumentRequest
-    ): String = errorParser.safeCall("saveDocumentDisability") {
+    ): String? = errorParser.safeCall("saveDocumentDisability") {
         pensionApiService.saveDocumentDisability(requestId, body).extractMessage()
     }
 

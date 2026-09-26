@@ -6,6 +6,9 @@ import com.tamin.taminhamrah.model.personal.saveSurvivorInfo.DependencyTypeReque
 import com.tamin.taminhamrah.model.personal.submitFinalSurvivorPension.SubmitFinalSurvivorPensionRequest
 import com.tamin.taminhamrah.model.personal.InsuredDocDTO
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
+import com.tamin.taminhamrah.tools.readPdfChannel
+import com.tamin.taminhamrah.tools.errorHandling.HttpErrorCopy
+import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.extractMessage
 import com.tamin.taminhamrah.util.ApiTestUtils
 import com.tamin.taminhamrah.util.PersonalTestData
@@ -179,7 +182,7 @@ class PersonalApiServiceTest : BaseApiTest() {
     }
 
     @Test
-    fun `getGirlSurvivorReport should return error status`() = runTest {
+    fun `getGirlSurvivorReport failure is a mapped error`() = runTest {
         val ktorfit = createMockKtorfit(
             content = ByteArray(0),
             status = HttpStatusCode.InternalServerError,
@@ -198,9 +201,10 @@ class PersonalApiServiceTest : BaseApiTest() {
             pensionerId = "002",
         )
 
-        statement.execute { response ->
-            assertEquals(500, response.status.value)
-        }
+        // A failed download is the failure its status describes, never a body to hand to a viewer.
+        val error = assertFailsWith<TaminErrorUriException> { statement.readPdfChannel() }
+        assertEquals(ErrorUri.INTERNAL_ERROR, error.uri)
+        assertEquals(HttpErrorCopy.GENERIC_SERVER, error.serverMessage)
     }
 
     @Test
@@ -257,14 +261,15 @@ class PersonalApiServiceTest : BaseApiTest() {
     }
 
     @Test
-    fun `getFinalSurvivorPensionPDF should return error status`() = runTest {
+    fun `getFinalSurvivorPensionPDF failure is a mapped error`() = runTest {
         val ktorfit = createMockKtorfit("", status = HttpStatusCode.InternalServerError)
         val apiService = ktorfit.createPersonalApiService()
 
         val statement = apiService.getFinalSurvivorPensionPDF()
-        statement.execute { response ->
-            assertEquals(500, response.status.value)
-        }
+        // A failed download is the failure its status describes, never a body to hand to a viewer.
+        val error = assertFailsWith<TaminErrorUriException> { statement.readPdfChannel() }
+        assertEquals(ErrorUri.INTERNAL_ERROR, error.uri)
+        assertEquals(HttpErrorCopy.GENERIC_SERVER, error.serverMessage)
     }
 
     @Test
