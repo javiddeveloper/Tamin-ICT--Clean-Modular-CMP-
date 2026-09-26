@@ -204,6 +204,36 @@ class UserRequestsViewModelTest {
         }
     }
 
+    @Test
+    fun `open smart guide failure emits show toast event`() = runTest(testDispatcher) {
+        repository.shouldThrowError = true
+        repository.error = RuntimeException("boom")
+
+        viewModel.events.test {
+            viewModel.sendIntent(UserRequestsIntent.OpenSmartGuide(requestType = 1, requestStatus = "0018", title = "راهنما"))
+
+            val event = assertIs<UserRequestsEvent.ShowToast>(awaitItem())
+            assertEquals("boom", event.message)
+        }
+    }
+
+    @Test
+    fun `repeated searches do not starve later intents`() = runTest(testDispatcher) {
+        // Each search's list flow stays open like the real Room-backed one; before the fix these
+        // filled flatMapMerge's 16 slots and the guide tap below was never handled.
+        repository.keepRequestsFlowOpen = true
+        repeat(20) { viewModel.sendIntent(UserRequestsIntent.SearchRequests) }
+        repository.shouldThrowError = true
+        repository.error = RuntimeException("boom")
+
+        viewModel.events.test {
+            viewModel.sendIntent(UserRequestsIntent.OpenSmartGuide(requestType = 1, requestStatus = "0018", title = "راهنما"))
+
+            val event = assertIs<UserRequestsEvent.ShowToast>(awaitItem())
+            assertEquals("boom", event.message)
+        }
+    }
+
     private fun sampleRequest(): UserRequestPR = UserRequestPR(
         id = 491371155L,
         refCode = "1075558440",
