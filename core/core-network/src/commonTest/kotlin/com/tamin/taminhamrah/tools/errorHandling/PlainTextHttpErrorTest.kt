@@ -16,6 +16,18 @@ class PlainTextHttpErrorTest {
         assertEquals(message, error?.serverMessage)
     }
 
+    /** Seen live on `disability-request/personal`: a bare backend code, not a sentence. */
+    @Test
+    fun `maps a bare backend error code to its copy`() {
+        val error = plainTextErrorFromHttpBody(
+            status = 400,
+            bodyText = "pension.disability.commission.not.possible.exception",
+        )
+
+        assertEquals(ErrorUri.INVALID_REQUEST, error?.uri)
+        assertEquals(HttpErrorCopy.DISABILITY_COMMISSION_NOT_POSSIBLE, error?.serverMessage)
+    }
+
     @Test
     fun `returns null for JSON error envelope`() {
         val body = """

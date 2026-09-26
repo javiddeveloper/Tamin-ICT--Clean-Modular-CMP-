@@ -1,13 +1,12 @@
 package com.tamin.taminhamrah.dataSource.requestPaymentForIllDays
 
+import com.tamin.taminhamrah.tools.safeCall
 import com.tamin.taminhamrah.apiService.requestPaymentForIllDays.RequestPaymentForIllDaysApiService
 import com.tamin.taminhamrah.model.requestPaymentForIllDays.CovidResultListDTO
 import com.tamin.taminhamrah.model.requestPaymentForIllDays.IllDaysInsuredMainInfoDTO
 import com.tamin.taminhamrah.model.requestPaymentForIllDays.SaveShortTermIllnessRequestDTO
 import com.tamin.taminhamrah.model.requestPaymentForIllDays.SaveShortTermIllnessResponseDTO
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
-import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
-import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 
 class RequestPaymentForIllDaysRemoteDataSourceImpl(
@@ -15,27 +14,15 @@ class RequestPaymentForIllDaysRemoteDataSourceImpl(
     private val errorParser: ErrorParser,
 ) : RequestPaymentForIllDaysRemoteDataSource {
 
-    override suspend fun getLatestInsuranceInfo(): IllDaysInsuredMainInfoDTO? {
-        return try {
+    override suspend fun getLatestInsuranceInfo(): IllDaysInsuredMainInfoDTO {
+        return errorParser.safeCall("getLatestInsuranceInfo") {
             apiService.getLatestInsuranceInfo().extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 
-    override suspend fun getCovidResult(): CovidResultListDTO? {
-        return try {
+    override suspend fun getCovidResult(): CovidResultListDTO {
+        return errorParser.safeCall("getCovidResult") {
             apiService.getCovidResult().extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 
@@ -44,32 +31,20 @@ class RequestPaymentForIllDaysRemoteDataSourceImpl(
         endDateTimeStamp: String,
         maritalStatus: String,
     ): List<String>? {
-        return try {
+        return errorParser.safeCall("calcIllness") {
             apiService.calcIllness(
                 startDateTimeStamp = startDateTimeStamp,
                 endDateTimeStamp = endDateTimeStamp,
                 maritalStatus = maritalStatus,
             ).extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 
     override suspend fun sendRequestForIllDay(
         request: SaveShortTermIllnessRequestDTO
-    ): SaveShortTermIllnessResponseDTO? {
-        return try {
+    ): SaveShortTermIllnessResponseDTO {
+        return errorParser.safeCall("sendRequestForIllDay") {
             apiService.sendRequestForIllDay(request).extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 }

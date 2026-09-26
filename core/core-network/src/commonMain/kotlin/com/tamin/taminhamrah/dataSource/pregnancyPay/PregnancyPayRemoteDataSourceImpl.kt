@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.dataSource.pregnancyPay
 
+import com.tamin.taminhamrah.tools.safeCall
 import com.tamin.taminhamrah.apiService.pregnancyPay.PregnancyPayApiService
 import com.tamin.taminhamrah.model.pregnancyPay.PregnancyMainInfoDTO
 import com.tamin.taminhamrah.model.pregnancyPay.PregnancyOptionListDTO
@@ -15,65 +16,41 @@ class PregnancyPayRemoteDataSourceImpl(
     private val errorParser: ErrorParser,
 ) : PregnancyPayRemoteDataSource {
 
-    override suspend fun getMainInfo(): PregnancyMainInfoDTO? {
-        return try {
+    override suspend fun getMainInfo(): PregnancyMainInfoDTO {
+        return errorParser.safeCall("getMainInfo") {
             val response = pregnancyPayApiService.getMainInfo()
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 
-    override suspend fun getPregnancyStatusList(): PregnancyOptionListDTO? {
-        return try {
+    override suspend fun getPregnancyStatusList(): PregnancyOptionListDTO {
+        return errorParser.safeCall("getPregnancyStatusList") {
             val response = pregnancyPayApiService.getPregnancyStatusList()
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 
-    override suspend fun getPregnancyTypeList(): PregnancyOptionListDTO? {
-        return try {
+    override suspend fun getPregnancyTypeList(): PregnancyOptionListDTO {
+        return errorParser.safeCall("getPregnancyTypeList") {
             val response = pregnancyPayApiService.getPregnancyTypeList()
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 
     override suspend fun sendPregnancyPayRequest(
         request: SendPregnancyPayRequestDTO
-    ): SendPregnancyPayResponseDTO? {
-        return try {
+    ): SendPregnancyPayResponseDTO {
+        return errorParser.safeCall("sendPregnancyPayRequest") {
             val response = pregnancyPayApiService.sendPregnancyPayRequest(request)
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 
     override suspend fun calculateEstimate(
         startDateTimeStamp: String,
         endDateTimeStamp: String,
-    ): List<String?>? {
-        return try {
+    ): List<String?> {
+        return errorParser.safeCall("calculateEstimate") {
             val response = pregnancyPayApiService.calculateEstimate(startDateTimeStamp, endDateTimeStamp)
             val result = response.extractData()
             if (result?.getOrNull(1).isNullOrBlank()) {
@@ -83,12 +60,6 @@ class PregnancyPayRemoteDataSourceImpl(
                 )
             }
             result
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 }
