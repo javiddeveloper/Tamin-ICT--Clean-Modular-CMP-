@@ -13,7 +13,9 @@ internal fun plainTextErrorFromHttpBody(status: Int, bodyText: String): TaminErr
     val trimmed = bodyText.trim()
     if (trimmed.isEmpty()) return null
     if (trimmed.startsWith("{") || trimmed.startsWith("[")) return null
-    if (!trimmed.looksLikeArabicScript()) return null
+    // A bare backend code (`pension.disability.commission.not.possible.exception`) is what
+    // [HttpStatusErrorMapper] translates; left to JSON decoding it failed and lost the reason.
+    if (!trimmed.looksLikeArabicScript() && !BACKEND_ERROR_CODE.matches(trimmed)) return null
 
     val mapped = HttpStatusErrorMapper.map(
         status = status,
@@ -26,3 +28,6 @@ internal fun plainTextErrorFromHttpBody(status: Int, bodyText: String): TaminErr
         navigateBack = mapped.navigateBack,
     )
 }
+
+/** `pension.disability.saved.before.exception`, `sso.to.sa.connection.exception`, … */
+private val BACKEND_ERROR_CODE = Regex("""[a-z0-9_]+(\.[a-z0-9_]+){2,}""")

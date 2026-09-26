@@ -30,7 +30,7 @@ class PersonalRemoteDataSourceImpl(
     private val errorParser: ErrorParser,
 ) : PersonalRemoteDataSource {
 
-    override suspend fun getPersonalInfo(): PersonalInfoDTO? =
+    override suspend fun getPersonalInfo(): PersonalInfoDTO =
         errorParser.safeCall("getPersonalInfo") {
             personalApiService.getPersonalInfo().extractData()
         }
@@ -50,21 +50,21 @@ class PersonalRemoteDataSourceImpl(
         }
 
     override suspend fun getDisabilityDependentInfo(query: ApiQueryParamDN): List<DisabilityDependentDTO> =
-        errorParser.safeCall("getDisabilityDependentInfo", ErrorUri.UNKNOWN) {
+        errorParser.safeCall("getDisabilityDependentInfo") {
             personalApiService.getDisabilityDependentInfo(
                 queryBuilder.buildQuery(query)
             ).extractData().list ?: emptyList()
         }
 
     override suspend fun getSurvivorList(deceasedNationalId: String): List<SurvivorDependentDTO> =
-        errorParser.safeCall("getSurvivorList", ErrorUri.UNKNOWN) {
+        errorParser.safeCall("getSurvivorList") {
             personalApiService.getSurvivorList(deceasedNationalId).extractData().list ?: emptyList()
         }
 
     override suspend fun checkGirlSurvivorConditions(
         nationalCode: String,
         pensionerId: String
-    ): String? =
+    ): String =
         errorParser.safeCall("checkGirlSurvivorConditions") {
             personalApiService.checkGirlSurvivorConditions(
                 nationalCode = nationalCode,
@@ -73,7 +73,7 @@ class PersonalRemoteDataSourceImpl(
         }
 
     override suspend fun confirmSurvivorsList(query: ApiQueryParamDN): List<ConfirmSurvivorDTO> =
-        errorParser.safeCall("confirmSurvivorsList", ErrorUri.UNKNOWN) {
+        errorParser.safeCall("confirmSurvivorsList") {
             personalApiService.confirmSurvivorsList(
                 queryBuilder.buildQuery(query)
             ).extractData().list ?: emptyList()
@@ -82,13 +82,13 @@ class PersonalRemoteDataSourceImpl(
     override suspend fun submitFinalSurvivorPension(
         requestId: Int,
         body: SubmitFinalSurvivorPensionRequest
-    ): String? =
-        errorParser.safeCall("submitFinalSurvivorPension", ErrorUri.UNKNOWN) {
+    ): String =
+        errorParser.safeCall("submitFinalSurvivorPension") {
             personalApiService.submitFinalSurvivorPension(requestId, body).extractMessage()
         }
 
     override suspend fun getFinalSurvivorPensionPDF(): PdfDownloadDTO =
-        errorParser.safeCall("getFinalSurvivorPensionPDF", ErrorUri.UNKNOWN) {
+        errorParser.safeCall("getFinalSurvivorPensionPDF") {
             val response = personalApiService.getFinalSurvivorPensionPDF()
             PdfDownloadDTO(
                 pdf = InputStreamDTO(
@@ -125,13 +125,13 @@ class PersonalRemoteDataSourceImpl(
             )
         }
 
-    override suspend fun confirmGirlSurvivor(body: ConfirmGirlSurvivorRequestDTO): String? =
+    override suspend fun confirmGirlSurvivor(body: ConfirmGirlSurvivorRequestDTO): String =
         errorParser.safeCall("confirmGirlSurvivor") {
             personalApiService.confirmGirlSurvivor(body).extractMessage()
         }
 
-    override suspend fun saveSurvivorInfo(body: SaveSurvivorInfoRequest): String? =
-        errorParser.safeCall("saveSurvivorInfo", ErrorUri.UNKNOWN) {
+    override suspend fun saveSurvivorInfo(body: SaveSurvivorInfoRequest): String =
+        errorParser.safeCall("saveSurvivorInfo") {
             personalApiService.saveSurvivorInfo(body).extractMessage()
         }
 
@@ -150,7 +150,7 @@ class PersonalRemoteDataSourceImpl(
             ).extractData().list ?: emptyList()
         }
 
-    override suspend fun getRequestSummary(requestId: String): NewInsuredSummaryDTO? =
+    override suspend fun getRequestSummary(requestId: String): NewInsuredSummaryDTO =
         errorParser.safeCall("getRequestSummary") {
             personalApiService.getRequestSummary(requestId).extractData()
         }

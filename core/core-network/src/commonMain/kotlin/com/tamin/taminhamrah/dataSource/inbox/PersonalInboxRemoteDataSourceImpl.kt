@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.dataSource.inbox
 
+import com.tamin.taminhamrah.tools.safeCall
 import com.tamin.taminhamrah.apiService.inbox.PersonalInboxApiService
 import com.tamin.taminhamrah.model.inbox.InboxInquiryRequestDTO
 import com.tamin.taminhamrah.model.inbox.InboxPermissionRequestDTO
@@ -9,8 +10,6 @@ import com.tamin.taminhamrah.model.inbox.PersonalInboxSizeDTO
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
-import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
-import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 
 class PersonalInboxRemoteDataSourceImpl(
@@ -20,53 +19,29 @@ class PersonalInboxRemoteDataSourceImpl(
 ) : PersonalInboxRemoteDataSource {
 
     override suspend fun getInboxItems(query: ApiQueryParamDN): PersonalInboxListDTO {
-        return try {
+        return errorParser.safeCall("getInboxItems") {
             val response = personalInboxApiService.getInboxItems(apiQueryBuilder.buildQuery(query))
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 
     override suspend fun getInboxSize(): PersonalInboxSizeDTO {
-        return try {
+        return errorParser.safeCall("getInboxSize") {
             personalInboxApiService.getInboxSize()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 
     override suspend fun getMyRequestPDF(requestId: String): PersonalInboxItemDTO {
-        return try {
+        return errorParser.safeCall("getMyRequestPDF") {
             val response = personalInboxApiService.getMyRequestPDF(requestId)
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 
     override suspend fun deleteMyRequest(requestId: String) {
-        try {
+        errorParser.safeCall("deleteMyRequest") {
             val response = personalInboxApiService.deleteMyRequest(requestId)
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 
@@ -75,7 +50,7 @@ class PersonalInboxRemoteDataSourceImpl(
         operation: String,
         duration: String?
     ) {
-        try {
+        errorParser.safeCall("inboxInquiryLicense") {
             val body = InboxInquiryRequestDTO(
                 operation = operation,
                 permission = duration?.let {
@@ -84,12 +59,6 @@ class PersonalInboxRemoteDataSourceImpl(
             )
             val response = personalInboxApiService.inboxInquiryLicense(requestId, body)
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 }
