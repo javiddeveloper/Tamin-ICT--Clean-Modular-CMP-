@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.dataSource.employerInfo
 
+import com.tamin.taminhamrah.tools.safeCall
 import com.tamin.taminhamrah.apiService.employerInfo.EmployerInfoApiService
 import com.tamin.taminhamrah.model.employerInfo.LegalWorkshopCeoDTO
 import com.tamin.taminhamrah.model.employerInfo.LegalWorkshopDTO
@@ -8,8 +9,6 @@ import com.tamin.taminhamrah.model.employerInfo.RealWorkshopInfoRequestDTO
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
-import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
-import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
 
@@ -47,11 +46,7 @@ internal class EmployerInfoRemoteDataSourceImpl(
     }
 
     /** Every call here reports failure the same way, so the try/catch lives once. */
-    private inline fun <T> call(block: () -> T): T = try {
+    private inline fun <T> call(block: () -> T): T = errorParser.safeCall("call") {
         block()
-    } catch (e: TaminErrorUriException) {
-        throw errorParser.parseGeneralError(e)
-    } catch (_: Exception) {
-        throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
     }
 }
