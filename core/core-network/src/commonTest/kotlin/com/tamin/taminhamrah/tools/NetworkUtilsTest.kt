@@ -49,6 +49,15 @@ class NetworkUtilsTest {
         assertEquals(ErrorUri.NO_CONNECTION_ERROR, FakeIOException().toErrorUri())
     }
 
+    /** The old app told a timeout apart from no internet: "زمان درخواست به پایان رسید". */
+    @Test
+    fun `a timeout is a timeout, not a lost connection`() {
+        class SocketTimeoutException : Exception("Read timed out")
+
+        assertEquals(ErrorUri.SERVICE_TIMEOUT, SocketTimeoutException().toErrorUri())
+        assertEquals(ErrorUri.SERVICE_TIMEOUT, Exception("wrapped", SocketTimeoutException()).toErrorUri())
+    }
+
     @Test
     fun `anything else stays unknown`() {
         assertEquals(ErrorUri.UNKNOWN, IllegalStateException("boom").toErrorUri())

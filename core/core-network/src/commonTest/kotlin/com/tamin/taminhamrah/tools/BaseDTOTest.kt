@@ -277,17 +277,17 @@ class BaseDTOTest {
 
     @Test
     fun `requireSuccessStatus lets a 2xx through even with no data`() {
-        BaseDTO<kotlinx.serialization.json.JsonElement?>(status = 200, family = "SUCCESSFUL", reason = "OK", data = null)
-            .requireSuccessStatus()
+        BaseDTO<Unit>(status = 200, family = "SUCCESSFUL", reason = "OK").requireSuccessStatus()
     }
 
+    /** `errorText` is what the reply converter recovers from a failed body's `data.message`. */
     @Test
     fun `requireSuccessStatus fails a 4xx with the server's own message`() {
-        val dto = BaseDTO<kotlinx.serialization.json.JsonElement?>(
+        val dto = BaseDTO<Unit>(
             status = 400,
             family = "CLIENT_ERROR",
             reason = "Bad Request",
-            data = buildJsonObject { put("message", "کد پستی نامعتبر است") },
+            errorText = "کد پستی نامعتبر است",
         )
         val error = assertFailsWith<TaminErrorUriException> { dto.requireSuccessStatus() }
 
@@ -297,11 +297,10 @@ class BaseDTOTest {
 
     @Test
     fun `requireSuccessStatus fails a 5xx with the status copy when the server says nothing readable`() {
-        val dto = BaseDTO<kotlinx.serialization.json.JsonElement?>(
+        val dto = BaseDTO<Unit>(
             status = 500,
             family = "SERVER_ERROR",
             reason = "Internal Server Error",
-            data = null,
         )
         val error = assertFailsWith<TaminErrorUriException> { dto.requireSuccessStatus() }
 
