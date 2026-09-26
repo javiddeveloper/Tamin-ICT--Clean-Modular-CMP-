@@ -32,6 +32,14 @@ class TaminExceptionTest {
         assertNull(TaminApiException(title = "خطا").taminErrorUriOrNull())
     }
 
+    /** Thrown outside a data source (a repository draining a download): parsed, not "مشکلی پیش آمده". */
+    @Test
+    fun `an unparsed classified failure still reads as its own message`() {
+        val bare = TaminErrorUriException(ErrorUri.FORBIDDEN, serverMessage = HttpErrorCopy.FORBIDDEN_VPN)
+
+        assertEquals("خطا, ${HttpErrorCopy.FORBIDDEN_VPN}", bare.toSingleLineMessage())
+    }
+
     /** A server message wins the copy, but the classification underneath it still comes through. */
     @Test
     fun `a server-worded failure keeps the uri under its own message`() {
