@@ -4,12 +4,20 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Email
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -24,6 +32,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.component
 import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.components.EmployerInfoDialogs
 import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.components.EmployerInfoHero
 import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.components.EmployerInfoScreenShimmer
+import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.components.EmployerInfoSubmitButton
 import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.components.EmployerInfoVerifySection
 import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.components.LegalWorkshopFormSection
 import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.components.RealWorkshopFormSection
@@ -54,6 +63,8 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.employer_info_btn_send_otp
 
 @Composable
 fun CompleteEmployerInfoRoute(
@@ -108,6 +119,8 @@ fun CompleteEmployerInfoScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = colors.bgPage,
+        // The hero draws behind the status bar; each step pads for the navigation bar itself.
+        contentWindowInsets = WindowInsets(0),
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -119,6 +132,7 @@ fun CompleteEmployerInfoScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(scrollState)
+                        .statusBarsPadding()
                         .navigationBarsPadding(),
                 ) {
                     EmployerInfoScreenShimmer()
@@ -178,7 +192,17 @@ fun CompleteEmployerInfoScreen(
                                 )
                             }
 
-                            EmployerInfoStep.LEGAL_FORM -> EmployerInfoStepBody {
+                            EmployerInfoStep.LEGAL_FORM -> EmployerInfoStepBody(
+                                bottomBar = {
+                                    EmployerInfoSubmitButton(
+                                        text = stringResource(Res.string.employer_info_btn_send_otp),
+                                        icon = Icons.Outlined.Email,
+                                        enabled = state.canSubmitLegal,
+                                        isSubmitting = state.isSubmitting,
+                                        onSubmit = { onIntent(CompleteEmployerInfoIntent.SubmitLegalForm) },
+                                    )
+                                },
+                            ) {
                                 LegalWorkshopFormSection(
                                     legalNationalId = state.legalNationalId,
                                     onLegalNationalIdChanged = { onIntent(CompleteEmployerInfoIntent.ChangeLegalNationalId(it)) },
@@ -210,13 +234,20 @@ fun CompleteEmployerInfoScreen(
                                     ceoBirthError = state.ceoBirthError?.let { stringResource(it) },
                                     mobileError = state.legalMobileError?.let { stringResource(it) },
                                     emailError = state.legalEmailError?.let { stringResource(it) },
-                                    isSubmitting = state.isSubmitting,
-                                    canSubmit = state.canSubmitLegal,
-                                    onSubmit = { onIntent(CompleteEmployerInfoIntent.SubmitLegalForm) },
                                 )
                             }
 
-                            EmployerInfoStep.REAL_FORM -> EmployerInfoStepBody {
+                            EmployerInfoStep.REAL_FORM -> EmployerInfoStepBody(
+                                bottomBar = {
+                                    EmployerInfoSubmitButton(
+                                        text = stringResource(Res.string.employer_info_btn_send_otp),
+                                        icon = Icons.Outlined.Email,
+                                        enabled = state.canSubmitReal,
+                                        isSubmitting = state.isSubmitting,
+                                        onSubmit = { onIntent(CompleteEmployerInfoIntent.SubmitRealForm) },
+                                    )
+                                },
+                            ) {
                                 RealWorkshopFormSection(
                                     workshopCode = state.realWorkshopCode,
                                     onWorkshopCodeChanged = { onIntent(CompleteEmployerInfoIntent.ChangeRealWorkshopCode(it)) },
@@ -237,9 +268,6 @@ fun CompleteEmployerInfoScreen(
                                     provinceError = state.provinceError?.let { stringResource(it) },
                                     cityError = state.cityError?.let { stringResource(it) },
                                     branchError = state.branchError?.let { stringResource(it) },
-                                    isSubmitting = state.isSubmitting,
-                                    canSubmit = state.canSubmitReal,
-                                    onSubmit = { onIntent(CompleteEmployerInfoIntent.SubmitRealForm) },
                                 )
                             }
 
@@ -250,7 +278,9 @@ fun CompleteEmployerInfoScreen(
                                     state = listState,
                                     contentPadding = PaddingValues(
                                         top = Spacing.sm,
-                                        bottom = Spacing.xxl,
+                                        bottom = Spacing.xxl + WindowInsets.navigationBars
+                                            .asPaddingValues()
+                                            .calculateBottomPadding(),
                                     ),
                                 ) {
                                     legalWorkshopListSection(
@@ -386,12 +416,31 @@ internal fun previewAgreement(
  * list and a scrolling form with the same machinery.
  */
 @Composable
-private fun EmployerInfoStepBody(content: @Composable ColumnScope.() -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(bottom = Spacing.xxl),
-        content = content,
-    )
+private fun EmployerInfoStepBody(
+    bottomBar: (@Composable () -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .then(if (bottomBar == null) Modifier.navigationBarsPadding() else Modifier)
+                .padding(bottom = if (bottomBar != null) Spacing.lg else Spacing.xxl),
+            content = content,
+        )
+        // Pinned under the scrolling form, so the send button never scrolls out of reach.
+        if (bottomBar != null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(LocalTaminColors.current.bgPage)
+                    .navigationBarsPadding()
+                    .padding(horizontal = Spacing.lg, vertical = Spacing.md),
+            ) {
+                bottomBar()
+            }
+        }
+    }
 }

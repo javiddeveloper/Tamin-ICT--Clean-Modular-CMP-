@@ -20,10 +20,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
@@ -37,8 +39,13 @@ import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.contract.
 import com.tamin.taminhamrah.model.employerInfo.WorkshopItemPR
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
+import com.tamin.taminhamrah.ui.components.TaminTopAppBar
+import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.TaminNavy300
+import com.tamin.taminhamrah.ui.theme.TaminNavy900
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
@@ -65,53 +72,31 @@ fun EmployerInfoHero(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
+    // The fill of انعقاد قرارداد جدید on امور قراردادها و پرداخت, so the chosen tab reads as the
+    // same kind of control.
+    val selectedTabBrush = remember { Brush.linearGradient(listOf(TaminNavy900, TaminNavy300)) }
+    val barShape = RoundedCornerShape(bottomStart = CornerRadius.x3l, bottomEnd = CornerRadius.x3l)
 
     Column(modifier = modifier.fillMaxWidth()) {
-        // Hero background area
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(bottomStart = 30.dp, bottomEnd = 30.dp))
-                .background(colors.heroGradient)
-                .padding(horizontal = Spacing.lg, vertical = Spacing.md),
+        // The same bar and wash as امور قراردادها و پرداخت and اعتراض به سوابق ناموجود, drawn
+        // behind the status bar.
+        TaminTopAppBar(
+            title = stringResource(Res.string.employer_info_title),
+            background = taminTopAppBarGradient(colors.profileGradientStops),
+            shape = barShape,
+            cornerRadius = CornerRadius.x3l,
+            bottomPadding = Spacing.md,
+            modifier = Modifier.clip(barShape),
+            navigationIcon = {
+                TaminTopAppBarButton(
+                    icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                    contentDescription = null,
+                    onClick = onBack,
+                    bordered = true
+                )
+            },
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                // Top App Bar
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(colors.onGradient.copy(alpha = 0.12f))
-                            .border(1.dp, colors.onGradient.copy(alpha = 0.20f), RoundedCornerShape(14.dp))
-                            .clickable(onClick = onBack),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(
-                            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                            contentDescription = null,
-                            tint = colors.onGradient,
-                            modifier = Modifier.size(18.dp),
-                        )
-                    }
-
-                    Text(
-                        text = stringResource(Res.string.employer_info_title),
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            color = colors.onGradient,
-                        ),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(1f),
-                    )
-
-                    Spacer(modifier = Modifier.size(36.dp))
-                }
-
                 if (screen == CompleteEmployerInfoScreenState.LIST) {
                     Spacer(modifier = Modifier.height(Spacing.md))
                     // The app's header icon: a glass tile inside two rings that pulse out of it.
@@ -305,7 +290,7 @@ fun EmployerInfoHero(
                             .height(40.dp)
                             .clip(RoundedCornerShape(12.dp))
                             .then(
-                                if (isLegal) Modifier.background(colors.buttonGradient)
+                                if (isLegal) Modifier.background(selectedTabBrush)
                                 else Modifier.background(Color.Transparent)
                             )
                             .clickable { onSelectTab(CompleteEmployerInfoTab.LEGAL) },
@@ -329,7 +314,7 @@ fun EmployerInfoHero(
                             .height(40.dp)
                             .clip(RoundedCornerShape(12.dp))
                             .then(
-                                if (isReal) Modifier.background(colors.buttonGradient)
+                                if (isReal) Modifier.background(selectedTabBrush)
                                 else Modifier.background(Color.Transparent)
                             )
                             .clickable { onSelectTab(CompleteEmployerInfoTab.REAL) },

@@ -22,7 +22,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DateRange
-import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -57,7 +56,6 @@ import com.tamin.taminhamrah.util.PersianDateFormatter
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.employer_info_btn_send_otp
 import taminx.core.core_ui.employer_info_ceo_birth_label
 import taminx.core.core_ui.employer_info_ceo_birth_picker_title
 import taminx.core.core_ui.employer_info_ceo_name_prefix
@@ -103,9 +101,6 @@ fun LegalWorkshopFormSection(
     ceoBirthError: String?,
     mobileError: String?,
     emailError: String?,
-    isSubmitting: Boolean,
-    canSubmit: Boolean,
-    onSubmit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
@@ -541,22 +536,11 @@ fun LegalWorkshopFormSection(
                             }
                         },
                     )
-                    FieldErrorText(emailError)
                 }
+                // Outside the LTR block: the reason is Persian and reads right to left.
+                FieldErrorText(emailError)
             }
         }
-
-        // Error message line
-        Spacer(modifier = Modifier.height(2.dp))
-
-        // Submit Button
-        EmployerInfoSubmitButton(
-            text = stringResource(Res.string.employer_info_btn_send_otp),
-            icon = Icons.Outlined.Email,
-            enabled = canSubmit,
-            isSubmitting = isSubmitting,
-            onSubmit = onSubmit,
-        )
     }
 
     if (showDatePicker) {

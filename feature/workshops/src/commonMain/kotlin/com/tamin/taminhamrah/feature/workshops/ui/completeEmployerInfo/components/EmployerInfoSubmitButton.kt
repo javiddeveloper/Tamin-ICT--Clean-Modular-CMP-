@@ -17,10 +17,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tamin.taminhamrah.ui.theme.IconGradientBlueEnd
+import com.tamin.taminhamrah.ui.theme.IconGradientBlueStart
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -30,6 +33,12 @@ private val ButtonCorner = 15.dp
 private val ButtonElevation = 6.dp
 private val ButtonIconSize = 17.dp
 private val ButtonTextSize = 13.5.sp
+
+/**
+ * The theme's `buttonGradient` stops, reversed: on the right-to-left page it runs from the light
+ * blue at the right edge to the dark one at the left, matching the selected tab above.
+ */
+private val EnabledGradient = Brush.horizontalGradient(listOf(IconGradientBlueEnd, IconGradientBlueStart))
 
 /**
  * The one submit button the three steps share.
@@ -71,7 +80,7 @@ fun EmployerInfoSubmitButton(
                 spotColor = colors.shadowPrimary,
             )
             .clip(RoundedCornerShape(ButtonCorner))
-            .background(if (enabled) colors.buttonGradient else colors.buttonDisabledGradient)
+            .background(if (enabled) EnabledGradient else colors.buttonDisabledGradient)
             .clickable(enabled = enabled, onClick = onSubmit),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
