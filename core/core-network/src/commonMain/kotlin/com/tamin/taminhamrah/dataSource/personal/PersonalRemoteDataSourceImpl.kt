@@ -30,7 +30,7 @@ class PersonalRemoteDataSourceImpl(
     private val errorParser: ErrorParser,
 ) : PersonalRemoteDataSource {
 
-    override suspend fun getPersonalInfo(): PersonalInfoDTO =
+    override suspend fun getPersonalInfo(): PersonalInfoDTO? =
         errorParser.safeCall("getPersonalInfo") {
             personalApiService.getPersonalInfo().extractData()
         }
@@ -64,7 +64,7 @@ class PersonalRemoteDataSourceImpl(
     override suspend fun checkGirlSurvivorConditions(
         nationalCode: String,
         pensionerId: String
-    ): String =
+    ): String? =
         errorParser.safeCall("checkGirlSurvivorConditions") {
             personalApiService.checkGirlSurvivorConditions(
                 nationalCode = nationalCode,
@@ -82,7 +82,7 @@ class PersonalRemoteDataSourceImpl(
     override suspend fun submitFinalSurvivorPension(
         requestId: Int,
         body: SubmitFinalSurvivorPensionRequest
-    ): String =
+    ): String? =
         errorParser.safeCall("submitFinalSurvivorPension") {
             personalApiService.submitFinalSurvivorPension(requestId, body).extractMessage()
         }
@@ -125,12 +125,12 @@ class PersonalRemoteDataSourceImpl(
             )
         }
 
-    override suspend fun confirmGirlSurvivor(body: ConfirmGirlSurvivorRequestDTO): String =
+    override suspend fun confirmGirlSurvivor(body: ConfirmGirlSurvivorRequestDTO): String? =
         errorParser.safeCall("confirmGirlSurvivor") {
             personalApiService.confirmGirlSurvivor(body).extractMessage()
         }
 
-    override suspend fun saveSurvivorInfo(body: SaveSurvivorInfoRequest): String =
+    override suspend fun saveSurvivorInfo(body: SaveSurvivorInfoRequest): String? =
         errorParser.safeCall("saveSurvivorInfo") {
             personalApiService.saveSurvivorInfo(body).extractMessage()
         }
@@ -150,7 +150,7 @@ class PersonalRemoteDataSourceImpl(
             ).extractData().list ?: emptyList()
         }
 
-    override suspend fun getRequestSummary(requestId: String): NewInsuredSummaryDTO =
+    override suspend fun getRequestSummary(requestId: String): NewInsuredSummaryDTO? =
         errorParser.safeCall("getRequestSummary") {
             personalApiService.getRequestSummary(requestId).extractData()
         }
