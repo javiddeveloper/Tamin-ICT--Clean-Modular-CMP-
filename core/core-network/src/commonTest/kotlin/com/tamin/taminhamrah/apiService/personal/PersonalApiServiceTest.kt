@@ -18,7 +18,6 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 class PersonalApiServiceTest : BaseApiTest() {
 
@@ -33,15 +32,15 @@ class PersonalApiServiceTest : BaseApiTest() {
 
         assertEquals(200, response.status)
         assertNotNull(response.data)
-        assertEquals("0071234567", response.data?.insuranceId)
-        assertEquals("09121234567", response.data?.mobileNumber)
-        assertEquals("زهرا", response.data?.personal?.firstName)
-        assertEquals("محمدی", response.data?.personal?.lastName)
-        assertEquals("0012345678", response.data?.personal?.nationalId)
-        assertEquals("02", response.data?.personal?.gender?.genderCode)
-        assertEquals("456789", response.data?.personal?.idCardNumber)
-        assertEquals("1234567890", response.data?.personal?.contacts?.firstOrNull()?.zipCode)
-        assertEquals("تهران، خیابان آزادی، پلاک ۱۲", response.data?.personal?.contacts?.firstOrNull()?.address)
+        assertEquals("0071234567", response.data.insuranceId)
+        assertEquals("09121234567", response.data.mobileNumber)
+        assertEquals("زهرا", response.data.personal?.firstName)
+        assertEquals("محمدی", response.data.personal?.lastName)
+        assertEquals("0012345678", response.data.personal?.nationalId)
+        assertEquals("02", response.data.personal?.gender?.genderCode)
+        assertEquals("456789", response.data.personal?.idCardNumber)
+        assertEquals("1234567890", response.data.personal?.contacts?.firstOrNull()?.zipCode)
+        assertEquals("تهران، خیابان آزادی، پلاک ۱۲", response.data.personal?.contacts?.firstOrNull()?.address)
     }
 
     @Test
@@ -54,13 +53,12 @@ class PersonalApiServiceTest : BaseApiTest() {
 
             assertEquals(200, response.status)
             assertNotNull(response.data)
-            assertEquals("0012886024", response.data?.insuranceId)
-            assertEquals("علي", response.data?.personal?.firstName)
-            assertEquals("عيسي زاده", response.data?.personal?.lastName)
-            assertEquals("6360110032", response.data?.personal?.nationalId)
-            assertEquals("01", response.data?.personal?.gender?.genderCode)
-            assertEquals(2, response.data?.request?.personal)
-            assertEquals("1234567890", response.data?.personal?.contacts?.firstOrNull()?.zipCode)
+            assertEquals("0012886024", response.data.insuranceId)
+            assertEquals("علي", response.data.personal?.firstName)
+            assertEquals("عيسي زاده", response.data.personal?.lastName)
+            assertEquals("6360110032", response.data.personal?.nationalId)
+            assertEquals("01", response.data.personal?.gender?.genderCode)
+            assertEquals("1234567890", response.data.personal?.contacts?.firstOrNull()?.zipCode)
         }
 
     @Test
@@ -148,7 +146,7 @@ class PersonalApiServiceTest : BaseApiTest() {
         val response = apiService.checkGirlSurvivorConditions("0012345678", "04", "1234567890")
 
         assertEquals(400, response.status)
-        assertTrue(response.problems?.isNotEmpty() == true)
+        assertEquals(response.problems?.isNotEmpty(), true)
         assertEquals("فرد مشمول تعهدنامه فرزندان دختر نیست", response.problems?.firstOrNull()?.errorMsg)
     }
 

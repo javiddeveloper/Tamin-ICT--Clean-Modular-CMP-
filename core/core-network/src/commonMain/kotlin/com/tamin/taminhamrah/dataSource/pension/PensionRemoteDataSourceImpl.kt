@@ -29,8 +29,6 @@ import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
-import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
-import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
 import com.tamin.taminhamrah.tools.readPdfChannel
@@ -101,7 +99,7 @@ class PensionRemoteDataSourceImpl(
 
     override suspend fun pensionerPayRollPDF(
         filter: List<ApiFilterDN>
-    ): PdfDownloadDTO = errorParser.safeCall("pensionerPayRollPDF", ErrorUri.UNKNOWN) {
+    ): PdfDownloadDTO = errorParser.safeCall("pensionerPayRollPDF") {
         val filterJson = apiQueryBuilder.buildFilterJson(filter)
         val response = pensionApiService.pensionerPayRollPDF(mapOf("filter" to filterJson))
         PdfDownloadDTO(
@@ -113,7 +111,7 @@ class PensionRemoteDataSourceImpl(
 
     override suspend fun getEdictReportPDF(
         filter: List<ApiFilterDN>
-    ): PdfDownloadDTO = errorParser.safeCall("getEdictReportPDF", ErrorUri.UNKNOWN) {
+    ): PdfDownloadDTO = errorParser.safeCall("getEdictReportPDF") {
         val filterJson = apiQueryBuilder.buildFilterJson(filter)
         val response = pensionApiService.getEdictReportPDF(mapOf("filter" to filterJson))
         PdfDownloadDTO(
@@ -176,59 +174,47 @@ class PensionRemoteDataSourceImpl(
     }
 
     override suspend fun sendPayRollToInbox(filter: List<ApiFilterDN>): String? {
-        return try {
+        return errorParser.safeCall("sendPayRollToInbox") {
             val filterJson = apiQueryBuilder.buildFilterJson(filter)
             val response = pensionApiService.sendPayRollToInbox(filterJson)
             response?.extractMessage()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 
     override suspend fun sendRequestInquirePensionCertificate(filter: List<ApiFilterDN>) :String? {
-        return try {
+        return errorParser.safeCall("sendRequestInquirePensionCertificate") {
             val filterJson = apiQueryBuilder.buildFilterJson(filter)
 
             val response = pensionApiService.sendRequestInquirePensionCertificate(
                 mapOf("filter" to filterJson)
             )
             response.extractMessage()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 
     override suspend fun saveDisabilityUserInfo(
         body: DisabilitySaveInfoRequest
-    ): DisabilitySaveInfoResponseDTO = errorParser.safeCall("saveDisabilityUserInfo", ErrorUri.UNKNOWN) {
+    ): DisabilitySaveInfoResponseDTO = errorParser.safeCall("saveDisabilityUserInfo") {
         pensionApiService.saveDisabilityUserInfo(body).extractData()
     }
 
     override suspend fun finalConfirmDisabilityRequest(
         requestId: Long,
         body: DisabilityFinalConfirmRequest
-    ): DisabilitySaveInfoResponseDTO = errorParser.safeCall("finalConfirmDisabilityRequest", ErrorUri.UNKNOWN) {
+    ): DisabilitySaveInfoResponseDTO = errorParser.safeCall("finalConfirmDisabilityRequest") {
         pensionApiService.finalConfirmDisabilityRequest(requestId, body).extractData()
     }
 
     override suspend fun saveDocumentDisability(
         requestId: Long,
         body: DisabilitySaveDocumentRequest
-    ): String? = errorParser.safeCall("saveDocumentDisability", ErrorUri.UNKNOWN) {
+    ): String = errorParser.safeCall("saveDocumentDisability") {
         pensionApiService.saveDocumentDisability(requestId, body).extractMessage()
     }
 
     override suspend fun getMedicalCommissionPdf(
         lastWorkshop: String
-    ): PdfDownloadDTO = errorParser.safeCall("getMedicalCommissionPdf", ErrorUri.UNKNOWN) {
+    ): PdfDownloadDTO = errorParser.safeCall("getMedicalCommissionPdf") {
         val response = pensionApiService.getMedicalCommissionPdf(lastWorkshop)
         PdfDownloadDTO(
             pdf = InputStreamDTO(

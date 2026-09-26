@@ -1,12 +1,11 @@
 package com.tamin.taminhamrah.dataSource.paymentSource
 
+import com.tamin.taminhamrah.tools.safeCall
 import com.tamin.taminhamrah.apiService.payment.PaymentGatewayApiService
 import com.tamin.taminhamrah.model.payment.PaymentInfoDTO
 import com.tamin.taminhamrah.model.payment.PaymentLinkDTO
 import com.tamin.taminhamrah.model.payment.PaymentLinkRequestDTO
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
-import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
-import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
 
@@ -30,11 +29,7 @@ internal class PaymentGatewayRemoteDataSourceImpl(
         call { apiService.cancelPayment(ticket).extractMessage() }
     }
 
-    private suspend fun <T> call(block: suspend () -> T): T = try {
+    private suspend fun <T> call(block: suspend () -> T): T = errorParser.safeCall("call") {
         block()
-    } catch (e: TaminErrorUriException) {
-        throw errorParser.parseGeneralError(e)
-    } catch (e: Exception) {
-        throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
     }
 }
