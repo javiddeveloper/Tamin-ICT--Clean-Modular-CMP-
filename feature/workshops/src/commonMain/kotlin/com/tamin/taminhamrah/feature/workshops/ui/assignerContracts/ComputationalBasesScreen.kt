@@ -123,7 +123,6 @@ fun ComputationalBasesContent(
         onBack = onBack,
         subtitle = stringResource(Res.string.assigner_contract_subtitle, workshopName, rowLabel),
         modifier = modifier,
-        borderedBack = true,
     ) {
         // The total keeps its place through every list state.
         val totalLabel = stringResource(Res.string.assigner_bases_total)

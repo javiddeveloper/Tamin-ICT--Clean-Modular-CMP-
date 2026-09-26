@@ -19,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -107,6 +108,8 @@ internal fun SettlementTermsStep(
     gross: Long,
     isUploading: Boolean,
     errors: ImmutableMap<SettlementField, StringResource>,
+    /** The form's image previews, shared with the documents step. */
+    previewCache: SnapshotStateMap<String, ByteArray>,
     onIntent: (SettlementRequestIntent) -> Unit,
 ) {
     val subjectLabel = stringResource(Res.string.settlement_subject)
@@ -165,6 +168,7 @@ internal fun SettlementTermsStep(
                 image = terms.image,
                 isUploading = isUploading,
                 isError = SettlementField.SUBJECT_IMAGE in errors,
+                previewCache = previewCache,
                 onIntent = onIntent,
             )
         }
@@ -309,6 +313,7 @@ internal fun SettlementTermsStep(
                 image = terms.image,
                 isUploading = isUploading,
                 isError = SettlementField.SUBJECT_IMAGE in errors,
+                previewCache = previewCache,
                 onIntent = onIntent,
             )
         }
@@ -526,6 +531,7 @@ private fun SettlementSubjectImage(
     image: ImmutableList<WorkshopAttachment>,
     isUploading: Boolean,
     isError: Boolean,
+    previewCache: SnapshotStateMap<String, ByteArray>,
     onIntent: (SettlementRequestIntent) -> Unit,
 ) {
     WorkshopDocumentsPanel(
@@ -537,6 +543,7 @@ private fun SettlementSubjectImage(
         onRemove = { onIntent(SettlementRequestIntent.RemoveSubjectImage) },
         isUploading = isUploading,
         isError = isError,
+        previewCache = previewCache,
     )
 }
 

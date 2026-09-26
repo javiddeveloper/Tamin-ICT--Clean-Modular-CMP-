@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -185,10 +186,14 @@ fun SettlementRequestContent(
 ) {
     val step = state.step
     val colors = LocalTaminColors.current
-    // The documents step's image previews. Up here, outside the steps, so going on to the next step
+    // The form's image previews — the documents step's and the conditions' image. Up here, outside the
+    // steps, so going on to the next step
     // and back does not throw them away with the panel.
     val documentPreviews = remember { mutableStateMapOf<String, ByteArray>() }
-    Column(modifier = modifier.fillMaxSize()) {
+    // Rises with the keyboard: the steps' scroll area shrinks to what is left above it, and the field
+    // being typed in is scrolled into that space instead of sitting behind the keyboard. The footer's
+    // navigation-bar padding sees the inset already consumed here, so it does not pad a second time.
+    Column(modifier = modifier.fillMaxSize().imePadding()) {
         SettlementHeader(
             step = step,
             workshopName = contract?.card?.name,
@@ -274,6 +279,7 @@ fun SettlementRequestContent(
                         gross = gross,
                         isUploading = state.isUploading,
                         errors = state.errors,
+                        previewCache = documentPreviews,
                         onIntent = onIntent,
                     )
                 }

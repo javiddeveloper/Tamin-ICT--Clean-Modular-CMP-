@@ -56,11 +56,6 @@ fun WorkshopScreenShell(
     workshopCode: String? = null,
     action: (@Composable () -> Unit)? = null,
     /**
-     * Outlines the back control, as `TaminTopAppBarButton(bordered = true)` draws it. False — the
-     * default — keeps the plain control every other workshop screen shows.
-     */
-    borderedBack: Boolean = false,
-    /**
      * One muted line under the title — which record the screen is about. Null, the default, draws
      * the title alone, as every existing screen does.
      */

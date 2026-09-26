@@ -144,7 +144,6 @@ fun AssignerContractDetailContent(
         onBack = onBack,
         subtitle = subtitle,
         modifier = modifier,
-        borderedBack = true,
     ) {
         if (contract == null) {
             EmptyStateMessage(

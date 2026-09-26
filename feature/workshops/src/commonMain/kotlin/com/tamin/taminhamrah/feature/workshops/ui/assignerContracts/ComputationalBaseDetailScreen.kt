@@ -130,7 +130,6 @@ fun ComputationalBaseDetailContent(
         onBack = onBack,
         subtitle = subtitle,
         modifier = modifier,
-        borderedBack = true,
     ) {
         if (base == null) {
             EmptyStateMessage(

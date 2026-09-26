@@ -176,33 +176,6 @@ fun AssignerContractsContent(
         AssignerContractsTopArea(onBack = onBack, onSearchClick = onSearchClick, topAreaState = topAreaState)
     }
     val listState = rememberLazyListState()
-    Column(modifier = modifier.fillMaxSize()) {
-        TaminTopAppBar(
-            title = stringResource(Res.string.assigner_contracts_title),
-            background = headerGradient,
-            bottomPadding = Spacing.page,
-            navigationIcon = {
-                TaminTopAppBarButton(
-                    icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                    contentDescription = null,
-                    onClick = onBack,
-                    bordered = true,
-                )
-            },
-            action = {
-                TaminTopAppBarButton(
-                    icon = vectorResource(Res.drawable.ic_tamin_search),
-                    contentDescription = stringResource(Res.string.assigner_select_workshop),
-                    onClick = { onIntent(AssignerContractsIntent.SearchOpenChanged(isOpen = true)) },
-                    bordered = true,
-                )
-            },
-        ) {
-            AnimatedRingHeaderIcon(
-                icon = vectorResource(Res.drawable.ic_tamin_assigner_contracts),
-                modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
-            )
-        }
 
     // Overlaid rather than a Column, so the list passes underneath the header as it scrolls.
     Box(modifier = modifier.fillMaxSize()) {
@@ -210,7 +183,11 @@ fun AssignerContractsContent(
         // clearing the search never takes the tabs off the screen while the rows below settle.
         val count = list.items.size
         val header: @Composable () -> Unit = {
-            Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
+            Column(
+                // A little air between the gradient bar and the tabs.
+                modifier = Modifier.padding(top = Spacing.sm),
+                verticalArrangement = Arrangement.spacedBy(Spacing.md),
+            ) {
                 AssignerTabsRow(
                     selected = tab,
                     count = count,
