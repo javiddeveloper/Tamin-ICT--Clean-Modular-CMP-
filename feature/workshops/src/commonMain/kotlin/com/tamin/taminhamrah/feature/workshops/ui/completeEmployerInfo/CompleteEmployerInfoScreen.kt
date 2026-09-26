@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -420,7 +421,10 @@ private fun EmployerInfoStepBody(
     bottomBar: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
+    // The app is edge-to-edge, so the keyboard draws over the page instead of resizing it. Padding
+    // for it here shrinks the scrolling area above the keyboard (and lifts the pinned button with
+    // it), which lets a focused field scroll itself into view instead of hiding underneath.
+    Column(modifier = Modifier.fillMaxSize().imePadding()) {
         Column(
             modifier = Modifier
                 .weight(1f)
