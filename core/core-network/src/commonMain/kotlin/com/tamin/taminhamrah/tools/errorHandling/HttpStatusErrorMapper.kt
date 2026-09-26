@@ -63,6 +63,8 @@ internal object HttpErrorCopy {
             "_اطلاعات ثبت شده برای شما دارای اشکال است."
 
     const val INVALID_REQUEST = "اطلاعات ارسالی صحیح نیست"
+
+    const val NO_CONTENT = "محتوای مورد نظر شما قابل دسترس نیست"
 }
 
 /**
@@ -74,6 +76,11 @@ internal object HttpStatusErrorMapper {
     fun map(status: Int, rawMessage: String?, cause: String?): MappedHttpError {
         val raw = sanitizeRaw(rawMessage)
         return when (status) {
+            // Every call here expects a body, so an empty 204 is a failure — the old app's wording.
+            204 -> MappedHttpError(
+                uri = ErrorUri.RESOURCE_NOT_FOUND,
+                userMessage = HttpErrorCopy.NO_CONTENT
+            )
             401 -> MappedHttpError(
                 uri = ErrorUri.INVALID_AUTH,
                 userMessage = arabicOr(raw, "لطفا دوباره وارد شوید")

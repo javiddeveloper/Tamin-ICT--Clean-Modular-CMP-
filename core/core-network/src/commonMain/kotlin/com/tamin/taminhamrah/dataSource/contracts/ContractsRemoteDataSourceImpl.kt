@@ -1,7 +1,8 @@
 package com.tamin.taminhamrah.dataSource.contracts
 
+import kotlinx.coroutines.CancellationException
+import io.ktor.serialization.JsonConvertException
 import com.tamin.taminhamrah.tools.requireSuccessStatus
-import com.tamin.taminhamrah.tools.safeCall
 import com.tamin.taminhamrah.apiService.contract.ContractsApiService
 import com.tamin.taminhamrah.model.contracts.BranchDTO
 import com.tamin.taminhamrah.model.contracts.ContractDTO
@@ -24,6 +25,8 @@ import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
+import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
+import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
 import kotlinx.serialization.json.JsonElement
@@ -39,79 +42,211 @@ class ContractsRemoteDataSourceImpl(
     private val errorParser: ErrorParser
 ) : ContractsRemoteDataSource {
     override suspend fun getContracts(query: ApiQueryParamDN): ListData<ContractDTO> {
-        return errorParser.safeCall("getContracts") {
+        return try {
             val response =
                 contractsApiService.getContractList(apiQueryBuilder.buildQuery(query))
             response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
     override suspend fun getRegistrationInfo(): RegistrationInfoDTO {
-        return errorParser.safeCall("getRegistrationInfo") {
+        return try {
             contractsApiService.getRegistrationInfo().extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
     override suspend fun getBranches(query: ApiQueryParamDN): ListData<BranchDTO> {
-        return errorParser.safeCall("getBranches") {
+        return try {
             val response = contractsApiService.getBranches(apiQueryBuilder.buildQuery(query))
             response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
     override suspend fun getSpcPremiumRates(): ListData<PremiumRateDTO> {
-        return errorParser.safeCall("getSpcPremiumRates") {
+        return try {
             contractsApiService.getSpcPremiumRates().extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
     override suspend fun getFreelancePremiumRange(params: FreelancePremiumRangeParams): FreelancePremiumRangeDTO {
-        return errorParser.safeCall("getFreelancePremiumRange") {
+        return try {
             contractsApiService.getFreelancePremiumRange(
                 treatmentSupportCode = params.treatmentSupportCode,
                 spcRateCode = params.spcRateCode,
                 freeJobCode = params.freeJobCode,
             ).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
     override suspend fun getOptionalPremiumRange(): FreelancePremiumRangeDTO {
-        return errorParser.safeCall("getOptionalPremiumRange") {
+        return try {
             contractsApiService.getOptionalPremiumRange().extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
     override suspend fun checkRedCrossStatus(): String {
-        return errorParser.safeCall("checkRedCrossStatus") {
+        return try {
             contractsApiService.checkRedCrossStatus().extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
     override suspend fun checkMedicalStudent(): String {
-        return errorParser.safeCall("checkMedicalStudent") {
+        return try {
             contractsApiService.checkMedicalStudent().extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
     override suspend fun calculateFreelanceSalary(params: FreelanceCalculateSalaryParams): Long {
-        return errorParser.safeCall("calculateFreelanceSalary") {
+        return try {
             contractsApiService.calculateFreelanceSalary(
                 monthlyPremium = params.monthlyPremium,
                 treatmentSupportCode = params.treatmentSupportCode,
                 spcRateCode = params.spcRateCode,
             ).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
     override suspend fun calculateOptionalSalary(premiumRateCode: String): Long {
-        return errorParser.safeCall("calculateOptionalSalary") {
+        return try {
             contractsApiService.calculateOptionalSalary(premiumRateCode).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
     override suspend fun getFreeJobWages(query: ApiQueryParamDN): ListData<FreeJobDTO> {
-        return errorParser.safeCall("getFreeJobWages") {
+        return try {
             contractsApiService.getFreeJobWages(apiQueryBuilder.buildQuery(query)).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
@@ -119,11 +254,23 @@ class ContractsRemoteDataSourceImpl(
         monthlyPremium: Long,
         request: FreelanceMakeContractRequestDTO,
     ): FreelanceContractResultDTO {
-        return errorParser.safeCall("makeFreelanceContract") {
+        return try {
             contractsApiService.makeFreelanceContract(
                 monthlyPremium = monthlyPremium,
                 request = request,
             ).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
@@ -131,11 +278,23 @@ class ContractsRemoteDataSourceImpl(
         selectedSalary: Long,
         request: FreelanceMakeContractRequestDTO,
     ): FreelanceContractResultDTO {
-        return errorParser.safeCall("makeContract") {
+        return try {
             contractsApiService.makeContract(
                 selectedSalary = selectedSalary,
                 request = request,
             ).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
@@ -143,11 +302,23 @@ class ContractsRemoteDataSourceImpl(
         selectedSalary: Long,
         request: ContractByGuardianRequestDTO,
     ): FreelanceContractResultDTO {
-        return errorParser.safeCall("makeFreelanceContractByGuardian") {
+        return try {
             contractsApiService.makeFreelanceContractByGuardian(
                 selectedSalary = selectedSalary,
                 request = request,
             ).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
@@ -155,11 +326,23 @@ class ContractsRemoteDataSourceImpl(
         selectedSalary: Long,
         request: OptionalContractByGuardianRequestDTO,
     ): FreelanceContractResultDTO {
-        return errorParser.safeCall("makeOptionalContractByGuardian") {
+        return try {
             contractsApiService.makeOptionalContractByGuardian(
                 selectedSalary = selectedSalary,
                 request = request,
             ).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
@@ -167,9 +350,21 @@ class ContractsRemoteDataSourceImpl(
         premium: Long,
         request: FreelanceMakeContractRequestDTO,
     ) {
-        errorParser.safeCall("updateFreelanceContract") {
+        try {
             val response = contractsApiService.updateFreelanceContract(premium, request)
             response.requireSuccessStatus()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
+            )
         }
     }
 
@@ -177,9 +372,21 @@ class ContractsRemoteDataSourceImpl(
         premium: Long,
         request: UpdateOptionalContractDTO,
     ) {
-        errorParser.safeCall("updateOptionalContract") {
+        try {
             val response = contractsApiService.updateOptionalContract(premium, request)
             response.requireSuccessStatus()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
+            )
         }
     }
 
@@ -187,9 +394,21 @@ class ContractsRemoteDataSourceImpl(
         premium: Long,
         request: ContractByGuardianRequestDTO,
     ) {
-        errorParser.safeCall("updateFreelanceContractByGuardian") {
+        try {
             val response = contractsApiService.updateFreelanceContractByGuardian(premium, request)
             response.requireSuccessStatus()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
+            )
         }
     }
 
@@ -197,14 +416,26 @@ class ContractsRemoteDataSourceImpl(
         premium: Long,
         request: UpdateOptionalContractByGuardianRequestDTO,
     ) {
-        errorParser.safeCall("updateOptionalContractByGuardian") {
+        try {
             val response = contractsApiService.updateOptionalContractByGuardian(premium, request)
             response.requireSuccessStatus()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
+            )
         }
     }
 
     override suspend fun getInsurancePayment(params: InsurancePaymentParamsDN): InsurancePaymentDTO {
-        return errorParser.safeCall("getInsurancePayment") {
+        return try {
             contractsApiService.getInsurancePayment(
                 startDate = params.startDate,
                 endDate = params.endDate,
@@ -215,17 +446,41 @@ class ContractsRemoteDataSourceImpl(
                 month = params.month,
                 redirectUrl = params.redirectUrl,
             ).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
     override suspend fun checkInsurancePaymentStatus(systemType: String): JsonElement? {
-        return errorParser.safeCall("checkInsurancePaymentStatus") {
+        return try {
             contractsApiService.checkInsurancePaymentStatus(systemType).data
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
     override suspend fun uploadImage(request: UploadImageRequestDN): String? {
-        return errorParser.safeCall("uploadImage") {
+        return try {
             val content = MultiPartFormDataContent(
                 formData {
                     append(
@@ -242,13 +497,38 @@ class ContractsRemoteDataSourceImpl(
                 },
             )
             contractsApiService.uploadImage(content).guid
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
+            )
         }
     }
 
-    override suspend fun saveContact(request: SaveContactRequestDTO): Any? =
-        errorParser.safeCall("saveContact") {
+    override suspend fun saveContact(request: SaveContactRequestDTO): Any? {
+        return try {
             val response = contractsApiService.saveContact(request)
             response.requireSuccessStatus()
             response.data as Any?
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
+    }
 }
