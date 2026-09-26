@@ -22,7 +22,6 @@ fun String.looksLikeArabicScript(): Boolean = ARABIC_SCRIPT_REGEX.containsMatchI
  */
 inline fun <T> ErrorParser.safeCall(
     tag: String,
-    fallbackUri: ErrorUri = ErrorUri.NO_CONNECTION_ERROR,
     block: () -> T
 ): T {
     return try {
@@ -35,7 +34,7 @@ inline fun <T> ErrorParser.safeCall(
         throw e
     } catch (e: Exception) {
         Logger.e(tag = tag) { "API call failed: ${e::class.simpleName} - ${e.message}" }
-        throw parseGeneralError(TaminErrorUriException(e.toErrorUri()?:fallbackUri))
+        throw parseGeneralError(TaminErrorUriException(e.toErrorUri()))
     }
 }
 
@@ -50,9 +49,13 @@ inline fun <T> ErrorParser.safeCall(
 fun Throwable.toErrorUri(): ErrorUri = when {
     isConnectivityFailure() -> ErrorUri.NO_CONNECTION_ERROR
     // The request arrived and something came back — it just was not what the contract promised.
-    this is SerializationException -> ErrorUri.INTERNAL_ERROR
+    // Ktor wraps it (JsonConvertException), so look down the cause chain, not at this alone.
+    causes().any { it is SerializationException } -> ErrorUri.INTERNAL_ERROR
     else -> ErrorUri.UNKNOWN
 }
+
+private fun Throwable.causes(): Sequence<Throwable> =
+    generateSequence(this) { it.cause?.takeIf { cause -> cause !== it } }
 
 /**
  * Whether this failure happened on the wire rather than after it.
@@ -61,14 +64,9 @@ fun Throwable.toErrorUri(): ErrorUri = when {
  * engine — an `IOException` on Android, a `SocketException`/`NSURLError`-backed failure on iOS —
  * and a common-code `when` on the class cannot see all of them.
  */
-fun Throwable.isConnectivityFailure(): Boolean {
-    var cause: Throwable? = this
-    while (cause != null) {
-        val name = cause::class.simpleName.orEmpty()
-        if (CONNECTIVITY_MARKERS.any { name.contains(it, ignoreCase = true) }) return true
-        cause = cause.cause?.takeIf { it != cause }
-    }
-    return false
+fun Throwable.isConnectivityFailure(): Boolean = causes().any { cause ->
+    val name = cause::class.simpleName.orEmpty()
+    CONNECTIVITY_MARKERS.any { name.contains(it, ignoreCase = true) }
 }
 
 private val CONNECTIVITY_MARKERS = listOf(

@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.dataSource.occurrence
 
+import com.tamin.taminhamrah.tools.safeCall
 import com.tamin.taminhamrah.apiService.occurrence.OccurrenceApiService
 import com.tamin.taminhamrah.model.occurrence.InsuredRelationDTO
 import com.tamin.taminhamrah.model.occurrence.OccurrenceDocTypeDTO
@@ -36,7 +37,7 @@ internal class OccurrenceRemoteDataSourceImpl(
         workshopCode: String,
         branchCode: String,
     ): OccurrencePersonalInfoDTO {
-        return try {
+        return errorParser.safeCall("getPersonalInfo") {
             val queries = queryBuilder.buildQuery(
                 ApiQueryParamDN(
                     filters = listOf(
@@ -64,15 +65,11 @@ internal class OccurrenceRemoteDataSourceImpl(
                 )
             )
             apiService.getPersonalInfo(queries).extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
     override suspend fun getAllWorkshops(nationalCode: String): ListData<WorkshopListItemDTO> {
-        return try {
+        return errorParser.safeCall("getAllWorkshops") {
             val queries = queryBuilder.buildQuery(
                 ApiQueryParamDN(
                     filters = listOf(
@@ -85,15 +82,11 @@ internal class OccurrenceRemoteDataSourceImpl(
                 )
             )
             apiService.getAllWorkshops(queries).extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
     override suspend fun getWorkshopSpec(workshopCode: String, branchCode: String): WorkshopItemDTO {
-        return try {
+        return errorParser.safeCall("getWorkshopSpec") {
             val queries = queryBuilder.buildQuery(
                 ApiQueryParamDN(
                     filters = listOf(
@@ -111,15 +104,11 @@ internal class OccurrenceRemoteDataSourceImpl(
                 )
             )
             apiService.getWorkshopSpec(queries).extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
     override suspend fun getInsuredRelation(nationalCode: String): InsuredRelationDTO {
-        return try {
+        return errorParser.safeCall("getInsuredRelation") {
             val queries = queryBuilder.buildQuery(
                 ApiQueryParamDN(
                     filters = listOf(
@@ -132,26 +121,18 @@ internal class OccurrenceRemoteDataSourceImpl(
                 )
             )
             apiService.getInsuredRelation(queries).extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
     override suspend fun getDocumentTypes(): ListData<OccurrenceDocTypeDTO> {
-        return try {
+        return errorParser.safeCall("getDocumentTypes") {
             val queries = queryBuilder.buildQuery(ApiQueryParamDN())
             apiService.getDocumentTypes(queries).extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
     override suspend fun uploadImage(fileName: String, fileBytes: ByteArray): String {
-        return try {
+        return errorParser.safeCall("uploadImage") {
             val content = MultiPartFormDataContent(
                 formData {
                     append(
@@ -166,20 +147,12 @@ internal class OccurrenceRemoteDataSourceImpl(
             )
             apiService.uploadImage(content).guid
                 ?: throw TaminErrorUriException(ErrorUri.UNKNOWN)
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
     override suspend fun submitOccurrence(request: OccurrenceRequestDTO): OccurrenceResponseDTO {
-        return try {
+        return errorParser.safeCall("submitOccurrence") {
             apiService.submitOccurrence(request).extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 }
