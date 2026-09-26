@@ -89,7 +89,7 @@ fun UserRequestCard(
     val accentBarColor = when (request.statusTone) {
         UserRequestStatusTone.ERROR -> colorScheme.error
         UserRequestStatusTone.APPROVED -> taminColors.greenText
-        UserRequestStatusTone.NEUTRAL -> taminColors.divider
+        UserRequestStatusTone.NEUTRAL -> taminColors.textSecondary
     }
 
     val showViewButton = request.viewCapability != UserRequestViewCapability.NONE
