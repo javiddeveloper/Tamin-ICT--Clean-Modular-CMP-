@@ -74,8 +74,7 @@ data class WorkshopsUiState(
     }
 }
 
-const val WORKSHOP_STATS_PAGE_SIZE = 1
-
+/** The strip's figures, counted over distinct workshops — the rows the list itself shows. */
 @Immutable
 data class WorkshopStats(
     val total: Int = 0,

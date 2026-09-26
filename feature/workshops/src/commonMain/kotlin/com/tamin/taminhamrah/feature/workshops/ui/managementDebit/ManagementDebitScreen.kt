@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import taminx.core.core_ui.article_sixteen_empty
+import taminx.core.core_ui.workshop_empty_list
 import taminx.core.core_ui.ws_dialog_ok
 import taminx.core.core_ui.article_sixteen_form_done_body
 import taminx.core.core_ui.article_sixteen_form_done_title
@@ -81,6 +83,7 @@ import taminx.core.core_ui.payment_sheet_debit_number
 import taminx.core.core_ui.workshop_action_article_sixteen
 import taminx.core.core_ui.workshop_debt_from_date
 import taminx.core.core_ui.workshop_debt_to_date
+import taminx.core.core_ui.ic_tamin_workshop_article_sixteen
 
 /**
  * رسیدگی به بدهی ماده ۱۶.
@@ -145,6 +148,7 @@ fun ManagementDebitContent(
             icon = Icons.Outlined.Info,
             confirmButton = {
                 TaminFilledButton(
+                    background = LocalTaminColors.current.buttonGradient,
                     text = stringResource(Res.string.ws_dialog_ok),
                     onClick = { onIntent(ManagementDebitIntent.DismissExpertMessage) },
                     modifier = Modifier.fillMaxWidth(),
@@ -170,6 +174,7 @@ fun ManagementDebitContent(
             iconBackground = colors.greenBg,
             confirmButton = {
                 TaminFilledButton(
+                    background = LocalTaminColors.current.buttonGradient,
                     text = stringResource(Res.string.ws_dialog_ok),
                     onClick = { onIntent(ManagementDebitIntent.DismissFiled) },
                     modifier = Modifier.fillMaxWidth(),
@@ -228,6 +233,8 @@ fun ManagementDebitContent(
                 state.list.copy(items = visibleDebts)
             }
             WorkshopListScaffold(
+                emptyIcon = vectorResource(Res.drawable.ic_tamin_workshop_article_sixteen),
+                emptyMessage = stringResource(if (filters.isNotEmpty()) Res.string.workshop_empty_list else Res.string.article_sixteen_empty),
                 state = displayedList,
                 onLoadMore = { onIntent(ManagementDebitIntent.LoadMore) },
                 key = { it.debitNumber },

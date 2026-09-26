@@ -64,7 +64,6 @@ class ObjectionStatusViewModel(
         emit(
             PartialState.Loaded(
                 list = uiState.value.list.loaded(result, isFirstPage = page == 0) { it.toPresentation() },
-                total = result.total,
             )
         )
     }.catch { emit(PartialState.Error(it.toSingleLineMessage())) }
@@ -89,7 +88,7 @@ class ObjectionStatusViewModel(
         PartialState.Loading -> currentState.copy(list = currentState.list.loading())
         PartialState.LoadingMore -> currentState.copy(list = currentState.list.loadingMore())
         is PartialState.Error -> currentState.copy(list = currentState.list.failed(partialState.message))
-        is PartialState.Loaded -> currentState.copy(list = partialState.list, totalCount = partialState.total)
+        is PartialState.Loaded -> currentState.copy(list = partialState.list)
         is PartialState.DraftChanged -> currentState.copy(draft = partialState.draft)
         is PartialState.Applied -> currentState.copy(applied = partialState.filters)
         is PartialState.SearchOpenChanged -> currentState.copy(isSearchOpen = partialState.isOpen)

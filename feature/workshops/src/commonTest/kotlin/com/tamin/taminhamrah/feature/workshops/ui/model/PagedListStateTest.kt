@@ -166,6 +166,52 @@ class PagedListStateTest {
         assertTrue(state.hasMore)
     }
 
+    // ------------------------------------------------------------ the printed count
+
+    /** The service counts a repeated row; the list shows it once, and so must the count. */
+    @Test
+    fun `the count leaves out repeats the list dropped`() {
+        val state = PagedListState<String>().loaded(
+            PagedListDN(items = List(9) { "same workshop" }, total = 9),
+            isFirstPage = true,
+        ) { it }
+
+        assertEquals(1, state.items.size)
+        assertEquals(1, state.distinctTotal)
+    }
+
+    @Test
+    fun `a repeat on a later page comes off the count when it arrives`() {
+        val first = PagedListState<String>()
+            .loaded(PagedListDN(items = List(WORKSHOP_PAGE_SIZE) { "row-$it" }, total = 40),
+                isFirstPage = true) { it }
+        // Nothing has repeated yet, so nothing is known to come off.
+        assertEquals(40, first.distinctTotal)
+
+        val second = first.loaded(
+            PagedListDN(items = listOf("row-0", "row-1", "fresh"), total = 40),
+            isFirstPage = false,
+        ) { it }
+
+        assertEquals(38, second.distinctTotal)
+    }
+
+    @Test
+    fun `the count is never fewer than the rows shown`() {
+        val state = PagedListState<String>()
+            .loaded(PagedListDN(items = listOf("a", "b", "c"), total = 1), isFirstPage = true) { it }
+
+        assertEquals(3, state.distinctTotal)
+    }
+
+    /** A state built by hand — a preview — has received nothing, and repeats nothing. */
+    @Test
+    fun `a hand-built state counts its total as given`() {
+        val state = PagedListState(items = listOf("a", "b").toImmutable(), total = 4)
+
+        assertEquals(4, state.distinctTotal)
+    }
+
     @Test
     fun `a reload starts the received count over`() {
         val paged = PagedListState<String>()
