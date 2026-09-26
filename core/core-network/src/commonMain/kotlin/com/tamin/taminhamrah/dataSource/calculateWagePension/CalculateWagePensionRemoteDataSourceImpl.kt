@@ -1,11 +1,10 @@
 package com.tamin.taminhamrah.dataSource.calculateWagePension
 
+import com.tamin.taminhamrah.tools.safeCall
 import com.tamin.taminhamrah.apiService.calculateWagePension.CalculateWagePensionApiService
 import com.tamin.taminhamrah.model.calculateWagePension.MultipleWorkshopPersonalInfoDTO
 import com.tamin.taminhamrah.model.calculateWagePension.MultipleWorkshopResultDTO
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
-import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
-import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 
 class CalculateWagePensionRemoteDataSourceImpl(
@@ -14,14 +13,8 @@ class CalculateWagePensionRemoteDataSourceImpl(
 ) : CalculateWagePensionRemoteDataSource {
 
     override suspend fun getPersonalInfo(): MultipleWorkshopPersonalInfoDTO {
-        return try {
+        return errorParser.safeCall("getPersonalInfo") {
             apiService.getPersonalInfo().extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 
@@ -29,14 +22,8 @@ class CalculateWagePensionRemoteDataSourceImpl(
         branchCode: String,
         insuranceNumber: String
     ): MultipleWorkshopResultDTO {
-        return try {
+        return errorParser.safeCall("isMultipleWorkshops") {
             apiService.isMultipleWorkshops(branchCode, insuranceNumber).extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 
@@ -44,14 +31,8 @@ class CalculateWagePensionRemoteDataSourceImpl(
         branchCode: String,
         insuranceNumber: String
     ): MultipleWorkshopResultDTO {
-        return try {
+        return errorParser.safeCall("calculateMultipleWorkshops") {
             apiService.calculateMultipleWorkshops(branchCode, insuranceNumber).extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 }

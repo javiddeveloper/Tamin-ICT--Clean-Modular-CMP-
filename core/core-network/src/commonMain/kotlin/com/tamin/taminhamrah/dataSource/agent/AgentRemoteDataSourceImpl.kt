@@ -1,17 +1,19 @@
 package com.tamin.taminhamrah.dataSource.agent
 
-import kotlin.coroutines.cancellation.CancellationException
 import com.tamin.taminhamrah.apiService.agent.AgentApiService
 import com.tamin.taminhamrah.model.agent.AgentRequestDTO
-import com.tamin.taminhamrah.model.agent.ChatTokenExpiredException
 import com.tamin.taminhamrah.model.agent.CancelResponseDTO
 import com.tamin.taminhamrah.model.agent.ChatAllowedDTO
+import com.tamin.taminhamrah.model.agent.ChatTokenExpiredException
 import com.tamin.taminhamrah.model.agent.PollingResponseDTO
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
-import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
+import com.tamin.taminhamrah.tools.safeCall
+import com.tamin.taminhamrah.tools.toErrorUri
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 import io.ktor.http.content.ByteArrayContent
 import io.ktor.http.content.OutgoingContent
 import io.ktor.utils.io.ByteChannel
@@ -19,10 +21,8 @@ import io.ktor.utils.io.readRemaining
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.io.readByteArray
-import io.ktor.http.ContentType
-import io.ktor.http.Headers
-import io.ktor.http.HttpHeaders
 import kotlinx.serialization.json.Json
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * The prompt's `data` part. The server wants every key, as the native app's Gson (`serializeNulls`)
@@ -54,17 +54,8 @@ internal class AgentRemoteDataSourceImpl(
 ) : AgentRemoteDataSource {
 
     override suspend fun checkChatAllowed(): ChatAllowedDTO {
-        return try {
+        return errorParser.safeCall("checkChatAllowed") {
             agentApiService.checkChatAllowed()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: CancellationException) {
-            // A request cancelled because the user left is not a connection error.
-            throw e
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 
@@ -113,7 +104,7 @@ internal class AgentRemoteDataSourceImpl(
             throw e
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+                TaminErrorUriException(e.toErrorUri())
             )
         }
     }
@@ -134,38 +125,20 @@ internal class AgentRemoteDataSourceImpl(
             throw e
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+                TaminErrorUriException(e.toErrorUri())
             )
         }
     }
 
     override suspend fun trackRequest(requestId: String): PollingResponseDTO {
-        return try {
+        return errorParser.safeCall("trackRequest") {
             agentApiService.trackRequest(requestId)
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: CancellationException) {
-            // A request cancelled because the user left is not a connection error.
-            throw e
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 
     override suspend fun cancelRequest(requestId: String): CancelResponseDTO {
-        return try {
+        return errorParser.safeCall("cancelRequest") {
             agentApiService.cancelRequest(requestId)
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: CancellationException) {
-            // A request cancelled because the user left is not a connection error.
-            throw e
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 }

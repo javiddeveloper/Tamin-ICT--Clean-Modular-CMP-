@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.dataSource.calculateWagePension
 
+import com.tamin.taminhamrah.tools.FakeIOException
 import com.tamin.taminhamrah.apiService.calculateWagePension.CalculateWagePensionApiService
 import com.tamin.taminhamrah.model.calculateWagePension.MultipleWorkshopPersonalInfoDTO
 import com.tamin.taminhamrah.model.calculateWagePension.MultipleWorkshopResultDTO
@@ -70,7 +71,7 @@ private class FakeCalculateWagePensionApiService(
 ) : CalculateWagePensionApiService {
 
     override suspend fun getPersonalInfo(): BaseDTO<MultipleWorkshopPersonalInfoDTO> {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         return success(
             MultipleWorkshopPersonalInfoDTO(
                 organizationId = "12345",
@@ -84,7 +85,7 @@ private class FakeCalculateWagePensionApiService(
         branchCode: String,
         insuranceNumber: String
     ): BaseDTO<MultipleWorkshopResultDTO> {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         return success(MultipleWorkshopResultDTO(result = 1))
     }
 
@@ -92,7 +93,7 @@ private class FakeCalculateWagePensionApiService(
         branchCode: String,
         insuranceNumber: String
     ): BaseDTO<MultipleWorkshopResultDTO> {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         return success(MultipleWorkshopResultDTO(result = 25_000_000))
     }
 
