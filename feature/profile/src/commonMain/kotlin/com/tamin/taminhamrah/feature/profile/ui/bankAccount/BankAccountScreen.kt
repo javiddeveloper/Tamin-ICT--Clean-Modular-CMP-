@@ -84,6 +84,7 @@ import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminNavy300
 import com.tamin.taminhamrah.ui.theme.TaminNavy900
 import com.tamin.taminhamrah.ui.toparea.TopAreaState
+import com.tamin.taminhamrah.ui.toparea.collapseWhileImeVisible
 import com.tamin.taminhamrah.ui.toparea.driveTopArea
 import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
 import com.tamin.taminhamrah.ui.toparea.topAreaHide
@@ -205,6 +206,9 @@ fun BankAccountScreen(
     LaunchedEffect(state.pane) {
         if (state.pane != BankAccountPane.ADD) topArea.expandFully()
     }
+    // The account-number field's keyboard must not leave the header stuck mid-fold: collapse it
+    // fully the moment the IME appears, expand it fully the moment it hides.
+    topArea.collapseWhileImeVisible()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
