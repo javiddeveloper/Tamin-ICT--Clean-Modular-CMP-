@@ -61,7 +61,7 @@ fun InboxItemCard(
         } else {
             stringResource(Res.string.inbox_status_rejected)
         },
-        stampColor = if (item.seen) colors.greenText else colors.border,
+        stampColor = if (item.seen) colors.greenText else colors.textSecondary,
         codeLabel = stringResource(Res.string.inbox_tracking_code),
         code = item.id.toString(),
         codeIcon = vectorResource(Res.drawable.ic_tamin_track),
