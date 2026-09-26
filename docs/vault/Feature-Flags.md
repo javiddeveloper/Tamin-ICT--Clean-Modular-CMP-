@@ -246,9 +246,11 @@ every other caller of the menu (contracts, contract affairs, home, …) is unaff
 The exclusion does not depend on role — `PRESCRIPTION`(26) has `showRole:[1,2]` (both insured and
 pensioner see «نسخ الکترونیک» in the raw menu) but is dropped from every role's services tab alike,
 since the treatment hub it belongs to is reachable by any role regardless of which tab they searched
-from. `EDIT_IMAGE`(4) and `HOME_LAST_REQUESTS`(3008) are deliberately **not** in `DedicatedScreenFlags`
-— `EDIT_IMAGE` has no `ProfileMenuItem` row yet (in progress on another branch), and
-`HOME_LAST_REQUESTS` is a dashboard widget, not a duplicate of anything services would show.
+from. `EDIT_IMAGE`(4) is in the profile set: it is opened by tapping the photo in the profile header
+(`ProfileMenuItem.EDIT_IMAGE`, gated on tap like any row; the edit screen itself plugs in through
+`ProfileScreen.onNavigateToEditImage`, a no-op until that branch lands). `HOME_LAST_REQUESTS`(3008)
+is deliberately **not** in `DedicatedScreenFlags` — a dashboard widget, not a duplicate of anything
+services would show.
 
 `DedicatedScreenFlags` is hand-maintained, not derived from `ProfileMenuItem`/`TreatmentFeatureFlags`
 directly: `feature:taminServices` may not import another feature module (see `CLAUDE.md`'s

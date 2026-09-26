@@ -7,6 +7,8 @@ import com.tamin.taminhamrah.model.common.FeatureFlag
  * null for a row that is always available (settings, support, logout, …).
  */
 enum class ProfileMenuItem(val flag: FeatureFlag? = null) {
+    /** Not a list row — opened by tapping the user's photo in the profile header. */
+    EDIT_IMAGE(FeatureFlag.EDIT_IMAGE),
     IDENTITY_INFO(FeatureFlag.IDENTITY_INFO),
     ACTIVE_RELATION(FeatureFlag.ACTIVE_RELATION),
     DEPENDENTS(FeatureFlag.DEPENDENTS),

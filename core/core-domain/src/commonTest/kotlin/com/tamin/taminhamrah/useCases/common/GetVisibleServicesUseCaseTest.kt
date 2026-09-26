@@ -29,6 +29,7 @@ class GetVisibleServicesUseCaseTest {
     @Test
     fun `test the services tab drops every profile-owned and treatment-owned row`() = runTest {
         fakeRepository.mainMenuResult = listOf(
+            MainServiceDN(id = FeatureFlag.EDIT_IMAGE.id, name = "ویرایش تصویر"),
             MainServiceDN(id = FeatureFlag.IDENTITY_INFO.id, name = "اطلاعات هویتی"),
             MainServiceDN(id = FeatureFlag.DEPENDENTS.id, name = "افراد تبعی"),
             MainServiceDN(id = FeatureFlag.PRESCRIPTION.id, name = "نسخ الکترونیک"),

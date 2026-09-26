@@ -178,6 +178,7 @@ class ProfileViewModel(
         when (item) {
             ProfileMenuItem.SETTINGS -> sendEvent(ProfileEvent.NavigateToSettings)
             ProfileMenuItem.LOGOUT -> sendIntent(ProfileIntent.Logout)
+            ProfileMenuItem.EDIT_IMAGE -> sendEvent(ProfileEvent.NavigateToEditImage)
             ProfileMenuItem.IDENTITY_INFO -> sendEvent(ProfileEvent.NavigateToIdentity)
             ProfileMenuItem.ELECTRONIC_FILE -> sendEvent(ProfileEvent.NavigateToElectronicFile)
             ProfileMenuItem.VERSION_HISTORY -> sendEvent(ProfileEvent.NavigateToVersionHistory)

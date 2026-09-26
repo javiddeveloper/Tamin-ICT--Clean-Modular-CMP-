@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.feature.profile.ui
 
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Code
 import androidx.compose.foundation.layout.Arrangement
@@ -151,6 +152,9 @@ fun ProfileScreen(
     onNavigateToSaveEvents: () -> Unit = {},
     onOpenUrl: (String) -> Unit = {},
     onShowMessage: (String) -> Unit = {},
+    // The photo-editing screen is developed on its own branch; until it is wired in, the flag
+    // gate still runs on tap and this stays a no-op.
+    onNavigateToEditImage: () -> Unit = {},
     onNavigateToSecurity: () -> Unit = {},
     onNavigateToDeveloperOptions: () -> Unit = {},
     onBackClicked: () -> Unit
@@ -187,6 +191,7 @@ fun ProfileScreen(
         onNavigateToSaveEvents = onNavigateToSaveEvents,
         onOpenUrl = onOpenUrl,
         onShowMessage = onShowMessage,
+        onNavigateToEditImage = onNavigateToEditImage,
         onBackClicked = onBackClicked
     )
 
@@ -220,6 +225,7 @@ fun HandleProfileEvents(
     onNavigateToDeveloperOptions: () -> Unit,
     onOpenUrl: (String) -> Unit,
     onShowMessage: (String) -> Unit,
+    onNavigateToEditImage: () -> Unit,
     onBackClicked: () -> Unit
 ) {
 
@@ -233,6 +239,10 @@ fun HandleProfileEvents(
 
             ProfileEvent.NavigateToSettings -> {
                 onNavigateToSettings()
+            }
+
+            ProfileEvent.NavigateToEditImage -> {
+                onNavigateToEditImage()
             }
 
             ProfileEvent.NavigateToIdentity -> {
@@ -397,9 +407,14 @@ fun ProfileContent(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(Spacing.md)
                             ) {
+                                // Tapping the photo edits it, gated by EDIT_IMAGE like any profile row:
+                                // ignored while the flag is unresolved, a message when it is off.
                                 UserAvatar(
                                     model = state.profileImage,
-                                    isLoading = state.isProfileImageLoading
+                                    isLoading = state.isProfileImageLoading,
+                                    modifier = Modifier.clickable {
+                                        onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.EDIT_IMAGE))
+                                    }
                                 )
                                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.xxs)) {
                                     if (state.identityInfo == null) {

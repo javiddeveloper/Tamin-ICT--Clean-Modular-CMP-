@@ -59,6 +59,7 @@ sealed class ProfileIntent {
 
 sealed interface ProfileEvent {
     data object NavigateToActiveRelation : ProfileEvent
+    data object NavigateToEditImage : ProfileEvent
     data object NavigateBack : ProfileEvent
     data object NavigateToSettings : ProfileEvent
     data object NavigateToIdentity : ProfileEvent

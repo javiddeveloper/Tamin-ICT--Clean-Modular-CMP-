@@ -37,6 +37,7 @@ enum class ServiceCatalogAudience {
 object DedicatedScreenFlags {
     /** Every flag [com.tamin.taminhamrah.feature.profile.ui.model.ProfileMenuItem] gates on. */
     val profile: Set<FeatureFlag> = setOf(
+        FeatureFlag.EDIT_IMAGE,
         FeatureFlag.IDENTITY_INFO,
         FeatureFlag.ACTIVE_RELATION,
         FeatureFlag.BANK_ACCOUNT_LIST,
