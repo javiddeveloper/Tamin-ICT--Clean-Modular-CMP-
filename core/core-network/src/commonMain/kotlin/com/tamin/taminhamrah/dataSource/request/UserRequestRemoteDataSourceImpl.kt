@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.dataSource.request
 
+import com.tamin.taminhamrah.tools.safeCall
 import com.tamin.taminhamrah.apiService.userRequest.UserRequestApiService
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.userRequest.ArticleSixteenRequestInfoDTO
@@ -16,8 +17,6 @@ import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.BaseDTO
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
-import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
-import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 
 class UserRequestRemoteDataSourceImpl(
@@ -87,14 +86,8 @@ class UserRequestRemoteDataSourceImpl(
     }
 
     private suspend fun <T> fetchData(call: suspend () -> BaseDTO<T>): T {
-        return try {
+        return errorParser.safeCall("fetchData") {
             call().extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 }
