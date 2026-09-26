@@ -6,9 +6,12 @@
 */
 package com.tamin.taminhamrah.dataSource.userSource
 
-import com.tamin.taminhamrah.tools.safeCall
+import kotlinx.coroutines.CancellationException
+import io.ktor.serialization.JsonConvertException
 import com.tamin.core.network.model.user.IdentityInfoDto
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
+import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
+import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
 import com.tamin.taminhamrah.tools.extractTypedData
@@ -45,23 +48,59 @@ internal class UserRemoteDataSourceImpl(
 ) : UserRemoteDataSource {
 
     override suspend fun getIdentityInfo(): IdentityInfoDto {
-        return errorParser.safeCall("getIdentityInfo") {
+        return try {
             val response = userApiService.getIdentityInfo()
             response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
     override suspend fun getUserProfileImage(): String {
-        return errorParser.safeCall("getUserProfileImage") {
+        return try {
             val response = userApiService.getUserProfileImage()
             response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
     override suspend fun fetchTaminRelation(): TaminRelationDTO {
-        return errorParser.safeCall("fetchTaminRelation") {
+        return try {
             val response = userApiService.fetchTaminRelation()
             response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
@@ -69,62 +108,146 @@ internal class UserRemoteDataSourceImpl(
         branchCode: String,
         filter: List<ApiFilterDN>
     ): String {
-        return errorParser.safeCall("sendImageRequest") {
+        return try {
             val response =
                 userApiService.sendImageRequest(branchCode, queryBuilder.buildFilterJson(filter))
             response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
     override suspend fun getSubDominantsInfo(
         query: ApiQueryParamDN
     ): SubDominantResponseDTO {
-        return errorParser.safeCall("getSubDominantsInfo") {
+        return try {
             val response = userApiService.getSubDominantsInfo(queryBuilder.buildQuery(query))
             response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
     override suspend fun getBankAccountList(
         query: ApiQueryParamDN
-    ): ListData<BankAccountDTO> {
-        return errorParser.safeCall("getBankAccountList") {
+    ): ListData<BankAccountDTO>? {
+        return try {
             val response = userApiService.getBankAccountList(queryBuilder.buildQuery(query))
             response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
-    override suspend fun getInsuredActiveBranch(): List<InsuredActiveBranchDTO> {
-        return errorParser.safeCall("getInsuredActiveBranch") {
+    override suspend fun getInsuredActiveBranch(): List<InsuredActiveBranchDTO>? {
+        return try {
             val response = userApiService.getInsuredActiveBranch()
             response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
     override suspend fun getRelationTaminAll(
         query: ApiQueryParamDN
-    ): ListData<ActiveRelationDTO> {
-        return errorParser.safeCall("getRelationTaminAll") {
+    ): ListData<ActiveRelationDTO>? {
+        return try {
             val response = userApiService.getRelationTaminAll(queryBuilder.buildQuery(query))
             response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
     override suspend fun getElectronicFile(
         query: ApiQueryParamDN
-    ): ListData<ElectronicFileDTO> {
-        return errorParser.safeCall("getElectronicFile") {
+    ): ListData<ElectronicFileDTO>? {
+        return try {
             val response = userApiService.getElectronicFile(queryBuilder.buildQuery(query))
             response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
     override suspend fun downloadDocument(url: String): PdfDownloadDTO {
-        return errorParser.safeCall("downloadDocument") {
+        return try {
             PdfDownloadDTO(
                 pdf = InputStreamDTO(
                     pdf = userApiService.downloadDocument(url).readPdfChannel()
                 )
+            )
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
             )
         }
     }
@@ -132,73 +255,169 @@ internal class UserRemoteDataSourceImpl(
     override suspend fun changeMobile(
         mobile: String
     ): EditMobileResponseDto {
-        return errorParser.safeCall("changeMobile") {
+        return try {
             val response = userApiService.changeMobile(
 //                referer = NetworkConstants.REFERER_MOBILE,
                 url = NetworkConstants.EDIT_MOBILE_URL,
                 mobile = mobile
             )
             response.extractTypedData(json, EditMobileResponseDto.serializer())
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
     override suspend fun verifyChangeMobileCode(request: VerifyMobileRequest): String {
-        return errorParser.safeCall("verifyChangeMobileCode") {
+        return try {
             val response = userApiService.verifyChangeMobileCode(
 //                referer = NetworkConstants.REFERER_MOBILE,
                 url = NetworkConstants.VERIFY_EDIT_MOBILE_URL,
                 loginRequest = request
             )
             response.extractTypedData(json, String.serializer())
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
-    override suspend fun getUserProfile(): UserProfileDto {
-        return errorParser.safeCall("getUserProfile") {
+    override suspend fun getUserProfile(): UserProfileDto? {
+        return try {
             val response = userApiService.getUserProfile()
             response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
-    override suspend fun getCurrentUser(): CurrentUserDto {
-        return errorParser.safeCall("getCurrentUser") {
+    override suspend fun getCurrentUser(): CurrentUserDto? {
+        return try {
             userApiService.getCurrentUser().extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
     override suspend fun checkUserIsNew(nationalId: String): Boolean {
-        return errorParser.safeCall("checkUserIsNew") {
+        return try {
             val response = userApiService.checkUserIsNew(nationalId)
             response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
     override suspend fun registerBankAccount(
         request: BankAccountRequestDTO,
-    ): BankAccountCreatedDTO {
-        return errorParser.safeCall("registerBankAccount") {
+    ): BankAccountCreatedDTO? {
+        return try {
             val response = userApiService.registerBankAccount(request)
             response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
-    override suspend fun getStatusCertificateReport(filter: List<ApiFilterDN>): String {
-        return errorParser.safeCall("getStatusCertificateReport") {
+    override suspend fun getStatusCertificateReport(filter: List<ApiFilterDN>): String? {
+        return try {
             val response = userApiService.getStatusCertificateReport(queryBuilder.buildFilterJson(filter))
             response.extractMessage()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
-    override suspend fun getWageCertificateReport(filter: List<ApiFilterDN>): String {
-        return errorParser.safeCall("getWageCertificateReport") {
+    override suspend fun getWageCertificateReport(filter: List<ApiFilterDN>): String? {
+        return try {
             val response = userApiService.getWageCertificateReport(queryBuilder.buildFilterJson(filter))
             response.extractMessage()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
-    override suspend fun getRecipients(query: ApiQueryParamDN): ListData<RecipientDTO> {
-        return errorParser.safeCall("getRecipients") {
+    override suspend fun getRecipients(query: ApiQueryParamDN): ListData<RecipientDTO>? {
+        return try {
             val response = userApiService.getRecipients(queryBuilder.buildQuery(query.copy(limit = 1000)))
             response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 }

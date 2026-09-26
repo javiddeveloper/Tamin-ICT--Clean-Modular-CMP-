@@ -1,11 +1,14 @@
 package com.tamin.taminhamrah.dataSource.workersPayment
 
-import com.tamin.taminhamrah.tools.safeCall
+import kotlinx.coroutines.CancellationException
+import io.ktor.serialization.JsonConvertException
 import com.tamin.taminhamrah.apiService.workersPayment.WorkersPaymentApiService
 import com.tamin.taminhamrah.model.workersPayment.WorkersPayDebitDTO
 import com.tamin.taminhamrah.model.workersPayment.WorkersPayDebitRequestDTO
 import com.tamin.taminhamrah.model.workersPayment.WorkersPaymentInfoDataDTO
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
+import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
+import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
 
@@ -15,8 +18,20 @@ internal class WorkersPaymentRemoteDataSourceImpl(
 ) : WorkersPaymentRemoteDataSource {
 
     override suspend fun getWorkersPaymentInfo(): WorkersPaymentInfoDataDTO {
-        return errorParser.safeCall("getWorkersPaymentInfo") {
+        return try {
             apiService.getWorkersPaymentInfo().extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
@@ -24,14 +39,38 @@ internal class WorkersPaymentRemoteDataSourceImpl(
         request: WorkersPayDebitRequestDTO,
         redirectUrl: String,
     ): WorkersPayDebitDTO {
-        return errorParser.safeCall("payWorkersDebit") {
+        return try {
             apiService.payWorkersDebit(body = request, redirectUrl = redirectUrl).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
     override suspend fun inspectTicket(ticket: String?, paymentInfo: String?): String {
-        return errorParser.safeCall("inspectTicket") {
+        return try {
             apiService.inspectTicket(ticket = ticket, paymentInfo = paymentInfo).extractMessage()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 }
