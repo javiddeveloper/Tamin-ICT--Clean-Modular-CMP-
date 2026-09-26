@@ -72,6 +72,49 @@ class TopAreaState internal constructor(
         return old - new
     }
 
+    private val isMidFold: Boolean
+        get() = rawOffsetPx > 0f && rawOffsetPx < maxOffsetPx
+
+    /**
+     * Springs to fully expanded or fully collapsed (the nearer edge when [scrollVelocityY] is
+     * below [FlingThreshold]). No-op when already at an edge. Safe to call from IME / inset
+     * side-effects that may have left the header mid-fold without a fling.
+     */
+    fun settleToNearestEdge(scrollVelocityY: Float = 0f) {
+        if (!isMidFold) return
+        val target = when {
+            scrollVelocityY < -FlingThreshold -> maxOffsetPx
+            scrollVelocityY > FlingThreshold -> 0f
+            rawOffsetPx >= maxOffsetPx / 2f -> maxOffsetPx
+            else -> 0f
+        }
+        animateTo(target, initialVelocity = -scrollVelocityY)
+    }
+
+    /** Springs to the fully collapsed edge. No-op when already collapsed. */
+    fun collapseFully() {
+        if (rawOffsetPx >= maxOffsetPx) return
+        animateTo(maxOffsetPx)
+    }
+
+    /** Springs to the fully expanded edge. No-op when already expanded. */
+    fun expandFully() {
+        if (rawOffsetPx <= 0f) return
+        animateTo(0f)
+    }
+
+    private fun animateTo(target: Float, initialVelocity: Float = 0f) {
+        settleJob?.cancel()
+        settleJob = scope.launch {
+            animate(
+                initialValue = rawOffsetPx,
+                targetValue = target,
+                initialVelocity = initialVelocity,
+                animationSpec = SnapSpec,
+            ) { value, _ -> rawOffsetPx = value }
+        }
+    }
+
     /**
      * A [NestedScrollConnection] that folds the top area from the driven content's own drag,
      * before the content scrolls -- so the fold plays under the finger and works even when the
@@ -89,6 +132,10 @@ class TopAreaState internal constructor(
      * fold is only started when the content actually has more to reveal below -- this is what
      * keeps the top area fully expanded when the content can't scroll at all, with no separate
      * "not scrollable" special case needed anywhere else.
+     *
+     * Only [NestedScrollSource.UserInput] drives the fold. Programmatic scrolls (IME
+     * bring-into-view, relocate, inset-driven adjustments) are ignored so they cannot leave the
+     * header mid-fold with no fling to snap it to an edge.
      */
     internal fun connection(
         contentCanScrollForward: () -> Boolean,
@@ -97,6 +144,9 @@ class TopAreaState internal constructor(
 
             // available.y < 0: content scrolling toward later content -- fold.
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (source != NestedScrollSource.UserInput) {
+                    return Offset.Zero
+                }
                 val dy = available.y
                 if (dy >= 0f || !contentCanScrollForward()) return Offset.Zero
                 settleJob?.cancel()
@@ -110,6 +160,9 @@ class TopAreaState internal constructor(
                 available: Offset,
                 source: NestedScrollSource,
             ): Offset {
+                if (source != NestedScrollSource.UserInput) {
+                    return Offset.Zero
+                }
                 val dy = available.y
                 if (dy <= 0f) return Offset.Zero
                 settleJob?.cancel()
@@ -124,28 +177,8 @@ class TopAreaState internal constructor(
             // starting its own gesture. Returning immediately keeps the scrollable free the instant
             // the finger lifts, while the header still snaps to its edge on its own.
             override suspend fun onPreFling(available: Velocity): Velocity {
-                if (rawOffsetPx <= 0f || rawOffsetPx >= maxOffsetPx) return Velocity.Zero
-                val target = when {
-                    available.y < -FlingThreshold -> maxOffsetPx
-                    available.y > FlingThreshold -> 0f
-                    rawOffsetPx >= maxOffsetPx / 2f -> maxOffsetPx
-                    else -> 0f
-                }
-                settleJob?.cancel()
-                settleJob = scope.launch {
-                    animate(
-                        initialValue = rawOffsetPx,
-                        targetValue = target,
-                        // The fling's own velocity, carried into the spring instead of starting
-                        // from rest -- without this a hard, fast flick and a gentle release land
-                        // on the same fixed-duration settle, so a fast flick visibly lags behind
-                        // the speed the gesture implied. Negated because `available.y`'s sign is
-                        // scroll-delta convention (see the class doc), the opposite of
-                        // rawOffsetPx's own increasing-while-folding direction.
-                        initialVelocity = -available.y,
-                        animationSpec = SnapSpec,
-                    ) { value, _ -> rawOffsetPx = value }
-                }
+                if (!isMidFold) return Velocity.Zero
+                settleToNearestEdge(scrollVelocityY = available.y)
                 return available
             }
         }

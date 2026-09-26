@@ -180,24 +180,6 @@ private fun PreviewBankAccountFormIncomplete() {
     PreviewRtlThemeContent { PreviewForm(BankAccountDraftPR(), showValidation = true) }
 }
 
-@PreviewRtlTheme
-@Composable
-private fun PreviewBankAccountFormSubmitting() {
-    PreviewRtlThemeContent {
-        PreviewForm(
-            draft = BankAccountDraftPR(
-                startDateMillis = 0L,
-                startDateLabel = "۱۴۰۴/۰۳/۱۲",
-                bank = Bank.REFAH,
-                accountType = AccountType.INTEREST_FREE,
-                accountNumber = "218745603",
-            ),
-            showValidation = false,
-            isSubmitting = true,
-        )
-    }
-}
-
 /**
  * The two choosers.
  *
@@ -239,15 +221,12 @@ private fun PreviewCard(account: BankAccountPR) {
 private fun PreviewForm(
     draft: BankAccountDraftPR,
     showValidation: Boolean,
-    isSubmitting: Boolean = false,
 ) {
     BankAccountForm(
         draft = draft,
         showValidation = showValidation,
-        isSubmitting = isSubmitting,
         onPickerRequested = {},
         onAccountNumberChanged = {},
-        onSubmit = {},
         modifier = Modifier.fillMaxWidth().padding(PreviewPadding),
     )
 }
