@@ -110,7 +110,7 @@ fun AssignerTabsRow(
                             }
                         }
                         .clip(SegmentShape)
-                        .background(assignerPrimaryGradient()),
+                        .background(colors.buttonGradient),
                 )
                 Row(
                     modifier = Modifier

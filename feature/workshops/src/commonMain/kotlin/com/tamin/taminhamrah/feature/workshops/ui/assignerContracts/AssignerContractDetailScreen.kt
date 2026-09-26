@@ -18,7 +18,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.AssignerStatusPill
-import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.assignerPrimaryGradient
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractsIntent
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButton
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButtonTone
@@ -145,6 +144,7 @@ fun AssignerContractDetailContent(
         onBack = onBack,
         subtitle = subtitle,
         modifier = modifier,
+        borderedBack = true,
     ) {
         if (contract == null) {
             EmptyStateMessage(
@@ -251,7 +251,6 @@ fun AssignerContractDetailContent(
                             WorkshopCardButtonTone.DISABLED
                         },
                         onClick = { onRequestSettlement(contract) },
-                        background = assignerPrimaryGradient(),
                     )
                 }
             }

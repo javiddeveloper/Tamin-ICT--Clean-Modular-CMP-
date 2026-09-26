@@ -15,10 +15,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,7 +28,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.AssignerContractsViewModel
-import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.assignerPrimaryGradient
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.findContract
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButton
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButtonTone
@@ -184,6 +185,9 @@ fun SettlementRequestContent(
 ) {
     val step = state.step
     val colors = LocalTaminColors.current
+    // The documents step's image previews. Up here, outside the steps, so going on to the next step
+    // and back does not throw them away with the panel.
+    val documentPreviews = remember { mutableStateMapOf<String, ByteArray>() }
     Column(modifier = modifier.fillMaxSize()) {
         SettlementHeader(
             step = step,
@@ -247,6 +251,7 @@ fun SettlementRequestContent(
                     types = state.documentTypes,
                     isUploading = state.isUploading,
                     isError = SettlementField.DOCUMENTS in state.errors,
+                    previewCache = documentPreviews,
                     onIntent = onIntent,
                 )
 
@@ -299,7 +304,7 @@ fun SettlementRequestContent(
             shimmerWhileBusy = true,
             // Filing is the green, ticked button; every step before it points on.
             nextIcon = if (isLastStep) checkIcon else null,
-            nextBackground = if (isLastStep) colors.successGradient else assignerPrimaryGradient(),
+            nextBackground = if (isLastStep) colors.successGradient else null,
         )
     }
 
@@ -338,6 +343,7 @@ private fun SettlementHeader(
                 icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                 contentDescription = null,
                 onClick = onBack,
+                bordered = true,
             )
         },
         action = {
@@ -345,6 +351,7 @@ private fun SettlementHeader(
                 icon = vectorResource(Res.drawable.ic_tamin_cross),
                 contentDescription = null,
                 onClick = onClose,
+                bordered = true,
             )
         },
     ) {
@@ -500,13 +507,11 @@ private fun SettlementSubcontractorField(
             WorkshopCardButton(
                 text = stringResource(Res.string.settlement_yes),
                 tone = if (hasSubcontractor == true) WorkshopCardButtonTone.PRIMARY else WorkshopCardButtonTone.OUTLINE,
-                background = assignerPrimaryGradient(),
                 onClick = { onIntent(SettlementRequestIntent.SubcontractorChanged(true)) },
             )
             WorkshopCardButton(
                 text = stringResource(Res.string.settlement_no),
                 tone = if (hasSubcontractor == false) WorkshopCardButtonTone.PRIMARY else WorkshopCardButtonTone.OUTLINE,
-                background = assignerPrimaryGradient(),
                 onClick = { onIntent(SettlementRequestIntent.SubcontractorChanged(false)) },
             )
         }
@@ -599,6 +604,7 @@ private fun SettlementDocumentsStep(
     types: ImmutableList<WorkshopDocumentType>,
     isUploading: Boolean,
     isError: Boolean,
+    previewCache: SnapshotStateMap<String, ByteArray>,
     onIntent: (SettlementRequestIntent) -> Unit,
 ) {
     SettlementHint(stringResource(Res.string.settlement_documents_hint))
@@ -613,6 +619,7 @@ private fun SettlementDocumentsStep(
         isUploading = isUploading,
         isError = isError,
         acceptsPdf = true,
+        previewCache = previewCache,
     )
 }
 
@@ -630,7 +637,7 @@ private fun SettlementDoneDialog(onDone: () -> Unit) {
             TaminPrimaryButton(
                 text = stringResource(Res.string.settlement_done_back),
                 onClick = onDone,
-                background = assignerPrimaryGradient(),
+                background = colors.buttonGradient,
                 modifier = Modifier.fillMaxWidth(),
             )
         },

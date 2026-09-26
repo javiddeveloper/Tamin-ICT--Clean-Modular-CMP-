@@ -242,7 +242,7 @@ fun AssignerSearchSheetContent(
                 // The ViewModel drops an apply that arrives while a page is in flight. Disabling
                 // the button is that same guard made visible, so the tap does not read as dead.
                 enabled = !isApplying,
-                background = assignerPrimaryGradient(),
+                background = colors.buttonGradient,
                 modifier = Modifier.weight(1f),
             )
             if (canReset) {

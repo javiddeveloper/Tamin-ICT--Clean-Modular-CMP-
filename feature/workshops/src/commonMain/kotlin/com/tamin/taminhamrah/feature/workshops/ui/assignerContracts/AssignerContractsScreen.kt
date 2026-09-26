@@ -173,6 +173,7 @@ fun AssignerContractsContent(
                     icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                     contentDescription = null,
                     onClick = onBack,
+                    bordered = true,
                 )
             },
             action = {
@@ -180,6 +181,7 @@ fun AssignerContractsContent(
                     icon = vectorResource(Res.drawable.ic_tamin_search),
                     contentDescription = stringResource(Res.string.assigner_select_workshop),
                     onClick = { onIntent(AssignerContractsIntent.SearchOpenChanged(isOpen = true)) },
+                    bordered = true,
                 )
             },
         ) {
