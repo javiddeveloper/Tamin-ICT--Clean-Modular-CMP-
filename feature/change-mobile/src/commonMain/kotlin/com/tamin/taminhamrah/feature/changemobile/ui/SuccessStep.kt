@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -31,11 +30,12 @@ import com.tamin.taminhamrah.ui.components.ListGroupView
 import com.tamin.taminhamrah.ui.components.ListItemBadge
 import com.tamin.taminhamrah.ui.components.ListItemColors
 import com.tamin.taminhamrah.ui.components.ListItemData
-import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.coloredShadow
 import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toparea.TopAreaState
+import com.tamin.taminhamrah.ui.toparea.driveTopArea
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.painterResource
@@ -46,14 +46,16 @@ import taminx.core.core_ui.ic_tamin_check
 @Composable
 fun SuccessStep(
     uiState: ChangeMobileUiState,
-    onFinish: () -> Unit
+    topAreaState: TopAreaState
 ) {
     val taminColors = LocalTaminColors.current
+    val scrollState = rememberScrollState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .driveTopArea(topAreaState, scrollState)
+            .verticalScroll(scrollState)
             .padding(Spacing.lg),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -124,14 +126,6 @@ fun SuccessStep(
                     titleStyle = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                 )
             )
-        )
-
-        Spacer(modifier = Modifier.height(Spacing.xl))
-
-        LoadingButton(
-            text = "بازگشت به حساب کاربری",
-            onClick = onFinish,
-            modifier = Modifier.fillMaxWidth()
         )
     }
 }

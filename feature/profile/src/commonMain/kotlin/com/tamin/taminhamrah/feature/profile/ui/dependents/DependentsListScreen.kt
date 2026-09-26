@@ -19,10 +19,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
@@ -37,10 +37,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.profile.ui.dependents.contract.DependentsListEvent
 import com.tamin.taminhamrah.feature.profile.ui.dependents.contract.DependentsListIntent
 import com.tamin.taminhamrah.feature.profile.ui.dependents.contract.DependentsListState
@@ -62,21 +64,23 @@ import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.Elevation
+import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.ShimmerCardList
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
+import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.coroutines.flow.Flow
-import androidx.compose.ui.draw.rotate
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.ic_arrow_show_more
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_user
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.action_back
 import taminx.core.core_ui.action_retry
+import taminx.core.core_ui.edict_national_code
 import taminx.core.core_ui.identity_field_birth_date
 import taminx.core.core_ui.identity_field_father_name
 import taminx.core.core_ui.identity_field_national_code
@@ -273,55 +277,82 @@ private fun DependentCard(
     modifier: Modifier = Modifier
 ) {
     val colors = LocalTaminColors.current
-    val rotation by animateFloatAsState(targetValue = if (isExpanded) -90f else 0f, label = "ChevronRotation")
+    val shape = RoundedCornerShape(CornerRadius.xl)
+    val rotation by animateFloatAsState(
+        targetValue = if (isExpanded) 180f else 0f,
+        label = "ChevronRotation"
+    )
+    val displayName = dependent.fullName.ifBlank {
+        stringResource(Res.string.dependents_list_unregistered_name)
+    }
+    val nationalCodeLabel = stringResource(
+        Res.string.edict_national_code,
+        dependent.nationalCode.ifBlank { "-" }.toPersianDigits()
+    )
 
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .animateContentSize()
-            .clip(RoundedCornerShape(CornerRadius.lg))
+            .shadow(elevation = Elevation.sm, shape = shape, clip = false)
+            .clip(shape)
             .background(colors.bgSurface)
-            .border(1.dp, colors.border, RoundedCornerShape(CornerRadius.lg))
+            .border(Thickness.border, colors.border, shape)
+            .animateContentSize()
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onToggle)
                 .padding(Spacing.lg),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column( modifier = Modifier.fillMaxWidth().weight(0.8f),verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
-                Text(
-                    text = dependent.fullName.ifBlank { stringResource(Res.string.dependents_list_unregistered_name) },
-                    color = colors.textPrimary,
-                    fontSize = 14.5.sp,
-                    fontWeight = FontWeight.ExtraBold
-                )
-                StatusPill(
-                    text = dependent.relationDescription.ifBlank { "-" },
-                    containerColor = colors.blueBg,
-                    contentColor = colors.blueText
+            Box(
+                modifier = Modifier.align(Alignment.Top)
+                    .size(IconSize.textFieldIconContainer)
+                    .clip(RoundedCornerShape(CornerRadius.avatarTile))
+                    .background(colors.bgSurface)
+                    .border(Thickness.border, colors.blueBorder, RoundedCornerShape(CornerRadius.avatarTile)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowDown,
+                    contentDescription = null,
+                    tint = colors.blueText,
+                    modifier = Modifier
+                        .size(IconSize.medium)
+                        .rotate(rotation)
                 )
             }
-            Box(modifier = Modifier.fillMaxWidth().weight(0.2f) , contentAlignment = Alignment.CenterEnd){
-                Box(
-                    modifier = Modifier
-                        .size(34.dp)
-                        .clip(CircleShape)
-                        .background(colors.bgPage)
-                        .border(1.dp, colors.border, CircleShape),
-                    contentAlignment = Alignment.Center
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.ic_arrow_show_more),
-                        contentDescription = null,
-                        tint = colors.chevron,
-                        modifier = Modifier
-                            .size(17.dp)
-                            .rotate(rotation)
+                    Text(
+                        text = displayName,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.textPrimary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
+                    )
+                    StatusPill(
+                        text = dependent.relationDescription.ifBlank { "-" },
+                        containerColor = colors.blueBg,
+                        contentColor = colors.blueText
                     )
                 }
+                Text(
+                    text = nationalCodeLabel,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.textMuted
+                )
             }
         }
 
@@ -332,19 +363,40 @@ private fun DependentCard(
                     .fillMaxWidth()
                     .padding(horizontal = Spacing.lg, vertical = Spacing.sm)
             ) {
-                DetailRow(label = stringResource(Res.string.identity_field_national_code), value = dependent.nationalCode, numeric = true)
-                DetailRow(label = stringResource(Res.string.identity_field_birth_date), value = dependent.birthDateJalali.ifBlank { "-" }, numeric = true)
-                DetailRow(label = stringResource(Res.string.identity_field_father_name), value = dependent.fatherName.ifBlank { "-" }, numeric = false)
-                DetailRow(label = stringResource(Res.string.dependents_list_insurance_id), value = dependent.insuranceId.ifBlank { "-" }, numeric = true)
-                DetailRow(label = stringResource(Res.string.dependents_list_status), value = dependent.status.ifBlank { "-" }, numeric = false)
+                DetailRow(
+                    label = stringResource(Res.string.identity_field_national_code),
+                    value = dependent.nationalCode,
+                    numeric = true
+                )
+                DetailRow(
+                    label = stringResource(Res.string.identity_field_birth_date),
+                    value = dependent.birthDateJalali.ifBlank { "-" },
+                    numeric = true
+                )
+                DetailRow(
+                    label = stringResource(Res.string.identity_field_father_name),
+                    value = dependent.fatherName.ifBlank { "-" },
+                    numeric = false
+                )
+                DetailRow(
+                    label = stringResource(Res.string.dependents_list_insurance_id),
+                    value = dependent.insuranceId.ifBlank { "-" },
+                    numeric = true
+                )
+                DetailRow(
+                    label = stringResource(Res.string.dependents_list_status),
+                    value = dependent.status.ifBlank { "-" },
+                    numeric = false
+                )
             }
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(4.dp)
-                    .background(colors.buttonGradient)
-            )
         }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(Thickness.accent)
+                .background(colors.buttonGradient)
+        )
     }
 }
 

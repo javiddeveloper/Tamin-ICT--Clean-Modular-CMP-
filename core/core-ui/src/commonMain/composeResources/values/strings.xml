@@ -107,6 +107,8 @@
     <string name="profile_verify_otp_code">تأیید کد یکبار مصرف</string>
     <string name="profile_otp_sent_to">کد تأیید به شمارهٔ %1$s ارسال شد.</string>
     <string name="profile_change_mobile_success">شماره همراه شما با موفقیت تغییر یافت.</string>
+    <string name="profile_change_mobile_confirm_and_continue">تأیید و ادامه</string>
+    <string name="profile_change_mobile_back_to_account">بازگشت به حساب کاربری</string>
     <string name="profile_back_to_profile">بازگشت به پروفایل</string>
     <string name="profile_cartable">کارتابل</string>
     <string name="profile_requests">درخواست ها</string>
