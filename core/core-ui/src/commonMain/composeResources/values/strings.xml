@@ -900,7 +900,7 @@
 
     <!-- Version History -->
     <string name="profile_version_history_last_updated">آخرین به‌روزرسانی: %1$s</string>
-    <string name="profile_version_history_version_prefix">نسخه %1$s</string>
+    <string name="profile_version_history_version_prefix">نسخهٔ %1$s</string>
     <string name="profile_version_history_release_date">تاریخ انتشار: %1$s</string>
     <string name="profile_version_history_new_features">ویژگی‌های جدید</string>
     <string name="profile_version_history_bug_fixes_and_improvements">رفع اشکال و بهینه‌سازی</string>
