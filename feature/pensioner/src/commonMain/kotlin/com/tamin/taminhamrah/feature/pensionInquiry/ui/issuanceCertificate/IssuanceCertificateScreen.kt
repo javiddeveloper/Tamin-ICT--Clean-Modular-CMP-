@@ -110,6 +110,7 @@ import taminx.core.core_ui.issuance_certificate_submit_and_send
 import taminx.core.core_ui.issuance_certificate_success_confirm
 import taminx.core.core_ui.issuance_certificate_success_desc
 import taminx.core.core_ui.issuance_certificate_success_title
+import kotlinx.collections.immutable.toImmutableList
 
 /** How long the copy button shows the green check before reverting to the copy icon. */
 private const val COPY_FEEDBACK_DURATION_MS = 2000L
@@ -134,8 +135,10 @@ fun IssuanceCertificateScreen(
     )
 
     if (state.showPensionerSheet) {
+        val pensioners = state.pensionerIds
+        val pensionerIds = remember(pensioners) { pensioners.map { it.pensionerId }.toImmutableList() }
         EdictPensionerSheet(
-            pensionerIds = state.pensionerIds.map { it.pensionerId },
+            pensionerIds = pensionerIds,
             selectedId = state.selectedPensionerId,
             onSelect = { id -> viewModel.sendIntent(IssuanceCertificateIntent.SelectPensionerId(id)) },
             onDismiss = { viewModel.sendIntent(IssuanceCertificateIntent.DismissPensionerSheet) },

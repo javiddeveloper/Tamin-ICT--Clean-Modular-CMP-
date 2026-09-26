@@ -38,6 +38,11 @@ import kotlinx.collections.immutable.ImmutableList
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_tamin_check
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import com.tamin.taminhamrah.ui.components.TaminEmptyState
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.no_items_found
 
 private val SheetCorner = 28.dp
 private val OptionRowMinHeight = 64.dp
@@ -77,13 +82,17 @@ fun OrotezProtezOptionSheet(
             )
             Spacer(Modifier.height(Spacing.lg))
 
-            Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                options.forEach { option ->
-                    OrotezProtezOptionRow(
-                        option = option,
-                        isSelected = option.id == selectedId,
-                        onClick = { onSelect(option) },
-                    )
+            if (options.isEmpty()) {
+                TaminEmptyState(message = stringResource(Res.string.no_items_found))
+            } else {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                    items(options) { option ->
+                        OrotezProtezOptionRow(
+                            option = option,
+                            isSelected = option.id == selectedId,
+                            onClick = { onSelect(option) },
+                        )
+                    }
                 }
             }
         }

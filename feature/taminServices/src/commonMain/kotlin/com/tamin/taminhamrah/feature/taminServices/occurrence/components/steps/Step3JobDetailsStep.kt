@@ -60,6 +60,8 @@ import taminx.core.core_ui.occurrence_select_marital
 import taminx.core.core_ui.occurrence_sheet_marital_title
 import taminx.core.core_ui.occurrence_step3_readonly_hint
 import taminx.core.core_ui.occurrence_step3_title
+import androidx.compose.runtime.remember
+import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 internal fun Step3JobDetailsStep(
@@ -227,9 +229,15 @@ internal fun Step3JobDetailsStep(
     }
 
     if (uiState.dialogs.showMaritalSheet) {
+        val maritalTitles = MaritalStatusPR.entries.map { stringResource(it.displayNameRes) }
+        val maritalOptions = remember(maritalTitles) {
+            MaritalStatusPR.entries.mapIndexed { index, status ->
+                OccurrenceSheetOption(id = status.code, title = maritalTitles[index])
+            }.toImmutableList()
+        }
         OccurrenceSelectionBottomSheet(
             title = stringResource(Res.string.occurrence_sheet_marital_title),
-            options = MaritalStatusPR.entries.map { OccurrenceSheetOption(id = it.code, title = stringResource(it.displayNameRes)) },
+            options = maritalOptions,
             selectedId = step.maritalStatus,
             onSelect = { option ->
                 onIntent(OccurrenceIntent.UpdateJobDetails(step.copy(maritalStatus = option.id)))

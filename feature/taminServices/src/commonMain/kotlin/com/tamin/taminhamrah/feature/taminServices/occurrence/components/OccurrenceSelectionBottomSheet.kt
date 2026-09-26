@@ -31,6 +31,13 @@ import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import com.tamin.taminhamrah.ui.components.TaminEmptyState
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.no_items_found
+import kotlinx.collections.immutable.ImmutableList
 
 /**
  * One selectable choice inside an [OccurrenceSelectionBottomSheet].
@@ -54,7 +61,7 @@ data class OccurrenceSheetOption(
 @Composable
 fun OccurrenceSelectionBottomSheet(
     title: String,
-    options: List<OccurrenceSheetOption>,
+    options: ImmutableList<OccurrenceSheetOption>,
     selectedId: String?,
     onSelect: (OccurrenceSheetOption) -> Unit,
     onDismiss: () -> Unit,
@@ -82,12 +89,18 @@ fun OccurrenceSelectionBottomSheet(
                 color = taminColors.textPrimary,
                 modifier = Modifier.padding(bottom = Spacing.xs),
             )
-            options.forEach { option ->
-                OccurrenceSelectionOptionRow(
-                    option = option,
-                    selected = option.id == selectedId,
-                    onClick = { onSelect(option) },
-                )
+            if (options.isEmpty()) {
+                TaminEmptyState(message = stringResource(Res.string.no_items_found))
+            } else {
+                LazyColumn {
+                    items(options) { option ->
+                        OccurrenceSelectionOptionRow(
+                            option = option,
+                            selected = option.id == selectedId,
+                            onClick = { onSelect(option) },
+                        )
+                    }
+                }
             }
             Spacer(modifier = Modifier.height(Spacing.lg))
         }
