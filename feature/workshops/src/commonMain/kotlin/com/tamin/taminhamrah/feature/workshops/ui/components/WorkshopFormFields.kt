@@ -22,7 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopConstants
 import com.tamin.taminhamrah.feature.workshops.ui.model.PersonSearch
@@ -179,6 +181,9 @@ fun WorkshopFieldSlot(
  * A thin adapter over [TaminStyledTextField] rather than a field of its own: that one already
  * carries the label, the placeholder, the character restriction, the length cap and the inline
  * error state, and every other form in the app is drawn with it.
+ *
+ * A digits-only field is right-aligned: a bare number carries no direction and would otherwise
+ * start from the left, away from its label and placeholder on the RTL page.
  */
 @Composable
 fun WorkshopTextField(
@@ -195,6 +200,8 @@ fun WorkshopTextField(
     errorText: String? = null,
     /** Passed through; None, the default, draws the value as typed. */
     visualTransformation: VisualTransformation = VisualTransformation.None,
+    /** The field's fill. The surface colour, the default, suits a field on the page background. */
+    containerColor: Color = LocalTaminColors.current.bgSurface,
 ) {
     TaminStyledTextField(
         value = value,
@@ -209,6 +216,12 @@ fun WorkshopTextField(
         errorText = errorText,
         modifier = modifier,
         visualTransformation = visualTransformation,
+        textFieldBg = containerColor,
+        textAlign = if (inputRestriction == InputRestriction.DigitsOnly) {
+            TextAlign.Right
+        } else {
+            TextAlign.Unspecified
+        },
     )
 }
 

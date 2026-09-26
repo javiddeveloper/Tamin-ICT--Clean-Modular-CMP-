@@ -138,6 +138,11 @@ fun ColumnScope.WorkshopQuickPickList(
      * default — keeps the spinner ردیف‌های پیمان shows.
      */
     shimmerLoadingMore: Boolean = false,
+    /**
+     * Draws an unpicked row as an outline alone, with no fill. False — the default — keeps the
+     * filled chip rows the assigner search sheet shows.
+     */
+    outlineUnselected: Boolean = false,
 ) {
     val listState = rememberLazyListState()
     listState.OnLoadMore(
@@ -171,6 +176,7 @@ fun ColumnScope.WorkshopQuickPickList(
                 codeLabel = workshop.codeLabel,
                 isSelected = workshop.workshopId == selectedWorkshopId &&
                     (selectedBranchCode.isBlank() || workshop.branchCode == selectedBranchCode),
+                outlineUnselected = outlineUnselected,
                 onPick = { onPick(workshop.workshopId, workshop.branchCode) },
             )
         }
@@ -197,6 +203,7 @@ private fun WorkshopQuickPickRow(
     name: String,
     codeLabel: String,
     isSelected: Boolean,
+    outlineUnselected: Boolean,
     onPick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -207,12 +214,13 @@ private fun WorkshopQuickPickRow(
             .fillMaxWidth()
             .clip(shape)
             .clickable(onClick = onPick)
-            .background(if (isSelected) colors.blueBg else colors.chipBg)
             .then(
-                if (isSelected) {
-                    Modifier.border(Thickness.border, colors.blueBorder, shape)
-                } else {
-                    Modifier
+                when {
+                    isSelected -> Modifier
+                        .background(colors.blueBg)
+                        .border(Thickness.border, colors.blueBorder, shape)
+                    outlineUnselected -> Modifier.border(Thickness.border, colors.border, shape)
+                    else -> Modifier.background(colors.chipBg)
                 },
             )
             .padding(horizontal = Spacing.lg, vertical = Spacing.md),
