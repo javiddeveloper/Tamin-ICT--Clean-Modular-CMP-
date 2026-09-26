@@ -13,9 +13,9 @@ import com.tamin.taminhamrah.model.common.InsuranceTypeDN
 import com.tamin.taminhamrah.model.common.ProvinceDN
 import com.tamin.taminhamrah.model.contracts.BranchDN
 import com.tamin.taminhamrah.model.historyObjection.NotExistRequestDN
-import com.tamin.taminhamrah.useCases.common.GetCitiesByProvinceUseCase
+import com.tamin.taminhamrah.useCases.common.GetCitiesByProvincePageUseCase
 import com.tamin.taminhamrah.useCases.common.GetInsuranceTypesUseCase
-import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
+import com.tamin.taminhamrah.useCases.common.GetProvincesPageUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.GetHistoryObjectionNotExistRequestsUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.SaveHistoryObjectionNotExistRequestUseCase
@@ -49,8 +49,8 @@ class HistoryObjectionStepperViewModelTest {
         commonRepository = FakeCommonRepository()
         historyObjectionRepository = FakeHistoryObjectionRepository()
         viewModel = HistoryObjectionStepperViewModel(
-            getProvincesUseCase = GetProvincesUseCase(cityProvinceRepository),
-            getCitiesByProvinceUseCase = GetCitiesByProvinceUseCase(cityProvinceRepository),
+            getProvincesUseCase = GetProvincesPageUseCase(cityProvinceRepository),
+            getCitiesByProvinceUseCase = GetCitiesByProvincePageUseCase(cityProvinceRepository),
             getBranchesUseCase = GetBranchesUseCase(contractsRepository),
             getInsuranceTypesUseCase = GetInsuranceTypesUseCase(commonRepository),
             getHistoryObjectionNotExistRequestsUseCase = GetHistoryObjectionNotExistRequestsUseCase(historyObjectionRepository),
@@ -87,37 +87,6 @@ class HistoryObjectionStepperViewModelTest {
             val afterBranchLoad = awaitUntil { it.branches.isNotEmpty() }
             assertEquals("1158", contractsRepository.lastBranchCityCode)
             assertEquals(1, afterBranchLoad.branches.size)
-        }
-    }
-
-    @Test
-    fun citiesLoad_usesFreshNetworkResultNotStaleCache() = runTest(testDispatcher) {
-        // Regression test: getCitiesByProvinceUseCase is cache-then-network and emits twice —
-        // once with whatever's already cached (possibly stale/incomplete), then again with the
-        // fresh network result. The ViewModel must end up on the second emission, not the first.
-        val province = ProvinceDN(provinceCode = "27", provinceName = "گلستان", status = "1", statusStartDate = "1")
-        val staleCachedCities = listOf(CityDN(cityCode = "1", cityName = "شهر قدیمی", provinceCode = "27"))
-        val freshCities = listOf(
-            CityDN(cityCode = "1", cityName = "گرگان", provinceCode = "27"),
-            CityDN(cityCode = "2", cityName = "گنبد کاووس", provinceCode = "27"),
-            CityDN(cityCode = "3", cityName = "علی‌آباد کتول", provinceCode = "27"),
-        )
-        cityProvinceRepository.provincesResult = listOf(province)
-        cityProvinceRepository.staleCitiesByProvinceResult = staleCachedCities
-        cityProvinceRepository.citiesByProvinceResult = freshCities
-
-        viewModel.uiState.test {
-            awaitItem()
-            viewModel.sendIntent(HistoryObjectionStepperIntent.Load(null))
-            awaitUntil { it.provinces.isNotEmpty() }
-
-            viewModel.sendIntent(
-                HistoryObjectionStepperIntent.OnProvinceSelected(
-                    com.tamin.taminhamrah.model.common.ProvincePR("27", "گلستان")
-                )
-            )
-            val finalState = awaitUntil { it.cities.size == freshCities.size }
-            assertEquals(freshCities.map { it.cityName }, finalState.cities.map { it.cityName })
         }
     }
 

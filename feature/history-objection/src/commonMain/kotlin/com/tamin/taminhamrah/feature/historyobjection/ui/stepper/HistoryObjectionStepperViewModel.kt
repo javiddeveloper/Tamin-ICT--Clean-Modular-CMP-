@@ -16,14 +16,16 @@ import com.tamin.taminhamrah.model.common.InsuranceTypePR
 import com.tamin.taminhamrah.model.common.ProvincePR
 import com.tamin.taminhamrah.model.contracts.BranchDN
 import com.tamin.taminhamrah.model.historyObjection.SaveNotExistRequestDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.query.city.CityByProvinceQuery
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetConfig
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetItem
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetType
 import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
-import com.tamin.taminhamrah.useCases.common.GetCitiesByProvinceUseCase
+import com.tamin.taminhamrah.useCases.common.GetCitiesByProvincePageUseCase
 import com.tamin.taminhamrah.useCases.common.GetInsuranceTypesUseCase
-import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
+import com.tamin.taminhamrah.useCases.common.GetProvincesPageUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.GetHistoryObjectionNotExistRequestsUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.SaveHistoryObjectionNotExistRequestUseCase
 import com.tamin.taminhamrah.util.PersianDateFormatter
@@ -54,10 +56,12 @@ import taminx.core.core_ui.search_hint
 
 /** The end date must be at least this many days before today — see [dateRangeErrorMessage]. */
 private const val MIN_DAYS_BETWEEN_END_DATE_AND_TODAY = 60
+private const val ALL_PROVINCES_PAGE_SIZE = 100
+private const val ALL_CITIES_PAGE_SIZE = 200
 
 class HistoryObjectionStepperViewModel(
-    private val getProvincesUseCase: GetProvincesUseCase,
-    private val getCitiesByProvinceUseCase: GetCitiesByProvinceUseCase,
+    private val getProvincesUseCase: GetProvincesPageUseCase,
+    private val getCitiesByProvinceUseCase: GetCitiesByProvincePageUseCase,
     private val getBranchesUseCase: GetBranchesUseCase,
     private val getInsuranceTypesUseCase: GetInsuranceTypesUseCase,
     private val getHistoryObjectionNotExistRequestsUseCase: GetHistoryObjectionNotExistRequestsUseCase,
@@ -254,8 +258,9 @@ class HistoryObjectionStepperViewModel(
         emit(PartialState.BottomSheetStateChanged(config = null, target = null))
         emit(PartialState.CitiesLoading(true))
         try {
-            getCitiesByProvinceUseCase(province.provinceCode).collect { result ->
-                emit(PartialState.CitiesLoaded(result.cities.toCityPresentation().toPersistentList(), isStale = result.isStale))
+            val query = ApiQueryParamDN(filters = CityByProvinceQuery.filters(province.provinceCode), limit = ALL_CITIES_PAGE_SIZE)
+            getCitiesByProvinceUseCase(province.provinceCode, query).collect { page ->
+                emit(PartialState.CitiesLoaded(page.items.toCityPresentation().toPersistentList(), isStale = false))
             }
         } catch (e: CancellationException) {
             throw e
@@ -384,8 +389,10 @@ class HistoryObjectionStepperViewModel(
     }
 
     private fun loadProvinces(): Flow<PartialState> = flow {
-        getProvincesUseCase().collect { provinces ->
-            emit(PartialState.ProvincesLoaded(provinces.toProvincePresentation().toPersistentList()))
+        // Not migrated to incremental paging (Paginator) yet — this stepper has no infinite-scroll
+        // picker, so a single generously-sized page stands in for "all provinces" for now.
+        getProvincesUseCase(ApiQueryParamDN(limit = ALL_PROVINCES_PAGE_SIZE)).collect { page ->
+            emit(PartialState.ProvincesLoaded(page.items.toProvincePresentation().toPersistentList()))
         }
     }
 
@@ -398,8 +405,9 @@ class HistoryObjectionStepperViewModel(
         if (provinceCode != null) {
             emit(PartialState.CitiesLoading(true))
             try {
-                getCitiesByProvinceUseCase(provinceCode).collect { result ->
-                    emit(PartialState.CitiesLoaded(result.cities.toCityPresentation().toPersistentList(), isStale = result.isStale))
+                val query = ApiQueryParamDN(filters = CityByProvinceQuery.filters(provinceCode), limit = ALL_CITIES_PAGE_SIZE)
+                getCitiesByProvinceUseCase(provinceCode, query).collect { page ->
+                    emit(PartialState.CitiesLoaded(page.items.toCityPresentation().toPersistentList(), isStale = false))
                 }
             } catch (e: CancellationException) {
                 throw e

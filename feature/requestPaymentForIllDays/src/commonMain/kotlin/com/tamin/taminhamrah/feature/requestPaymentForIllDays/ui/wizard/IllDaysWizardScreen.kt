@@ -154,6 +154,7 @@ import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 private const val MAX_DOCUMENTS = 5
+private const val CITY_SEARCH_DEBOUNCE_MS = 1000L
 
 @Composable
 fun IllDaysWizardScreen(
@@ -976,6 +977,12 @@ private fun IllDaysWizardPickers(
                 itemLabel = { it.cityName },
                 itemKey = { it.cityCode },
                 searchPlaceholder = stringResource(Res.string.ill_days_wizard_city_search),
+                onSearchQueryChange = { onIntent(IllDaysWizardIntent.CitySearchQueryChanged(it)) },
+                searchDebounceMs = CITY_SEARCH_DEBOUNCE_MS,
+                isLoading = state.isCitiesLoading,
+                canLoadMore = state.canLoadMoreCities,
+                isLoadingMore = state.isCitiesLoadingMore,
+                onLoadMore = { onIntent(IllDaysWizardIntent.CityPickerLoadMore) },
                 onItemSelected = { onIntent(IllDaysWizardIntent.CityPicked(it)) },
                 onDismiss = { onIntent(IllDaysWizardIntent.DismissPicker) },
             )

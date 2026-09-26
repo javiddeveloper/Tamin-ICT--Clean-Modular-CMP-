@@ -9,7 +9,7 @@ import com.tamin.taminhamrah.mapper.common.toCityPresentation
 import com.tamin.taminhamrah.mapper.requestPaymentForIllDays.toPresentation
 import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.model.requestPaymentForIllDays.IllDaysBranchWorkshopDN
-import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
+import com.tamin.taminhamrah.useCases.common.GetCitiesPageUseCase
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.GetCovidResultUseCase
 import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.GetIllDaysInsuredMainInfoUseCase
@@ -52,7 +52,7 @@ class IllDaysWizardViewModelTest {
 
     private fun buildViewModel(): IllDaysWizardViewModel = IllDaysWizardViewModel(
         getIllDaysInsuredMainInfoUseCase = GetIllDaysInsuredMainInfoUseCase(illDaysRepository),
-        getCitiesUseCase = GetCitiesUseCase(cityRepository),
+        getCitiesPageUseCase = GetCitiesPageUseCase(cityRepository),
         getCovidResultUseCase = GetCovidResultUseCase(illDaysRepository),
         uploadImageUseCase = UploadImageUseCase(contractsRepository),
         sendRequestForIllDayUseCase = SendRequestForIllDayUseCase(illDaysRepository),

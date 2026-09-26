@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.data.repository
 
 import app.cash.turbine.test
+import com.tamin.core.network.model.common.CityDto
 import com.tamin.core.network.model.common.CityNameDto
 import com.tamin.core.network.model.common.ProvinceDto
 import com.tamin.core.network.model.common.ProvinceNameDto
@@ -25,6 +26,10 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+/**
+ * Province/city lists are network-only for now (no Room caching) — see [CityProvinceRepositoryImpl].
+ * `getCity`/`getProvince` (single-item lookups) still use the DAO and are covered separately.
+ */
 class CityProvinceRepositoryImplTest {
 
     private lateinit var remoteDataSource: FakeRemoteDataSource
@@ -39,67 +44,48 @@ class CityProvinceRepositoryImplTest {
     }
 
     @Test
-    fun `getProvinces should first emit local data then remote data`() = runTest {
-        dao.provincesFlow.value = listOf(createProvinceEntity(code = "1"))
+    fun `getProvincesPage returns the page the remote data source answers with`() = runTest {
         remoteDataSource.provinceNameResult = ProvinceNameDto(list = listOf(createProvinceDto(code = "2")), total = 1)
 
-        repository.getProvinces().test {
-            val firstEmission = awaitItem()
-            assertEquals(listOf("1"), firstEmission.map { it.provinceCode })
-
-            val secondEmission = awaitItem()
-            assertEquals(listOf("2"), secondEmission.map { it.provinceCode })
-
-            cancelAndIgnoreRemainingEvents()
-        }
-
-        assertEquals(1, dao.replaceAllProvincesCalledCount)
-        assertEquals(listOf("2"), dao.provincesFlow.value.map { it.provinceCode })
-    }
-
-    @Test
-    fun `getProvinces should not throw when local data exists and remote fails`() = runTest {
-        dao.provincesFlow.value = listOf(createProvinceEntity(code = "1"))
-        remoteDataSource.shouldThrowError = true
-
-        repository.getProvinces().test {
-            val firstEmission = awaitItem()
-            assertEquals(listOf("1"), firstEmission.map { it.provinceCode })
-            expectNoEvents()
+        repository.getProvincesPage(ApiQueryParamDN()).test {
+            val page = awaitItem()
+            assertEquals(listOf("2"), page.items.map { it.provinceCode })
+            assertEquals(1, page.total)
+            awaitComplete()
         }
     }
 
     @Test
-    fun `getProvinces should throw when local data is empty and remote fails`() = runTest {
-        dao.provincesFlow.value = emptyList()
+    fun `getProvincesPage propagates a remote failure`() = runTest {
         remoteDataSource.shouldThrowError = true
 
-        repository.getProvinces().test {
-            awaitItem() // first emission: empty local list
+        repository.getProvincesPage(ApiQueryParamDN()).test {
             awaitError()
         }
     }
 
     @Test
-    fun `getProvinces should replace the cached list rather than merge it`() = runTest {
-        dao.provincesFlow.value = listOf(createProvinceEntity(code = "stale"))
-        remoteDataSource.provinceNameResult = ProvinceNameDto(list = listOf(createProvinceDto(code = "fresh")), total = 1)
+    fun `getCitiesPage returns the page the remote data source answers with`() = runTest {
+        remoteDataSource.cityNameResult = CityNameDto(list = listOf(createCityDto(code = "0701")), total = 1)
 
-        repository.getProvinces().test {
-            awaitItem()
-            awaitItem()
-            cancelAndIgnoreRemainingEvents()
+        repository.getCitiesPage(ApiQueryParamDN()).test {
+            val page = awaitItem()
+            assertEquals(listOf("0701"), page.items.map { it.cityCode })
+            assertEquals(1, page.total)
+            awaitComplete()
         }
-
-        assertEquals(listOf("fresh"), dao.provincesFlow.value.map { it.provinceCode })
     }
 
-    private fun createProvinceEntity(code: String) = ProvinceEntity(
-        provinceCode = code,
-        provinceName = "province-$code",
-        status = null,
-        statusStartDate = null,
-    )
+    @Test
+    fun `getCitiesByProvincePage returns the page the remote data source answers with`() = runTest {
+        remoteDataSource.citiesByProvinceResult = CityNameDto(list = listOf(createCityDto(code = "0701")), total = 1)
+
+        repository.getCitiesByProvincePage("07", ApiQueryParamDN()).test {
+            val page = awaitItem()
+            assertEquals(listOf("0701"), page.items.map { it.cityCode })
+            awaitComplete()
+        }
+    }
 
     private fun createProvinceDto(code: String) = ProvinceDto(
         provinceCode = code,
@@ -108,21 +94,33 @@ class CityProvinceRepositoryImplTest {
         statusStartDate = null,
     )
 
+    private fun createCityDto(code: String) = CityDto(
+        cityCode = code,
+        provinceCode = "07",
+        cityName = "city-$code",
+    )
+
     // Fakes
     private class FakeRemoteDataSource : CommonRemoteDataSource {
         var provinceNameResult = ProvinceNameDto(list = emptyList(), total = 0)
+        var cityNameResult = CityNameDto(list = emptyList(), total = 0)
+        var citiesByProvinceResult = CityNameDto(list = emptyList(), total = 0)
         var shouldThrowError = false
 
-        override suspend fun getCityName(cityNameRequest: ApiQueryParamDN): CityNameDto =
-            throw NotImplementedError("not used by these tests")
+        override suspend fun getCityName(cityNameRequest: ApiQueryParamDN): CityNameDto {
+            if (shouldThrowError) throw RuntimeException("Remote failure")
+            return cityNameResult
+        }
 
         override suspend fun getProvinceName(provinceNameRequest: ApiQueryParamDN): ProvinceNameDto {
             if (shouldThrowError) throw RuntimeException("Remote failure")
             return provinceNameResult
         }
 
-        override suspend fun getCitiesByProvince(query: ApiQueryParamDN): CityNameDto =
-            throw NotImplementedError("not used by these tests")
+        override suspend fun getCitiesByProvince(query: ApiQueryParamDN): CityNameDto {
+            if (shouldThrowError) throw RuntimeException("Remote failure")
+            return citiesByProvinceResult
+        }
 
         override suspend fun getInsuranceTypes(query: ApiQueryParamDN): ListData<InsuranceTypeDTO>? =
             throw NotImplementedError("not used by these tests")
@@ -149,7 +147,6 @@ class CityProvinceRepositoryImplTest {
     private class FakeDao : CityProvinceDao {
         val provincesFlow = MutableStateFlow<List<ProvinceEntity>>(emptyList())
         val citiesFlow = MutableStateFlow<List<CityEntity>>(emptyList())
-        var replaceAllProvincesCalledCount = 0
 
         override suspend fun upsertCity(city: CityEntity) {
             citiesFlow.value = citiesFlow.value.filterNot { it.cityCode == city.cityCode } + city
@@ -192,7 +189,6 @@ class CityProvinceRepositoryImplTest {
         }
 
         override suspend fun replaceAllProvinces(provinces: List<ProvinceEntity>) {
-            replaceAllProvincesCalledCount++
             clearProvinces()
             upsertProvinces(provinces)
         }

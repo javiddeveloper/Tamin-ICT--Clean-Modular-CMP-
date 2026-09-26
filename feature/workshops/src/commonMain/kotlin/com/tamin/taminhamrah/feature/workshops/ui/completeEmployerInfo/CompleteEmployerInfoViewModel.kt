@@ -17,10 +17,14 @@ import com.tamin.taminhamrah.model.common.ProvincePR
 import com.tamin.taminhamrah.model.employerInfo.LegalWorkshopCeoDN
 import com.tamin.taminhamrah.model.employerInfo.LegalWorkshopInfoRequestDN
 import com.tamin.taminhamrah.model.employerInfo.RealWorkshopInfoRequestDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.paging.PaginationConfig
+import com.tamin.taminhamrah.paging.Paginator
+import com.tamin.taminhamrah.query.city.CityByProvinceQuery
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.ui.digitsOnly
-import com.tamin.taminhamrah.useCases.common.GetCitiesByProvinceUseCase
-import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
+import com.tamin.taminhamrah.useCases.common.GetCitiesByProvincePageUseCase
+import com.tamin.taminhamrah.useCases.common.GetProvincesPageUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.employerInfo.GetLegalWorkshopCeoUseCase
 import com.tamin.taminhamrah.useCases.employerInfo.GetLegalWorkshopUseCase
@@ -38,8 +42,10 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.transform
 
 class CompleteEmployerInfoViewModel(
     private val getEmployerAgreements: GetEmployerAgreementsUseCase,
@@ -50,8 +56,8 @@ class CompleteEmployerInfoViewModel(
     private val submitLegalWorkshopInfoUseCase: SubmitLegalWorkshopInfoUseCase,
     private val requestRealTicketUseCase: RequestRealTicketUseCase,
     private val submitRealWorkshopInfoUseCase: SubmitRealWorkshopInfoUseCase,
-    private val getProvincesUseCase: GetProvincesUseCase,
-    private val getCitiesByProvinceUseCase: GetCitiesByProvinceUseCase,
+    private val getProvincesPageUseCase: GetProvincesPageUseCase,
+    private val getCitiesByProvincePageUseCase: GetCitiesByProvincePageUseCase,
     private val getBranchesUseCase: GetBranchesUseCase,
 ) : BaseViewModel<
     CompleteEmployerInfoUiState,
@@ -59,6 +65,18 @@ class CompleteEmployerInfoViewModel(
     CompleteEmployerInfoEvent,
     CompleteEmployerInfoIntent,
 >(CompleteEmployerInfoUiState()) {
+
+    private var currentProvinceCode: String = ""
+
+    private val provincePaginator = Paginator(
+        loadPage = { query -> getProvincesPageUseCase(query).first() },
+    )
+    // One large page (matching the pre-pagination code's `limit = 200` for this endpoint) so the
+    // sheet's local text filter has full coverage of a province's cities on first load.
+    private val cityPaginator = Paginator(
+        config = PaginationConfig(pageSize = CITIES_PER_PROVINCE_PAGE_SIZE),
+        loadPage = { query -> getCitiesByProvincePageUseCase(currentProvinceCode, query).first() },
+    )
 
     init {
         sendIntent(CompleteEmployerInfoIntent.LoadInitialData)
@@ -96,7 +114,9 @@ class CompleteEmployerInfoViewModel(
                 emit(CompleteEmployerInfoPartialState.RealWorkshopCodeChanged(intent.code))
             }
             is CompleteEmployerInfoIntent.SelectProvince -> handleSelectProvince(intent.province)
+            is CompleteEmployerInfoIntent.ProvincePickerLoadMore -> flow { provincePaginator.loadNext() }
             is CompleteEmployerInfoIntent.SelectCity -> handleSelectCity(intent.city)
+            is CompleteEmployerInfoIntent.CityPickerLoadMore -> flow { cityPaginator.loadNext() }
             is CompleteEmployerInfoIntent.SelectBranch -> flow {
                 emit(CompleteEmployerInfoPartialState.BranchSelected(intent.branch))
             }
@@ -134,7 +154,7 @@ class CompleteEmployerInfoViewModel(
      * the page stayed loading for as long as it was open.
      */
     private fun handleLoadInitialData(): Flow<CompleteEmployerInfoPartialState> =
-        merge(loadUserAndWorkshops(), loadProvinces())
+        merge(loadUserAndWorkshops(), loadProvinces(), observeProvincePaging(), observeCityPaging())
 
     private fun loadUserAndWorkshops(): Flow<CompleteEmployerInfoPartialState> = flow {
         emit(CompleteEmployerInfoPartialState.Loading(true))
@@ -175,20 +195,45 @@ class CompleteEmployerInfoViewModel(
     }
 
     private fun loadProvinces(): Flow<CompleteEmployerInfoPartialState> = flow {
-        getProvincesUseCase()
-            .catch { error ->
-                // A toast rather than the list's error state: the province picker sits behind the
-                // second tab, and blanking the workshop list for it would hide working content.
-                sendEvent(CompleteEmployerInfoEvent.ShowToast(error.toSingleLineMessage()))
-            }
-            .collect { provinces ->
-                emit(
-                    CompleteEmployerInfoPartialState.ProvincesLoaded(
-                        provinces.toProvincePresentation().toImmutableList()
-                    )
-                )
-            }
+        provincePaginator.refresh(ApiQueryParamDN())
     }
+
+    private fun observeProvincePaging(): Flow<CompleteEmployerInfoPartialState> =
+        provincePaginator.state.transform { paging ->
+            emit(
+                CompleteEmployerInfoPartialState.ProvincePagingChanged(
+                    items = paging.items.toProvincePresentation().toImmutableList(),
+                    isLoadingFirstPage = paging.isLoadingFirstPage,
+                    isLoadingNextPage = paging.isLoadingNextPage,
+                    endReached = paging.endReached,
+                ),
+            )
+            // A toast rather than the list's error state: the province picker sits behind the
+            // second tab, and blanking the workshop list for it would hide working content.
+            paging.error?.let { sendEvent(CompleteEmployerInfoEvent.ShowToast(it.toSingleLineMessage())) }
+        }
+
+    private fun observeCityPaging(): Flow<CompleteEmployerInfoPartialState> =
+        cityPaginator.state.transform { paging ->
+            emit(
+                CompleteEmployerInfoPartialState.CityPagingChanged(
+                    items = paging.items.toCityPresentation().toImmutableList(),
+                    isLoadingFirstPage = paging.isLoadingFirstPage,
+                    isLoadingNextPage = paging.isLoadingNextPage,
+                    endReached = paging.endReached,
+                ),
+            )
+            paging.error?.let { sendEvent(CompleteEmployerInfoEvent.ShowToast(it.toSingleLineMessage())) }
+        }
+
+    // `special-insured-services/cities` only ever filtered by province — the pre-pagination code
+    // never sent a city-name filter to it (city text search was purely a client-side filter over
+    // the fetched list, same as province's search box below). Server-side name search on this
+    // endpoint is unverified, so the search box stays local rather than risking the same 404 the
+    // sibling `proxy/models/city/` name filter hit for illDays.
+    private fun cityBaseQuery(): ApiQueryParamDN = ApiQueryParamDN(
+        filters = CityByProvinceQuery.filters(currentProvinceCode),
+    )
 
     private fun handleChangeLegalNationalId(nid: String): Flow<CompleteEmployerInfoPartialState> = flow {
         val digits = nid.digitsOnly()
@@ -226,14 +271,8 @@ class CompleteEmployerInfoViewModel(
 
     private fun handleSelectProvince(province: ProvincePR): Flow<CompleteEmployerInfoPartialState> = flow {
         emit(CompleteEmployerInfoPartialState.ProvinceSelected(province))
-        collectWhileLoading(
-            source = getCitiesByProvinceUseCase(province.provinceCode),
-            loading = CompleteEmployerInfoPartialState::CitiesLoading,
-            onSuccess = {
-                CompleteEmployerInfoPartialState.CitiesLoaded(it.cities.toCityPresentation().toImmutableList())
-            },
-            onFailure = { CompleteEmployerInfoPartialState.CitiesLoaded(persistentListOf()) },
-        )
+        currentProvinceCode = province.provinceCode
+        cityPaginator.refresh(cityBaseQuery())
     }
 
     private fun handleSelectCity(city: CityPR): Flow<CompleteEmployerInfoPartialState> = flow {
@@ -466,8 +505,11 @@ class CompleteEmployerInfoViewModel(
         is CompleteEmployerInfoPartialState.RealWorkshopCodeChanged -> currentState.copy(
             realWorkshopCode = partialState.code,
         )
-        is CompleteEmployerInfoPartialState.ProvincesLoaded -> currentState.copy(
-            provinces = partialState.provinces,
+        is CompleteEmployerInfoPartialState.ProvincePagingChanged -> currentState.copy(
+            provinces = partialState.items,
+            isProvincesLoading = partialState.isLoadingFirstPage,
+            isProvincesLoadingMore = partialState.isLoadingNextPage,
+            canLoadMoreProvinces = !partialState.endReached,
         )
         is CompleteEmployerInfoPartialState.ProvinceSelected -> currentState.copy(
             selectedProvince = partialState.province,
@@ -477,12 +519,11 @@ class CompleteEmployerInfoViewModel(
             branches = persistentListOf(),
             activeBottomSheet = null,
         )
-        is CompleteEmployerInfoPartialState.CitiesLoading -> currentState.copy(
-            isCitiesLoading = partialState.isLoading,
-        )
-        is CompleteEmployerInfoPartialState.CitiesLoaded -> currentState.copy(
-            cities = partialState.cities,
-            isCitiesLoading = false,
+        is CompleteEmployerInfoPartialState.CityPagingChanged -> currentState.copy(
+            cities = partialState.items,
+            isCitiesLoading = partialState.isLoadingFirstPage,
+            isCitiesLoadingMore = partialState.isLoadingNextPage,
+            canLoadMoreCities = !partialState.endReached,
         )
         is CompleteEmployerInfoPartialState.CitySelected -> currentState.copy(
             selectedCity = partialState.city,
@@ -557,3 +598,5 @@ class CompleteEmployerInfoViewModel(
 
 /** What the old app sends when the account carries no email; the ticket service rejects a blank. */
 private const val FALLBACK_TICKET_EMAIL = "tamin@tamin.ir"
+
+private const val CITIES_PER_PROVINCE_PAGE_SIZE = 200

@@ -205,11 +205,7 @@ fun RegistrationFormPage(
             }
         }
         val onLoadMore = remember(onIntent, picker) {
-            if (picker == RegistrationPicker.JOB) {
-                { onIntent(WorkshopRecentlyAddedMembersIntent.FormPickerLoadMore) }
-            } else {
-                null
-            }
+            { onIntent(WorkshopRecentlyAddedMembersIntent.FormPickerLoadMore) }
         }
         WorkshopLookupSheet(
             title = stringResource(

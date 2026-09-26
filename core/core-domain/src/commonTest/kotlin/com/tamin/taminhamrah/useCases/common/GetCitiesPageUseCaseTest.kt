@@ -2,6 +2,10 @@ package com.tamin.taminhamrah.useCases.common
 
 import app.cash.turbine.test
 import com.tamin.taminhamrah.model.common.CityDN
+import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.request.FilterOperator
+import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.repository.FakeCityProvinceRepository
 import com.tamin.taminhamrah.useCases.BaseUseCaseTest
 import kotlinx.coroutines.test.runTest
@@ -9,30 +13,33 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class GetCitiesByProvinceUseCaseTest : BaseUseCaseTest() {
+class GetCitiesPageUseCaseTest : BaseUseCaseTest() {
 
     private lateinit var repository: FakeCityProvinceRepository
-    private lateinit var useCase: GetCitiesByProvinceUseCase
+    private lateinit var useCase: GetCitiesPageUseCase
 
     @BeforeTest
     fun setup() {
         repository = FakeCityProvinceRepository()
-        useCase = GetCitiesByProvinceUseCase(repository)
+        useCase = GetCitiesPageUseCase(repository)
     }
 
     @Test
-    fun `invoke should return cities for the given province from repository`() = runTest {
+    fun `invoke should return cities page filtered by name from repository`() = runTest {
         val expectedCities = listOf(
             CityDN(cityCode = "1158", cityName = "اصفهان", provinceCode = "04"),
         )
-        repository.citiesByProvinceResult = expectedCities
+        repository.citiesResult = expectedCities
+        val query = ApiQueryParamDN(
+            filters = listOf(ApiFilterDN(FilterProperty.CITY_NAME, "اصفهان", FilterOperator.CONTAINS)),
+        )
 
-        useCase("04").test {
-            assertEquals(expectedCities, awaitItem().cities)
+        useCase(query).test {
+            assertEquals(expectedCities, awaitItem().items)
             awaitComplete()
         }
 
-        assertEquals("04", repository.lastCitiesByProvinceCode)
+        assertEquals("اصفهان", repository.lastCitiesSearch)
     }
 
     @Test
@@ -41,7 +48,7 @@ class GetCitiesByProvinceUseCaseTest : BaseUseCaseTest() {
         repository.shouldThrowError = true
         repository.error = expectedException
 
-        useCase("04").test {
+        useCase(ApiQueryParamDN()).test {
             val actualException = awaitError()
             assertEquals(expectedException.message, actualException.message)
         }

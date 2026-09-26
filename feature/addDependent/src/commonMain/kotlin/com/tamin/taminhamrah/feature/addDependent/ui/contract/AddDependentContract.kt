@@ -69,6 +69,10 @@ data class AddDependentState(
     val requiredDocTypes: List<DocType> = emptyList(),
     val uploadedDocuments: List<UploadedDocument> = emptyList(),
     val cities: List<CityPR> = emptyList(),
+    val isCitiesLoading: Boolean = false,
+    val isCitiesLoadingMore: Boolean = false,
+    val canLoadMoreCities: Boolean = false,
+    val activeCityPicker: BottomSheetTarget? = null,
     val needCallInquiryRegistry: Boolean = true,
     val needCallInquiryEducation: Boolean = true,
     val bottomSheetConfig: TaminBottomSheetConfig? = null,
@@ -82,7 +86,13 @@ data class AddDependentState(
             val autoSelectedBranch: BranchPR?
         ) : PartialState()
         data class FamilyRelationshipsLoaded(val relationships: List<FamilyRelationshipPR>) : PartialState()
-        data class CitiesLoaded(val cities: List<CityPR>) : PartialState()
+        data class CityPagingChanged(
+            val items: List<CityPR>,
+            val isLoadingFirstPage: Boolean,
+            val isLoadingNextPage: Boolean,
+            val endReached: Boolean,
+        ) : PartialState()
+        data class CityPickerOpened(val target: BottomSheetTarget?) : PartialState()
         data class NationalIdChanged(val id: String) : PartialState()
         data class BirthDateSelected(
             val persianDate: String,
@@ -130,6 +140,9 @@ sealed interface AddDependentIntent {
     data object ShowCityIssuancePicker : AddDependentIntent
     data object ShowBranchPicker : AddDependentIntent
     data object DismissBottomSheet : AddDependentIntent
+    data object DismissCityPicker : AddDependentIntent
+    data class CitySearchQueryChanged(val query: String) : AddDependentIntent
+    data object CityPickerLoadMore : AddDependentIntent
     data class OnCityBirthSelected(val city: CityPR) : AddDependentIntent
     data class OnCityIssuanceSelected(val city: CityPR) : AddDependentIntent
     data class OnBranchSelected(val branch: BranchPR) : AddDependentIntent

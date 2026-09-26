@@ -20,9 +20,10 @@ import com.tamin.taminhamrah.model.workshop.NewMemberRegistrationDN
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberPR
 import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberQuery
 import com.tamin.taminhamrah.paging.Paginator
+import com.tamin.taminhamrah.query.city.CityListQuery
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.ui.digitsOnly
-import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
+import com.tamin.taminhamrah.useCases.common.GetCitiesPageUseCase
 import com.tamin.taminhamrah.useCases.common.GetCityUseCase
 import com.tamin.taminhamrah.useCases.common.GetJobTitlePageUseCase
 import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
@@ -44,6 +45,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.transform
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.abs_doc_unknown
@@ -62,7 +64,7 @@ class WorkshopRecentlyAddedMembersViewModel(
     private val downloadAttachment: WorkshopAttachmentDownloader,
     private val putRegistrationDocuments: PutInsuredRegistrationDocListUseCase,
     private val getFiledDocuments: GetInsuredRegistrationDocListUseCase,
-    private val getCities: GetCitiesUseCase,
+    private val getCitiesPage: GetCitiesPageUseCase,
     private val getCity: GetCityUseCase,
     private val getJobTitlePage: GetJobTitlePageUseCase,
     private val getRegistrationDeclarationForm: GetRegistrationDeclarationFormUseCase,
@@ -75,6 +77,9 @@ class WorkshopRecentlyAddedMembersViewModel(
 
     private val jobPaginator = Paginator(
         loadPage = { query -> getJobTitlePage(query).first() },
+    )
+    private val cityPaginator = Paginator(
+        loadPage = { query -> getCitiesPage(query).first() },
     )
 
     init {
@@ -123,11 +128,13 @@ class WorkshopRecentlyAddedMembersViewModel(
         is WorkshopRecentlyAddedMembersIntent.FormPickerOpened -> openPicker(intent.picker)
         is WorkshopRecentlyAddedMembersIntent.FormPickerQueryChanged -> searchPicker(intent.query)
         WorkshopRecentlyAddedMembersIntent.FormPickerLoadMore -> flow {
-            if (uiState.value.form?.picker == RegistrationPicker.JOB) {
-                jobPaginator.loadNext()
+            when (uiState.value.form?.picker) {
+                RegistrationPicker.JOB -> jobPaginator.loadNext()
+                RegistrationPicker.BIRTH_CITY, RegistrationPicker.ISSUE_CITY -> cityPaginator.loadNext()
+                null -> Unit
             }
         }
-        WorkshopRecentlyAddedMembersIntent.InitJobPaging -> observeJobPaging()
+        WorkshopRecentlyAddedMembersIntent.InitJobPaging -> merge(observeJobPaging(), observeCityPaging())
         WorkshopRecentlyAddedMembersIntent.FormDownloadDeclaration -> downloadDeclaration()
         WorkshopRecentlyAddedMembersIntent.DeclarationViewerDismissed ->
             just(PartialState.DeclarationPdfChanged(null))
@@ -420,34 +427,20 @@ class WorkshopRecentlyAddedMembersViewModel(
      */
     private fun openPicker(picker: RegistrationPicker?): Flow<PartialState> = flow {
         emit(PartialState.FormPickerOpened(picker))
-        if (picker == RegistrationPicker.JOB) {
-            jobPaginator.refresh(jobBaseQuery(""))
-        } else if (picker != null) {
-            emitAll(loadPickerOptions(picker, query = ""))
+        when (picker) {
+            RegistrationPicker.JOB -> jobPaginator.refresh(jobBaseQuery(""))
+            RegistrationPicker.BIRTH_CITY, RegistrationPicker.ISSUE_CITY -> cityPaginator.refresh(cityBaseQuery(""))
+            null -> Unit
         }
     }
 
     private fun searchPicker(query: String): Flow<PartialState> = flow {
         val picker = uiState.value.form?.picker ?: return@flow
         emit(PartialState.FormPickerQueryChanged(query))
-        if (picker == RegistrationPicker.JOB) {
-            jobPaginator.refresh(jobBaseQuery(query))
-        } else {
-            emitAll(loadPickerOptions(picker, query))
+        when (picker) {
+            RegistrationPicker.JOB -> jobPaginator.refresh(jobBaseQuery(query))
+            RegistrationPicker.BIRTH_CITY, RegistrationPicker.ISSUE_CITY -> cityPaginator.refresh(cityBaseQuery(query))
         }
-    }
-
-    private fun loadPickerOptions(
-        picker: RegistrationPicker,
-        query: String,
-    ): Flow<PartialState> = flow {
-        emit(PartialState.FormPickerLoading(true))
-        val options = getCities(cityName = query.takeIf { it.isNotBlank() }).first()
-            .map { PickedOption(it.cityCode, it.cityName.orEmpty()) }
-        emit(PartialState.FormPickerOptionsLoaded(options.toPersistentList()))
-    }.catch {
-        emit(PartialState.FormPickerLoading(false))
-        emit(reportFailure(it))
     }
 
     private fun observeJobPaging(): Flow<PartialState> = jobPaginator.state.transform { paging ->
@@ -465,6 +458,18 @@ class WorkshopRecentlyAddedMembersViewModel(
         paging.error?.let { emit(reportFailure(it)) }
     }
 
+    private fun observeCityPaging(): Flow<PartialState> = cityPaginator.state.transform { paging ->
+        emit(
+            PartialState.FormPickerCityPagingChanged(
+                items = paging.items.map { PickedOption(it.cityCode, it.cityName.orEmpty()) }.toPersistentList(),
+                isLoadingFirstPage = paging.isLoadingFirstPage,
+                isLoadingNextPage = paging.isLoadingNextPage,
+                endReached = paging.endReached,
+            ),
+        )
+        paging.error?.let { emit(reportFailure(it)) }
+    }
+
     /** `jobDescription LIKE "*query*"`, and `LIKE "*"` for a blank one — what the old app sends. */
     private fun jobBaseQuery(query: String): ApiQueryParamDN = ApiQueryParamDN(
         filters = listOf(
@@ -474,6 +479,10 @@ class WorkshopRecentlyAddedMembersViewModel(
                 operator = FilterOperator.LIKE,
             ),
         ),
+    )
+
+    private fun cityBaseQuery(query: String): ApiQueryParamDN = ApiQueryParamDN(
+        filters = CityListQuery.filters(cityName = query.takeIf { it.isNotBlank() }),
     )
 
     /**
@@ -685,21 +694,21 @@ class WorkshopRecentlyAddedMembersViewModel(
             copy(pickerQuery = partialState.query)
         }
 
-        is PartialState.FormPickerLoading -> currentState.editForm {
-            copy(isPickerLoading = partialState.isLoading)
-        }
-
-        is PartialState.FormPickerOptionsLoaded -> currentState.editForm {
-            copy(
-                isPickerLoading = false,
-                isPickerLoadingMore = false,
-                canPickerLoadMore = false,
-                pickerOptions = partialState.options,
-            )
-        }
-
         is PartialState.FormPickerJobPagingChanged -> currentState.editForm {
             if (picker == RegistrationPicker.JOB) {
+                copy(
+                    pickerOptions = partialState.items,
+                    isPickerLoading = partialState.isLoadingFirstPage,
+                    isPickerLoadingMore = partialState.isLoadingNextPage,
+                    canPickerLoadMore = !partialState.endReached,
+                )
+            } else {
+                this
+            }
+        }
+
+        is PartialState.FormPickerCityPagingChanged -> currentState.editForm {
+            if (picker == RegistrationPicker.BIRTH_CITY || picker == RegistrationPicker.ISSUE_CITY) {
                 copy(
                     pickerOptions = partialState.items,
                     isPickerLoading = partialState.isLoadingFirstPage,
