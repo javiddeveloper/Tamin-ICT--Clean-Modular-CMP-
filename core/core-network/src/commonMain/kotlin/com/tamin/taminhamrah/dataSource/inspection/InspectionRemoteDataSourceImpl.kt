@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.dataSource.inspection
 
+import com.tamin.taminhamrah.tools.safeCall
 import com.tamin.taminhamrah.apiService.inspection.InspectionApiService
 import com.tamin.taminhamrah.model.inspection.BranchDTO
 import com.tamin.taminhamrah.model.inspection.InspectionPerformedDTO
@@ -12,10 +13,7 @@ import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
-import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
-import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
-import kotlinx.coroutines.CancellationException
 
 internal class InspectionRemoteDataSourceImpl(
     private val apiService: InspectionApiService,
@@ -27,15 +25,9 @@ internal class InspectionRemoteDataSourceImpl(
         query: ApiQueryParamDN
     ): ListData<InspectionPerformedDTO> {
         val queries = queryBuilder.buildQuery(query)
-        return try {
+        return errorParser.safeCall("getAllInsurance") {
             val response = apiService.getAllInsurance(queries)
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 
@@ -43,17 +35,9 @@ internal class InspectionRemoteDataSourceImpl(
         query: ApiQueryParamDN
     ): ListData<InspectionPerformedDTO> {
         val queries = queryBuilder.buildQuery(query)
-        return try {
+        return errorParser.safeCall("getAllManager") {
             val response = apiService.getAllManager(queries)
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 
@@ -61,15 +45,9 @@ internal class InspectionRemoteDataSourceImpl(
         query: ApiQueryParamDN
     ): ListData<BranchDTO> {
         val queries = queryBuilder.buildQuery(query)
-        return try {
+        return errorParser.safeCall("getBranches") {
             val response = apiService.getBranches(queries)
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 
@@ -77,46 +55,28 @@ internal class InspectionRemoteDataSourceImpl(
         query: ApiQueryParamDN
     ): ListData<JobDTO> {
         val queries = queryBuilder.buildQuery(query)
-        return try {
+        return errorParser.safeCall("getJobs") {
             val response = apiService.getJobs(queries)
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 
     override suspend fun submitInspectionRequest(
         request: SubmitInspectionRequestDTO
     ): SubmitInspectionRequestModelDTO {
-        return try {
+        return errorParser.safeCall("submitInspectionRequest") {
             val response = apiService.submitInspectionRequest(request)
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
-            )
         }
     }
 
     override suspend fun getInspectionReportPDF(inspectionNo: String): PdfDownloadDTO {
-        return try {
+        return errorParser.safeCall("getInspectionReportPDF") {
             val response = apiService.getInspectionReportPDF(inspectionNo)
             PdfDownloadDTO(
                 pdf = InputStreamDTO(
                     pdf = response.body()
                 )
-            )
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.UNKNOWN)
             )
         }
     }

@@ -33,13 +33,41 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
-import io.ktor.serialization.kotlinx.json.json
+import io.ktor.serialization.ContentConverter
+import io.ktor.serialization.kotlinx.KotlinxSerializationConverter
+import io.ktor.util.reflect.TypeInfo
+import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.charsets.Charset
 import kotlinx.serialization.json.Json
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.bind
 import org.koin.dsl.module
 import co.touchlab.kermit.Logger as KermitLogger
+
+/**
+ * The one Json every API client is built on. Tests use this same instance: the API tests once ran
+ * a laxer copy, so a reply production could not read passed them.
+ */
+internal val taminJson = Json {
+    ignoreUnknownKeys = true
+    isLenient = true
+    prettyPrint = true
+}
+
+/**
+ * Sends requests with [json] exactly as given, and reads replies the way the old app's Gson did: a
+ * field the server leaves out is null. Without that, every nullable DTO field lacking a `= null`
+ * default is required, and one absent field turns a successful reply into an error screen
+ * (EM-2716). Only reading is relaxed — `explicitNulls = false` would also drop nulls from request
+ * bodies, and those stay byte-for-byte what they were.
+ */
+internal class LenientReplyConverter(json: Json) : ContentConverter by KotlinxSerializationConverter(json) {
+    private val replies = KotlinxSerializationConverter(Json(json) { explicitNulls = false })
+
+    override suspend fun deserialize(charset: Charset, typeInfo: TypeInfo, content: ByteReadChannel): Any? =
+        replies.deserialize(charset, typeInfo, content)
+}
 
 val networkModule = module {
 
@@ -70,13 +98,7 @@ val networkModule = module {
     singleOf(::AuthRepositoryImpl) bind AuthRepository::class
 
     // JSON Serializer
-    single {
-        Json {
-            ignoreUnknownKeys = true
-            isLenient = true
-            prettyPrint = true
-        }
-    }
+    single { taminJson }
 
 
     // Auth HTTP Client (no Auth plugin, used for token endpoints)
@@ -163,7 +185,7 @@ private fun createHttpClient(
         expectSuccess = false
 
         install(ContentNegotiation) {
-            json(json, contentType = ContentType.Any)
+            register(ContentType.Any, LenientReplyConverter(json))
         }
 
         install(PlainTextErrorResponsePlugin)
@@ -251,7 +273,7 @@ private fun createHealthHttpClient(
         expectSuccess = false
 
         install(ContentNegotiation) {
-            json(json, contentType = ContentType.Any)
+            register(ContentType.Any, LenientReplyConverter(json))
         }
 
         install(HttpTimeout) {
@@ -293,7 +315,7 @@ private fun createAuthHttpClient(
         expectSuccess = false
 
         install(ContentNegotiation) {
-            json(json, contentType = ContentType.Any)
+            register(ContentType.Any, LenientReplyConverter(json))
         }
 
         install(HttpTimeout) {
