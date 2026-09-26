@@ -37,6 +37,9 @@ import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
 import com.tamin.taminhamrah.tools.readPdfChannel
 import com.tamin.taminhamrah.tools.safeCall
+import io.ktor.client.plugins.HttpRequestTimeoutException
+import io.ktor.client.network.sockets.ConnectTimeoutException
+import io.ktor.client.network.sockets.SocketTimeoutException
 
 class PensionRemoteDataSourceImpl(
     private val pensionApiService: PensionApiService,
@@ -190,6 +193,18 @@ class PensionRemoteDataSourceImpl(
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
             )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -212,6 +227,18 @@ class PensionRemoteDataSourceImpl(
         } catch (e: JsonConvertException) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
             )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
@@ -236,7 +263,7 @@ class PensionRemoteDataSourceImpl(
     override suspend fun saveDocumentDisability(
         requestId: Long,
         body: DisabilitySaveDocumentRequest
-    ): String? = errorParser.safeCall("saveDocumentDisability") {
+    ): String = errorParser.safeCall("saveDocumentDisability") {
         pensionApiService.saveDocumentDisability(requestId, body).extractMessage()
     }
 

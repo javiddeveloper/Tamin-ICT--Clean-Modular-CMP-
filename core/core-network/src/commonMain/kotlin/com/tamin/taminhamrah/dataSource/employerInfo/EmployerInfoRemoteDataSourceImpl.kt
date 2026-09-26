@@ -14,6 +14,9 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
+import io.ktor.client.plugins.HttpRequestTimeoutException
+import io.ktor.client.network.sockets.ConnectTimeoutException
+import io.ktor.client.network.sockets.SocketTimeoutException
 
 internal class EmployerInfoRemoteDataSourceImpl(
     private val apiService: EmployerInfoApiService,
@@ -58,6 +61,18 @@ internal class EmployerInfoRemoteDataSourceImpl(
     } catch (e: JsonConvertException) {
         throw errorParser.parseGeneralError(
             TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+        )
+    } catch (e: HttpRequestTimeoutException) {
+        throw errorParser.parseGeneralError(
+            TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+        )
+    } catch (e: ConnectTimeoutException) {
+        throw errorParser.parseGeneralError(
+            TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+        )
+    } catch (e: SocketTimeoutException) {
+        throw errorParser.parseGeneralError(
+            TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
         )
     } catch (_: Exception) {
         throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
