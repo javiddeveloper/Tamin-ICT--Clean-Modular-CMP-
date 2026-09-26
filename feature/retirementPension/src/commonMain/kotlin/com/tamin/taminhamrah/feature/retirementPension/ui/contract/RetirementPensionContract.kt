@@ -163,6 +163,12 @@ data class RetirementPensionUiState(
     /** A request already exists, so the intro can offer to track it. */
     val hasExistingRequest: Boolean get() = !requestId.isNullOrBlank()
 
+    /**
+     * The gate passed on an age the service actually reported. [isAgeEligible] also stays open
+     * when no age came back at all, which must not read as "age conditions met".
+     */
+    val isAgeConfirmed: Boolean get() = isAgeEligible && !insured?.ageYears.isNullOrBlank()
+
     val isDocumentUploading: Boolean
         get() = documents.values.any(RetirementDocumentPR::isUploading)
 
