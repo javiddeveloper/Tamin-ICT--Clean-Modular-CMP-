@@ -47,6 +47,8 @@ inline fun <T> ErrorParser.safeCall(
  * a connection problem; a reply we could not read is the server's answer, however unhelpful.
  */
 fun Throwable.toErrorUri(): ErrorUri = when {
+    // The old app told these apart: a timeout is "زمان درخواست به پایان رسید", not "no internet".
+    causes().any { it::class.simpleName.orEmpty().contains("Timeout", ignoreCase = true) } -> ErrorUri.SERVICE_TIMEOUT
     isConnectivityFailure() -> ErrorUri.NO_CONNECTION_ERROR
     // The request arrived and something came back — it just was not what the contract promised.
     // Ktor wraps it (JsonConvertException), so look down the cause chain, not at this alone.
