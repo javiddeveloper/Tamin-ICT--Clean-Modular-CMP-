@@ -154,6 +154,7 @@
     <string name="profile_share">اشتراک‌گذاری برنامه</string>
     <string name="profile_version_history">تاریخچهٔ نسخه</string>
     <string name="profile_logout">خروج از حساب کاربری</string>
+    <string name="profile_logout_confirm_description">آیا مطمئن هستید که می‌خواهید از حساب کاربری خود خارج شوید؟</string>
     <string name="profile_title">حساب کاربری</string>
     <string name="profile_developer_options">گزینه‌های توسعه‌دهنده</string>
     <string name="developer_options_title">گزینه‌های توسعه‌دهنده</string>
