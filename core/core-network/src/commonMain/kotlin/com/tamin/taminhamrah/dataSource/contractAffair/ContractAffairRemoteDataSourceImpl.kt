@@ -1,7 +1,8 @@
 package com.tamin.taminhamrah.dataSource.contractAffair
 
+import kotlinx.coroutines.CancellationException
+import io.ktor.serialization.JsonConvertException
 import com.tamin.taminhamrah.tools.requireSuccessStatus
-import com.tamin.taminhamrah.tools.safeCall
 import com.tamin.taminhamrah.apiService.contractAffair.ContractAffairApiService
 import com.tamin.taminhamrah.model.contractAffair.CancelContractRequestDTO
 import com.tamin.taminhamrah.model.contractAffair.ContractDTO
@@ -17,6 +18,8 @@ import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
+import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
+import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import io.ktor.util.date.getTimeMillis
 import kotlinx.serialization.json.JsonArray
@@ -33,14 +36,36 @@ class ContractAffairRemoteDataSourceImpl(
 ) : ContractAffairRemoteDataSource {
 
     override suspend fun getContracts(query: ApiQueryParamDN): ListData<ContractDTO> {
-        return errorParser.safeCall("getContracts") {
+        return try {
             contractAffairApiService.getContractList(apiQueryBuilder.buildQuery(query)).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
     override suspend fun getContractStates(query: ApiQueryParamDN): ListData<ContractStateDTO> {
-        return errorParser.safeCall("getContractStates") {
+        return try {
             contractAffairApiService.getContractStates(apiQueryBuilder.buildQuery(query)).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
+            )
         }
     }
 
@@ -49,28 +74,52 @@ class ContractAffairRemoteDataSourceImpl(
         stateCode: Int,
         request: CancelContractRequestDTO,
     ) {
-        errorParser.safeCall("cancelContract") {
+        try {
             val response = if (premiumType == ContractPremiumType.OPTIONAL) {
                 contractAffairApiService.cancelOptionalContract(stateCode, request)
             } else {
                 contractAffairApiService.cancelFreelanceContract(stateCode, request)
             }
             response.requireSuccessStatus()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
+            )
         }
     }
 
     override suspend fun getContractPaymentHistory(
         contractNumber: String,
     ): List<ContractPaymentHistoryItemDTO> {
-        return errorParser.safeCall("getContractPaymentHistory") {
+        return try {
             val rows = contractAffairApiService.getContractPaymentHistory(contractNumber)
                 .extractData().list.orEmpty()
             rows.map { it.toPaymentHistoryItem() }
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
+            )
         }
     }
 
     override suspend fun downloadContractReport(premiumType: ContractPremiumType): PdfDownloadDTO {
-        return errorParser.safeCall("downloadContractReport") {
+        return try {
             // `old_android` sends `System.currentTimeMillis()` as a cache-busting path segment;
             // the backend resolves the contract from the authenticated session.
             val timestamp = getTimeMillis()
@@ -85,6 +134,18 @@ class ContractAffairRemoteDataSourceImpl(
                     contractAffairApiService.getFreelanceContractReport(timestamp)
             }
             PdfDownloadDTO(pdf = InputStreamDTO(pdf = statement.body()))
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
+            )
         }
     }
 
@@ -92,20 +153,32 @@ class ContractAffairRemoteDataSourceImpl(
         premiumType: ContractPremiumType,
         month: Int,
     ): ContractDebitDTO {
-        return errorParser.safeCall("getContractDebit") {
+        return try {
             val response = if (premiumType == ContractPremiumType.OPTIONAL) {
                 contractAffairApiService.getOptionalContractDebit(month)
             } else {
                 contractAffairApiService.getFreelanceContractDebit(month)
             }
             response.extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
+            )
         }
     }
 
     override suspend fun getContractLastPayment(
         premiumType: ContractPremiumType,
     ): ContractLastPaymentDTO {
-        return errorParser.safeCall("getContractLastPayment") {
+        return try {
             if (premiumType == ContractPremiumType.OPTIONAL) {
                 val timestamp = contractAffairApiService.getOptionalLastPayment().data
                 ContractLastPaymentDTO(lastPaymentTimestamp = timestamp?.toString())
@@ -117,6 +190,18 @@ class ContractAffairRemoteDataSourceImpl(
                     medicalRsltResend = data?.medicalRsltResend,
                 )
             }
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
+            )
         }
     }
 
@@ -125,7 +210,7 @@ class ContractAffairRemoteDataSourceImpl(
         startDate: Long,
         endDate: Long,
     ): List<PaymentCalculationRowDTO> {
-        return errorParser.safeCall("getPaymentCalculationDetails") {
+        return try {
             val response = if (premiumType == ContractPremiumType.OPTIONAL) {
                 contractAffairApiService.getOptionalPaymentDetails(
                     startDate = startDate.toString(),
@@ -138,6 +223,18 @@ class ContractAffairRemoteDataSourceImpl(
                 )
             }
             response.extractData().list.orEmpty().map { it.toPaymentCalculationRow() }
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
+            )
         }
     }
 
