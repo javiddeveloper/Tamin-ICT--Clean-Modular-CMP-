@@ -58,8 +58,10 @@ class IllDaysWizardViewModel(
 
     override fun handleIntent(intent: IllDaysWizardIntent): Flow<PartialState> = flow {
         when (intent) {
-            IllDaysWizardIntent.Load,
-            IllDaysWizardIntent.Retry -> emitAll(merge(loadMainInfo(), observeCityPaging()))
+            // Observed once, on Load: it never completes, so a Retry that started another would
+            // stack a second collector and toast every paging error twice.
+            IllDaysWizardIntent.Load -> emitAll(merge(loadMainInfo(), observeCityPaging()))
+            IllDaysWizardIntent.Retry -> emitAll(loadMainInfo())
             IllDaysWizardIntent.OpenBranchPicker ->
                 emit(PartialState.PickerChanged(IllDaysWizardPicker.Branch))
             IllDaysWizardIntent.OpenCityPicker ->
@@ -76,7 +78,9 @@ class IllDaysWizardViewModel(
             }
             is IllDaysWizardIntent.CitySearchQueryChanged ->
                 cityPaginator.refresh(cityBaseQuery(intent.query))
-            IllDaysWizardIntent.CityPickerLoadMore -> cityPaginator.loadNext()
+            // A failed page blocks loadNext() until the error is cleared, so retry it first.
+            IllDaysWizardIntent.CityPickerLoadMore ->
+                if (cityPaginator.state.value.error != null) cityPaginator.retry() else cityPaginator.loadNext()
             IllDaysWizardIntent.NextStep -> handleNext()
             IllDaysWizardIntent.PreviousStep -> handlePrevious()
             is IllDaysWizardIntent.CovidChanged -> handleCovidToggle(intent.enabled)

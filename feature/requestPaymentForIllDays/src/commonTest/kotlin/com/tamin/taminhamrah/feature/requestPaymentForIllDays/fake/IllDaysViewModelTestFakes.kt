@@ -4,6 +4,7 @@ import com.tamin.taminhamrah.model.common.CityDN
 import com.tamin.taminhamrah.model.common.ProvinceDN
 import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.model.contracts.BranchDN
 import com.tamin.taminhamrah.model.contracts.ContractDN
 import com.tamin.taminhamrah.model.contracts.FreeJobDN
@@ -94,13 +95,17 @@ class FakeIllDaysCityProvinceRepository : CityProvinceRepository {
         CityDN(cityCode = "1158", cityName = "Tehran", provinceCode = "08"),
     )
     var lastQuery: ApiQueryParamDN? = null
+    var citiesError: Throwable? = null
 
     override fun getCity(cityId: String): Flow<CityDN> = flowOf()
     override fun getProvince(provinceId: String): Flow<ProvinceDN> = flowOf()
     override fun getProvincesPage(query: ApiQueryParamDN): Flow<PageDN<ProvinceDN>> = flowOf(PageDN(emptyList()))
     override fun getCitiesPage(query: ApiQueryParamDN): Flow<PageDN<CityDN>> = flow {
         lastQuery = query
-        emit(PageDN(cities))
+        citiesError?.let { throw it }
+        val term = query.filters.firstOrNull { it.property == FilterProperty.CITY_NAME }?.value?.trim('*')
+        val matching = cities.filter { term.isNullOrBlank() || it.cityName?.contains(term, ignoreCase = true) == true }
+        emit(PageDN(matching.drop(query.start).take(query.limit), total = matching.size))
     }
     override fun getCitiesByProvincePage(provinceCode: String, query: ApiQueryParamDN): Flow<PageDN<CityDN>> =
         flowOf(PageDN(emptyList()))
