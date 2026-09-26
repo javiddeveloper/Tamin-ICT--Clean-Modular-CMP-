@@ -1,7 +1,10 @@
 <!--
-  Traced verbatim from the design's own ردیف‌های پیمان glyph: a sheet with a folded corner and
-  two ruled lines, stroked on a 24-unit grid with round caps. Matching the neighbouring workshop
-  action icons, the stroke is 1.7 and the colour a placeholder — every use tints it.
+  ردیف‌های پیمان's own glyph, traced from the design's `ic-peyman` sprite (the home tile's icon): a
+  rounded card split into three rows by two rules, a dot at the head of each row. The design draws
+  it duotone for the home grid; here it is a single-tone line icon like its neighbors in the
+  workshop action list — the fill and accent colors dropped, the stroke 1.7 to match them, the
+  color a placeholder that every use tints. The row dots keep the design's 2.2 width: a
+  zero-length segment with a round cap is how the sprite draws a dot.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
@@ -9,20 +12,20 @@
     android:viewportWidth="24"
     android:viewportHeight="24">
     <path
-        android:pathData="M7 3 h7 l4 4 v14 H7 z"
+        android:pathData="M5.8 4.6 h12.4 a2.4 2.4 0 0 1 2.4 2.4 v10 a2.4 2.4 0 0 1 -2.4 2.4 h-12.4 a2.4 2.4 0 0 1 -2.4 -2.4 v-10 a2.4 2.4 0 0 1 2.4 -2.4 z"
         android:strokeWidth="1.7"
         android:strokeColor="#FF000000"
         android:strokeLineCap="round"
         android:strokeLineJoin="round" />
     <path
-        android:pathData="M14 3 v4 h4"
+        android:pathData="M3.4 9.4 h17.2 M3.4 14.6 h17.2"
         android:strokeWidth="1.7"
         android:strokeColor="#FF000000"
         android:strokeLineCap="round"
         android:strokeLineJoin="round" />
     <path
-        android:pathData="M10 12.5 h6 M10 16 h4"
-        android:strokeWidth="1.7"
+        android:pathData="M7.4 7 h0.01 M7.4 12 h0.01 M7.4 17 h0.01"
+        android:strokeWidth="2.2"
         android:strokeColor="#FF000000"
         android:strokeLineCap="round"
         android:strokeLineJoin="round" />

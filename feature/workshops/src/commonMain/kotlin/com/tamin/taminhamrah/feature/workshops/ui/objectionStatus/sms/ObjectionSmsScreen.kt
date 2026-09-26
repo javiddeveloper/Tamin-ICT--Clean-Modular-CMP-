@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.outlined.Sms
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,10 +23,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.tamin.taminhamrah.feature.workshops.ui.components.DashedEmptyStateCard
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopListScaffold
 import com.tamin.taminhamrah.feature.workshops.ui.components.colors
 import com.tamin.taminhamrah.feature.workshops.ui.components.tint
@@ -36,11 +35,11 @@ import com.tamin.taminhamrah.model.workshop.WorkShopObjectionStatus
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionType
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
-import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.util.toPersianDigits
@@ -119,7 +118,13 @@ fun ObjectionSmsContent(
         WorkshopListScaffold(
             state = state.list,
             onLoadMore = onLoadMore,
-            emptyContent = { ObjectionSmsEmptyState() },
+            empty = {
+                EmptyStateMessage(
+                    icon = Icons.Outlined.Sms,
+                    title = stringResource(Res.string.objection_sms_empty),
+                    showIconTile = true,
+                )
+            },
             key = { it.id ?: it.hashCode() },
             header = {
                 Row(
@@ -147,21 +152,6 @@ fun ObjectionSmsContent(
                     modifier = itemModifier,
                 )
             },
-        )
-    }
-}
-
-/** «پیامکی برای این اعتراض ارسال نشده است» — no per-message identity needed, just the one line. */
-@Composable
-private fun ObjectionSmsEmptyState(modifier: Modifier = Modifier) {
-    val colors = LocalTaminColors.current
-    DashedEmptyStateCard(modifier = modifier) {
-        Text(
-            text = stringResource(Res.string.objection_sms_empty),
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold,
-            color = colors.textPrimary,
-            textAlign = TextAlign.Center,
         )
     }
 }

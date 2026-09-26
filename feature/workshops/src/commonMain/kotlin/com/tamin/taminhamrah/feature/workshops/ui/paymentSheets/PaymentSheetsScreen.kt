@@ -85,10 +85,13 @@ import taminx.core.core_ui.payment_sheet_type
 import taminx.core.core_ui.payment_sheet_type_collected
 import taminx.core.core_ui.payment_sheet_type_effective
 import taminx.core.core_ui.payment_sheet_type_void
+import taminx.core.core_ui.payment_sheets_empty
 import taminx.core.core_ui.workshop_action_payment_sheets
 import taminx.core.core_ui.workshop_all_items
+import taminx.core.core_ui.workshop_empty_list
 import taminx.core.core_ui.workshop_search
 import taminx.core.core_ui.workshop_select_date
+import taminx.core.core_ui.ic_tamin_workshop_payment
 
 /**
  * برگ پرداخت‌ها — receipt list of one workshop.
@@ -145,11 +148,14 @@ fun PaymentSheetsContent(
                 onClick = {
                     onIntent(PaymentSheetsIntent.SearchOpenChanged(!state.isSearchOpen))
                 },
+                bordered = true,
             )
         },
         modifier = modifier,
     ) {
         WorkshopListScaffold(
+            emptyIcon = vectorResource(Res.drawable.ic_tamin_workshop_payment),
+            emptyMessage = stringResource(if (state.applied.isNotEmpty) Res.string.workshop_empty_list else Res.string.payment_sheets_empty),
             state = state.list,
             onLoadMore = { onIntent(PaymentSheetsIntent.LoadMore) },
             onRetry = { onIntent(PaymentSheetsIntent.Load) },

@@ -43,7 +43,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.tamin.taminhamrah.feature.workshops.ui.components.DashedEmptyStateCard
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopListScaffold
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopTextField
 import com.tamin.taminhamrah.feature.workshops.ui.components.colors
@@ -121,6 +120,8 @@ import taminx.core.core_ui.workshop_card_collapse
 import taminx.core.core_ui.workshop_card_expand
 import taminx.core.core_ui.workshop_code
 import taminx.core.core_ui.workshop_filter_clear
+import com.tamin.taminhamrah.ui.components.EmptyStateMessage
+import taminx.core.core_ui.ic_tamin_workshop_objection
 
 @Composable
 fun ObjectionStatusScreen(
@@ -163,7 +164,7 @@ fun ObjectionStatusContent(
         ObjectionStatusTopArea(
             identityName = state.identityName,
             identityNationalId = state.identityNationalId,
-            totalCount = state.totalCount,
+            totalCount = state.list.distinctTotal,
             onBack = onBack,
             onSearchClick = { onIntent(ObjectionStatusIntent.SearchOpenChanged(true)) },
             topAreaState = topAreaState,
@@ -180,7 +181,14 @@ fun ObjectionStatusContent(
             listState = listState,
             modifier = Modifier.fillMaxSize().driveTopArea(topArea, listState),
             contentPadding = topAreaContentPadding(state = topArea, rest = WorkshopDimens.listContentPadding),
-            emptyContent = { ObjectionEmptyState() },
+            empty = {
+                EmptyStateMessage(
+                    icon = vectorResource(Res.drawable.ic_tamin_workshop_objection),
+                    title = stringResource(Res.string.objection_status_empty_title),
+                    subtitle = stringResource(Res.string.objection_status_empty_message),
+                    showIconTile = true,
+                )
+            },
             key = { it.seqNo ?: it.hashCode() },
             header = {
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
@@ -205,7 +213,7 @@ fun ObjectionStatusContent(
         ObjectionStatusTopArea(
             identityName = state.identityName,
             identityNationalId = state.identityNationalId,
-            totalCount = state.totalCount,
+            totalCount = state.list.distinctTotal,
             onBack = onBack,
             onSearchClick = { onIntent(ObjectionStatusIntent.SearchOpenChanged(true)) },
             topAreaState = topArea,
@@ -484,31 +492,6 @@ private fun FilterChip(text: String, onRemove: () -> Unit, modifier: Modifier = 
             contentDescription = stringResource(Res.string.workshop_filter_clear),
             tint = colors.blueText,
             modifier = Modifier.size(WorkshopDimens.chipCrossSize),
-        )
-    }
-}
-
-/**
- * «اعتراضی با این مشخصات یافت نشد» — the empty state for a search/filter that matched nothing,
- * a dashed-border card rather than [com.tamin.taminhamrah.ui.components.TaminEmptyState]'s plain
- * icon+text, per the design (node 1788:906).
- */
-@Composable
-private fun ObjectionEmptyState(modifier: Modifier = Modifier) {
-    val colors = LocalTaminColors.current
-    DashedEmptyStateCard(modifier = modifier) {
-        Text(
-            text = stringResource(Res.string.objection_status_empty_title),
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold,
-            color = colors.textPrimary,
-            textAlign = TextAlign.Center,
-        )
-        Text(
-            text = stringResource(Res.string.objection_status_empty_message),
-            style = MaterialTheme.typography.bodyMedium,
-            color = colors.textMuted,
-            textAlign = TextAlign.Center,
         )
     }
 }
@@ -819,8 +802,8 @@ private fun ObjectionStatusScreenPreview() {
             state = ObjectionStatusUiState(
                 identityName = "حسین توکلی کرمانی",
                 identityNationalId = "۴۴۷۹۸۹۰۸۸۲",
-                totalCount = 4,
                 list = PagedListState(
+                    total = 4,
                     items = persistentListOf(
                         WorkShopObjectionPR(
                             seqNo = 1403008720,
