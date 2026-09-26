@@ -129,6 +129,30 @@ class ContractFlowViewModelTest {
         assertTrue(cleared.canGoNext)
     }
 
+    @Test
+    fun reload_resetsGateToLoading_untilNewRefreshesComplete() = runTest(testDispatcher) {
+        val repository = FakeContractFlowRepository()
+        val viewModel = createViewModel(repository)
+
+        viewModel.sendIntent(ContractFlowIntent.LoadInitialData)
+        advanceUntilIdle()
+        assertFalse(viewModel.uiState.value.isRegistrationGateLoading)
+
+        repository.holdRefresh = true
+        viewModel.sendIntent(ContractFlowIntent.LoadInitialData)
+        advanceUntilIdle()
+
+        val reloading = viewModel.uiState.value
+        assertTrue(reloading.isRegistrationGateLoading)
+        assertFalse(reloading.canGoNext)
+
+        repository.releaseTypedRefresh.complete(Unit)
+        repository.releaseAllRefresh.complete(Unit)
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isRegistrationGateLoading)
+    }
+
     private fun createViewModel(repository: FakeContractFlowRepository): ContractFlowViewModel {
         val userRepository = FakeContractFlowUserRepository()
         return ContractFlowViewModel(

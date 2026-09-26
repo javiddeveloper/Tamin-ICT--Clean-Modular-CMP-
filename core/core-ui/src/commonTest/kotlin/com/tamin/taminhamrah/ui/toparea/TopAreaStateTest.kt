@@ -242,6 +242,38 @@ class TopAreaStateTest {
     }
 
     @Test
+    fun `expandFully is a no-op when the header is already expanded`() {
+        val state = stateOf(maxOffsetPx = 100f, scope = animatingScope())
+
+        state.expandFully()
+
+        assertEquals(0f, state.rawOffsetPx)
+        assertEquals(0f, state.progress)
+    }
+
+    @Test
+    fun `expandFully springs a collapsed header to the expanded edge`() {
+        val state = stateOf(maxOffsetPx = 100f, scope = animatingScope())
+        state.foldBy(dy = -100f)
+
+        state.expandFully()
+
+        assertEquals(0f, state.rawOffsetPx)
+        assertEquals(0f, state.progress)
+    }
+
+    @Test
+    fun `expandFully springs a mid-fold header to the expanded edge`() {
+        val state = stateOf(maxOffsetPx = 100f, scope = animatingScope())
+        state.foldBy(dy = -40f)
+
+        state.expandFully()
+
+        assertEquals(0f, state.rawOffsetPx)
+        assertEquals(0f, state.progress)
+    }
+
+    @Test
     fun `settleToNearestEdge is a no-op when already at an edge`() {
         val state = stateOf(maxOffsetPx = 100f, scope = animatingScope())
 

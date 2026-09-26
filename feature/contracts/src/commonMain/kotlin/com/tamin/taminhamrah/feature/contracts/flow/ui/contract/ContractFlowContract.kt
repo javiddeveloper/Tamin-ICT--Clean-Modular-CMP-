@@ -182,6 +182,7 @@ data class ContractFlowUiState(
         data object AllContractsLoadFailed : PartialState()
         data object TypedContractsRefreshCompleted : PartialState()
         data object AllContractsRefreshCompleted : PartialState()
+        data object RegistrationGateReset : PartialState()
         data class EligibilityLoaded(val eligibility: ContractEligibilityPR) : PartialState()
         data class RulesConfirmedChanged(val confirmed: Boolean) : PartialState()
         data class UserInfoChanged(val userInfo: UserInfoFormPR) : PartialState()

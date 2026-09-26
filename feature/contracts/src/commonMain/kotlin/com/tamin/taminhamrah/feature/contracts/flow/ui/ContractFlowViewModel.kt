@@ -177,15 +177,21 @@ class ContractFlowViewModel(
         }
     }
 
-    private fun handleLoadInitialData(): Flow<PartialState> = merge(
-        loadRegistrationInfo(),
-        loadContracts(),
-        loadAllContracts(),
-        loadCities(),
-        loadProvinces(),
-        loadPremiumRates(),
-        loadFreeJobsIfNeeded(),
-    )
+    private fun handleLoadInitialData(): Flow<PartialState> = flow {
+        preflightFacts = PreflightFacts()
+        emit(PartialState.RegistrationGateReset)
+        emitAll(
+            merge(
+                loadRegistrationInfo(),
+                loadContracts(),
+                loadAllContracts(),
+                loadCities(),
+                loadProvinces(),
+                loadPremiumRates(),
+                loadFreeJobsIfNeeded(),
+            ),
+        )
+    }
 
     private fun loadFreeJobsIfNeeded(): Flow<PartialState> {
         if (!config.requiresFreeJob) return flow { }
@@ -1224,6 +1230,11 @@ class ContractFlowViewModel(
         )
         PartialState.AllContractsRefreshCompleted -> currentState.copy(
             hasCompletedAllContractsRefresh = true,
+        )
+        PartialState.RegistrationGateReset -> currentState.copy(
+            hasCompletedTypedContractsRefresh = false,
+            hasCompletedAllContractsRefresh = false,
+            preflightGateError = null,
         )
         is PartialState.EligibilityLoaded -> currentState.copy(
             eligibility = partialState.eligibility,

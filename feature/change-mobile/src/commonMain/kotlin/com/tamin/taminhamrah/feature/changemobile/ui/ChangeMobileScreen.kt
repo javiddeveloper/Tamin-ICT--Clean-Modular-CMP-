@@ -60,6 +60,8 @@ import taminx.core.core_ui.ic_mobile
 import taminx.core.core_ui.ic_send
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.profile_change_mobile
+import taminx.core.core_ui.profile_change_mobile_back_to_account
+import taminx.core.core_ui.profile_change_mobile_confirm_and_continue
 import taminx.core.core_ui.profile_change_mobile_subtitle
 import taminx.core.core_ui.profile_get_otp_code
 
@@ -326,7 +328,7 @@ private fun ChangeMobileBottomBar(
             )
 
             ChangeMobileStep.VerifyOtp -> LoadingButton(
-                text = "تأیید و ادامه",
+                text = stringResource(Res.string.profile_change_mobile_confirm_and_continue),
                 onClick = { onIntent(ChangeMobileIntent.VerifyOtp) },
                 enabled = !uiState.isLoading && uiState.otpCode.length == 5,
                 isLoading = uiState.isLoading,
@@ -334,7 +336,7 @@ private fun ChangeMobileBottomBar(
             )
 
             ChangeMobileStep.Success -> LoadingButton(
-                text = "بازگشت به حساب کاربری",
+                text = stringResource(Res.string.profile_change_mobile_back_to_account),
                 onClick = onFinish,
                 modifier = Modifier.fillMaxWidth()
             )
