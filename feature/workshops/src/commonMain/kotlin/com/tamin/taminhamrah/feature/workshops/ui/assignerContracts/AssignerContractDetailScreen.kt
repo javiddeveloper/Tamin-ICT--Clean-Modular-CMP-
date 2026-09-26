@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -17,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.AssignerStatusPill
+import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.assignerPrimaryGradient
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.contract.AssignerContractsIntent
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButton
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButtonTone
@@ -166,7 +168,10 @@ fun AssignerContractDetailContent(
                 .fillMaxWidth()
                 // A fixed handful of groups, not a data list — the scroll is for a short screen.
                 .verticalScroll(rememberScrollState())
-                .padding(WorkshopDimens.listContentPadding),
+                .padding(WorkshopDimens.listContentPadding)
+                // The page draws edge to edge: the last group and the two actions under it clear the
+                // system navigation bar instead of sitting beneath it.
+                .navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
             WorkshopFormBanner(
@@ -246,6 +251,7 @@ fun AssignerContractDetailContent(
                             WorkshopCardButtonTone.DISABLED
                         },
                         onClick = { onRequestSettlement(contract) },
+                        background = assignerPrimaryGradient(),
                     )
                 }
             }

@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.AssignerContractsViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components.assignerPrimaryGradient
 import com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.findContract
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButton
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopCardButtonTone
@@ -298,7 +299,7 @@ fun SettlementRequestContent(
             shimmerWhileBusy = true,
             // Filing is the green, ticked button; every step before it points on.
             nextIcon = if (isLastStep) checkIcon else null,
-            nextBackground = if (isLastStep) colors.successGradient else null,
+            nextBackground = if (isLastStep) colors.successGradient else assignerPrimaryGradient(),
         )
     }
 
@@ -499,11 +500,13 @@ private fun SettlementSubcontractorField(
             WorkshopCardButton(
                 text = stringResource(Res.string.settlement_yes),
                 tone = if (hasSubcontractor == true) WorkshopCardButtonTone.PRIMARY else WorkshopCardButtonTone.OUTLINE,
+                background = assignerPrimaryGradient(),
                 onClick = { onIntent(SettlementRequestIntent.SubcontractorChanged(true)) },
             )
             WorkshopCardButton(
                 text = stringResource(Res.string.settlement_no),
                 tone = if (hasSubcontractor == false) WorkshopCardButtonTone.PRIMARY else WorkshopCardButtonTone.OUTLINE,
+                background = assignerPrimaryGradient(),
                 onClick = { onIntent(SettlementRequestIntent.SubcontractorChanged(false)) },
             )
         }
@@ -627,7 +630,7 @@ private fun SettlementDoneDialog(onDone: () -> Unit) {
             TaminPrimaryButton(
                 text = stringResource(Res.string.settlement_done_back),
                 onClick = onDone,
-                background = colors.buttonGradient,
+                background = assignerPrimaryGradient(),
                 modifier = Modifier.fillMaxWidth(),
             )
         },

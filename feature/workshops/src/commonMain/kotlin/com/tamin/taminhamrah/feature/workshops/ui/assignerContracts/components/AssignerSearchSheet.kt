@@ -1,37 +1,54 @@
 package com.tamin.taminhamrah.feature.workshops.ui.assignerContracts.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopConstants
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFieldError
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopQuickPickList
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopSheetBody
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopTextField
-import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
+import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
+import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
-import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
+import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.digitsOnly
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
+import com.tamin.taminhamrah.ui.theme.TaminHamrahShapes
+import com.tamin.taminhamrah.ui.theme.Thickness
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.action_close
 import taminx.core.core_ui.assigner_filter_clear
+import taminx.core.core_ui.assigner_search_apply
 import taminx.core.core_ui.assigner_search_branch_code_optional
 import taminx.core.core_ui.assigner_search_branch_hint
 import taminx.core.core_ui.assigner_search_contract_row_optional
-import taminx.core.core_ui.assigner_search_apply
 import taminx.core.core_ui.assigner_search_row_hint
 import taminx.core.core_ui.assigner_search_subtitle
 import taminx.core.core_ui.assigner_search_workshop_hint
@@ -52,6 +69,12 @@ import taminx.core.core_ui.workshop_code
  * کارگاه‌های شما sits under the fields, the same list ردیف‌های پیمان offers and drawn by the same
  * shared composable: picking a row fills the code and its branch, which is the part nobody wants
  * to type from memory.
+ *
+ * Dressed as the app's design-system sheet (`TaminBottomSheet`) is — on the page color, as the
+ * document-type sheet is, with every field and row a bordered surface card on it — 24dp top
+ * corners, Material's own drag handle, a start-aligned title beside a close button, the subtitle
+ * under it, and a filled button beside an outlined one at the foot. `TaminBottomSheet` itself only
+ * takes a list of items, not fields, so its look is repeated here rather than the component reused.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,7 +99,10 @@ fun AssignerSearchSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        dragHandle = null,
+        // The document-type sheet's palette: the page color behind, so the white fields and rows read
+        // as cards on it.
+        containerColor = LocalTaminColors.current.bgPage,
+        shape = SheetShape,
     ) {
         AssignerSearchSheetContent(
             workshopId = workshopId,
@@ -93,6 +119,7 @@ fun AssignerSearchSheet(
             onLoadMoreWorkshops = onLoadMoreWorkshops,
             onApply = onApply,
             onReset = onReset,
+            onClose = onDismiss,
         )
     }
 }
@@ -123,18 +150,28 @@ fun AssignerSearchSheetContent(
     onApply: () -> Unit,
     onReset: () -> Unit,
     modifier: Modifier = Modifier,
+    onClose: () -> Unit = {},
 ) {
     val colors = LocalTaminColors.current
-    WorkshopSheetBody(
-        title = stringResource(Res.string.assigner_select_workshop),
-        subtitle = stringResource(Res.string.assigner_search_subtitle),
-        modifier = modifier,
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = Spacing.page)
+            .padding(
+                bottom = WindowInsets.navigationBars.asPaddingValues()
+                    .calculateBottomPadding() + Spacing.page,
+            ),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
+        SheetHeader(
+            title = stringResource(Res.string.assigner_select_workshop),
+            subtitle = stringResource(Res.string.assigner_search_subtitle),
+            onClose = onClose,
+        )
+
         // The design's pair — کد کارگاه the wider — with ردیف پیمان, kept by decision, under it.
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = Spacing.smd),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
             verticalAlignment = Alignment.Top,
         ) {
@@ -166,62 +203,106 @@ fun AssignerSearchSheetContent(
             onValueChange = { onContractRowChange(it.digitsOnly()) },
             placeholder = stringResource(Res.string.assigner_search_row_hint),
             maxLength = WorkshopConstants.ASSIGNER_CONTRACT_ROW_LENGTH,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = Spacing.sm),
+            modifier = Modifier.fillMaxWidth(),
         )
 
-        WorkshopQuickPickList(
-            workshops = myWorkshops,
-            selectedWorkshopId = workshopId,
-            selectedBranchCode = branchCode,
-            onPick = onQuickPick,
-            onLoadMore = onLoadMoreWorkshops,
-            shimmerLoadingMore = true,
-        )
+        // Its own column, so the list's heading keeps its own spacing rather than the sheet's.
+        if (myWorkshops.items.isNotEmpty()) {
+            Column(modifier = Modifier.fillMaxWidth().weight(1f, fill = false)) {
+                WorkshopQuickPickList(
+                    workshops = myWorkshops,
+                    selectedWorkshopId = workshopId,
+                    selectedBranchCode = branchCode,
+                    onPick = onQuickPick,
+                    onLoadMore = onLoadMoreWorkshops,
+                    shimmerLoadingMore = true,
+                    cardRows = true,
+                )
+            }
+        }
 
         // One message under all three, not on the field: the design puts it there, and only one of
         // the three can be wrong.
         if (showWorkshopIdError) {
             WorkshopFieldError(
                 text = stringResource(Res.string.contract_rows_workshop_code_required),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = Spacing.sm),
+                modifier = Modifier.fillMaxWidth(),
             )
         }
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = Spacing.smd),
+                .padding(top = Spacing.xs),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            TaminPrimaryButton(
+            TaminFilledButton(
                 text = stringResource(Res.string.assigner_search_apply),
                 onClick = onApply,
                 // The ViewModel drops an apply that arrives while a page is in flight. Disabling
                 // the button is that same guard made visible, so the tap does not read as dead.
                 enabled = !isApplying,
-                background = colors.buttonGradient,
-                height = WorkshopDimens.panelButtonHeight,
+                background = assignerPrimaryGradient(),
                 modifier = Modifier.weight(1f),
             )
             if (canReset) {
-                // An explicit width, because TaminOutlinedButton applies `fillMaxWidth()` after
-                // the caller's modifier and would swallow the row given a `weight()`.
                 TaminOutlinedButton(
                     text = stringResource(Res.string.assigner_filter_clear),
                     onClick = onReset,
-                    height = WorkshopDimens.panelButtonHeight,
-                    borderWidth = WorkshopDimens.panelButtonBorderWidth,
-                    borderColor = colors.border,
-                    containerColor = colors.bgSurface,
-                    contentColor = colors.textSecondary,
-                    textStyle = MaterialTheme.typography.labelMedium,
-                    modifier = Modifier.width(WorkshopDimens.contractRowResetButtonWidth),
+                    textStyle = MaterialTheme.typography.titleMedium.copy(color = colors.textSecondary),
+                    modifier = Modifier.weight(1f),
                 )
             }
         }
     }
 }
+
+/** `TaminBottomSheet`'s header: the title on the start side, the close tile beside it, the subtitle under. */
+@Composable
+private fun SheetHeader(
+    title: String,
+    subtitle: String,
+    onClose: () -> Unit,
+) {
+    val colors = LocalTaminColors.current
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            TaminText(
+                text = title,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    color = colors.textPrimary,
+                    fontWeight = FontWeight.ExtraBold,
+                ),
+                modifier = Modifier.weight(1f),
+            )
+            Box(
+                modifier = Modifier
+                    .size(CloseTileSize)
+                    .clip(TaminHamrahShapes.medium)
+                    .background(colors.bgSurface)
+                    .border(Thickness.border, colors.border, TaminHamrahShapes.medium)
+                    .clickable(onClick = onClose),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = stringResource(Res.string.action_close),
+                    tint = colors.textSecondary,
+                    modifier = Modifier.size(Spacing.lg),
+                )
+            }
+        }
+        TaminText(
+            text = subtitle,
+            style = MaterialTheme.typography.bodyMedium.copy(color = colors.textTertiary),
+        )
+    }
+}
+
+// TaminBottomSheet's own measurements, which it keeps as literals rather than theme tokens.
+private val SheetShape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+private val CloseTileSize = 34.dp

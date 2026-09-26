@@ -129,6 +129,11 @@ fun RowScope.WorkshopCardButton(
      * dropped, since another would only start the same request again.
      */
     isLoading: Boolean = false,
+    /**
+     * Replaces a gradient tone's fill. Null, the default, keeps the tone's own; ignored by the
+     * outlined tones.
+     */
+    background: Brush? = null,
 ) {
     val colors = LocalTaminColors.current
     val textStyle = (if (compact) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelMedium)
@@ -142,7 +147,7 @@ fun RowScope.WorkshopCardButton(
         WorkshopCardButtonTone.SUCCESS -> colors.successGradient
         WorkshopCardButtonTone.ALERT -> colors.alertGradient
         else -> null
-    }
+    }?.let { background ?: it }
 
     if (gradient != null) {
         TaminPrimaryButton(

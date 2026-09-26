@@ -6,6 +6,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -57,6 +59,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -359,27 +362,35 @@ fun WorkshopReviewGroup(
             }
             Row(
                 modifier = Modifier.fillMaxWidth().padding(vertical = ReviewRowPadding),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                // A value that wraps grows downward from the label's line, not around its middle.
+                verticalAlignment = Alignment.Top,
             ) {
                 Text(
                     text = row.label,
                     style = MaterialTheme.typography.bodySmall,
                     color = colors.textMuted,
+                    maxLines = 1,
                 )
                 if (row.isNumeric) {
-                    NumericText(
-                        text = row.value,
-                        style = MaterialTheme.typography.labelLarge
-                            .copy(fontWeight = FontWeight.Bold),
-                        color = colors.textPrimary,
-                    )
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
+                        NumericText(
+                            text = row.value,
+                            style = MaterialTheme.typography.labelLarge
+                                .copy(fontWeight = FontWeight.Bold),
+                            color = colors.textPrimary,
+                        )
+                    }
                 } else {
+                    // Takes what the label leaves and wraps inside it: a long workshop name or
+                    // address used to push the label out of the row instead of breaking a line.
                     Text(
                         text = row.value,
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
                         color = colors.textPrimary,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.weight(1f),
                     )
                 }
             }
@@ -583,27 +594,30 @@ fun WorkshopDocumentsPanel(
             )
         }
 
+        // Each card sits in its own padded box instead of taking the gap as its own modifier. The
+        // card applies its modifier to its content only, while the wave fills the card's outer box,
+        // so a top padding passed to the card left the wave spilling into the gap above it.
         settled.forEachIndexed { index, attachment ->
-            TaminDocumentUploadCard(
-                title = stringResource(attachment.type.label),
-                state = TaminDocumentUploadState.Uploaded,
-                statusText = stringResource(Res.string.ws_form_file_size, attachment.size),
-                onDeleteClick = { onRemove(index) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = Spacing.cardGap),
-            )
+            Box(modifier = Modifier.fillMaxWidth().padding(top = Spacing.cardGap)) {
+                TaminDocumentUploadCard(
+                    title = stringResource(attachment.type.label),
+                    state = TaminDocumentUploadState.Uploaded,
+                    statusText = stringResource(Res.string.ws_form_file_size, attachment.size),
+                    onDeleteClick = { onRemove(index) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
         }
 
         if (isWaving) {
             val waving = attachments.lastOrNull()?.type?.takeIf { hasLanded } ?: pendingType
-            TaminDocumentUploadCard(
-                title = waving?.label?.let { stringResource(it) }.orEmpty(),
-                state = TaminDocumentUploadState.Uploading,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = Spacing.cardGap),
-            )
+            Box(modifier = Modifier.fillMaxWidth().padding(top = Spacing.cardGap)) {
+                TaminDocumentUploadCard(
+                    title = waving?.label?.let { stringResource(it) }.orEmpty(),
+                    state = TaminDocumentUploadState.Uploading,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
         }
 
         if (attachments.size < capacity && !isWaving) {
@@ -860,7 +874,10 @@ fun WorkshopFormFooter(
                 end = Spacing.page,
                 top = Spacing.md,
                 bottom = Spacing.xlg,
-            ),
+            )
+            // The page draws edge to edge, so the bar's own fill runs under the system navigation
+            // bar while its buttons stay above it.
+            .navigationBarsPadding(),
         horizontalArrangement = Arrangement.spacedBy(Spacing.cardGap),
     ) {
         if (onPrev != null) {
@@ -972,10 +989,13 @@ fun WorkshopDocumentTypeSheet(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
+    // Drawn as orotez-protez's document sheet is: the page color behind, a bold title, and each
+    // choice on its own bordered surface card.
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = colors.bgSurface,
+        containerColor = colors.bgPage,
+        shape = DocTypeSheetShape,
         modifier = modifier,
     ) {
         LazyColumn(
@@ -984,31 +1004,36 @@ fun WorkshopDocumentTypeSheet(
                 .padding(horizontal = Spacing.page)
                 .padding(
                     bottom = WindowInsets.navigationBars.asPaddingValues()
-                        .calculateBottomPadding() + Spacing.lg,
+                        .calculateBottomPadding() + Spacing.md,
                 ),
             verticalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             item(key = "title") {
                 Text(
                     text = stringResource(Res.string.ws_form_doc_type_title),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = colors.textPrimary,
-                    modifier = Modifier.padding(bottom = Spacing.sm),
+                    modifier = Modifier.padding(bottom = Spacing.md),
                 )
             }
             items(types, key = { it.code }) { type ->
-                Text(
-                    text = stringResource(type.label),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.textPrimary,
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .heightIn(min = DocTypeItemMinHeight)
                         .clip(DocTypeItemShape)
+                        .background(colors.bgSurface)
+                        .border(Thickness.border, colors.border, DocTypeItemShape)
                         .clickable { onSelect(type) }
-                        .background(colors.chipBg)
                         .padding(horizontal = Spacing.lg, vertical = Spacing.md),
-                )
+                    contentAlignment = Alignment.CenterStart,
+                ) {
+                    Text(
+                        text = stringResource(type.label),
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = colors.textPrimary,
+                    )
+                }
             }
         }
     }
@@ -1177,6 +1202,8 @@ private val CheckCardShape = RoundedCornerShape(CornerRadius.xl)
 private val CheckBoxShape = RoundedCornerShape(CheckBoxCorner)
 private val TextAreaShape = RoundedCornerShape(TextAreaCorner)
 private val FooterButtonShape = RoundedCornerShape(FooterButtonCorner)
-private val DocTypeItemShape = RoundedCornerShape(CornerRadius.md)
+private val DocTypeItemShape = RoundedCornerShape(CornerRadius.lg)
+private val DocTypeSheetShape = RoundedCornerShape(topStart = CornerRadius.sheet, topEnd = CornerRadius.sheet)
+private val DocTypeItemMinHeight = 56.dp
 private val OptionItemShape = RoundedCornerShape(CornerRadius.md)
 private val BannerShape = RoundedCornerShape(CornerRadius.chip)
