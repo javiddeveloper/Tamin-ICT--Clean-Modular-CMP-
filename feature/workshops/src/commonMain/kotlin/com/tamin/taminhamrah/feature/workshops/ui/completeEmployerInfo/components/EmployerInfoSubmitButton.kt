@@ -36,9 +36,10 @@ private val ButtonTextSize = 13.5.sp
 
 /**
  * The theme's `buttonGradient` stops, reversed: on the right-to-left page it runs from the light
- * blue at the right edge to the dark one at the left, matching the selected tab above.
+ * blue at the right edge to the dark one at the left, matching the selected tab above. Shared
+ * with the list card's «تکمیل اطلاعات» button.
  */
-private val EnabledGradient = Brush.horizontalGradient(listOf(IconGradientBlueEnd, IconGradientBlueStart))
+internal val EmployerInfoButtonGradient = Brush.horizontalGradient(listOf(IconGradientBlueEnd, IconGradientBlueStart))
 
 /**
  * The one submit button the three steps share.
@@ -80,7 +81,7 @@ fun EmployerInfoSubmitButton(
                 spotColor = colors.shadowPrimary,
             )
             .clip(RoundedCornerShape(ButtonCorner))
-            .background(if (enabled) EnabledGradient else colors.buttonDisabledGradient)
+            .background(if (enabled) EmployerInfoButtonGradient else colors.buttonDisabledGradient)
             .clickable(enabled = enabled, onClick = onSubmit),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
