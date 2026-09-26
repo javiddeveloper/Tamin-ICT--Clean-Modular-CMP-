@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.dataSource.treatment
 
+import com.tamin.taminhamrah.tools.safeCall
 import com.tamin.taminhamrah.apiService.treatment.TreatmentApiService
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
@@ -13,8 +14,6 @@ import com.tamin.taminhamrah.model.treatment.MedicalConfirmationDTO
 import com.tamin.taminhamrah.model.utils.ListData
 
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
-import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
-import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.readPdfChannel
 
@@ -23,14 +22,10 @@ internal class TreatmentRemoteDataSourceImpl(
     private val errorParser: ErrorParser
 ) : TreatmentRemoteDataSource {
 
-    override suspend fun getDeservedTreatment(nationalCode: String): ListData<DeservedTreatmentDTO>? {
-        return try {
+    override suspend fun getDeservedTreatment(nationalCode: String): ListData<DeservedTreatmentDTO> {
+        return errorParser.safeCall("getDeservedTreatment") {
             val response = apiService.getDeservedTreatment(nationalCode = nationalCode)
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
@@ -41,16 +36,12 @@ internal class TreatmentRemoteDataSourceImpl(
         startDate: String,
         endDate: String,
         params: Map<String, String>
-    ): ListData<ElectronicPrescriptionDTO>? {
-        return try {
+    ): ListData<ElectronicPrescriptionDTO> {
+        return errorParser.safeCall("getElectronicPrescriptionList") {
             val response = apiService.getElectronicPrescriptionList(
                 requestTypeId, nationalCode, dependantUserNationalCode, startDate, endDate, params
             )
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
@@ -61,16 +52,12 @@ internal class TreatmentRemoteDataSourceImpl(
         flagSata: String,
         type: String,
         params: Map<String, String>
-    ): ListData<ElectronicPrescriptionDetailDTO>? {
-        return try {
+    ): ListData<ElectronicPrescriptionDetailDTO> {
+        return errorParser.safeCall("getElectronicPrescriptionDetail") {
             val response = apiService.getElectronicPrescriptionDetail(
                 noteHeadID, nationalCode, childNationalCode, flagSata, type, params
             )
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
@@ -78,117 +65,77 @@ internal class TreatmentRemoteDataSourceImpl(
         noteHeadID: String,
         nationalCode: String,
         params: Map<String, String>
-    ): ListData<ElectronicPrescriptionPriceDTO>? {
-        return try {
+    ): ListData<ElectronicPrescriptionPriceDTO> {
+        return errorParser.safeCall("getElectronicPrescriptionPrice") {
             val response = apiService.getElectronicPrescriptionPrice(noteHeadID, nationalCode, params)
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
     override suspend fun getDependantUnderEighteen(
         nationalCode: String,
         params: Map<String, String>
-    ): ListData<DependantUserUnderEighteenDTO>? {
-        return try {
+    ): ListData<DependantUserUnderEighteenDTO> {
+        return errorParser.safeCall("getDependantUnderEighteen") {
             val response = apiService.getDependantUnderEighteen(nationalCode, params)
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
     override suspend fun getPrescriptionPdfFile(prescriptionID: String): PdfDownloadDTO {
-        return try {
+        return errorParser.safeCall("getPrescriptionPdfFile") {
             PdfDownloadDTO(pdf = InputStreamDTO(pdf = apiService.getPrescriptionPdfFile(prescriptionID).readPdfChannel()))
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
     override suspend fun downloadLabResultPdf(
         patientID: String?, noteHeadEprescID: String?, currentUserNationalCode: String?
     ): PdfDownloadDTO {
-        return try {
+        return errorParser.safeCall("downloadLabResultPdf") {
             val statement = apiService.downloadLabResultPdf(
                 patientID ?: "", noteHeadEprescID ?: "", currentUserNationalCode ?: ""
             )
             PdfDownloadDTO(pdf = InputStreamDTO(pdf = statement.readPdfChannel()))
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
-    override suspend fun getTreatmentCosts(params: Map<String, String>): ListData<TreatmentCostDTO>? {
-        return try {
+    override suspend fun getTreatmentCosts(params: Map<String, String>): ListData<TreatmentCostDTO> {
+        return errorParser.safeCall("getTreatmentCosts") {
             val response = apiService.getTreatmentCosts(params)
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
     override suspend fun getTreatmentCostsPDF(repId: String): PdfDownloadDTO {
-        return try {
+        return errorParser.safeCall("getTreatmentCostsPDF") {
             // Drained through readPdfChannel like every other PDF here: the raw response body is a
             // single-use stream that is already closed by the time a caller reads it.
             PdfDownloadDTO(pdf = InputStreamDTO(pdf = apiService.getTreatmentCostsPDF(repId).readPdfChannel()))
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
     override suspend fun sendToInboxTreatmentCosts(repId: String): String {
-        return try {
+        return errorParser.safeCall("sendToInboxTreatmentCosts") {
             apiService.sendToInboxTreatmentCosts(repId).extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
-    override suspend fun getMedicalConfirmations(params: Map<String, String>): ListData<MedicalConfirmationDTO>? {
-        return try {
+    override suspend fun getMedicalConfirmations(params: Map<String, String>): ListData<MedicalConfirmationDTO> {
+        return errorParser.safeCall("getMedicalConfirmations") {
             val response = apiService.getMedicalConfirmations(params)
             response.extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
     override suspend fun getMedicalConfirmationPdf(repId: String): PdfDownloadDTO {
-        return try {
+        return errorParser.safeCall("getMedicalConfirmationPdf") {
             PdfDownloadDTO(pdf = InputStreamDTO(pdf = apiService.getMedicalConfirmationPdf(repId).readPdfChannel()))
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 
     override suspend fun sendToInboxMedicalConfirmation(repId: String): String {
-        return try {
+        return errorParser.safeCall("sendToInboxMedicalConfirmation") {
             apiService.sendToInboxMedicalConfirmation(repId).extractData()
-        } catch (e: TaminErrorUriException) {
-            throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
     }
 }
