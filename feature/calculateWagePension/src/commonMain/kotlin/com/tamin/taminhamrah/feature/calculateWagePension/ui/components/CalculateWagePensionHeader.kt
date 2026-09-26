@@ -102,16 +102,6 @@ internal fun CalculateWagePensionHeader(
                 .padding(horizontal = Spacing.sm),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-     /*       Text(
-                text = stringResource(Res.string.calculate_wage_pension_title),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = colors.onGradient,
-                textAlign = TextAlign.Center,
-            )
-
-            Spacer(modifier = Modifier.height(Spacing.md))*/
-
             Spacer(modifier = Modifier.height(Spacing.md))
 
             Text(

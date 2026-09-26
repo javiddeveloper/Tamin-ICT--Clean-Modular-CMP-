@@ -216,7 +216,7 @@ private fun HistoryObjectionStepperContent(
                             icon = vectorResource(Res.drawable.ic_close),
                             contentDescription = null,
                             onClick = {
-                                abandonToHome = false
+                                abandonToHome = true
                                 showAbandonDialog = true
                             },
                             bordered = true

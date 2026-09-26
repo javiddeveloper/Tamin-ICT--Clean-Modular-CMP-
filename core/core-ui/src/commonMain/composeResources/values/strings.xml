@@ -2383,7 +2383,7 @@
     <string name="ill_days_doctor_name_label">نام پزشک معالج *</string>
     <string name="ill_days_doctor_name_placeholder">نام و نام خانوادگی پزشک</string>
     <string name="ill_days_doctor_code_label">کد نظام پزشکی پزشک معالج *</string>
-    <string name="ill_days_doctor_code_placeholder">تا ۸ رقم …</string>
+    <string name="ill_days_doctor_code_placeholder">تا 10 رقم …</string>
     <string name="ill_days_medical_record_toggle_label">این استراحت پرونده پزشکی مرتبط دارد</string>
     <string name="ill_days_medical_record_toggle_caption">اگر برای این بازه استراحت، سابقه بستری یا مدارک درمانی در مراکز طرف قرارداد دارید، این گزینه را فعال کنید.</string>
     <string name="ill_days_wizard_step4_title">مدارک و ثبت درخواست</string>
