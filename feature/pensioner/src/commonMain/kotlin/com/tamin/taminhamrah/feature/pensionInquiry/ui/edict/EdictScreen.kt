@@ -75,6 +75,7 @@ import taminx.core.core_ui.edict_send_success_title
 import taminx.core.core_ui.ic_email
 import taminx.core.core_ui.ic_tamin_download
 import kotlinx.collections.immutable.toImmutableList
+import org.jetbrains.compose.resources.getString
 
 // ─── Entry point ──────────────────────────────────────────────────────────────
 
@@ -167,6 +168,7 @@ fun HandleEdictEvents(
     events.collectWithLifecycleAware { event ->
         when (event) {
             is EdictEvent.ShowToast -> onShowToast(event.message)
+            is EdictEvent.ShowToastRes -> onShowToast(getString(event.message))
             is EdictEvent.NavigateBack -> onNavigateBack()
         }
     }
