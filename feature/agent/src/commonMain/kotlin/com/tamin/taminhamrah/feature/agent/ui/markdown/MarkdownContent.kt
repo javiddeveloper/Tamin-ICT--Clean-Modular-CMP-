@@ -6,7 +6,6 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,7 +26,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Functions
 import androidx.compose.material.icons.outlined.TableChart
 import androidx.compose.material3.Icon
@@ -42,7 +40,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -55,9 +52,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.LayoutDirection
@@ -75,12 +70,12 @@ import com.tamin.taminhamrah.feature.agent.markdown.MathParser
 import com.tamin.taminhamrah.feature.agent.service.base.ChatBubbleContent
 import com.tamin.taminhamrah.feature.agent.service.base.TableRow
 import com.tamin.taminhamrah.feature.agent.ui.bubble.TableBubble
+import com.tamin.taminhamrah.feature.agent.ui.AgentActionButton
+import com.tamin.taminhamrah.feature.agent.ui.AgentGlass
+import com.tamin.taminhamrah.feature.agent.ui.agentGlassCard
 import com.tamin.taminhamrah.ui.components.CopyIconButton
-import com.tamin.taminhamrah.ui.components.TaminDivider
-import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
-import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.util.toPersianDigits
@@ -89,6 +84,7 @@ import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.agent_markdown_formula
 import taminx.core.core_ui.agent_markdown_table
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Draws an assistant markdown answer, block by block, in the app's design system: prose in the
@@ -111,11 +107,21 @@ fun MarkdownContent(
     val blocks = remember(text) { MarkdownParser.parse(text) }
     var revealed by remember(text) { mutableIntStateOf(if (isAnimating) 0 else blocks.size) }
 
+    // Whether this message has a reveal to play at all, decided once when it first appears.
+    //
+    // A message restored from history arrives with every block already revealed, and wrapping
+    // each of them in an AnimatedVisibility that will never animate still costs a Transition
+    // and an extra layout node per block — paid again on every scroll back into view, and a
+    // long answer is easily twenty blocks. Latched rather than read live from `isAnimating`:
+    // that flag flips to false once the reveal ends, and swapping the wrapper out underneath a
+    // visible block would tear down and rebuild it mid-conversation.
+    val animateBlocks = remember(text) { isAnimating }
+
     LaunchedEffect(text) {
         while (revealed < blocks.size) {
             revealed++
             onRequestScroll()
-            delay(BLOCK_REVEAL_DELAY_MS)
+            delay(BLOCK_REVEAL_DELAY_MS.milliseconds)
         }
         onAnimationFinished()
     }
@@ -123,10 +129,14 @@ fun MarkdownContent(
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
             blocks.forEachIndexed { index, block ->
-                AnimatedVisibility(
-                    visible = index < revealed,
-                    enter = fadeIn(tween(BLOCK_FADE_MS)) + expandVertically(tween(BLOCK_FADE_MS)),
-                ) {
+                if (animateBlocks) {
+                    AnimatedVisibility(
+                        visible = index < revealed,
+                        enter = fadeIn(tween(BLOCK_FADE_MS)) + expandVertically(tween(BLOCK_FADE_MS)),
+                    ) {
+                        MarkdownBlockView(block = block, contentColor = contentColor, onLinkClick = onLinkClick)
+                    }
+                } else {
                     MarkdownBlockView(block = block, contentColor = contentColor, onLinkClick = onLinkClick)
                 }
             }
@@ -134,14 +144,19 @@ fun MarkdownContent(
     }
 }
 
+/**
+ * One block of the answer. Everything here sits on the fixed-dark `AgentBackground`, so the
+ * tiles (quote, code, rule) and markers use the [AgentGlass] palette, never the light/dark
+ * theme's surfaces — those are white in light mode and showed up as white blocks in the chat.
+ */
 @Composable
 private fun MarkdownBlockView(
     block: MarkdownBlock,
     contentColor: Color,
     onLinkClick: (String) -> Unit,
 ) {
-    val colors = LocalTaminColors.current
     val body = MaterialTheme.typography.bodyMedium.copy(color = contentColor, lineHeight = BODY_LINE_HEIGHT)
+    val tileShape = RoundedCornerShape(CornerRadius.md)
     when (block) {
         is MarkdownBlock.Heading -> MarkdownHeading(block, contentColor)
 
@@ -149,42 +164,48 @@ private fun MarkdownBlockView(
 
         is MarkdownBlock.ListItem -> MarkdownListItem(block, body)
 
+        // A quote is a subtle glass tile with an accent bar on its leading edge.
         is MarkdownBlock.Quote -> Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(IntrinsicSize.Min)
-                .clip(RoundedCornerShape(CornerRadius.md))
-                .background(colors.blueBg),
+                .clip(tileShape)
+                .background(AgentGlass.tileFillSubtle)
+                .border(AgentGlass.borderWidth, AgentGlass.borderColor, tileShape),
         ) {
             Box(
                 modifier = Modifier
                     .width(QUOTE_BAR_WIDTH)
                     .fillMaxHeight()
-                    .background(colors.blueText),
+                    .background(AgentGlass.accent),
             )
             Text(
                 text = block.text.toStyledText(),
-                style = body.copy(color = colors.textSecondary),
+                style = body.copy(color = AgentGlass.textSecondary),
                 modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.sm),
             )
         }
 
-        // Code reads left to right, boxed like DetailRow's boxed value.
+        // Code reads left to right, on the same glass card as tables and formulas.
         is MarkdownBlock.CodeBlock -> CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
             Text(
                 text = block.code,
-                style = MaterialTheme.typography.bodySmall.copy(color = colors.textPrimary),
+                style = MaterialTheme.typography.bodySmall.copy(color = AgentGlass.textPrimary),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(CornerRadius.md))
-                    .background(colors.bgPage)
-                    .border(Thickness.border, colors.border, RoundedCornerShape(CornerRadius.md))
+                    .agentGlassCard(tileShape)
                     .horizontalScroll(rememberScrollState())
                     .padding(Spacing.md),
             )
         }
 
-        MarkdownBlock.Rule -> TaminDivider(modifier = Modifier.padding(vertical = Spacing.xs))
+        MarkdownBlock.Rule -> Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = Spacing.xs)
+                .height(Thickness.border)
+                .background(AgentGlass.borderColor),
+        )
 
         is MarkdownBlock.Table -> MarkdownSection(
             title = stringResource(Res.string.agent_markdown_table),
@@ -193,15 +214,16 @@ private fun MarkdownBlockView(
         ) {
             // Cells keep their inline markdown. A cell that is just a link is a button, like the
             // links outside tables; a link inside other text is tapped in place.
-            val linkColor = colors.blueText
-            val cellStyle = MaterialTheme.typography.bodySmall.copy(color = colors.textPrimary)
+            // On the glass card the cells take the reply's own text color, not the theme's.
+            val linkColor = AgentGlass.accent
+            val cellStyle = MaterialTheme.typography.bodySmall.copy(color = contentColor)
             TableBubble(
                 content = ChatBubbleContent.Table(
                     columns = block.header.map { it.toPersianDigits() },
                     rows = block.rows.map { row -> TableRow(row) },
                 ),
                 framed = false,
-                renderCell = { cell -> cell.styledText(colors.bgPage, linkColor, onLinkClick) },
+                renderCell = { cell -> cell.styledText(AgentGlass.tileFill, linkColor, onLinkClick) },
                 cellContent = { cell ->
                     val link = remember(cell) { MarkdownParser.loneLink(cell) }
                     if (link != null) {
@@ -228,11 +250,10 @@ private fun MarkdownBlockView(
 /** `#`–`##` read as titles, deeper levels as the app's muted section captions. */
 @Composable
 private fun MarkdownHeading(block: MarkdownBlock.Heading, contentColor: Color) {
-    val colors = LocalTaminColors.current
     val style = when (block.level) {
         1 -> MaterialTheme.typography.titleMedium.copy(color = contentColor, fontWeight = FontWeight.Bold)
         2 -> MaterialTheme.typography.titleSmall.copy(color = contentColor, fontWeight = FontWeight.Bold)
-        else -> MaterialTheme.typography.labelLarge.copy(color = colors.textSecondary, fontWeight = FontWeight.Bold)
+        else -> MaterialTheme.typography.labelLarge.copy(color = AgentGlass.textSecondary, fontWeight = FontWeight.Bold)
     }
     Text(
         text = block.text.toStyledText(),
@@ -241,10 +262,9 @@ private fun MarkdownHeading(block: MarkdownBlock.Heading, contentColor: Color) {
     )
 }
 
-/** A bullet is a small primary dot, a number the app's blue; nesting indents by [Spacing.lg]. */
+/** A bullet is a small accent dot, a number the accent blue; nesting indents by [Spacing.lg]. */
 @Composable
 private fun MarkdownListItem(block: MarkdownBlock.ListItem, body: TextStyle) {
-    val colors = LocalTaminColors.current
     Row(
         modifier = Modifier.padding(start = Spacing.lg * block.level),
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
@@ -256,13 +276,13 @@ private fun MarkdownListItem(block: MarkdownBlock.ListItem, body: TextStyle) {
             if (block.ordered) {
                 Text(
                     text = "${block.number}.".toPersianDigits(),
-                    style = body.copy(color = colors.blueText, fontWeight = FontWeight.Bold),
+                    style = body.copy(color = AgentGlass.accent, fontWeight = FontWeight.Bold),
                 )
             } else {
                 Box(
                     modifier = Modifier
                         .size(BULLET_SIZE)
-                        .background(if (block.level == 0) colors.blueText else colors.chevron, CircleShape),
+                        .background(if (block.level == 0) AgentGlass.accent else AgentGlass.textSecondary, CircleShape),
                 )
             }
         }
@@ -278,11 +298,13 @@ private fun MarkdownSection(
     copyText: String,
     content: @Composable () -> Unit,
 ) {
-    val colors = LocalTaminColors.current
+    // The same glass card as the screen's top/input bars, not the theme's opaque surface:
+    // the reply sits on the fixed-dark AgentBackground, so the card and everything on it
+    // use the AgentGlass palette rather than the light/dark TaminColors.
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .taminSurface(cornerRadius = CornerRadius.xl)
+            .agentGlassCard(RoundedCornerShape(CornerRadius.xl))
             .padding(Spacing.md),
         verticalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
@@ -294,18 +316,18 @@ private fun MarkdownSection(
             Box(
                 modifier = Modifier
                     .size(IconSize.badge)
-                    .background(colors.iconBgSubtle, RoundedCornerShape(CornerRadius.avatarTile)),
+                    .background(AgentGlass.tileFill, RoundedCornerShape(CornerRadius.avatarTile)),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(imageVector = icon, contentDescription = null, tint = colors.blueText, modifier = Modifier.size(IconSize.small))
+                Icon(imageVector = icon, contentDescription = null, tint = AgentGlass.iconTint, modifier = Modifier.size(IconSize.small))
             }
             Text(
                 text = title,
                 style = MaterialTheme.typography.labelLarge,
-                color = colors.textSecondary,
+                color = AgentGlass.textSecondary,
                 modifier = Modifier.weight(1f),
             )
-            CopyIconButton(value = copyText, label = title)
+            CopyIconButton(value = copyText, label = title, tint = AgentGlass.textSecondary)
         }
         content()
     }
@@ -320,7 +342,7 @@ private fun MarkdownSection(
 private fun FormulaRow(formula: MarkdownBlock.Formula, color: Color) {
     // The app's font, like the prose around it; a bare TextStyle would fall back to the system font.
     val style = MaterialTheme.typography.bodyMedium.copy(color = color, fontSize = FORMULA_FONT_SIZE, lineHeight = FORMULA_LINE_HEIGHT)
-    val mathStyle = style.copy(color = LocalTaminColors.current.blueText)
+    val mathStyle = style.copy(color = AgentGlass.formula)
     val direction = if (MathParser.isRightToLeft(formula.expression)) LayoutDirection.Rtl else LayoutDirection.Ltr
     CompositionLocalProvider(LocalLayoutDirection provides direction) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
@@ -357,57 +379,20 @@ private fun ActionButtons(links: List<MarkdownLink>, onLinkClick: (String) -> Un
 }
 
 /**
- * A link as the app's blue action chip: tinted fill, blue border and label, and a forward arrow
- * that follows the reading direction. [compact] is the table-cell size, filling its cell and
- * wrapping a long label onto a second line. Only a link the app can act on is tappable; the
- * feature flag is checked on tap.
+ * A link as the reply's gradient action button. [compact] is the table-cell size. Only a link the
+ * app can act on is tappable; the feature flag is checked on tap.
  */
 @Composable
 private fun LinkButton(link: MarkdownLink, onLinkClick: (String) -> Unit, compact: Boolean) {
-    val colors = LocalTaminColors.current
     val isActionable = remember(link.url) {
         DeepLinkParser.parse(link.url, DeepLinkSource.AGENT) != ParsedDeepLink.Invalid
     }
-    val shape = RoundedCornerShape(if (compact) CornerRadius.md else CornerRadius.chip)
-    Row(
-        modifier = Modifier
-            .then(if (compact) Modifier.fillMaxWidth() else Modifier)
-            .alpha(if (isActionable) 1f else colors.disabledAlpha)
-            .heightIn(min = if (compact) COMPACT_BUTTON_MIN_HEIGHT else BUTTON_MIN_HEIGHT)
-            .clip(shape)
-            .background(colors.blueBg)
-            .border(Thickness.border, colors.blueBorder, shape)
-            .clickable(enabled = isActionable) { onLinkClick(link.url) }
-            .padding(
-                horizontal = if (compact) Spacing.sm else Spacing.md,
-                vertical = if (compact) Spacing.xs else Spacing.sm,
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.xs, Alignment.CenterHorizontally),
-    ) {
-        Text(
-            text = link.label.toPersianDigits(),
-            style = if (compact) {
-                MaterialTheme.typography.labelSmall.copy(lineHeight = COMPACT_BUTTON_LINE_HEIGHT)
-            } else {
-                MaterialTheme.typography.labelLarge
-            },
-            color = colors.blueText,
-            fontWeight = FontWeight.Medium,
-            textAlign = TextAlign.Center,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = if (compact) Modifier.weight(1f, fill = false) else Modifier,
-        )
-        if (!compact) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                contentDescription = null,
-                tint = colors.blueText,
-                modifier = Modifier.size(IconSize.small),
-            )
-        }
-    }
+    AgentActionButton(
+        label = link.label,
+        onClick = { onLinkClick(link.url) },
+        enabled = isActionable,
+        compact = compact,
+    )
 }
 
 /**
@@ -422,7 +407,8 @@ private fun String.toStyledText(
     linkColor: Color = Color.Unspecified,
     onLinkClick: ((String) -> Unit)? = null,
 ): AnnotatedString {
-    val codeBackground = LocalTaminColors.current.bgPage
+    // Inline code sits on a glass tile, like every other boxed thing in a reply.
+    val codeBackground = AgentGlass.tileFill
     return remember(this, linkColor, onLinkClick, codeBackground) {
         styledText(codeBackground, linkColor, onLinkClick)
     }
@@ -464,9 +450,6 @@ private val BODY_LINE_HEIGHT = 22.sp
 private val BODY_LINE_HEIGHT_DP = 22.dp
 private val BULLET_SIZE = 6.dp
 private val QUOTE_BAR_WIDTH = 3.dp
-private val BUTTON_MIN_HEIGHT = 40.dp
-private val COMPACT_BUTTON_MIN_HEIGHT = 32.dp
-private val COMPACT_BUTTON_LINE_HEIGHT = 16.sp
 private val FORMULA_FONT_SIZE = 14.sp
 private val FORMULA_LINE_HEIGHT = 20.sp
 /** A phrase in a formula wraps past this share of the card, so two phrases and their brackets fit side by side. */

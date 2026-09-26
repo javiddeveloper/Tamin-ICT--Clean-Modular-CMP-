@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.core.datastore
 
 import com.russhwolf.settings.Settings
 import com.tamin.taminhamrah.model.BaseUrlKey
+import com.tamin.taminhamrah.model.agent.AgentMockMode
 import com.tamin.taminhamrah.model.payment.PaymentMockMode
 import com.tamin.taminhamrah.repository.DeveloperOptionsRepository
 import com.tamin.taminhamrah.util.AppConfig
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 private const val PREF_KEY_PREFIX = "dev_opt_base_url_"
 private const val PREF_KEY_PAYMENT_MOCK_MODE = "dev_opt_payment_mock_mode"
+private const val PREF_KEY_AGENT_MOCK_MODE = "dev_opt_agent_mock_mode"
 
 class DeveloperOptionsRepositoryImpl(
     private val settings: Settings,
@@ -19,6 +21,7 @@ class DeveloperOptionsRepositoryImpl(
 
     private val _overrides = MutableStateFlow(loadOverrides())
     private val _paymentMockMode = MutableStateFlow(loadPaymentMockMode())
+    private val _agentMockMode = MutableStateFlow(loadAgentMockMode())
 
     private fun loadOverrides(): Map<BaseUrlKey, String> =
         BaseUrlKey.entries.mapNotNull { key ->
@@ -65,5 +68,21 @@ class DeveloperOptionsRepositoryImpl(
     override fun setPaymentMockMode(mode: PaymentMockMode) {
         settings.putString(PREF_KEY_PAYMENT_MOCK_MODE, mode.name)
         _paymentMockMode.value = mode
+    }
+
+    private fun loadAgentMockMode(): AgentMockMode =
+        settings.getStringOrNull(PREF_KEY_AGENT_MOCK_MODE)
+            ?.let { stored -> AgentMockMode.entries.firstOrNull { it.name == stored } }
+            ?: AgentMockMode.DISABLED
+
+    /** Same guard as [getPaymentMockMode]: a release build never answers the assistant from a fake. */
+    override fun getAgentMockMode(): AgentMockMode =
+        if (isDebug) _agentMockMode.value else AgentMockMode.DISABLED
+
+    override fun observeAgentMockMode(): Flow<AgentMockMode> = _agentMockMode.asStateFlow()
+
+    override fun setAgentMockMode(mode: AgentMockMode) {
+        settings.putString(PREF_KEY_AGENT_MOCK_MODE, mode.name)
+        _agentMockMode.value = mode
     }
 }
