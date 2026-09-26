@@ -5,8 +5,8 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val girlSurvivorModule = module {
-    // Not viewModelOf(::GirlSurvivorViewModel): that asks Koin for every constructor parameter,
-    // defaults included, and there is no definition for `resolveString` — the screen crashed on open.
+    // viewModelOf(::GirlSurvivorViewModel) also resolves the default resolveString
+    // parameter (a suspend Function2). Nothing registers that type, so creation crashes.
     viewModel {
         GirlSurvivorViewModel(
             getPersonalInfoUseCase = get(),

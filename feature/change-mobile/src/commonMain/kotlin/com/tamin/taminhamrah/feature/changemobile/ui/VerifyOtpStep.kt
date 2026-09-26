@@ -40,10 +40,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.changemobile.ui.contract.ChangeMobileIntent
 import com.tamin.taminhamrah.feature.changemobile.ui.contract.ChangeMobileUiState
-import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.OtpInputField
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toparea.TopAreaState
+import com.tamin.taminhamrah.ui.toparea.driveTopArea
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
@@ -51,12 +52,15 @@ import kotlin.time.Duration.Companion.milliseconds
 @Composable
 fun VerifyOtpStep(
     uiState: ChangeMobileUiState,
+    topAreaState: TopAreaState,
     onIntent: (ChangeMobileIntent) -> Unit
 ) {
+    val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .driveTopArea(topAreaState, scrollState)
+            .verticalScroll(scrollState)
             .padding(Spacing.lg),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -72,12 +76,6 @@ fun VerifyOtpStep(
         )
         Spacer(modifier = Modifier.height(Spacing.md))
         ResendTimer(onResendClick = { onIntent(ChangeMobileIntent.GetOtpCode) })
-        Spacer(modifier = Modifier.height(Spacing.xl))
-        SubmitVerifyButton(
-            isLoading = uiState.isLoading,
-            isOtpComplete = uiState.otpCode.length == 5,
-            onSubmit = { onIntent(ChangeMobileIntent.VerifyOtp) }
-        )
     }
 }
 
@@ -141,21 +139,6 @@ private fun OtpSection(
         errorMessage = error,
         showClearButton = true,
         leadingIcon = Icons.Outlined.Lock
-    )
-}
-
-@Composable
-private fun SubmitVerifyButton(
-    isLoading: Boolean,
-    isOtpComplete: Boolean,
-    onSubmit: () -> Unit
-) {
-    LoadingButton(
-        text = "تأیید و ادامه",
-        onClick = onSubmit,
-        enabled = !isLoading && isOtpComplete,
-        isLoading = isLoading,
-        modifier = Modifier.fillMaxWidth()
     )
 }
 

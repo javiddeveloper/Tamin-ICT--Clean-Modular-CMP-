@@ -18,28 +18,26 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 
+/**
+ * Regression for the crash on opening the screen: `viewModelOf(::GirlSurvivorViewModel)` also
+ * tried to resolve the default `resolveString` parameter, which nothing registers.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 class GirlSurvivorModuleTest {
 
     @BeforeTest
-    fun setUp() {
-        Dispatchers.setMain(UnconfinedTestDispatcher())
-    }
+    fun setUp() = Dispatchers.setMain(UnconfinedTestDispatcher())
 
     @AfterTest
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
+    fun tearDown() = Dispatchers.resetMain()
 
     /**
      * The screen resolves its ViewModel from this module. `viewModelOf(::GirlSurvivorViewModel)` also
      * asked Koin for the defaulted `resolveString`, which has no definition — the screen crashed on open.
      */
     @Test
-    fun `the screen's ViewModel resolves from its Koin module`() {
-        val repository = FakePersonalRepository().apply {
-            personalInfoResult = FakePersonalRepository.samplePersonalInfo()
-        }
+    fun girlSurvivorModule_resolvesViewModel() {
+        val repository = FakePersonalRepository()
         val koin = koinApplication {
             modules(
                 module {
@@ -49,6 +47,12 @@ class GirlSurvivorModuleTest {
                     factory { ConfirmGirlSurvivorUseCase(repository) }
                 },
                 girlSurvivorModule,
+                module {
+                    single { GetPersonalInfoUseCase(repository) }
+                    single { CheckGirlSurvivorConditionsUseCase(repository) }
+                    single { GetGirlSurvivorReportUseCase(repository) }
+                    single { ConfirmGirlSurvivorUseCase(repository) }
+                },
             )
         }.koin
 

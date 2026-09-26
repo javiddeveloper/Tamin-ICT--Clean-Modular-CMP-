@@ -126,6 +126,8 @@ object Thickness {
     val border = 1.dp
     val medium = 2.dp
     val chartBar = 3.dp
+    /** Bottom accent bar on expandable list cards (e.g. dependents). */
+    val accent = 4.dp
 }
 
 /** Decorative wash behind [com.tamin.taminhamrah.ui.components.TaminTopAppBar] hero content. */
