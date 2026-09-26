@@ -56,6 +56,8 @@ import com.tamin.taminhamrah.ui.components.CustomSearchBar
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
+import com.tamin.taminhamrah.ui.components.toast.LocalToaster
+import com.tamin.taminhamrah.ui.components.toast.warning
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -81,10 +83,12 @@ fun TaminServicesRoute(
         viewModel.sendIntent(TaminServicesIntent.OnSearchQueryChanged(""))
     }
 
+    val toaster = LocalToaster.current
     HandleTaminServicesEvents(
         events = viewModel.events,
         onNavigateToService = onNavigateToService,
         onOpenUrl = onOpenUrl,
+        onShowMessage = { toaster.warning(it) },
         onBackClicked = onBackClicked
     )
 
@@ -99,6 +103,7 @@ fun HandleTaminServicesEvents(
     events: Flow<TaminSericesEvent>,
     onNavigateToService: (FeatureFlag) -> Unit,
     onOpenUrl: (String) -> Unit,
+    onShowMessage: (String) -> Unit,
     onBackClicked: () -> Unit
 ) {
     LaunchedEffect(events) {
@@ -116,8 +121,9 @@ fun HandleTaminServicesEvents(
                     onBackClicked()
                 }
 
+                // The server's reason a service is off; without it the tap did nothing.
                 is TaminSericesEvent.ShowMessage -> {
-                    //TODO display toast
+                    onShowMessage(event.message)
                 }
             }
         }

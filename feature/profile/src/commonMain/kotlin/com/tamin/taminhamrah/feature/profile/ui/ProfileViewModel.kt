@@ -12,6 +12,7 @@ import com.tamin.taminhamrah.mapper.identity.toPresentation
 import com.tamin.taminhamrah.mapper.relation.toPresentation
 import com.tamin.taminhamrah.model.DarkThemeConfig
 import com.tamin.taminhamrah.repository.TokenStoreManager
+import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.auth.GetSignOutUrlUseCase
 import com.tamin.taminhamrah.useCases.auth.SignOutUseCase
 import com.tamin.taminhamrah.useCases.common.SetThemeUseCase
@@ -111,7 +112,27 @@ class ProfileViewModel(
             }
         }
 
-        merge(userIdFlow, imageFlow, identityFlow, taminRelationFlow, dependentsCountFlow, activeRelationFlow).collect {
+        // Independent sections: an unguarded merge let the first failure cancel the other five —
+        // offline, the cached identity never landed and the header shimmered for good. Each one
+        // now fails on its own, and the first failure is said once rather than toasted six times.
+        var isFailureShown = false
+        fun Flow<PartialState>.failingAlone(fallback: PartialState? = null) = catch { error ->
+            if (!isFailureShown) {
+                isFailureShown = true
+                sendEvent(ProfileEvent.ShowToast(error.toSingleLineMessage()))
+            }
+            fallback?.let { emit(it) }
+        }
+
+        merge(
+            userIdFlow.failingAlone(),
+            imageFlow.failingAlone(fallback = PartialState.ProfileImageLoaded(null)),
+            identityFlow.failingAlone(fallback = PartialState.Loading(false)),
+            taminRelationFlow.failingAlone(),
+            dependentsCountFlow.failingAlone(),
+            // No fallback: zero relations would claim "no active relation" for a call that failed.
+            activeRelationFlow.failingAlone(),
+        ).collect {
             emit(it)
         }
     }

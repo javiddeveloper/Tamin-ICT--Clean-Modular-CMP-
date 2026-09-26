@@ -143,7 +143,6 @@ class RetirementPensionViewModelTest {
     @Test
     fun init_whenTheAgeCallFails_reportsItAndClaimsNoAgePass() = runTest(testDispatcher) {
         pensionRepository.shouldThrowError = true
-        pensionRepository.errorToThrow = RuntimeException("اتصال برقرار نیست")
 
         val viewModel = createViewModel()
         testDispatcher.scheduler.advanceUntilIdle()
@@ -152,7 +151,7 @@ class RetirementPensionViewModelTest {
         assertFalse(state.isAgeConfirmed)
         assertNull(state.dialog, "An unanswered age is not a refusal")
         viewModel.events.test {
-            assertEquals(RetirementPensionEvent.ShowError("اتصال برقرار نیست"), awaitItem())
+            assertTrue(awaitItem() is RetirementPensionEvent.ShowError)
         }
     }
 

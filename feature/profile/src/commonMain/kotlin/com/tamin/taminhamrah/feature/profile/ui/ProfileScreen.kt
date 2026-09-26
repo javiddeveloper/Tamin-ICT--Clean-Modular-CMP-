@@ -3,8 +3,6 @@ package com.tamin.taminhamrah.feature.profile.ui
 
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Code
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +21,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Code
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -62,6 +62,8 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.UserAvatar
 import com.tamin.taminhamrah.ui.components.ValidationStatusCard
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
+import com.tamin.taminhamrah.ui.components.toast.LocalToaster
+import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.motion.ScrollMotionState
 import com.tamin.taminhamrah.ui.motion.motionFade
 import com.tamin.taminhamrah.ui.motion.motionParallax
@@ -74,8 +76,8 @@ import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
-import com.tamin.taminhamrah.util.AppConfig
 import com.tamin.taminhamrah.ui.util.ExternalAppLauncher
+import com.tamin.taminhamrah.util.AppConfig
 import com.tamin.taminhamrah.util.toPersianDigits
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
@@ -86,6 +88,8 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.active_relation_header_status_error
+import taminx.core.core_ui.active_relation_header_status_ok
 import taminx.core.core_ui.contact_us_title
 import taminx.core.core_ui.ic_communication
 import taminx.core.core_ui.ic_exit
@@ -102,14 +106,13 @@ import taminx.core.core_ui.ic_send
 import taminx.core.core_ui.ic_setting
 import taminx.core.core_ui.ic_share
 import taminx.core.core_ui.ic_sun
-import taminx.core.core_ui.ic_tamin_calendar
 import taminx.core.core_ui.ic_support
+import taminx.core.core_ui.ic_tamin_calendar
 import taminx.core.core_ui.profile_active_relation
 import taminx.core.core_ui.profile_bank_account
 import taminx.core.core_ui.profile_cartable
 import taminx.core.core_ui.profile_change_mobile
 import taminx.core.core_ui.profile_dependents
-import taminx.core.core_ui.profile_dependents_badge_test
 import taminx.core.core_ui.profile_developer_options
 import taminx.core.core_ui.profile_electronic_file
 import taminx.core.core_ui.profile_identity_info
@@ -126,8 +129,6 @@ import taminx.core.core_ui.profile_support
 import taminx.core.core_ui.profile_support_section
 import taminx.core.core_ui.profile_title
 import taminx.core.core_ui.profile_version_history
-import taminx.core.core_ui.active_relation_header_status_error
-import taminx.core.core_ui.active_relation_header_status_ok
 import taminx.core.core_ui.validation_status_badge_invalid
 import taminx.core.core_ui.validation_status_badge_valid
 import androidx.compose.ui.unit.lerp as dpLerp
@@ -158,6 +159,7 @@ fun ProfileScreen(
     val lazyListState = rememberLazyListState()
     val motionState = rememberScrollMotionState(maxMotionDistance = 120.dp)
     var themeButtonCenter by remember { mutableStateOf(Offset.Zero) }
+    val toaster = LocalToaster.current
 
     LaunchedEffect(userId) {
         viewModel.sendIntent(ProfileIntent.LoadProfile(userId))
@@ -184,6 +186,7 @@ fun ProfileScreen(
         onNavigateToUserRequests = onNavigateToUserRequests,
         onNavigateToSaveEvents = onNavigateToSaveEvents,
         onOpenUrl = onOpenUrl,
+        onShowToast = { toaster.error(it) },
         onBackClicked = onBackClicked
     )
 
@@ -216,6 +219,7 @@ fun HandleProfileEvents(
     onNavigateToSecurity: () -> Unit,
     onNavigateToDeveloperOptions: () -> Unit,
     onOpenUrl: (String) -> Unit,
+    onShowToast: (String) -> Unit,
     onBackClicked: () -> Unit
 ) {
 
@@ -279,7 +283,7 @@ fun HandleProfileEvents(
             }
 
             is ProfileEvent.ShowToast -> {
-                // Handle toast
+                onShowToast(it.message)
             }
 
             ProfileEvent.NavigateToSecurity -> {
@@ -411,14 +415,13 @@ fun ProfileContent(
                                         )
                                     } else {
                                         Text(
-                                            text = state.identityInfo?.fullName ?: "",
+                                            text = state.identityInfo.fullName,
                                             style = MaterialTheme.typography.titleMedium,
                                             color = taminColors.txtNameProfile
                                         )
                                         NumericText(
-                                            text = state.identityInfo?.nationalId
-                                                ?.toPersianDigits()
-                                                .orEmpty(),
+                                            text = state.identityInfo.nationalId
+                                                .toPersianDigits(),
                                             style = MaterialTheme.typography.bodySmall,
                                             color = taminColors.txtNatProfile
                                         )
