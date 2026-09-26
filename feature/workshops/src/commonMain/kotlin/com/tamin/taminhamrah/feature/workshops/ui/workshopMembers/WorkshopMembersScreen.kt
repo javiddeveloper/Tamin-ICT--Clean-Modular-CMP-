@@ -48,6 +48,10 @@ import taminx.core.core_ui.member_leaving_status
 import taminx.core.core_ui.member_national_id
 import taminx.core.core_ui.member_nationality
 import taminx.core.core_ui.workshop_action_members
+import org.jetbrains.compose.resources.vectorResource
+import taminx.core.core_ui.ic_tamin_workshop_members
+import taminx.core.core_ui.workshop_empty_list
+import taminx.core.core_ui.workshop_members_empty
 
 /**
  * کارکنان — the insured people registered against one workshop.
@@ -118,6 +122,8 @@ fun WorkshopMembersContent(
         modifier = modifier,
     ) {
         WorkshopListScaffold(
+            emptyIcon = vectorResource(Res.drawable.ic_tamin_workshop_members),
+            emptyMessage = stringResource(if (applied.isNotEmpty) Res.string.workshop_empty_list else Res.string.workshop_members_empty),
             state = state.list,
             onLoadMore = { onIntent(WorkshopMembersIntent.LoadMore) },
             // No key: a person who left and was taken on again is two rows with the same
@@ -138,9 +144,10 @@ fun WorkshopMembersContent(
                     }
                     WorkshopSectionHeader(
                         title = stringResource(Res.string.workshop_action_members),
-                        // The service's own total, not how much of it has been paged in: a count
+                        // The service's own total less the repeats the list dropped, not how much of it has
+                        // been paged in: a count
                         // that climbs while the user scrolls reads as though the first one was wrong.
-                        count = state.list.total,
+                        count = state.list.distinctTotal,
                     )
                     WorkshopFilterChips(
                         chips = filterChips,

@@ -337,6 +337,7 @@ private fun SettlementHeader(
                 icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                 contentDescription = null,
                 onClick = onBack,
+                bordered = true,
             )
         },
         action = {
@@ -344,6 +345,7 @@ private fun SettlementHeader(
                 icon = vectorResource(Res.drawable.ic_tamin_cross),
                 contentDescription = null,
                 onClick = onClose,
+                bordered = true,
             )
         },
     ) {

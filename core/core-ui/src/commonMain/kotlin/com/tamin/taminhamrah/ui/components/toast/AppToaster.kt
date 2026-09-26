@@ -14,6 +14,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.padding
+import com.tamin.taminhamrah.ui.theme.Spacing
 
 /**
  * CompositionLocal that exposes the app-wide [ToasterState].
@@ -65,11 +67,14 @@ fun AppToastHost(
         },
         iconSlot = { toast ->
             val tint = LocalToastContentColor.current
+            // The gap between the glyph and the message: this slot replaces the library's default,
+            // which carried it, so without it the icon sits against the first word.
+            val gap = Modifier.padding(end = Spacing.md)
             when (toast.type) {
-                ToastType.Success -> androidx.compose.material3.Icon(Icons.Default.CheckCircle, contentDescription = null, tint = tint)
-                ToastType.Error   -> androidx.compose.material3.Icon(Icons.Default.Error, contentDescription = null, tint = tint)
-                ToastType.Info    -> androidx.compose.material3.Icon(Icons.Default.Info, contentDescription = null, tint = tint)
-                ToastType.Warning -> androidx.compose.material3.Icon(Icons.Default.Warning, contentDescription = null, tint = tint)
+                ToastType.Success -> androidx.compose.material3.Icon(Icons.Default.CheckCircle, contentDescription = null, tint = tint, modifier = gap)
+                ToastType.Error   -> androidx.compose.material3.Icon(Icons.Default.Error, contentDescription = null, tint = tint, modifier = gap)
+                ToastType.Info    -> androidx.compose.material3.Icon(Icons.Default.Info, contentDescription = null, tint = tint, modifier = gap)
+                ToastType.Warning -> androidx.compose.material3.Icon(Icons.Default.Warning, contentDescription = null, tint = tint, modifier = gap)
                 ToastType.Normal  -> {} // no icon
             }
         },

@@ -80,9 +80,13 @@ import taminx.core.core_ui.new_member_insurance_number
 import taminx.core.core_ui.new_member_national_id
 import taminx.core.core_ui.new_member_register_date
 import taminx.core.core_ui.new_member_request_status
+import taminx.core.core_ui.new_member_requests_empty
 import taminx.core.core_ui.new_member_status
 import taminx.core.core_ui.workshop_action_new_member
+import taminx.core.core_ui.workshop_empty_list
 import taminx.core.core_ui.workshop_ten_digits
+import org.jetbrains.compose.resources.vectorResource
+import taminx.core.core_ui.ic_tamin_workshop_new_member
 
 /**
  * نام‌نویسی غیرحضوری بیمه‌شده.
@@ -213,6 +217,8 @@ fun WorkshopRecentlyAddedMembersContent(
         modifier = modifier,
     ) {
         WorkshopListScaffold(
+            emptyIcon = vectorResource(Res.drawable.ic_tamin_workshop_new_member),
+            emptyMessage = stringResource(if (state.applied.isNotEmpty) Res.string.workshop_empty_list else Res.string.new_member_requests_empty),
             state = state.list,
             onLoadMore = onLoadMore,
             key = { it.personalId ?: it.nationalId },
@@ -411,6 +417,7 @@ private fun MemberActionDialog(
         description = stringResource(action.question),
         confirmButton = {
             TaminFilledButton(
+                background = LocalTaminColors.current.buttonGradient,
                 text = stringResource(Res.string.action_confirm),
                 onClick = onAccept,
                 modifier = Modifier.fillMaxWidth(),

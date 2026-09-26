@@ -94,11 +94,15 @@ data class WorkshopMemberQuery(
  *
  * The stakeholder service nests the workshop one level deeper (`workshopId.workshopId`) than every
  * other workshop list; that difference lives in the repository, not here.
+ *
+ * Searchable by کد ملی only. A stakeholder row carries no insurance number — the service does not
+ * return one and has no column to filter it by (the candidates answer 500) — so, unlike کارکنان,
+ * there is no insurance-number filter to send. The old app never searched this list at all: its
+ * data source dropped the keys its caller passed.
  */
 data class WorkshopStackHolderQuery(
     val workshopId: String,
     val branchCode: String,
-    val insuranceNumber: String? = null,
     val nationalId: String? = null,
     val page: Int = 0,
     val pageSize: Int = WORKSHOP_PAGE_SIZE,
