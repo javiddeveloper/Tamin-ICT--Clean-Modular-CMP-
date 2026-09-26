@@ -1,11 +1,12 @@
 package com.tamin.taminhamrah.dataSource.authSource
 
-import com.tamin.taminhamrah.tools.toErrorUri
-import com.tamin.taminhamrah.tools.safeCall
+import kotlinx.coroutines.CancellationException
+import io.ktor.serialization.JsonConvertException
 import com.tamin.taminhamrah.model.BaseUrlKey
 import com.tamin.taminhamrah.model.auth.TokenResponseDto
 import com.tamin.taminhamrah.repository.DeveloperOptionsRepository
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
+import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.apiService.UserApiService
 import co.touchlab.kermit.Logger
@@ -24,7 +25,7 @@ internal class AuthRemoteDataSourceImpl(
         codeVerifier: String,
         audience: String,
     ): TokenResponseDto {
-        return errorParser.safeCall("exchangeCodeForTokens") {
+        return try {
             val url = "${developerOptionsRepository.getEffectiveBaseUrl(BaseUrlKey.ACCOUNT)}server/v2/token"
             userApiService.signIn(
                 url = url,
@@ -35,6 +36,18 @@ internal class AuthRemoteDataSourceImpl(
                 codeVerifier = codeVerifier,
                 audience = audience,
             )
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
     }
 
@@ -42,13 +55,25 @@ internal class AuthRemoteDataSourceImpl(
         refreshToken: String,
         clientId: String,
     ): TokenResponseDto {
-        return errorParser.safeCall("refreshTokens") {
+        return try {
             val url = "${developerOptionsRepository.getEffectiveBaseUrl(BaseUrlKey.ACCOUNT)}server/v2/token"
             userApiService.refreshToken(
                 url = url,
                 grantType = "refresh_token",
                 refreshToken = refreshToken,
                 clientId = clientId,
+            )
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
             )
         }
     }
@@ -80,10 +105,16 @@ internal class AuthRemoteDataSourceImpl(
         } catch (e: TaminErrorUriException) {
             logger.e(e) { "signOut failed with TaminErrorUriException" }
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
         } catch (e: Exception) {
             logger.e(e) { "signOut failed with Exception: ${e.message}" }
             throw errorParser.parseGeneralError(
-                TaminErrorUriException(e.toErrorUri())
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
             )
         }
     }

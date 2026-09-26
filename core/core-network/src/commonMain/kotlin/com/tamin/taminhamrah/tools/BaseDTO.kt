@@ -13,6 +13,7 @@ import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -49,7 +50,14 @@ data class BaseDTO<out T>(
     @SerialName("reason") val reason: String,
     @SerialName("data") val data: T? = null,
     @SerialName("hasError") val hasError: Boolean? = null,
-    @SerialName("problems") val problems: List<ProblemDTO>? = null
+    @SerialName("problems") val problems: List<ProblemDTO>? = null,
+    /**
+     * What a failed reply said, read from the raw body by `LenientReplyConverter` — `data.message`,
+     * validation violations or a bare string. A typed [data] cannot hold any of these, so without
+     * this the server's reason was lost whenever [T] was not an [ErrorCarrier].
+     */
+    @Transient val errorText: String? = null,
+    @Transient val errorCauseText: String? = null,
 ) {
     /**
      * True when the backend flagged this response as failed via the
@@ -165,14 +173,14 @@ private fun <T> BaseDTO<T>.rawErrorText(): String {
         is JsonPrimitive -> d.contentOrNull
         else -> null
     }
-    return fromData ?: problemMessage ?: reason
+    return fromData ?: errorText ?: problemMessage ?: reason
 }
 
 private fun <T> BaseDTO<T>.errorCause(): String? = when (val d = data) {
     is ErrorCarrier -> d.cause
     is JsonObject -> d["cause"]?.jsonPrimitive?.contentOrNull
     else -> null
-}
+} ?: errorCauseText
 
 /**
  * Same probe as [rawErrorText], but only keeps copy that looks like Arabic script.
