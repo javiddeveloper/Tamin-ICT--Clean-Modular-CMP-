@@ -83,6 +83,15 @@ class FakeWorkShopsRepository : WorkShopsRepository {
      */
     val heldMemberPages: MutableMap<Int, CompletableDeferred<Unit>> = mutableMapOf()
     var stackHolders: PagedListDN<WorkshopStackHolderDN> = PagedListDN()
+
+    /** One answer per page, for the paging tests; a page with no entry answers [stackHolders]. */
+    var stackHolderPages: Map<Int, PagedListDN<WorkshopStackHolderDN>> = emptyMap()
+
+    /**
+     * A page put here suspends until the test completes it, so a test can decide which answer
+     * lands first — the only way to reproduce an out-of-order page.
+     */
+    val heldStackHolderPages: MutableMap<Int, CompletableDeferred<Unit>> = mutableMapOf()
     var recentlyAddedMembers: PagedListDN<WorkshopNewMemberDN> = PagedListDN()
     var workshopsWithoutContract: PagedListDN<WorkshopWithoutContractDN> = PagedListDN()
     var workshopContractRows: PagedListDN<WorkshopContractRowDN> = PagedListDN()
@@ -372,9 +381,10 @@ class FakeWorkShopsRepository : WorkShopsRepository {
 
     override suspend fun getWorkshopStackHolders(
         query: WorkshopStackHolderQuery,
-    ): PagedListDN<WorkshopStackHolderDN> = answer {
+    ): PagedListDN<WorkshopStackHolderDN> {
         lastStackHolderQuery = query
-        stackHolders
+        heldStackHolderPages[query.page]?.await()
+        return answer { stackHolderPages[query.page] ?: stackHolders }
     }
 
     override suspend fun getWorkShopObjections(

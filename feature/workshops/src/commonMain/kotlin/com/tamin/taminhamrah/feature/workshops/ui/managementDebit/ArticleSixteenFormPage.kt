@@ -63,6 +63,7 @@ import taminx.core.core_ui.workshop_branch_code
 import taminx.core.core_ui.workshop_code
 import taminx.core.core_ui.workshop_debt_amount
 import taminx.core.core_ui.ws_form_next
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 
 /**
  * درخواست رسیدگی به بدهی ماده ۱۶ — check what is being asked about, then attach the evidence.
@@ -140,6 +141,7 @@ fun ArticleSixteenFormPage(
             icon = Icons.Outlined.Info,
             confirmButton = {
                 TaminFilledButton(
+                    background = LocalTaminColors.current.buttonGradient,
                     text = stringResource(Res.string.ws_dialog_ok),
                     onClick = dismiss,
                     modifier = Modifier.fillMaxWidth(),

@@ -45,6 +45,7 @@ import com.tamin.taminhamrah.model.workshop.WorkshopPR
 import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDN
 import com.tamin.taminhamrah.model.workshop.WorkshopContractRowPR
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
+import com.tamin.taminhamrah.model.workshop.StakeHolderRole
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderPR
 import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDN
 import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractPR
@@ -408,6 +409,7 @@ fun WorkshopStackHolderDN.toPresentation(): WorkshopStackHolderPR = WorkshopStac
     fullName = fullName.orDash(),
     fatherName = fatherName.orDash(),
     birthDate = birthDate.orDashTimestamp(),
+    role = StakeHolderRole.fromCode(stackType),
     stackType = stackType.orDash(),
 )
 

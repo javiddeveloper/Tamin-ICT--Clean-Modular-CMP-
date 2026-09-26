@@ -1,9 +1,10 @@
 package com.tamin.taminhamrah.feature.agent.ui.bubble
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,128 +15,158 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Pause
+import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.feature.agent.ui.AgentGlass
+import com.tamin.taminhamrah.feature.agent.ui.agentFrostedGlassCard
+import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.components.coloredShadow
+import com.tamin.taminhamrah.ui.theme.Spacing
+import dev.chrisbanes.haze.HazeState
 
 /**
- * A compact player pinned under the toolbar while a voice message plays, the way
+ * A compact one-line player pinned under the toolbar while a voice message plays, the way
  * messaging apps keep an audio message reachable.
  *
  * Without it the only transport lives inside the bubble, so scrolling away from a long
  * message leaves it playing with no way to pause or find it again. Tapping the bar
  * scrolls back to the message it belongs to.
+ *
+ * Same glass card family as the top/input bars ([agentFrostedGlassCard]), so it reads as a
+ * strip of the toolbar rather than a stray Material card floating over the chat.
+ * Layout, RTL start → end: play/pause · «پیام صوتی» · elapsed / total · close.
  */
 @Composable
 fun PinnedVoicePlayer(
     isPlaying: Boolean,
     positionMs: Int,
     durationMs: Int,
+    hazeState: HazeState,
     onTogglePlay: () -> Unit,
     onStop: () -> Unit,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val taminColors = LocalTaminColors.current
-    val progress = if (durationMs > 0) {
+    val targetProgress = if (durationMs > 0) {
         (positionMs.toFloat() / durationMs).coerceIn(0f, 1f)
     } else 0f
+    // Position ticks arrive in coarse steps; easing between them keeps the hairline from stuttering.
+    val progress by animateFloatAsState(targetProgress, tween(PROGRESS_TWEEN_MS), label = "pinned_voice_progress")
 
-    Column(
+    Box(
         modifier = modifier
             .fillMaxWidth()
-            .shadow(
-                elevation = 4.dp,
-                shape = RoundedCornerShape(12.dp),
-                ambientColor = Color.Black.copy(alpha = 0.08f),
-                spotColor = Color.Black.copy(alpha = 0.08f)
+            .coloredShadow(
+                color = AgentGlass.shadowColor.copy(alpha = 0.45f),
+                borderRadius = PinnedPlayerRadius,
+                blurRadius = 18.dp,
+                offsetY = 6.dp
             )
-            .clip(RoundedCornerShape(12.dp))
-            .background(taminColors.bgSurface)
+            .agentFrostedGlassCard(PinnedPlayerShape, hazeState)
             .clickable(onClick = onClick)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+                .height(PinnedPlayerHeight)
+                .padding(start = Spacing.xs, end = Spacing.xs),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary)
-                    .clickable(onClick = onTogglePlay),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                    contentDescription = if (isPlaying) "توقف" else "پخش",
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
+            // Bare icons, no tile behind them — the strip is meant to be quieter than the bars.
+            PinnedIconButton(
+                icon = if (isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
+                contentDescription = if (isPlaying) "توقف" else "پخش",
+                tint = AgentGlass.iconTint,
+                onClick = onTogglePlay
+            )
 
-            Spacer(Modifier.width(10.dp))
+            Text(
+                text = "پیام صوتی",
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                color = AgentGlass.textPrimary,
+                maxLines = 1
+            )
 
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "پیام صوتی",
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
-                    color = taminColors.textPrimary,
-                    maxLines = 1
-                )
-                Text(
-                    text = "${formatClock(positionMs)} / ${formatClock(durationMs)}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = taminColors.textMuted
-                )
-            }
+            Spacer(Modifier.width(Spacing.sm))
 
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .clickable(onClick = onStop),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Default.Close,
-                    contentDescription = "بستن",
-                    tint = taminColors.textMuted,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
+            NumericText(
+                text = "${formatClock(positionMs)} / ${formatClock(durationMs)}",
+                style = MaterialTheme.typography.labelSmall,
+                color = AgentGlass.textSecondary,
+                modifier = Modifier.weight(1f)
+            )
+
+            PinnedIconButton(
+                icon = Icons.Rounded.Close,
+                contentDescription = "بستن",
+                tint = AgentGlass.textSecondary,
+                onClick = onStop
+            )
         }
 
-        // Progress hairline along the bottom edge, like a media notification.
+        // Progress hairline along the bottom edge, like a media notification. Playback
+        // progress always grows left → right (the way every media timeline reads), so it is
+        // anchored with an absolute alignment rather than Start, which the app's global RTL
+        // would flip to the right edge.
         Box(
             modifier = Modifier
+                .align(AbsoluteAlignment.BottomLeft)
                 .fillMaxWidth()
-                .height(2.dp)
-                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                .height(PinnedPlayerProgressHeight)
+                .background(AgentGlass.tileFillSubtle)
         ) {
             Box(
                 modifier = Modifier
+                    .align(AbsoluteAlignment.CenterLeft)
                     .fillMaxWidth(progress)
-                    .height(2.dp)
-                    .background(MaterialTheme.colorScheme.primary)
+                    .height(PinnedPlayerProgressHeight)
+                    .background(AgentGlass.accent)
             )
         }
     }
 }
+
+@Composable
+private fun PinnedIconButton(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    contentDescription: String,
+    tint: androidx.compose.ui.graphics.Color,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(PinnedPlayerButtonSize)
+            .clip(CircleShape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            tint = tint,
+            modifier = Modifier.size(20.dp)
+        )
+    }
+}
+
+private val PinnedPlayerRadius = 16.dp
+private val PinnedPlayerShape = RoundedCornerShape(PinnedPlayerRadius)
+private val PinnedPlayerHeight = 40.dp
+private val PinnedPlayerButtonSize = 36.dp
+private val PinnedPlayerProgressHeight = 2.dp
+private const val PROGRESS_TWEEN_MS = 250
 
 private fun formatClock(ms: Int): String {
     val totalSeconds = (ms / 1000).coerceAtLeast(0)

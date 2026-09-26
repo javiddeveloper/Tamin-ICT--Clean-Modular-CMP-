@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
@@ -46,6 +47,7 @@ import com.tamin.taminhamrah.ui.components.dashedOutline
 import com.tamin.taminhamrah.ui.components.rememberCopyAction
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.ShimmerBlock
@@ -229,7 +231,11 @@ fun WorkshopSectionHeader(
  * One کارگاه.
  *
  * Details and actions sit behind a single button, as the design has it: on the old screen the
- * actions only existed once a card had been expanded, which hid the whole point of the list.
+ * actions only existed once a card had been expanded, which hid the whole point of the list. The
+ * card itself answers a tap the same way, since the whole of it reads as the workshop.
+ *
+ * Lifted off the page as the medical records cards are — the shadow cast before the surface, so it
+ * falls outside the card rather than darkening its edge.
  */
 @Composable
 fun WorkshopCard(
@@ -242,7 +248,9 @@ fun WorkshopCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .shadow(elevation = Elevation.lg, shape = WorkshopCardShape)
             .taminSurface(CornerRadius.lg)
+            .clickable(onClick = onOpenDetails)
             .padding(Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
@@ -418,7 +426,7 @@ fun CardExpandToggle(
                 )
             }
             .clickable(onClick = onToggle)
-            .padding(top = WorkshopDimens.toggleTopPadding),
+            .padding(vertical = WorkshopDimens.toggleVerticalPadding),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -441,5 +449,7 @@ fun CardExpandToggle(
 }
 
 private val CodeChipShape = RoundedCornerShape(WorkshopDimens.codeChipCorner)
+
+private val WorkshopCardShape = RoundedCornerShape(CornerRadius.lg)
 
 

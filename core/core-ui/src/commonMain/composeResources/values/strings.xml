@@ -1847,6 +1847,16 @@
     <string name="workshop_debt_remaining">ماندهٔ بدهی (ریال)</string>
     <string name="workshop_debt_from_date">از تاریخ</string>
     <string name="workshop_debt_to_date">تا تاریخ</string>
+    <string name="workshop_debt_empty">بدهی‌ای برای این کارگاه ثبت نشده است.</string>
+    <!-- Each list's own empty line, for when no search or filter narrowed it; a narrowed list that
+         comes back empty keeps workshop_empty_list. -->
+    <string name="workshops_empty">کارگاهی به نام شما ثبت نشده است.</string>
+    <string name="workshop_demand_docs_empty">سند مطالبه‌ای برای این بدهی ثبت نشده است.</string>
+    <string name="article_sixteen_empty">بدهی قابل رسیدگی ماده ۱۶ برای این کارگاه ثبت نشده است.</string>
+    <string name="objectionable_debt_empty">بدهی قابل اعتراضی برای این کارگاه ثبت نشده است.</string>
+    <string name="payment_sheets_empty">برگ پرداختی برای این کارگاه ثبت نشده است.</string>
+    <string name="workshop_members_empty">بیمه‌شدهٔ شاغلی برای این کارگاه ثبت نشده است.</string>
+    <string name="new_member_requests_empty">درخواست نام‌نویسی برای این کارگاه ثبت نشده است.</string>
     <string name="workshop_debt_primary_vote_number">شماره رای هیات بدوی</string>
     <string name="workshop_debt_primary_vote_date">تاریخ رای هیات بدوی</string>
     <string name="workshop_debt_documents">مشاهده اسناد مطالبه</string>
@@ -1934,6 +1944,10 @@
     <string name="member_leaving_date">تاریخ ترک کار</string>
     <string name="stackholder_type">نوع ذینفع</string>
     <string name="stackholder_birth_date">تاریخ تولد</string>
+    <string name="stackholder_role_board_member">اعضای هیئت مدیره</string>
+    <string name="stackholder_role_signatory">صاحبان امضا</string>
+    <string name="stackholder_role_ceo">مدیرعامل</string>
+    <string name="stackholder_role_representative">نماینده</string>
 
     <!-- ===================== فرم‌های کارگاه (shared form vocabulary) ===================== -->
     <string name="ws_form_prev">مرحلهٔ قبل</string>
@@ -3022,6 +3036,16 @@
     <string name="developer_options_payment_mock_failure">پاسخ ناموفق</string>
     <string name="developer_options_test_payment_entry">سناریوهای پرداخت آزمایشی</string>
 
+    <!-- Developer options: AI assistant mock -->
+    <string name="developer_options_agent_mock_title">شبیه‌سازی دستیار هوشمند</string>
+    <string name="developer_options_agent_mock_description">پاسخ دستیار از داده‌ی ساختگی می‌آید: هر پرامپت همه‌ی انواع حباب را برمی‌گرداند و با کلیدواژه (مثل «خطا»، «لغو»، «تایم‌اوت»، «توکن») حالت‌های دیگر ساخته می‌شوند. «راهنما» بفرستید تا فهرست را ببینید. حالت‌های دسترسی با باز کردن دوباره‌ی صفحه اعمال می‌شوند.</string>
+    <string name="developer_options_agent_mock_disabled">غیرفعال (سرور واقعی)</string>
+    <string name="developer_options_agent_mock_responses">پاسخ‌های ساختگی</string>
+    <string name="developer_options_agent_mock_no_voice">پاسخ‌های ساختگی، بدون پیام صوتی</string>
+    <string name="developer_options_agent_mock_access_denied">عدم دسترسی (canStartChat=false)</string>
+    <string name="developer_options_agent_mock_offline">آفلاین (chat-allowed در دسترس نیست)</string>
+    <string name="developer_options_open_agent_entry">باز کردن دستیار هوشمند</string>
+
     <!-- Debug-only payment sandbox (feature:payment) -->
     <string name="payment_sandbox_title">سناریوهای پرداخت</string>
     <string name="payment_sandbox_description">هر مورد یک تیکت تازه می‌سازد و کل فلوی پرداخت را با درگاه شبیه‌سازی‌شده اجرا می‌کند. نتیجه (موفق یا ناموفق) از حالت انتخاب‌شده در بالای همین صفحه پیروی می‌کند.</string>
@@ -3597,6 +3621,8 @@
     <string name="agent_like">پسندیدن</string>
     <string name="agent_dislike">نپسندیدن</string>
     <string name="agent_share">اشتراک‌گذاری</string>
+    <string name="agent_input_disclaimer">پاسخ‌های دستیار جنبهٔ راهنما دارد و جایگزین مراجع رسمی نیست.</string>
+    <string name="agent_recording_in_progress">در حال ضبط</string>
     <string name="agent_not_allowed_default">دستیار هوشمند برای شما فعال نیست.</string>
     <string name="agent_request_failed">عملیات ناموفق بود</string>
     <string name="agent_offline_error">برای گفتگو با دستیار به اینترنت نیاز دارید.</string>

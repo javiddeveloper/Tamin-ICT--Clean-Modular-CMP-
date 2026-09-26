@@ -62,6 +62,13 @@ enum class FilterProperty(val key: String) {
     @SerialName("workshopId.workshopId") WORKSHOPID_ID("workshopId.workshopId"),
     @SerialName("workshop.branchCode") WORKSHOP_BRANCH_CODE("workshop.branchCode"),
     @SerialName("workshopId.branchCode") WORKSHOPID_BRANCH_CODE("workshopId.branchCode"),
+    /**
+     * A ذینفع's national code: the stakeholder row's own `nationalId` column, the one the old app
+     * displayed. Not `workshopId.nationalId` — `workshopId` on this endpoint is the workshop entity,
+     * and filtering on it answers 500 (checked live, 2026-09-22), as does
+     * `personalRegistrationOffice.insuranceId`; this key answers 200.
+     */
+    @SerialName("nationalId") STAKEHOLDER_NATIONAL_ID("nationalId"),
     @SerialName("workshop.workshopStatus.workshopStatusCode") WORKSHOP_STATUS_CODE("workshop.workshopStatus.workshopStatusCode"),
     @SerialName("workshopId") PAYMENT_WORKSHOP_ID("workshopId"),
     @SerialName("branchCode") PAYMENT_BRANCH_CODE("branchCode"),
