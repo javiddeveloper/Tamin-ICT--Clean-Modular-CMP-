@@ -75,6 +75,7 @@ import com.tamin.taminhamrah.feature.orotezprotez.ui.contract.bytesOrNull
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.LoadingButton
@@ -89,7 +90,6 @@ import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminImageViewer
 import com.tamin.taminhamrah.ui.components.TaminJalaliDatePicker
-import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.ButtonDimens
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -210,6 +210,7 @@ fun OrotezProtezScreen(
             viewModel.sendIntent(OrotezProtezIntent.BackToPreviousStep)
         }
     }
+    BackHandler(onBack = handleBack)
 
     OrotezProtezContent(
         state = uiState,
@@ -636,15 +637,7 @@ private fun OrotezProtezInsuredInfoStep(
                 .navigationBarsPadding(),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            TaminTopAppBarButton(
-                icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                contentDescription = null,
-                onClick = onBack,
-                bordered = true,
-                containerColor = colors.bgSurface,
-                contentColor = colors.textPrimary,
-                borderColor = colors.border,
-            )
+            OrotezProtezStepBackButton(onClick = onBack)
             LoadingButton(
                 modifier = Modifier.weight(1f),
                 text = stringResource(Res.string.orotez_protez_confirm_and_continue),
@@ -737,15 +730,7 @@ private fun OrotezProtezDocumentsStep(
                 .navigationBarsPadding(),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            TaminTopAppBarButton(
-                icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                contentDescription = null,
-                onClick = onBack,
-                bordered = true,
-                containerColor = colors.bgSurface,
-                contentColor = colors.textPrimary,
-                borderColor = colors.border,
-            )
+            OrotezProtezStepBackButton(onClick = onBack)
             LoadingButton(
                 modifier = Modifier.weight(1f),
                 text = stringResource(Res.string.orotez_protez_submit_request),
@@ -770,6 +755,30 @@ private fun OrotezProtezDocumentsStep(
         OrotezProtezSubmitSuccessDialog(
             message = state.submittedResultMessage,
             onAcknowledged = { onIntent(OrotezProtezIntent.OnSubmitSuccessAcknowledged) },
+        )
+    }
+}
+
+@Composable
+private fun OrotezProtezStepBackButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+    val shape = RoundedCornerShape(CornerRadius.xl)
+    Box(
+        modifier = modifier
+            .size(ButtonDimens.height)
+            .clip(shape)
+            .background(colors.bgSurface)
+            .border(Thickness.border, colors.border, shape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_back),
+            contentDescription = null,
+            tint = colors.textPrimary,
         )
     }
 }

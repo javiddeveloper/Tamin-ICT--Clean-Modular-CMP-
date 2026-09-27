@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.data.mapper
 
+import com.tamin.taminhamrah.data.local.entity.JobTitlePageEntity
 import com.tamin.taminhamrah.model.common.JobTitleDN
 import com.tamin.taminhamrah.model.common.JobTitleDTO
 import com.tamin.taminhamrah.model.common.UserInsuredInfoDTO
@@ -28,3 +29,21 @@ fun UserInsuredInfoDTO.toDomain(): UserTypeInfoDN {
     }
     return UserTypeInfoDN(userType = userType, message = list?.getOrNull(1))
 }
+
+// ---- Offline page cache (job_title_pages) ----
+
+internal fun JobTitleDN.toPageEntity(listKey: String, position: Int) = JobTitlePageEntity(
+    listKey = listKey,
+    position = position,
+    jobCode = jobCode,
+    jobDescription = jobDescription,
+    status = status,
+    statusDate = statusDate,
+)
+
+internal fun JobTitlePageEntity.toDomain() = JobTitleDN(
+    jobCode = jobCode,
+    jobDescription = jobDescription,
+    status = status,
+    statusDate = statusDate,
+)

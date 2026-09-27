@@ -2400,7 +2400,7 @@
     <string name="ill_days_doctor_name_label">نام پزشک معالج *</string>
     <string name="ill_days_doctor_name_placeholder">نام و نام خانوادگی پزشک</string>
     <string name="ill_days_doctor_code_label">کد نظام پزشکی پزشک معالج *</string>
-    <string name="ill_days_doctor_code_placeholder">تا ۸ رقم …</string>
+    <string name="ill_days_doctor_code_placeholder">تا 10 رقم …</string>
     <string name="ill_days_medical_record_toggle_label">این استراحت پرونده پزشکی مرتبط دارد</string>
     <string name="ill_days_medical_record_toggle_caption">اگر برای این بازه استراحت، سابقه بستری یا مدارک درمانی در مراکز طرف قرارداد دارید، این گزینه را فعال کنید.</string>
     <string name="ill_days_wizard_step4_title">مدارک و ثبت درخواست</string>
@@ -3837,5 +3837,12 @@
     <string name="no_bank_account_desc">شما فاقد شماره حساب بانکی می باشید. لطفا به ثبت شماره حساب بانکی جدید(منوی حساب کاربری) اقدام نمایید.</string>
     <string name="register_bank_account">ثبت شماره حساب بانکی</string>
     <string name="later">بعداً</string>
+
+    <!-- ===================== Tamin Services (خدمات) landing screen ===================== -->
+    <string name="tamin_services_title">خدمات</string>
+    <string name="tamin_services_section_title">خدمات %1$s</string>
+    <string name="tamin_services_search_placeholder">جست‌وجو در میان خدمات ...</string>
+    <string name="tamin_services_badge_count">%1$s خدمت</string>
+    <string name="tamin_services_no_results_title">نتیجه‌ای یافت نشد</string>
 
 </resources>

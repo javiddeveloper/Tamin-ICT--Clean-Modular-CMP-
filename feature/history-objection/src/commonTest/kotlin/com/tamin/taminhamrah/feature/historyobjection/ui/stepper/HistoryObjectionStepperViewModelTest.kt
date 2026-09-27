@@ -13,9 +13,9 @@ import com.tamin.taminhamrah.model.common.InsuranceTypeDN
 import com.tamin.taminhamrah.model.common.ProvinceDN
 import com.tamin.taminhamrah.model.contracts.BranchDN
 import com.tamin.taminhamrah.model.historyObjection.NotExistRequestDN
-import com.tamin.taminhamrah.useCases.common.GetCitiesByProvinceUseCase
+import com.tamin.taminhamrah.useCases.common.GetCitiesByProvincePageUseCase
 import com.tamin.taminhamrah.useCases.common.GetInsuranceTypesUseCase
-import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
+import com.tamin.taminhamrah.useCases.common.GetProvincesPageUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.GetHistoryObjectionNotExistRequestsUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.SaveHistoryObjectionNotExistRequestUseCase
@@ -29,6 +29,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -49,8 +50,8 @@ class HistoryObjectionStepperViewModelTest {
         commonRepository = FakeCommonRepository()
         historyObjectionRepository = FakeHistoryObjectionRepository()
         viewModel = HistoryObjectionStepperViewModel(
-            getProvincesUseCase = GetProvincesUseCase(cityProvinceRepository),
-            getCitiesByProvinceUseCase = GetCitiesByProvinceUseCase(cityProvinceRepository),
+            getProvincesUseCase = GetProvincesPageUseCase(cityProvinceRepository),
+            getCitiesByProvinceUseCase = GetCitiesByProvincePageUseCase(cityProvinceRepository),
             getBranchesUseCase = GetBranchesUseCase(contractsRepository),
             getInsuranceTypesUseCase = GetInsuranceTypesUseCase(commonRepository),
             getHistoryObjectionNotExistRequestsUseCase = GetHistoryObjectionNotExistRequestsUseCase(historyObjectionRepository),
@@ -91,33 +92,21 @@ class HistoryObjectionStepperViewModelTest {
     }
 
     @Test
-    fun citiesLoad_usesFreshNetworkResultNotStaleCache() = runTest(testDispatcher) {
-        // Regression test: getCitiesByProvinceUseCase is cache-then-network and emits twice —
-        // once with whatever's already cached (possibly stale/incomplete), then again with the
-        // fresh network result. The ViewModel must end up on the second emission, not the first.
-        val province = ProvinceDN(provinceCode = "27", provinceName = "گلستان", status = "1", statusStartDate = "1")
-        val staleCachedCities = listOf(CityDN(cityCode = "1", cityName = "شهر قدیمی", provinceCode = "27"))
-        val freshCities = listOf(
-            CityDN(cityCode = "1", cityName = "گرگان", provinceCode = "27"),
-            CityDN(cityCode = "2", cityName = "گنبد کاووس", provinceCode = "27"),
-            CityDN(cityCode = "3", cityName = "علی‌آباد کتول", provinceCode = "27"),
-        )
+    fun insuranceTypesFailure_doesNotCancelProvinceLoad() = runTest(testDispatcher) {
+        // Offline: insurance types are network-only and throw, provinces come from the cache.
+        val province = ProvinceDN(provinceCode = "04", provinceName = "اصفهان", status = "1", statusStartDate = "1")
         cityProvinceRepository.provincesResult = listOf(province)
-        cityProvinceRepository.staleCitiesByProvinceResult = staleCachedCities
-        cityProvinceRepository.citiesByProvinceResult = freshCities
+        commonRepository.shouldThrowError = true
 
         viewModel.uiState.test {
             awaitItem()
             viewModel.sendIntent(HistoryObjectionStepperIntent.Load(null))
-            awaitUntil { it.provinces.isNotEmpty() }
-
-            viewModel.sendIntent(
-                HistoryObjectionStepperIntent.OnProvinceSelected(
-                    com.tamin.taminhamrah.model.common.ProvincePR("27", "گلستان")
-                )
-            )
-            val finalState = awaitUntil { it.cities.size == freshCities.size }
-            assertEquals(freshCities.map { it.cityName }, finalState.cities.map { it.cityName })
+            // StateFlow conflates, so wait for the settled state only: provinces loaded and
+            // loading finished. The error must still be there (the modal used to flash and close).
+            val finished = awaitUntil { it.provinces.isNotEmpty() && !it.isLoading }
+            assertEquals(1, finished.provinces.size)
+            assertNotNull(finished.error)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 

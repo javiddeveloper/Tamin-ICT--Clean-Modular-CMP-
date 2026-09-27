@@ -31,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.components.EmployerInfoBottomSheet
 import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.components.EmployerInfoDialogs
+import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.components.EmployerLocationPickerSheet
 import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.components.EmployerInfoHero
 import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.components.EmployerInfoScreenShimmer
 import com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.components.EmployerInfoSubmitButton
@@ -304,18 +305,27 @@ fun CompleteEmployerInfoScreen(
                 onDismiss = { onIntent(CompleteEmployerInfoIntent.CloseBottomSheet) },
                 selectedCompanyType = state.selectedCompanyType,
                 onSelectCompanyType = { onIntent(CompleteEmployerInfoIntent.SelectCompanyType(it)) },
-                provinces = state.provinces,
-                isProvincesLoading = state.isProvincesLoading,
-                selectedProvince = state.selectedProvince,
-                onSelectProvince = { onIntent(CompleteEmployerInfoIntent.SelectProvince(it)) },
-                cities = state.cities,
-                isCitiesLoading = state.isCitiesLoading,
-                selectedCity = state.selectedCity,
-                onSelectCity = { onIntent(CompleteEmployerInfoIntent.SelectCity(it)) },
                 branches = state.branches,
                 isBranchesLoading = state.isBranchesLoading,
                 selectedBranch = state.selectedBranch,
                 onSelectBranch = { onIntent(CompleteEmployerInfoIntent.SelectBranch(it)) },
+            )
+
+            EmployerLocationPickerSheet(
+                activeBottomSheet = state.activeBottomSheet,
+                onDismiss = { onIntent(CompleteEmployerInfoIntent.CloseBottomSheet) },
+                provinces = state.provinces,
+                isProvincesLoading = state.isProvincesLoading,
+                canLoadMoreProvinces = state.canLoadMoreProvinces,
+                isProvincesLoadingMore = state.isProvincesLoadingMore,
+                onProvinceLoadMore = { onIntent(CompleteEmployerInfoIntent.ProvincePickerLoadMore) },
+                onSelectProvince = { onIntent(CompleteEmployerInfoIntent.SelectProvince(it)) },
+                cities = state.cities,
+                isCitiesLoading = state.isCitiesLoading,
+                canLoadMoreCities = state.canLoadMoreCities,
+                isCitiesLoadingMore = state.isCitiesLoadingMore,
+                onCityLoadMore = { onIntent(CompleteEmployerInfoIntent.CityPickerLoadMore) },
+                onSelectCity = { onIntent(CompleteEmployerInfoIntent.SelectCity(it)) },
             )
 
             // Dialogs

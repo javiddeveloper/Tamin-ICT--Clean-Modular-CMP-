@@ -61,7 +61,7 @@ private class FakeWorkShopsRemoteDataSource : NotUsedWorkShopsRemoteDataSource()
 class WorkShopsRepositoryImplTest {
 
     private val remote = FakeWorkShopsRemoteDataSource()
-    private val repository = WorkShopsRepositoryImpl(remote)
+    private val repository = WorkShopsRepositoryImpl(remote, FakeEmployerServicesPageDao())
 
     /**
      * The legacy client wrote "شماره اعتراض" into a filter key (`branchCode`) the backend's own

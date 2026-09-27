@@ -12,7 +12,6 @@ import com.tamin.taminhamrah.useCases.constructionInsurance.GetInstallmentLetter
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
@@ -29,7 +28,7 @@ class InstallmentLetterViewModel(
     private var hasLoaded = false
 
     private val paginator = Paginator(
-        loadPage = { query -> getInstallmentLetterListPageUseCase(workshopId, branchId, query).first() },
+        loadPages = { query -> getInstallmentLetterListPageUseCase(workshopId, branchId, query) },
     )
 
     override fun handleIntent(intent: InstallmentLetterIntent): Flow<PartialState> =

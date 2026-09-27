@@ -1,5 +1,7 @@
 package com.tamin.taminhamrah.data.repository.contractAffair
 
+import com.tamin.taminhamrah.data.local.dao.ContractAffairDao
+import com.tamin.taminhamrah.data.local.entity.ContractAffairPageEntity
 import com.tamin.taminhamrah.dataSource.contractAffair.ContractAffairRemoteDataSource
 import com.tamin.taminhamrah.model.contractAffair.CancelContractParamsDN
 import com.tamin.taminhamrah.model.contractAffair.CancelContractRequestDTO
@@ -11,7 +13,10 @@ import com.tamin.taminhamrah.model.contractAffair.ContractPremiumType
 import com.tamin.taminhamrah.model.contractAffair.ContractStateDTO
 import com.tamin.taminhamrah.model.contractAffair.PaymentCalculationRowDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
+import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.request.FilterOperator
+import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.model.utils.ListData
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.toList
@@ -19,17 +24,88 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
- * [ContractAffairRepositoryImpl] is network-only (no Room). These tests pin the DTO→DN mapping,
+ * [ContractAffairRepositoryImpl]: the contracts list is offline-first (page cache); the rest is
+ * network-only. These tests pin the cache behaviour, the DTO→DN mapping,
  * the fixed «all reasons in one page» query for علت خاتمه قرارداد, and the غیرفعال کردن قرارداد
  * request shape (`contractStatus = 99`).
  */
 class ContractAffairRepositoryImplTest {
 
-    private fun repository(remote: FakeRemote) = ContractAffairRepositoryImpl(remote)
+    private fun repository(remote: FakeRemote, dao: FakeContractAffairDao = FakeContractAffairDao()) =
+        ContractAffairRepositoryImpl(remote, dao)
+
+    private fun contracts(vararg numbers: Int) =
+        ListData(total = 50, list = numbers.map { contractDto(contractNumber = it) })
+
+    @Test
+    fun `getContractsPage emits the cached page then the network page`() = runTest {
+        val dao = FakeContractAffairDao()
+        repository(FakeRemote(contracts = contracts(1)), dao).getContractsPage(ApiQueryParamDN()).toList()
+
+        val emissions = repository(FakeRemote(contracts = contracts(2)), dao)
+            .getContractsPage(ApiQueryParamDN()).toList()
+
+        assertEquals(2, emissions.size)
+        assertEquals(listOf(1), emissions[0].items.map { it.contractNumber })
+        assertTrue(emissions[0].isFromCache)
+        assertEquals(listOf(2), emissions[1].items.map { it.contractNumber })
+        assertFalse(emissions[1].isFromCache)
+    }
+
+    @Test
+    fun `getContractsPage serves cached pages in server order when offline`() = runTest {
+        val dao = FakeContractAffairDao()
+        repository(FakeRemote(contracts = contracts(9, 3)), dao)
+            .getContractsPage(ApiQueryParamDN(start = 0, limit = 2)).toList()
+        repository(FakeRemote(contracts = contracts(7, 1)), dao)
+            .getContractsPage(ApiQueryParamDN(start = 2, limit = 2)).toList()
+
+        val offline = repository(FakeRemote(error = IllegalStateException("offline")), dao)
+            .getContractsPage(ApiQueryParamDN(start = 2, limit = 2)).toList()
+
+        assertEquals(1, offline.size)
+        assertEquals(listOf(7, 1), offline.single().items.map { it.contractNumber })
+        assertTrue(offline.single().isFromCache)
+    }
+
+    @Test
+    fun `getContractsPage first page replaces only its own list`() = runTest {
+        val dao = FakeContractAffairDao()
+        val filtered = ApiQueryParamDN(
+            filters = listOf(ApiFilterDN(FilterProperty.CONTRACT_NUMBER, "5", FilterOperator.EQ)),
+        )
+        repository(FakeRemote(contracts = contracts(5)), dao).getContractsPage(filtered).toList()
+        repository(FakeRemote(contracts = contracts(1, 2)), dao).getContractsPage(ApiQueryParamDN()).toList()
+        // Unfiltered list refreshed with fewer rows: its stale row goes, the filtered list stays.
+        repository(FakeRemote(contracts = contracts(3)), dao).getContractsPage(ApiQueryParamDN()).toList()
+
+        val offline = FakeRemote(error = IllegalStateException("offline"))
+        assertEquals(
+            listOf(3),
+            repository(offline, dao).getContractsPage(ApiQueryParamDN()).first().items.map { it.contractNumber },
+        )
+        assertEquals(
+            listOf(5),
+            repository(offline, dao).getContractsPage(filtered).first().items.map { it.contractNumber },
+        )
+    }
+
+    @Test
+    fun `getContractsPage round-trips a contract through the cache`() = runTest {
+        val dao = FakeContractAffairDao()
+        val network = repository(FakeRemote(contracts = contracts(42)), dao)
+            .getContractsPage(ApiQueryParamDN()).first().items.single()
+
+        val cached = repository(FakeRemote(error = IllegalStateException("offline")), dao)
+            .getContractsPage(ApiQueryParamDN()).first().items.single()
+
+        assertEquals(network, cached)
+    }
 
     @Test
     fun `getContractsPage maps the list envelope into a page and forwards the query`() = runTest {
@@ -329,3 +405,20 @@ private fun contractDto(contractNumber: Int): ContractDTO = ContractDTO(
     statusDate = null,
     wage = null,
 )
+
+/** Page table keyed like Room's composite primary key (listKey, position). */
+private class FakeContractAffairDao : ContractAffairDao {
+    private val rows = mutableListOf<ContractAffairPageEntity>()
+
+    override suspend fun getPageSlice(listKey: String, limit: Int, offset: Int): List<ContractAffairPageEntity> =
+        rows.filter { it.listKey == listKey }.sortedBy { it.position }.drop(offset).take(limit)
+
+    override suspend fun upsertPage(rows: List<ContractAffairPageEntity>) {
+        rows.forEach { row -> this.rows.removeAll { it.listKey == row.listKey && it.position == row.position } }
+        this.rows += rows
+    }
+
+    override suspend fun clearPages(listKey: String) {
+        rows.removeAll { it.listKey == listKey }
+    }
+}

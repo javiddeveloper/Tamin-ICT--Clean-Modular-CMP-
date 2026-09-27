@@ -111,6 +111,26 @@ fun Modifier.topAreaContentSpacer(state: TopAreaState): Modifier = layout { meas
 }
 
 /**
+ * Shifts this child up by [overlap] to overlap the previous sibling's bottom edge -- e.g. a
+ * summary/stats card riding up into the reserved bottom space of a folding hero header above it --
+ * while reporting a height reduced by that same amount, so a parent measuring total column height
+ * (typically via [reportTopAreaHeight]) sees the true visual footprint instead of double-counting
+ * the overlap as reserved space.
+ *
+ * Previously re-declared file-local in three screens (`LegalRepresentativeWorkshopsScreen`,
+ * `ObjectionStatusScreen`, `EmployerOnlineServicesScreen`) per this file's own precedent of
+ * extracting on a fourth use -- `CalculateWagePensionScreen` is that fourth use.
+ */
+fun Modifier.straddlePreviousSibling(overlap: Dp): Modifier = layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints)
+    val overlapPx = overlap.roundToPx()
+    val reportedHeight = (placeable.height - overlapPx).coerceAtLeast(0)
+    layout(placeable.width, reportedHeight) {
+        placeable.placeRelative(0, -overlapPx)
+    }
+}
+
+/**
  * Alternative to [topAreaContentSpacer] for callers that would rather reserve the top area's
  * height via `contentPadding` than via a leading spacer item -- avoids a spacer participating in
  * a `LazyColumn`'s `verticalArrangement.spacedBy`, which would otherwise add one extra gap between

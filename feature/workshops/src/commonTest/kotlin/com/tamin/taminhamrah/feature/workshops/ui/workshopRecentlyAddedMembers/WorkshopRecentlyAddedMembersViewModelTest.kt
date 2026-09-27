@@ -30,7 +30,6 @@ import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.W
 import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersIntent.PendingActionDismissed
 import com.tamin.taminhamrah.model.common.BeneficiaryDN
 import com.tamin.taminhamrah.model.common.CityDN
-import com.tamin.taminhamrah.model.common.CityListResultDN
 import com.tamin.taminhamrah.model.common.InsuranceTypeDN
 import com.tamin.taminhamrah.model.common.JobTitleDN
 import com.tamin.taminhamrah.model.common.JobTitleListDN
@@ -66,7 +65,7 @@ import com.tamin.taminhamrah.model.workshop.WorkshopNewMemberPR
 import com.tamin.taminhamrah.repository.CityProvinceRepository
 import com.tamin.taminhamrah.repository.common.CommonRepository
 import com.tamin.taminhamrah.repository.personal.PersonalRepository
-import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
+import com.tamin.taminhamrah.useCases.common.GetCitiesPageUseCase
 import com.tamin.taminhamrah.useCases.common.GetCityUseCase
 import com.tamin.taminhamrah.useCases.common.GetJobTitlePageUseCase
 import com.tamin.taminhamrah.useCases.common.GetRegistrationDeclarationFormUseCase
@@ -148,7 +147,7 @@ class WorkshopRecentlyAddedMembersViewModelTest {
             downloader,
             PutInsuredRegistrationDocListUseCase(documents),
             GetInsuredRegistrationDocListUseCase(documents),
-            GetCitiesUseCase(cities),
+            GetCitiesPageUseCase(cities),
             GetCityUseCase(cities),
             GetJobTitlePageUseCase(jobs),
             GetRegistrationDeclarationFormUseCase(jobs),
@@ -553,7 +552,7 @@ class WorkshopRecentlyAddedMembersViewModelTest {
         }
 
     @Test
-    fun `opening city picker keeps canPickerLoadMore false`() =
+    fun `opening city picker loads first page from the server`() =
         runTest(testDispatcher) {
             val viewModel = viewModel()
 
@@ -563,7 +562,37 @@ class WorkshopRecentlyAddedMembersViewModelTest {
             val form = assertNotNull(viewModel.uiState.value.form)
             assertEquals(RegistrationPicker.BIRTH_CITY, form.picker)
             assertEquals(1, form.pickerOptions.size)
-            assertFalse(form.canPickerLoadMore, "city pickers do not paginate")
+            assertFalse(form.canPickerLoadMore, "fewer results than a full page means the list has ended")
+        }
+
+    @Test
+    fun `FormPickerQueryChanged for a city picker refreshes with a city-name filter`() =
+        runTest(testDispatcher) {
+            val cities = FakeCitiesRepository()
+            val viewModel = WorkshopRecentlyAddedMembersViewModel(
+                GetRecentlyAddedMembersUseCase(workshops),
+                ConfirmRecentlyAddedMemberUseCase(workshops),
+                DeleteRecentlyAddedMemberUseCase(workshops),
+                CheckNewMemberIsNewUseCase(workshops),
+                CreateNewMemberRegistrationUseCase(workshops),
+                WorkshopAttachmentUploader { UPLOADED_GUID },
+                WorkshopAttachmentDownloader { FILED_IMAGE },
+                PutInsuredRegistrationDocListUseCase(documents),
+                GetInsuredRegistrationDocListUseCase(documents),
+                GetCitiesPageUseCase(cities),
+                GetCityUseCase(cities),
+                GetJobTitlePageUseCase(jobs),
+                GetRegistrationDeclarationFormUseCase(jobs),
+            ).also { it.sendIntent(Open(WORKSHOP_ID, BRANCH_CODE)) }
+
+            viewModel.sendIntent(Edit(WorkshopNewMemberPR()))
+            viewModel.sendIntent(FormPickerOpened(RegistrationPicker.BIRTH_CITY))
+            viewModel.sendIntent(FormPickerQueryChanged("تهران"))
+
+            val filter = assertNotNull(cities.lastQuery?.filters?.firstOrNull())
+            assertEquals(FilterProperty.CITY_NAME, filter.property)
+            assertEquals("*تهران*", filter.value)
+            assertEquals(FilterOperator.LIKE, filter.operator)
         }
 
     /** A blank registration taken past step one and filled in on step two, not yet saved. */
@@ -639,16 +668,19 @@ private fun filedDocument(guid: String, typeCode: String) = InsuredDocDN(
 /** Knows one city, which is all the pickers and the draft need. */
 private class FakeCitiesRepository : CityProvinceRepository {
     private val tehran = CityDN(cityCode = TEHRAN.code, provinceCode = null, cityName = TEHRAN.label)
+    var lastQuery: ApiQueryParamDN? = null
 
-    override fun getCities(cityName: String?, provinceCode: String?): Flow<List<CityDN>> =
-        flowOf(listOf(tehran))
+    override fun getCitiesPage(query: ApiQueryParamDN): Flow<PageDN<CityDN>> = flow {
+        lastQuery = query
+        emit(PageDN(listOf(tehran)))
+    }
 
     override fun getCity(cityId: String): Flow<CityDN> =
         flowOf(tehran).filter { it.cityCode == cityId }
 
-    override fun getProvinces(): Flow<List<ProvinceDN>> = unused()
+    override fun getProvincesPage(query: ApiQueryParamDN): Flow<PageDN<ProvinceDN>> = unused()
     override fun getProvince(provinceId: String): Flow<ProvinceDN> = unused()
-    override fun getCitiesByProvince(provinceCode: String): Flow<CityListResultDN> = unused()
+    override fun getCitiesByProvincePage(provinceCode: String, query: ApiQueryParamDN): Flow<PageDN<CityDN>> = unused()
 }
 
 /** Knows one job; nothing else of the common repository is part of this screen's flows. */
