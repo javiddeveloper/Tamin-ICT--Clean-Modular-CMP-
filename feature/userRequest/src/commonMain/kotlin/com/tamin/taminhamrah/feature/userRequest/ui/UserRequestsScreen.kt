@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,12 +39,13 @@ import com.tamin.taminhamrah.feature.userRequest.ui.contract.UserRequestsEvent
 import com.tamin.taminhamrah.feature.userRequest.ui.contract.UserRequestsIntent
 import com.tamin.taminhamrah.feature.userRequest.ui.contract.UserRequestsUiState
 import com.tamin.taminhamrah.model.userRequest.UserRequestTabCategory
-import com.tamin.taminhamrah.model.userRequest.UserRequestTypeIds
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
+import com.tamin.taminhamrah.ui.paging.OnLoadMore
+import com.tamin.taminhamrah.ui.paging.PagingFooter
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -141,6 +143,14 @@ fun UserRequestsContent(
     topArea.collapseWhileImeVisible()
     val listState = rememberLazyListState()
 
+    // Re-keyed on the loaded count: OnLoadMore fires only when the end first comes into view, and
+    // a status tab can hide a whole page, leaving the end in view with no new trigger.
+    key(state.requests.size) {
+        listState.OnLoadMore(enabled = !state.endReached && state.paginationError == null) {
+            onIntent(UserRequestsIntent.LoadNextPage)
+        }
+    }
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -196,7 +206,7 @@ fun UserRequestsContent(
                         CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     }
                 }
-            } else if (state.filteredRequests.isEmpty()) {
+            } else if (state.filteredRequests.isEmpty() && state.endReached) {
                 item {
                     Box(
                         modifier = Modifier
@@ -230,6 +240,16 @@ fun UserRequestsContent(
                         onOpenErrors = { onIntent(UserRequestsIntent.OpenErrors(request.id, request.title)) },
                         onCopyTrackingCode = { onIntent(UserRequestsIntent.CopyTrackingCode(it)) },
                         modifier = Modifier.padding(horizontal = Spacing.page)
+                    )
+                }
+            }
+
+            if (!state.isLoading) {
+                item(key = PAGING_FOOTER_KEY) {
+                    PagingFooter(
+                        isLoadingNextPage = state.isLoadingNextPage,
+                        error = state.paginationError,
+                        onRetry = { onIntent(UserRequestsIntent.RetryNextPage) },
                     )
                 }
             }
@@ -421,5 +441,4 @@ private fun UserRequestsScreenPreviewDark() {
     }
 }
 
-
-
+private const val PAGING_FOOTER_KEY = "paging_footer"

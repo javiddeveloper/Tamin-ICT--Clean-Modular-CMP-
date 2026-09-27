@@ -229,6 +229,15 @@ city method, e.g. complete-employer-info uses `getCitiesByProvincePage`):
 table and the checklist code applies as-is. After a delete, `refresh()` briefly shows the cached
 first page (still holding the deleted item) until the network page replaces it.
 
+**Worked example — my requests** (`UserRequestRepositoryImpl.getUserRequestsPage` + feature/userRequest
+`UserRequestsViewModel`): the search (refCode / type) is not in the `ApiQueryParamDN` — the filters are
+built in core-data — so the method takes `(search, page)` and the ViewModel's `loadPages` lambda reads
+the current search; a new search sets it and calls `refresh()`. It reuses the shared `user_requests`
+table (also read by cartable and Home): only an unfiltered first page `replaceAll`s, anything else upserts.
+The status tabs filter loaded items client-side, so the screen wraps `OnLoadMore` in
+`key(state.requests.size)` — otherwise a tab that hides a whole page leaves the end in view and
+never re-triggers. Before this, the screen sent no `limit` and showed only the first 10 requests.
+
 ## Mutations reset the pager
 
 After a delete or any change that shifts rows, call `paginator.refresh()` — not a re-subscribe.

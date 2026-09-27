@@ -55,6 +55,7 @@ import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestErrorsUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetSmartGuideListUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestTypesUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestsUseCase
+import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestsPageUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestDetailUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetShowRequestInfoUseCase
 import com.tamin.taminhamrah.useCases.userRequest.DownloadUserRequestDocumentUseCase
@@ -398,6 +399,7 @@ val domainModule = module {
     factoryOf(::GetHomeContentUseCase)
     factoryOf(::SyncHomeContentUseCase)
     factoryOf(::GetUserRequestsUseCase)
+    factoryOf(::GetUserRequestsPageUseCase)
     factoryOf(::GetUserRequestTypesUseCase)
     factoryOf(::GetUserRequestErrorsUseCase)
     factoryOf(::GetSmartGuideListUseCase)

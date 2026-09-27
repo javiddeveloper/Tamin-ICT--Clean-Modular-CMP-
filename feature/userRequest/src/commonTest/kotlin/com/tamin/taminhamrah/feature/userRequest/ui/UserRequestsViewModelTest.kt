@@ -12,7 +12,7 @@ import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.userRequest.GetSmartGuideListUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestErrorsUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestTypesUseCase
-import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestsUseCase
+import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestsPageUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -41,7 +41,7 @@ class UserRequestsViewModelTest {
         Dispatchers.setMain(testDispatcher)
         repository = FakeUserRequestRepository()
         viewModel = UserRequestsViewModel(
-            getUserRequestsUseCase = GetUserRequestsUseCase(repository),
+            getUserRequestsPageUseCase = GetUserRequestsPageUseCase(repository),
             getUserRequestTypesUseCase = GetUserRequestTypesUseCase(repository),
             getUserRequestErrorsUseCase = GetUserRequestErrorsUseCase(repository),
             getSmartGuideListUseCase = GetSmartGuideListUseCase(repository),
@@ -152,6 +152,7 @@ class UserRequestsViewModelTest {
             assertTrue(state.isFilterOpen)
             assertEquals("REF-1", repository.lastSearch?.refCode)
             assertEquals("42", repository.lastSearch?.requestTypeId)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -198,12 +199,44 @@ class UserRequestsViewModelTest {
             viewModel.sendIntent(UserRequestsIntent.LoadRequests)
 
             var state = awaitItem()
-            while (state.error == null) state = awaitItem()
+            while (state.paginationError == null) state = awaitItem()
 
             assertFalse(state.isLoading)
-            assertEquals("boom", state.error)
+            assertEquals(RuntimeException("boom").toSingleLineMessage(), state.paginationError)
         }
     }
+
+    @Test
+    fun `requests are paged - first page, then the next page appends until total`() = runTest(testDispatcher) {
+        repository.userRequestsResult = (1L..15L).map { sampleDomain(it) }
+        repository.userRequestsTotal = 15
+
+        viewModel.uiState.test {
+            awaitItem()
+            viewModel.sendIntent(UserRequestsIntent.LoadRequests)
+            var state = awaitItem()
+            while (state.requests.size != 10) state = awaitItem()
+            assertFalse(state.endReached)
+
+            viewModel.sendIntent(UserRequestsIntent.LoadNextPage)
+            while (state.requests.size != 15) state = awaitItem()
+
+            assertTrue(state.endReached)
+            assertEquals(10, repository.lastPage?.start)
+        }
+    }
+
+    private fun sampleDomain(id: Long) = UserRequestDN(
+        id = id,
+        refCode = id.toString(),
+        title = "تست",
+        comment = null,
+        creationTime = null,
+        createByName = null,
+        status = null,
+        requestType = null,
+        referenceId = null,
+    )
 
     @Test
     fun `open smart guide failure emits show toast event`() = runTest(testDispatcher) {

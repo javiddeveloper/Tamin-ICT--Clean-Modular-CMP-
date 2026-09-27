@@ -1,13 +1,14 @@
 package com.tamin.taminhamrah.data.repository.userRequests
 
 import com.tamin.taminhamrah.data.local.dao.UserRequestDao
-import com.tamin.taminhamrah.data.local.entity.UserRequestEntity
 import com.tamin.taminhamrah.data.mapper.toDetails
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.dataSource.request.UserRequestRemoteDataSource
 import com.tamin.taminhamrah.model.userRequest.UserRequestDetailsDN
 import com.tamin.taminhamrah.model.userRequest.UserRequestTypeIds
+import com.tamin.taminhamrah.model.paging.PageDN
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import com.tamin.taminhamrah.model.request.ApiFilterDN
@@ -56,19 +57,49 @@ internal class UserRequestRepositoryImpl(
      * through to the local cache, so [getUserRequests] observers see the update too.
      */
     override suspend fun refreshUserRequests(search: UserRequestSearchParams): List<UserRequestDN> =
-        fetchAndCacheUserRequests(search).map { it.toDomain() }.applySearchFilter(search)
+        fetchAndCacheUserRequests(search).items.applySearchFilter(search)
 
-    /** Fetches the remote list and writes it through to the cache; returns the cached-shape entities. */
-    private suspend fun fetchAndCacheUserRequests(search: UserRequestSearchParams): List<UserRequestEntity> {
-        val isFiltered = search.isFiltered()
-        val response = requestRemoteDataSource.getUserRequests(buildQuery(search))
+    override fun getUserRequestsPage(
+        search: UserRequestSearchParams,
+        page: ApiQueryParamDN,
+    ): Flow<PageDN<UserRequestDN>> = flow {
+        // Same filter and order (refCode DESC) as the server, so the slice matches the page.
+        val cached = requestDao.getUserRequests().first()
+            .map { it.toDomain() }
+            .applySearchFilter(search)
+            .drop(page.start)
+            .take(page.limit)
+        if (cached.isNotEmpty()) emit(PageDN(items = cached, isFromCache = true))
+
+        val remote = try {
+            fetchAndCacheUserRequests(search, page)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            if (cached.isEmpty()) throw e
+            return@flow
+        }
+        emit(remote)
+    }
+
+    /**
+     * Fetches one page and writes it through to the cache. Only an unfiltered first page replaces
+     * the table; filtered or later pages upsert, so they never wipe rows another list shows.
+     */
+    private suspend fun fetchAndCacheUserRequests(
+        search: UserRequestSearchParams,
+        page: ApiQueryParamDN = ApiQueryParamDN(),
+    ): PageDN<UserRequestDN> {
+        val query = buildQuery(search).copy(page = page.page, start = page.start, limit = page.limit)
+        val response = requestRemoteDataSource.getUserRequests(query)
         val remoteRequests = response.list.orEmpty().map { it.toEntity() }
-        if (isFiltered) {
+        if (search.isFiltered() || page.start > 0) {
             requestDao.upsertUserRequests(remoteRequests)
         } else {
             requestDao.replaceAll(remoteRequests)
         }
-        return remoteRequests
+        // ListData.total defaults to 0 when absent; null lets the Paginator fall back to a short page.
+        return PageDN(items = remoteRequests.map { it.toDomain() }, total = response.total.takeIf { it > 0 })
     }
 
     override suspend fun getRequestTypes(query: ApiQueryParamDN?): List<UserRequestTypeDN> {
