@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.last
 import org.jetbrains.compose.resources.getString
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.fraction_contract_error_active_fraction
@@ -122,7 +123,7 @@ class FractionContractViewModel(
         try {
             val cities = identityInfoUseCase
                 .getCities()
-                .first()
+                .last() // offline-first: the network list, or the cache when offline
                 .toCityPresentation()
             emit(PartialState.CitiesLoaded(cities))
             matchPreferredCity(cities, preferredCityName)?.let { matched ->

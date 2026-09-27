@@ -52,7 +52,7 @@ class MyInboxViewModel(
 ) {
 
     private val paginator = Paginator(
-        loadPage = { query -> getPersonalInboxItemsPageUseCase(query).first() },
+        loadPages = { query -> getPersonalInboxItemsPageUseCase(query) },
     )
 
     init {

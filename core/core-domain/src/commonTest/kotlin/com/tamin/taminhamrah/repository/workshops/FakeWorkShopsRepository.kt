@@ -51,6 +51,7 @@ import com.tamin.taminhamrah.model.workshop.SettlementCertificateDN
 import com.tamin.taminhamrah.model.workshop.SettlementRequestDN
 import com.tamin.taminhamrah.model.workshop.SettlementSubjectDN
 import com.tamin.taminhamrah.repository.WorkShopsRepository
+import com.tamin.taminhamrah.model.paging.PageDN
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -329,20 +330,26 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         employerContactInfo
     }
 
-    override suspend fun getWorkshopsWithoutContract(
+    override fun getWorkshopsWithoutContract(
         page: Int,
-    ): PagedListDN<WorkshopWithoutContractDN> = answer {
-        lastWorkshopsWithoutContractPage = page
-        workshopsWithoutContract
+    ): Flow<PageDN<WorkshopWithoutContractDN>> = flow {
+        val result = answer {
+            lastWorkshopsWithoutContractPage = page
+            workshopsWithoutContract
+        }
+        emit(PageDN(items = result.items, total = result.total))
     }
 
-    override suspend fun getWorkshopContractRows(
+    override fun getWorkshopContractRows(
         workshopId: String,
         branchCode: String,
         page: Int,
-    ): PagedListDN<WorkshopContractRowDN> = answer {
-        lastContractRowsArgs = Triple(workshopId, branchCode, page)
-        workshopContractRows
+    ): Flow<PageDN<WorkshopContractRowDN>> = flow {
+        val result = answer {
+            lastContractRowsArgs = Triple(workshopId, branchCode, page)
+            workshopContractRows
+        }
+        emit(PageDN(items = result.items, total = result.total))
     }
 
     override suspend fun submitEmployerAgreement(request: EmployerAgreementSubmissionDN): String =

@@ -183,7 +183,11 @@ fun AssignerContractsContent(
         // clearing the search never takes the tabs off the screen while the rows below settle.
         val count = list.items.size
         val header: @Composable () -> Unit = {
-            Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
+            Column(
+                // A little air between the gradient bar and the tabs.
+                modifier = Modifier.padding(top = Spacing.sm),
+                verticalArrangement = Arrangement.spacedBy(Spacing.md),
+            ) {
                 AssignerTabsRow(
                     selected = tab,
                     count = count,

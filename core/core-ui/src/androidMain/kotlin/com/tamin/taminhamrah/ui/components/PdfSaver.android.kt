@@ -48,13 +48,15 @@ private class AndroidPdfSaver(private val context: Context) : PdfSaver {
         }
     }
 
-    override suspend fun save(fileName: String, bytes: ByteArray) {
-        if (bytes.isEmpty()) return
+    override suspend fun save(fileName: String, bytes: ByteArray): String? {
+        if (bytes.isEmpty()) return null
         // An earlier download is kept as it is: writing again would leave MediaStore holding
         // "name (1).pdf" beside the original.
         val existing = withContext(Dispatchers.IO) { find(fileName) }
-        val uri = existing ?: withContext(Dispatchers.IO) { write(fileName, bytes) } ?: return
-        notify(fileName, uri, isNew = existing == null)
+        val uri = existing ?: withContext(Dispatchers.IO) { write(fileName, bytes) } ?: return null
+        val message = if (existing == null) DOWNLOAD_DONE_MESSAGE else ALREADY_DOWNLOADED_MESSAGE
+        notify(fileName, uri, message)
+        return message
     }
 
     private fun write(fileName: String, bytes: ByteArray): Uri? =
@@ -116,7 +118,7 @@ private class AndroidPdfSaver(private val context: Context) : PdfSaver {
         FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
 
     @Suppress("MissingPermission")
-    private fun notify(fileName: String, uri: Uri, isNew: Boolean) {
+    private fun notify(fileName: String, uri: Uri, message: String) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
             PackageManager.PERMISSION_GRANTED
@@ -143,7 +145,7 @@ private class AndroidPdfSaver(private val context: Context) : PdfSaver {
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.stat_sys_download_done)
             .setContentTitle(fileName)
-            .setContentText(if (isNew) DOWNLOAD_DONE_MESSAGE else ALREADY_DOWNLOADED_MESSAGE)
+            .setContentText(message)
             .setContentIntent(contentIntent)
             .setAutoCancel(true)
             .build()

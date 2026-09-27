@@ -1,7 +1,12 @@
 package com.tamin.taminhamrah.data.repository.contractAffair
 
+import com.tamin.taminhamrah.data.local.dao.ContractAffairDao
+import com.tamin.taminhamrah.data.local.entity.ContractAffairPageEntity
+import com.tamin.taminhamrah.data.mapper.toContractAffairDomain
 import com.tamin.taminhamrah.data.mapper.toDomain
+import com.tamin.taminhamrah.data.mapper.toEntity
 import com.tamin.taminhamrah.data.mapper.toRequestDto
+import com.tamin.taminhamrah.data.repository.paging.pageCacheKey
 import com.tamin.taminhamrah.dataSource.contractAffair.ContractAffairRemoteDataSource
 import com.tamin.taminhamrah.model.contractAffair.CancelContractParamsDN
 import com.tamin.taminhamrah.model.contractAffair.ContractDN
@@ -15,26 +20,41 @@ import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.contractAffair.ContractAffairRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
-/**
- * امور قراردادها و پرداخت — network-only repository (no Room cache, no schema bump) backing the
- * standalone `feature/contractsAndPaymentAffair` module.
- */
 class ContractAffairRepositoryImpl(
     private val contractAffairRemoteDataSource: ContractAffairRemoteDataSource,
+    private val contractAffairDao: ContractAffairDao,
 ) : ContractAffairRepository {
 
     override fun getContractsPage(query: ApiQueryParamDN): Flow<PageDN<ContractDN>> = flow {
-        val response = contractAffairRemoteDataSource.getContracts(query)
-        emit(
-            PageDN(
-                items = response.list.orEmpty().map { it.toDomain() },
-                total = response.total,
-            ),
-        )
+        val listKey = query.pageCacheKey()
+        val cached = contractAffairDao.getPageSlice(listKey, limit = query.limit, offset = query.start)
+        if (cached.isNotEmpty()) {
+            emit(PageDN(items = cached.map { it.contract.toContractAffairDomain() }, isFromCache = true))
+        }
+
+        val response = try {
+            contractAffairRemoteDataSource.getContracts(query)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            if (cached.isEmpty()) throw e
+            return@flow
+        }
+        val contracts = response.list.orEmpty().map { it.toDomain() }
+        val rows = contracts.mapIndexed { index, contract ->
+            ContractAffairPageEntity(listKey = listKey, position = query.start + index, contract = contract.toEntity())
+        }
+        if (query.start == 0) {
+            contractAffairDao.replacePages(listKey, rows)
+        } else {
+            contractAffairDao.upsertPage(rows)
+        }
+        emit(PageDN(items = contracts, total = response.total))
     }
 
     override fun getContractStates(): Flow<List<ContractStateDN>> = flow {

@@ -22,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.ui.Modifier
 import com.tamin.taminhamrah.ui.theme.Duration
 import com.tamin.taminhamrah.ui.theme.Easing
@@ -410,6 +411,7 @@ fun MedicalRecordsContent(
                 background = taminHeroGradient(colors.treatmentHubStops),
                 navigationIcon = {
                     TaminTopAppBarButton(
+                        bordered = true,
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                         contentDescription = stringResource(Res.string.action_back),
                         onClick = onBack,
@@ -463,11 +465,13 @@ fun MedicalRecordsContent(
             }
         },
         bottomBar = {
-            RecordsTotals(
-                prices = visibleRecordPrices,
-                hasRecords = visibleRecords.isNotEmpty(),
-                isLoadingPrices = state.isLoadingPrices,
-            )
+            Box(modifier = Modifier.navigationBarsPadding()){
+                RecordsTotals(
+                    prices = visibleRecordPrices,
+                    hasRecords = visibleRecords.isNotEmpty(),
+                    isLoadingPrices = state.isLoadingPrices,
+                )
+            }
         },
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {

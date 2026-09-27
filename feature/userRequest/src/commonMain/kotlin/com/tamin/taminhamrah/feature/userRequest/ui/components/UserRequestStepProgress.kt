@@ -80,6 +80,7 @@ fun UserRequestStepProgress(
     }
 
     val barColor = colorScheme.primary
+    val taminColors = LocalTaminColors.current
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -89,12 +90,17 @@ fun UserRequestStepProgress(
             modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.xl),
             contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(Spacing.xxs + Thickness.border)
-                    .background(barColor)
-            )
+            // One segment per gap; a segment is filled once the step it leads to is reached.
+            Row(modifier = Modifier.fillMaxWidth()) {
+                steps.drop(1).forEach { next ->
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(Spacing.xxs + Thickness.border)
+                            .background(if (next.state == StepState.UNREACHED) taminColors.outerBorder else barColor)
+                    )
+                }
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -117,8 +123,12 @@ fun UserRequestStepProgress(
                 TaminText(
                     text = step.title,
                     style = MaterialTheme.typography.labelSmall.copy(
-                        color = if (step.state == StepState.ERROR) colorScheme.error else colorScheme.primary,
-                        fontWeight = if (step.state == StepState.ERROR) FontWeight.Bold else FontWeight.Normal,
+                        color = when (step.state) {
+                            StepState.ERROR -> colorScheme.error
+                            StepState.UNREACHED -> taminColors.textMuted
+                            else -> colorScheme.primary
+                        },
+                        fontWeight = if (step.state == StepState.ERROR || step.state == StepState.IN_PROGRESS) FontWeight.Bold else FontWeight.Normal,
                         textAlign = TextAlign.Center
                     ),
                     modifier = Modifier.weight(1f)
@@ -159,15 +169,14 @@ private fun StepNode(
                 modifier = Modifier
                     .size(nodeSize)
                     .clip(CircleShape)
-                    .background(taminColors.bgSurface)
-                    .border(Spacing.xxs + Thickness.border, barColor, CircleShape),
+                    .background(barColor),
                 contentAlignment = Alignment.Center
             ) {
                 Box(
                     modifier = Modifier
                         .size(Spacing.sm)
                         .clip(CircleShape)
-                        .background(barColor)
+                        .background(taminColors.bgSurface)
                 )
             }
         }
@@ -204,7 +213,7 @@ private fun StepNode(
 @Composable
 private fun UserRequestStepProgressPreview() {
     com.tamin.taminhamrah.ui.PreviewRtlThemeContent {
-        UserRequestStepProgress(phase = UserRequestProgressPhase.ERROR)
+        UserRequestStepProgress(phase = UserRequestProgressPhase.IN_PROGRESS)
     }
 }
 

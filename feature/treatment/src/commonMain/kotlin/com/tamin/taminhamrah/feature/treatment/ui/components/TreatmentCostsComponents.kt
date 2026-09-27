@@ -24,17 +24,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.animation.core.tween
 import androidx.compose.ui.Modifier
-import com.tamin.taminhamrah.ui.theme.Duration
-import com.tamin.taminhamrah.ui.theme.Easing
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -51,10 +46,13 @@ import com.tamin.taminhamrah.ui.ActionMenuItem
 import com.tamin.taminhamrah.ui.components.RecordCard
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.TaminEmptyState
+import com.tamin.taminhamrah.ui.components.rememberCopyAction
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
 import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.Duration
+import com.tamin.taminhamrah.ui.theme.Easing
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -177,8 +175,8 @@ private fun CertificateCard(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    @Suppress("DEPRECATION")
-    val clipboardManager = LocalClipboardManager.current
+    // announce = false: the chip's own tick is the confirmation.
+    val copyCode = rememberCopyAction(item.noPazir, announce = false)
     // Keyed on the admission number, not repId: a certificate the service never issued reports
     // repId "0", so several rows would share one key and bleed each other's expansion state.
     var expanded by remember(item.noPazir) { mutableStateOf(false) }
@@ -203,13 +201,16 @@ private fun CertificateCard(
         chipContainerColor = colors.greenBg,
         chipContentColor = colors.teal,
         date = item.serviceDate.toPersianDigits(),
+        dateColor = colors.textPrimary,
+        shadowBlur = TreatmentCostsDimens.cardShadowBlur,
+        shadowOffsetY = TreatmentCostsDimens.cardShadowOffsetY,
         title = item.nameFamil,
         stampLabel = item.payStatusDesc,
         stampColor = if (item.isPaid) colors.greenText else colors.orangeText,
         codeLabel = stringResource(Res.string.costs_admission_label),
         code = item.noPazir,
         codeIcon = vectorResource(Res.drawable.ic_tamin_misc_claims),
-        onCopyCode = { clipboardManager.setText(AnnotatedString(item.noPazir)) },
+        onCopyCode = copyCode,
         actionsLabel = stringResource(Res.string.costs_action_operations),
         actions = actions,
         onActionSelect = { action ->

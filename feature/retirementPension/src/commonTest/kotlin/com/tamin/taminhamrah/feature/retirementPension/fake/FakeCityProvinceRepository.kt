@@ -1,8 +1,9 @@
 package com.tamin.taminhamrah.feature.retirementPension.fake
 
 import com.tamin.taminhamrah.model.common.CityDN
-import com.tamin.taminhamrah.model.common.CityListResultDN
 import com.tamin.taminhamrah.model.common.ProvinceDN
+import com.tamin.taminhamrah.model.paging.PageDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.CityProvinceRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -14,7 +15,8 @@ class FakeCityProvinceRepository : CityProvinceRepository {
     override fun getProvince(provinceId: String): Flow<ProvinceDN> = flow {
         emit(ProvinceDN(provinceCode = provinceId, provinceName = "تهران", status = null, statusStartDate = null))
     }
-    override fun getProvinces(): Flow<List<ProvinceDN>> = flow { emit(emptyList()) }
-    override fun getCities(cityName: String?, provinceCode: String?): Flow<List<CityDN>> = flow { emit(emptyList()) }
-    override fun getCitiesByProvince(provinceCode: String): Flow<CityListResultDN> = flow { emit(CityListResultDN(emptyList())) }
+    override fun getProvincesPage(query: ApiQueryParamDN): Flow<PageDN<ProvinceDN>> = flow { emit(PageDN(emptyList())) }
+    override fun getCitiesPage(query: ApiQueryParamDN): Flow<PageDN<CityDN>> = flow { emit(PageDN(emptyList())) }
+    override fun getCitiesByProvincePage(provinceCode: String, query: ApiQueryParamDN): Flow<PageDN<CityDN>> =
+        flow { emit(PageDN(emptyList())) }
 }
