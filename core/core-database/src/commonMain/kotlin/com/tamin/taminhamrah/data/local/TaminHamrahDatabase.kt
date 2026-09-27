@@ -133,7 +133,8 @@ import com.tamin.taminhamrah.data.local.dao.ConstructionFileDao
         HomeContentEntity::class,
     ],
     // v5: FeatureFlag ids changed; cached home_content stored the old flagId.
-    version = 5,
+    // v6: construction_file_pages added (ConstructionFilePageEntity).
+    version = 6,
 )
 @ConstructedBy(TaminXDatabaseConstructor::class)
 @TypeConverters(TaminHamrahConverters::class)
