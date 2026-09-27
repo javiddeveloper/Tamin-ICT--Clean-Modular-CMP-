@@ -94,17 +94,6 @@ object WorkshopDimens {
     /** `transform:rotate(180deg)` once the card is open. */
     const val toggleHalfTurn = 180f
 
-    // ----------------------------------------------------------------- code chip
-    /** `padding:4px 9px; border-radius:11px; border:1.4px dashed`, with a 13px glyph. */
-    val codeChipCorner = 11.dp
-    val codeChipBorderWidth = 1.4.dp
-    val codeChipHorizontalPadding = 9.dp
-    val codeChipVerticalPadding = 4.dp
-    val codeChipGlyphSize = 13.dp
-
-    /** How long the tick stands in for the copy glyph — `setTimeout(…, 1600)` in the design. */
-    const val copiedFeedbackMillis = 1600L
-
     // --------------------------------------------------------------- status pill
     /**
      * How strongly a pill's outline shows through.

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -47,8 +46,6 @@ import com.tamin.taminhamrah.ui.components.collapsingBottomPadding
 import com.tamin.taminhamrah.ui.components.collapsingVerticalPadding
 import com.tamin.taminhamrah.ui.components.scaleOnCollapse
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
-import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationStripeEnd
-import com.tamin.taminhamrah.ui.theme.TaminHistoryDurationStripeStart
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.history_step_newer
 import taminx.core.core_ui.history_step_older
@@ -74,7 +71,7 @@ data class DurationCardPR(
 /**
  * The overlapping career duration card.
  *
- * Positioned below the hero header, with a top gradient stripe, step navigation buttons,
+ * Positioned below the hero header, with step navigation buttons,
  * scope indicator pill, and prominent multiscale Persian duration figures.
  * Supports smooth collapse on scroll when driven by a CollapsingHeaderState.
  */
@@ -91,9 +88,6 @@ fun HistoryDurationCard(
     val cardBg = remember {
         Brush.linearGradient(listOf(colors.historyCardBgStart, colors.bgSurface))
     }
-    val stripeBrush = remember {
-        Brush.horizontalGradient(listOf(TaminHistoryDurationStripeStart, TaminHistoryDurationStripeEnd))
-    }
 
     Box(
         modifier = modifier
@@ -103,14 +97,6 @@ fun HistoryDurationCard(
             .background(cardBg)
             .border(HistoryDimens.hairline, colors.historyDurationCardBorder, cardShape),
     ) {
-        // Top accent line
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(HistoryDimens.durationStripeHeight)
-                .background(stripeBrush),
-        )
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()

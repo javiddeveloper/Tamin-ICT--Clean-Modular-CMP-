@@ -28,10 +28,10 @@ internal object TreatmentDimens {
      * How far every card in the feature sits off the page.
      *
      * One number for all of them on purpose: a list where cards lift by different amounts reads as
-     * a mistake rather than a hierarchy. Deep enough to cast a real shadow, not so deep that a
-     * scrolling list looks like it is peeling away.
+     * a mistake rather than a hierarchy. Low on purpose: a soft shadow sitting right under the
+     * card, as if lit from directly above.
      */
-    val cardElevation = 12.dp
+    val cardElevation = 3.dp
 
     /** Header collapse scroll distance. */
     val headerCollapseDistance = 96.dp
