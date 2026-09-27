@@ -155,7 +155,11 @@ bump wipes local data. Then:
    `ContractAffairPageEntity` + `ContractAffairDao` + `ContractAffairRepositoryImpl.getContractsPage`
    (embeds the existing `ContractEntity`; its read mapper is `toContractAffairDomain()` because
    `ContractEntity.toDomain()` already maps to the contracts feature's model, and it returns `null`
-   for a nested object whose columns are all empty, so a cached row equals the network one).
+   for a nested object whose columns are all empty, so a cached row equals the network one);
+   `InspectionDao` + `InspectionPageEntities.kt` + `InspectionRepositoryImpl` — four lists in one
+   repository (inspections, workshop inspections, branches, job titles), so it uses a private
+   `offlineFirstPage(query, readCached, fetch, write)` helper; the two inspection lists share one
+   table and are told apart by a `pageCacheKey(scope)` prefix.
 
    The inbox's `drop/take` over a plain table loads the whole table; fine for tens–hundreds of rows. For bigger tables add a
    `LIMIT :limit OFFSET :offset` query (`CityProvinceDao.getCitiesSlice`). If the list has
