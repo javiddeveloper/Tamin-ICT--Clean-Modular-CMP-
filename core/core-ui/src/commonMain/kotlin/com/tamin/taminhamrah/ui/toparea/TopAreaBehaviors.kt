@@ -85,6 +85,13 @@ fun Modifier.topAreaHide(
     }
 }
 
+/** Grows a child from zero up to [height] as [state] folds -- the inverse of [topAreaHide]. */
+fun Modifier.topAreaReveal(state: TopAreaState, height: Dp): Modifier = layout { measurable, constraints ->
+    val revealedPx = (height.roundToPx() * state.progress).roundToInt().coerceAtLeast(0)
+    val placeable = measurable.measure(constraints.copy(minHeight = 0, maxHeight = revealedPx))
+    layout(placeable.width, revealedPx) { placeable.place(0, 0) }
+}
+
 /** Feeds the top area's real rendered height into [state], for [topAreaContentSpacer] to track. */
 fun Modifier.reportTopAreaHeight(state: TopAreaState): Modifier =
     onSizeChanged { state.measuredHeightPx = it.height }

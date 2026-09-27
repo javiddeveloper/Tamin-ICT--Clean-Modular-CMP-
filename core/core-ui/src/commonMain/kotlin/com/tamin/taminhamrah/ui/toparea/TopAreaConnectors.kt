@@ -1,9 +1,12 @@
 package com.tamin.taminhamrah.ui.toparea
 
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -106,6 +109,34 @@ fun rememberMeasuredTopAreaState(
 }
 
 private enum class TopAreaProbeSlot { Expanded, Collapsed }
+
+/**
+ * Snaps [state] fully collapsed the moment the IME appears, and fully expanded the moment it
+ * hides -- one complete motion each way, never stopping mid-fold.
+ *
+ * The IME's own "bring the focused field into view" scroll dispatches with
+ * [androidx.compose.ui.input.nestedscroll.NestedScrollSource.SideEffect], which
+ * [TopAreaState.connection] deliberately ignores (see its kdoc) so a few stray px of that scroll
+ * can't leave the header stuck mid-fold with nothing to spring it to an edge. That leaves the
+ * header wherever the user's last drag put it when the keyboard opens or closes. Call this once
+ * per screen, alongside [driveTopArea], to explicitly drive the header to an edge on every IME
+ * visibility change instead.
+ *
+ * Keyed on [state] itself, not just [imeVisible]: [rememberMeasuredTopAreaState] hands out a
+ * placeholder instance (`maxOffsetPx = 0`) on the very first composition, before its
+ * `SubcomposeLayout` measures the real header and swaps in the correctly-budgeted instance. If the
+ * IME's first-ever show in that screen landed inside that window, a `LaunchedEffect` keyed only on
+ * [imeVisible] would bind to the placeholder and never rebind -- silently no-op'ing on a disconnected
+ * object while the real header never got told to collapse.
+ */
+@Composable
+fun TopAreaState.collapseWhileImeVisible() {
+    val state = this
+    val imeVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
+    LaunchedEffect(state, imeVisible) {
+        if (imeVisible) state.collapseFully() else state.expandFully()
+    }
+}
 
 /**
  * Drives [state] from a [LazyColumn][androidx.compose.foundation.lazy.LazyColumn]'s own drag.

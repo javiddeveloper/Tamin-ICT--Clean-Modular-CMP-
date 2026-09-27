@@ -90,6 +90,18 @@ fun <T> BaseDTO<T>.extractData(): T {
 }
 
 /**
+ * For endpoints that answer with `"data": null` on success (e.g. DELETE/PUT).
+ * Throws on errors exactly like [extractData], but does not require a body.
+ */
+fun <T> BaseDTO<T>.ensureSuccess() {
+    when {
+        hasProblems -> throwProblemError()
+        status in 200..299 -> Unit
+        else -> handleCommonErrors()
+    }
+}
+
+/**
  * Extracts a success message from the response.
  * If data is a primitive (like String), it returns its content.
  * If data is null or an object, it returns the 'reason' field as the message.

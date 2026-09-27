@@ -108,7 +108,7 @@ class UserRequestApiServiceTest : BaseApiTest() {
         assertEquals(1, items.size)
         assertEquals(201L, items.first().id)
         assertEquals("شرایط ثبت درخواست چیست؟", items.first().question)
-        assertEquals(true, items.first().isPublic)
+        assertEquals("1", items.first().isPublic)
     }
 
     @Test

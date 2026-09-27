@@ -10,7 +10,7 @@ data class SmartGuideDTO(
     @SerialName("reply") val reply: String? = null,
     @SerialName("requestCode") val requestCode: String? = null,
     @SerialName("requestDesc") val requestDesc: String? = null,
-    @SerialName("isPublic") val isPublic: Boolean? = null,
+    @SerialName("isPublic") val isPublic: String? = null, // server sends "1"/"0"
     @SerialName("title") val title: String? = null,
     @SerialName("description") val description: String? = null,
     @SerialName("requestStatus") val requestStatus: SmartGuideStatusDTO? = null,
