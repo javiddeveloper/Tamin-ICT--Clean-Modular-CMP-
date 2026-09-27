@@ -40,6 +40,7 @@ import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.components.rememberCopyAction
+import com.tamin.taminhamrah.ui.components.rememberCopyCodeChipState
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.Elevation
@@ -160,7 +161,8 @@ fun WorkshopSectionHeader(
     onFilterClick: (() -> Unit)? = null,
 ) {
     val colors = LocalTaminColors.current
-    val copy = copyValue?.let { rememberCopyAction(it) }
+    val copied = rememberCopyCodeChipState()
+    val copy = copyValue?.let { rememberCopyAction(it, copiedState = copied) }
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -178,7 +180,7 @@ fun WorkshopSectionHeader(
                 fontWeight = FontWeight.Bold,
             )
             if (copyValue != null) {
-                CopyIconButton(value = copyValue, label = title, interactive = false)
+                CopyIconButton(value = copyValue, label = title, interactive = false, copiedState = copied)
             }
             if (count != null) {
                 NumericText(

@@ -289,8 +289,7 @@ private fun CopyableNumberBox(
 ) {
     val colors = LocalTaminColors.current
     val copiedState = rememberCopyCodeChipState()
-    // The glyph's tick is the confirmation, so no toast on top.
-    val copy = rememberCopyAction(value, announce = false)
+    val copy = rememberCopyAction(value, copiedState = copiedState)
     val shape = RoundedCornerShape(CornerRadius.lg)
 
     Box(
@@ -298,13 +297,7 @@ private fun CopyableNumberBox(
             .clip(shape)
             .background(colors.bgPage)
             .border(Thickness.border, colors.border, shape)
-            .then(
-                if (value.isNotBlank()) {
-                    Modifier.clickable { copy(); copiedState.isCopied = true }
-                } else {
-                    Modifier
-                },
-            )
+            .then(if (value.isNotBlank()) Modifier.clickable(onClick = copy) else Modifier)
             .padding(Spacing.md),
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {

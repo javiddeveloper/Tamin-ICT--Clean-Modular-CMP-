@@ -57,6 +57,7 @@ import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.coloredShadow
 import com.tamin.taminhamrah.ui.components.rememberCopyAction
+import com.tamin.taminhamrah.ui.components.rememberCopyCodeChipState
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.components.toast.AppToastHost
 import com.tamin.taminhamrah.ui.orDash
@@ -323,7 +324,8 @@ private fun ContractCodeRow(code: String) {
             modifier = Modifier.weight(1f),
         )
 
-        val copyCode = rememberCopyAction(code)
+        val copied = rememberCopyCodeChipState()
+        val copyCode = rememberCopyAction(code, copiedState = copied)
         Row(
             modifier = Modifier
                 .dashedRoundedBorder(colors.blueText, CornerRadius.md)
@@ -333,7 +335,7 @@ private fun ContractCodeRow(code: String) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
-            CopyIconButton(value = code, interactive = false)
+            CopyIconButton(value = code, interactive = false, copiedState = copied)
             NumericText(
                 text = code.ifBlank { "—" },
                 style = MaterialTheme.typography.labelLarge,

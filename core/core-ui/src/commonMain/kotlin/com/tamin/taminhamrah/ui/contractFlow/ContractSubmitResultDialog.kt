@@ -34,6 +34,7 @@ import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.rememberCopyAction
+import com.tamin.taminhamrah.ui.components.rememberCopyCodeChipState
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.IconSize
@@ -338,7 +339,8 @@ private fun ContractNumberChip(
 ) {
     val colors = LocalTaminColors.current
     val shape = RoundedCornerShape(CornerRadius.lg)
-    val copyAction = rememberCopyAction(rawNumber)
+    val copied = rememberCopyCodeChipState()
+    val copyAction = rememberCopyAction(rawNumber, copiedState = copied)
 
     Row(
         modifier = Modifier
@@ -373,6 +375,7 @@ private fun ContractNumberChip(
                 value = rawNumber,
                 tint = colors.blueText,
                 interactive = false,
+                copiedState = copied,
             )
         }
     }

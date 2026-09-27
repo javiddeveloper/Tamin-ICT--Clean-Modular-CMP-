@@ -49,6 +49,7 @@ import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.coloredShadow
 import com.tamin.taminhamrah.ui.components.rememberCopyAction
+import com.tamin.taminhamrah.ui.components.rememberCopyCodeChipState
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.components.toast.AppToastHost
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -260,7 +261,8 @@ private fun DebtNumberRow(debtNumber: String) {
 
         DashedLine(color = colors.divider, modifier = Modifier.weight(1f))
 
-        val copy = rememberCopyAction(debtNumber)
+        val copied = rememberCopyCodeChipState()
+        val copy = rememberCopyAction(debtNumber, copiedState = copied)
         Row(
             modifier = Modifier
                 .dashedRoundedBorder(colors.blueText, CornerRadius.md)
@@ -270,7 +272,7 @@ private fun DebtNumberRow(debtNumber: String) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
         ) {
-            CopyIconButton(value = debtNumber, interactive = false)
+            CopyIconButton(value = debtNumber, interactive = false, copiedState = copied)
             NumericText(
                 text = debtNumber.ifBlank { ABSENT },
                 style = MaterialTheme.typography.labelLarge,

@@ -34,6 +34,7 @@ import com.tamin.taminhamrah.ui.components.SegmentedInputField
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.components.rememberCopyAction
+import com.tamin.taminhamrah.ui.components.rememberCopyCodeChipState
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -96,7 +97,8 @@ private fun InquiryEducationInfoSurface(
     val colors = LocalTaminColors.current
     val shape = RoundedCornerShape(CornerRadius.listRow)
     val copyValue = stringResource(Res.string.inquiry_education_msrt_url_copy)
-    val copy = rememberCopyAction(copyValue)
+    val copied = rememberCopyCodeChipState()
+    val copy = rememberCopyAction(copyValue, copiedState = copied)
     val copyLabel = stringResource(Res.string.inquiry_education_copy_address)
 
     Column(
@@ -146,6 +148,7 @@ private fun InquiryEducationInfoSurface(
                 label = copyLabel,
                 tint = colors.blueText,
                 interactive = false,
+                copiedState = copied,
             )
             Text(
                 text = copyLabel,

@@ -74,6 +74,7 @@ import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.rememberCopyAction
+import com.tamin.taminhamrah.ui.components.rememberCopyCodeChipState
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
@@ -557,7 +558,8 @@ private fun TrackingCodeRow(code: String) {
     val copyDescription = stringResource(Res.string.bank_account_tracking_code)
     // The clipboard write and its confirmation come from core-ui, so this row and every copy
     // glyph elsewhere behave the same way rather than each growing its own version.
-    val copy = rememberCopyAction(code)
+    val copied = rememberCopyCodeChipState()
+    val copy = rememberCopyAction(code, copiedState = copied)
 
     Row(
         modifier = Modifier
@@ -590,6 +592,7 @@ private fun TrackingCodeRow(code: String) {
                 value = code,
                 tint = colors.blueText,
                 interactive = false,
+                copiedState = copied,
             )
         }
     }

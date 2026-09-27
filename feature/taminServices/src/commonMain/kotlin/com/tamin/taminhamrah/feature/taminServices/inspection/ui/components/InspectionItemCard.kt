@@ -45,6 +45,7 @@ import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.components.coloredShadow
 import com.tamin.taminhamrah.ui.components.rememberCopyAction
+import com.tamin.taminhamrah.ui.components.rememberCopyCodeChipState
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -275,7 +276,8 @@ private fun InfoBox(
     copyValue: String? = null,
 ) {
     val colors = LocalTaminColors.current
-    val copy = copyValue?.let { rememberCopyAction(it) }
+    val copied = rememberCopyCodeChipState()
+    val copy = copyValue?.let { rememberCopyAction(it, copiedState = copied) }
 
     Row(
         modifier = modifier
@@ -314,6 +316,7 @@ private fun InfoBox(
                 value = copyValue,
                 label = label,
                 interactive = false,
+                copiedState = copied,
             )
         }
     }
