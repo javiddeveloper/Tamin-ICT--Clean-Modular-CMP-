@@ -14,6 +14,9 @@ class FakeCityProvinceRepository : CityProvinceRepository {
     var citiesByProvinceResult: List<CityDN> = emptyList()
     var lastCitiesByProvinceCode: String? = null
     var shouldThrowError = false
+
+    /** Offline with a cached list: the repository emits only the cached page (`isFromCache`). */
+    var citiesFromCacheOnly = false
     var error: Throwable = RuntimeException("Error")
 
     override fun getCity(cityId: String): Flow<CityDN> = flow {}
@@ -29,6 +32,6 @@ class FakeCityProvinceRepository : CityProvinceRepository {
     override fun getCitiesByProvincePage(provinceCode: String, query: ApiQueryParamDN): Flow<PageDN<CityDN>> = flow {
         lastCitiesByProvinceCode = provinceCode
         if (shouldThrowError) throw error
-        emit(PageDN(citiesByProvinceResult))
+        emit(PageDN(citiesByProvinceResult, isFromCache = citiesFromCacheOnly))
     }
 }
