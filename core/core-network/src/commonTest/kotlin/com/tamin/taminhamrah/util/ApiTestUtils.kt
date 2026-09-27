@@ -121,7 +121,7 @@ object UserRequestTestData {
                         "reply": "برای ثبت درخواست داشتن سابقه بیمه حداقل یک سال الزامی است.",
                         "requestCode": "0018",
                         "requestDesc": "درخواست راهنما",
-                        "isPublic": true,
+                        "isPublic": "1",
                         "title": "راهنمای هوشمند",
                         "description": "توضیحات تکمیلی"
                     }

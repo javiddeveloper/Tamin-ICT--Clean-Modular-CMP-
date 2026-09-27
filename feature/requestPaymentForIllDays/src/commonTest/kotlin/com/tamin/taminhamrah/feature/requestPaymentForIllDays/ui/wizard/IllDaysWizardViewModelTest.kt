@@ -7,9 +7,11 @@ import com.tamin.taminhamrah.feature.requestPaymentForIllDays.fake.FakeIllDaysCo
 import com.tamin.taminhamrah.feature.requestPaymentForIllDays.fake.FakeIllDaysRepository
 import com.tamin.taminhamrah.mapper.common.toCityPresentation
 import com.tamin.taminhamrah.mapper.requestPaymentForIllDays.toPresentation
+import com.tamin.taminhamrah.model.common.CityDN
 import com.tamin.taminhamrah.model.common.CityPR
+import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.model.requestPaymentForIllDays.IllDaysBranchWorkshopDN
-import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
+import com.tamin.taminhamrah.useCases.common.GetCitiesPageUseCase
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.GetCovidResultUseCase
 import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.GetIllDaysInsuredMainInfoUseCase
@@ -52,7 +54,7 @@ class IllDaysWizardViewModelTest {
 
     private fun buildViewModel(): IllDaysWizardViewModel = IllDaysWizardViewModel(
         getIllDaysInsuredMainInfoUseCase = GetIllDaysInsuredMainInfoUseCase(illDaysRepository),
-        getCitiesUseCase = GetCitiesUseCase(cityRepository),
+        getCitiesPageUseCase = GetCitiesPageUseCase(cityRepository),
         getCovidResultUseCase = GetCovidResultUseCase(illDaysRepository),
         uploadImageUseCase = UploadImageUseCase(contractsRepository),
         sendRequestForIllDayUseCase = SendRequestForIllDayUseCase(illDaysRepository),
@@ -188,6 +190,80 @@ class IllDaysWizardViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         assertEquals("1234", viewModel.uiState.value.doctorCode)
+    }
+
+    @Test
+    fun citySearch_sendsTheTermToTheServer_andListsOnlyMatches() = runTest(testDispatcher) {
+        cityRepository.cities = manyCities(15)
+        viewModel = buildViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.sendIntent(IllDaysWizardIntent.CitySearchQueryChanged("City 12"))
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        val filter = cityRepository.lastQuery!!.filters.single { it.property == FilterProperty.CITY_NAME }
+        assertEquals("*City 12*", filter.value)
+        assertEquals(0, cityRepository.lastQuery!!.start)
+        assertEquals(listOf("City 12"), viewModel.uiState.value.cityOptions.map { it.cityName })
+    }
+
+    @Test
+    fun cityPicker_loadMore_appendsTheNextPage_untilTheEnd() = runTest(testDispatcher) {
+        cityRepository.cities = manyCities(15)
+        viewModel = buildViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+        assertEquals(10, viewModel.uiState.value.cityOptions.size)
+        assertTrue(viewModel.uiState.value.canLoadMoreCities)
+
+        viewModel.sendIntent(IllDaysWizardIntent.CityPickerLoadMore)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(15, viewModel.uiState.value.cityOptions.size)
+        assertFalse(viewModel.uiState.value.canLoadMoreCities)
+    }
+
+    @Test
+    fun cityPicker_failedPage_canBeRetriedByLoadingMoreAgain() = runTest(testDispatcher) {
+        cityRepository.cities = manyCities(15)
+        viewModel = buildViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.events.test {
+            cityRepository.citiesError = RuntimeException("offline")
+            viewModel.sendIntent(IllDaysWizardIntent.CityPickerLoadMore)
+            testDispatcher.scheduler.advanceUntilIdle()
+            assertIs<IllDaysWizardEvent.ShowToast>(awaitItem())
+            assertEquals(10, viewModel.uiState.value.cityOptions.size)
+
+            cityRepository.citiesError = null
+            viewModel.sendIntent(IllDaysWizardIntent.CityPickerLoadMore)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            assertEquals(15, viewModel.uiState.value.cityOptions.size)
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun cityPagingError_afterRetry_isReportedOnce() = runTest(testDispatcher) {
+        cityRepository.cities = manyCities(15)
+        viewModel = buildViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.sendIntent(IllDaysWizardIntent.Retry)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.events.test {
+            cityRepository.citiesError = RuntimeException("offline")
+            viewModel.sendIntent(IllDaysWizardIntent.CityPickerLoadMore)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            assertIs<IllDaysWizardEvent.ShowToast>(awaitItem())
+            expectNoEvents()
+        }
+    }
+
+    private fun manyCities(count: Int) = List(count) {
+        CityDN(cityCode = "$it", cityName = "City $it", provinceCode = "08")
     }
 
     private fun fillStepOne() {

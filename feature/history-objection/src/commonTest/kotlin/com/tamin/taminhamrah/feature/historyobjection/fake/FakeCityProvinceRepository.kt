@@ -1,36 +1,37 @@
 package com.tamin.taminhamrah.feature.historyobjection.fake
 
 import com.tamin.taminhamrah.model.common.CityDN
-import com.tamin.taminhamrah.model.common.CityListResultDN
 import com.tamin.taminhamrah.model.common.ProvinceDN
+import com.tamin.taminhamrah.model.paging.PageDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.CityProvinceRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-/** Only [getProvinces]/[getCitiesByProvince] are exercised by the stepper — the rest is stubbed. */
+/** Only [getProvincesPage]/[getCitiesByProvincePage] are exercised by the stepper — the rest is stubbed. */
 class FakeCityProvinceRepository : CityProvinceRepository {
     var provincesResult: List<ProvinceDN> = emptyList()
     var citiesByProvinceResult: List<CityDN> = emptyList()
-    /** Set to simulate the real cache-then-network shape: emitted first, before [citiesByProvinceResult]. */
-    var staleCitiesByProvinceResult: List<CityDN>? = null
     var lastCitiesByProvinceCode: String? = null
     var shouldThrowError = false
+
+    /** Offline with a cached list: the repository emits only the cached page (`isFromCache`). */
+    var citiesFromCacheOnly = false
     var error: Throwable = RuntimeException("Error")
 
     override fun getCity(cityId: String): Flow<CityDN> = flow {}
     override fun getProvince(provinceId: String): Flow<ProvinceDN> = flow {}
 
-    override fun getProvinces(): Flow<List<ProvinceDN>> = flow {
+    override fun getProvincesPage(query: ApiQueryParamDN): Flow<PageDN<ProvinceDN>> = flow {
         if (shouldThrowError) throw error
-        emit(provincesResult)
+        emit(PageDN(provincesResult))
     }
 
-    override fun getCities(cityName: String?, provinceCode: String?): Flow<List<CityDN>> = flow { emit(emptyList()) }
+    override fun getCitiesPage(query: ApiQueryParamDN): Flow<PageDN<CityDN>> = flow { emit(PageDN(emptyList())) }
 
-    override fun getCitiesByProvince(provinceCode: String): Flow<CityListResultDN> = flow {
+    override fun getCitiesByProvincePage(provinceCode: String, query: ApiQueryParamDN): Flow<PageDN<CityDN>> = flow {
         lastCitiesByProvinceCode = provinceCode
-        staleCitiesByProvinceResult?.let { emit(CityListResultDN(it)) }
         if (shouldThrowError) throw error
-        emit(CityListResultDN(citiesByProvinceResult))
+        emit(PageDN(citiesByProvinceResult, isFromCache = citiesFromCacheOnly))
     }
 }

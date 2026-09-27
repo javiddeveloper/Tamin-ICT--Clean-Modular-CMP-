@@ -13,7 +13,6 @@ import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -50,14 +49,7 @@ data class BaseDTO<out T>(
     @SerialName("reason") val reason: String,
     @SerialName("data") val data: T? = null,
     @SerialName("hasError") val hasError: Boolean? = null,
-    @SerialName("problems") val problems: List<ProblemDTO>? = null,
-    /**
-     * What a failed reply said, read from the raw body by `LenientReplyConverter` — `data.message`,
-     * validation violations or a bare string. A typed [data] cannot hold any of these, so without
-     * this the server's reason was lost whenever [T] was not an [ErrorCarrier].
-     */
-    @Transient val errorText: String? = null,
-    @Transient val errorCauseText: String? = null,
+    @SerialName("problems") val problems: List<ProblemDTO>? = null
 ) {
     /**
      * True when the backend flagged this response as failed via the
@@ -98,11 +90,15 @@ fun <T> BaseDTO<T>.extractData(): T {
 }
 
 /**
- * For calls whose reply has nothing to read: a non-2xx status throws the same status-mapped failure
- * as [extractData] — server message included — instead of an error that names nothing.
+ * For endpoints that answer with `"data": null` on success (e.g. DELETE/PUT).
+ * Throws on errors exactly like [extractData], but does not require a body.
  */
-fun BaseDTO<*>.requireSuccessStatus() {
-    if (status !in 200..299) handleCommonErrors()
+fun <T> BaseDTO<T>.ensureSuccess() {
+    when {
+        hasProblems -> throwProblemError()
+        status in 200..299 -> Unit
+        else -> handleCommonErrors()
+    }
 }
 
 /**
@@ -134,10 +130,12 @@ fun BaseDTO<JsonElement?>.extractMessage(): String {
  * it into a generic "something went wrong" string.
  */
 private fun <T> BaseDTO<T>.throwProblemError(): Nothing {
+    val firstProblem = problems?.firstOrNull()
     println("BaseDTO: Business error: family=$family reason=$reason problems=$problems")
     throw TaminErrorUriException(
         uri = ErrorUri.SERVER_PROBLEM,
-        serverMessage = getServerMessage()
+        serverMessage = getServerMessage(),
+        errorCode = firstProblem?.errorCode
     )
 }
 
@@ -164,28 +162,28 @@ private fun <T> BaseDTO<T>.handleCommonErrors(): Nothing {
  *           2. problems envelope
  *           3. reason field
  */
-private fun <T> BaseDTO<T>.rawErrorText(): String {
+private fun <T> BaseDTO<T>.rawErrorText(): String? {
     val fromData = when (val d = data) {
         is ErrorCarrier -> d.message
         is JsonObject -> d["message"]?.jsonPrimitive?.contentOrNull
         is JsonPrimitive -> d.contentOrNull
         else -> null
     }
-    return fromData ?: errorText ?: problemMessage ?: reason
+    return fromData ?: problemMessage ?: reason
 }
 
 private fun <T> BaseDTO<T>.errorCause(): String? = when (val d = data) {
     is ErrorCarrier -> d.cause
     is JsonObject -> d["cause"]?.jsonPrimitive?.contentOrNull
     else -> null
-} ?: errorCauseText
+}
 
 /**
  * Same probe as [rawErrorText], but only keeps copy that looks like Arabic script.
  * Used by the `hasError`/`problems` envelope, which is already localized when present.
  */
 private fun <T> BaseDTO<T>.getServerMessage(): String? =
-    rawErrorText().takeIf { it.looksLikeArabicScript() }
+    rawErrorText()?.takeIf { it.looksLikeArabicScript() }
 
 /**
  * Outcome of a [BaseDTO] extraction that does not throw when the backend
@@ -241,11 +239,11 @@ fun <T> BaseDTO<JsonElement?>.extractTypedData(json: Json, deserializer: Deseria
         status in 200..299 && data != null -> json.decodeFromJsonElement(deserializer, data)
         status in 400..599 -> {
             val serverMessage = (data as? JsonObject)?.get("message")?.jsonPrimitive?.contentOrNull
-            val mapped = HttpStatusErrorMapper.map(status = status, rawMessage = serverMessage, cause = errorCause())
-            println("BaseDTO: HTTP $status -> ${mapped.uri}: $reason, serverMessage=$serverMessage")
+            val errorPrefix = if (status in 400..499) "CLIENT_ERROR" else "SERVER_ERROR"
+            println("BaseDTO: $errorPrefix: $reason, serverMessage=$serverMessage")
             throw TaminErrorUriException(
-                uri = mapped.uri,
-                serverMessage = serverMessage ?: mapped.userMessage,
+                uri = ErrorUri.fromString("$errorPrefix: $reason"),
+                serverMessage = serverMessage
             )
         }
         else -> handleCommonErrors()

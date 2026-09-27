@@ -27,6 +27,23 @@ class BaseDTOTest {
 
     private val sampleProblem = ProblemDTO(errorCode = 9001, errorMsg = "شناسه رکورد باید بزرگتر از 1 باشد.")
 
+    // --- ensureSuccess ---
+
+    @Test
+    fun `ensureSuccess accepts a 200 with null data`() {
+        val json = """{"status":200,"family":"SUCCESSFUL","reason":"OK","traceId":"x","data":null}"""
+        Json { ignoreUnknownKeys = true }
+            .decodeFromString(BaseDTO.serializer(Unit.serializer()), json)
+            .ensureSuccess()
+    }
+
+    @Test
+    fun `ensureSuccess throws on non-2xx`() {
+        assertFailsWith<TaminErrorUriException> {
+            BaseDTO<Unit>(status = 500, family = "SERVER_ERROR", reason = "boom").ensureSuccess()
+        }
+    }
+
     // --- hasProblems / problemMessage ---
 
     @Test

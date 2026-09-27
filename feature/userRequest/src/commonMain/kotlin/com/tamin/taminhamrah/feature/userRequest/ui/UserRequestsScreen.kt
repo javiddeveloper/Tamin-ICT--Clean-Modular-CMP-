@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -46,6 +47,11 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toparea.TopAreaState
+import com.tamin.taminhamrah.ui.toparea.collapseWhileImeVisible
+import com.tamin.taminhamrah.ui.toparea.driveTopArea
+import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
+import com.tamin.taminhamrah.ui.toparea.topAreaHide
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -126,60 +132,27 @@ fun UserRequestsContent(
         },
     )
 
-    val profileGradientBrush = remember(taminColors.profileGradientStops) {
-        Brush.horizontalGradient(taminColors.profileGradientStops)
+    // Folds from the list's own drag; measured against the real header so the drag budget can't
+    // drift out of sync with a copy or font change.
+    val topArea = rememberMeasuredTopAreaState { probeState ->
+        UserRequestsHeader(onBackClick = {}, topAreaState = probeState)
     }
+    // The filter panel's ref-code field keyboard must not leave the header stuck mid-fold.
+    topArea.collapseWhileImeVisible()
+    val listState = rememberLazyListState()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = taminColors.bgPage,
-        topBar = {
-            TaminTopAppBar(
-                title = stringResource(Res.string.profile_requests),
-                background = profileGradientBrush,
-                bottomPadding = Spacing.xl,
-                shape = RoundedCornerShape(
-                    bottomStart = CornerRadius.x3l,
-                    bottomEnd = CornerRadius.x3l
-                ),
-                navigationIcon = {
-                    TaminTopAppBarButton(
-                        icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                        contentDescription = null,
-                        onClick = onBackClick,
-                        bordered = true
-                    )
-                }
-            ) {
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    DecorativeBackgroundCircle(
-                        size = 190.dp,
-                        xOffset = 450.dp,
-                        yOffset = (-150).dp
-                    )
-
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        AnimatedRingHeaderIcon(icon = vectorResource(Res.drawable.ic_request))
-                        Spacer(modifier = Modifier.height(Spacing.md))
-                        Text(
-                            text = stringResource(UserRequestRes.string.user_request_header_subtitle),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = taminColors.textHeaderSubtitle,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-            }
-        }
+        topBar = { UserRequestsHeader(onBackClick = onBackClick, topAreaState = topArea) }
     ) { innerPadding ->
         LazyColumn(
+            state = listState,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
+                .padding(innerPadding)
+                .driveTopArea(topArea, listState),
             verticalArrangement = Arrangement.spacedBy(Spacing.xs)
         ) {
             // Status Tabs section (header is now handled by TaminTopAppBar)
@@ -288,6 +261,66 @@ fun UserRequestsContent(
                 message = state.infoDialogMessage!!,
                 onDismissRequest = { onIntent(UserRequestsIntent.ShowInfoDialog(null)) }
             )
+        }
+    }
+}
+
+/**
+ * Its own composable so the probe in [rememberMeasuredTopAreaState] measures exactly what's shown,
+ * and so the `topBar` lambda skips on unrelated state changes (e.g. ref-code keystrokes).
+ */
+@Composable
+private fun UserRequestsHeader(onBackClick: () -> Unit, topAreaState: TopAreaState) {
+    val taminColors = LocalTaminColors.current
+    val profileGradientBrush = remember(taminColors.profileGradientStops) {
+        Brush.horizontalGradient(taminColors.profileGradientStops)
+    }
+
+    TaminTopAppBar(
+        title = stringResource(Res.string.profile_requests),
+        background = profileGradientBrush,
+        bottomPadding = Spacing.xl,
+        shape = RoundedCornerShape(
+            bottomStart = CornerRadius.x3l,
+            bottomEnd = CornerRadius.x3l
+        ),
+        navigationIcon = {
+            TaminTopAppBarButton(
+                icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                contentDescription = null,
+                onClick = onBackClick,
+                bordered = true
+            )
+        }
+    ) {
+        // Only this furniture folds away; the title row stays put.
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .topAreaHide(topAreaState)
+        ) {
+            DecorativeBackgroundCircle(
+                size = 190.dp,
+                xOffset = 450.dp,
+                yOffset = (-150).dp
+            )
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                AnimatedRingHeaderIcon(
+                    icon = vectorResource(Res.drawable.ic_request),
+                    animated = !topAreaState.isMeasureProbe,
+                )
+                Spacer(modifier = Modifier.height(Spacing.md))
+                Text(
+                    text = stringResource(UserRequestRes.string.user_request_header_subtitle),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = taminColors.textHeaderSubtitle,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }

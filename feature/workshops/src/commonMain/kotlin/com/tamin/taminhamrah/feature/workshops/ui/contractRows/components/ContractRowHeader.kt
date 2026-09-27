@@ -1,5 +1,8 @@
 package com.tamin.taminhamrah.feature.workshops.ui.contractRows.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -11,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -19,16 +24,22 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import com.tamin.taminhamrah.feature.workshops.ui.contractRows.contract.ContractRowTab
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
+import com.tamin.taminhamrah.ui.components.TaminSegmentedTabs
 import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.Duration
+import com.tamin.taminhamrah.ui.theme.Easing
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -40,6 +51,7 @@ import taminx.core.core_ui.contract_rows_filter_change
 import taminx.core.core_ui.contract_rows_read_only
 import taminx.core.core_ui.ic_tamin_cross
 import taminx.core.core_ui.workshop_filter_clear
+import kotlin.math.roundToInt
 
 /**
  * The two services, as a segmented control.
@@ -47,6 +59,11 @@ import taminx.core.core_ui.workshop_filter_clear
  * [ContractRowTab] declares the order and the copy, so this draws whatever the table holds rather
  * than naming either tab itself. The selected tab wears the button gradient, as the
  * اشخاص حقوقی / اشخاص حقیقی switch does.
+ *
+ * The gradient pill slides between the tabs rather than jumping, the way [TaminSegmentedTabs] moves
+ * its own — that strip has no hint line, so the motion is borrowed rather than the component. The
+ * position is read inside `layout {}`, so a frame of the slide relays out the pill alone; it is
+ * placed with `placeRelative`, so on the RTL page the first tab sits rightmost with no mirroring.
  */
 @Composable
 fun ContractRowTabs(
@@ -56,48 +73,90 @@ fun ContractRowTabs(
 ) {
     val colors = LocalTaminColors.current
     val stripShape = remember { RoundedCornerShape(CornerRadius.xl) }
-    Row(
+    val tabShape = remember { RoundedCornerShape(CornerRadius.listRow) }
+    val tabs = ContractRowTab.entries
+    val position by animateFloatAsState(
+        targetValue = tabs.indexOf(selected).coerceAtLeast(0).toFloat(),
+        animationSpec = tween(durationMillis = Duration.normal, easing = Easing.standard),
+        label = "contractRowTabsPill",
+    )
+    Box(
         modifier = modifier
             .fillMaxWidth()
             .clip(stripShape)
             .background(colors.bgPage)
             .border(Thickness.border, colors.border, stripShape)
             .padding(WorkshopDimens.contractRowTabStripPadding),
-        horizontalArrangement = Arrangement.spacedBy(WorkshopDimens.contractRowTabGap),
     ) {
-        ContractRowTab.entries.forEach { tab ->
-            val isSelected = tab == selected
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(WorkshopDimens.contractRowTabHeight)
-                    .clip(RoundedCornerShape(CornerRadius.listRow))
-                    .then(if (isSelected) Modifier.background(colors.buttonGradient) else Modifier)
-                    .clickable { onSelect(tab) },
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
-                Text(
-                    text = stringResource(tab.label),
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = if (isSelected) colors.onGradient else colors.textMuted,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.Center,
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .layout { measurable, constraints ->
+                    val width = if (constraints.hasBoundedWidth) constraints.maxWidth else 0
+                    val gap = WorkshopDimens.contractRowTabGap.roundToPx()
+                    val count = tabs.size.coerceAtLeast(1)
+                    val segment = ((width - gap * (count - 1)) / count).coerceAtLeast(0)
+                    val pill = measurable.measure(
+                        constraints.copy(minWidth = segment, maxWidth = segment),
+                    )
+                    layout(width, pill.height) {
+                        pill.placeRelative(x = ((segment + gap) * position).roundToInt(), y = 0)
+                    }
+                }
+                .clip(tabShape)
+                .background(colors.buttonGradient),
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth().selectableGroup(),
+            horizontalArrangement = Arrangement.spacedBy(WorkshopDimens.contractRowTabGap),
+        ) {
+            tabs.forEach { tab ->
+                val isSelected = tab == selected
+                val labelColor by animateColorAsState(
+                    targetValue = if (isSelected) colors.onGradient else colors.textMuted,
+                    animationSpec = tween(durationMillis = Duration.normal, easing = Easing.standard),
+                    label = "contractRowTabLabel",
                 )
-                Text(
-                    text = stringResource(tab.hint),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = if (isSelected) {
+                val hintColor by animateColorAsState(
+                    targetValue = if (isSelected) {
                         colors.onGradient.copy(alpha = SELECTED_HINT_ALPHA)
                     } else {
                         colors.textMuted
                     },
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.Center,
+                    animationSpec = tween(durationMillis = Duration.normal, easing = Easing.standard),
+                    label = "contractRowTabHint",
                 )
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(WorkshopDimens.contractRowTabHeight)
+                        .clip(tabShape)
+                        .selectable(
+                            selected = isSelected,
+                            role = Role.Tab,
+                            onClick = { onSelect(tab) },
+                        ),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Text(
+                        text = stringResource(tab.label),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = labelColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center,
+                    )
+                    Text(
+                        text = stringResource(tab.hint),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = hintColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center,
+                    )
+                }
             }
         }
     }

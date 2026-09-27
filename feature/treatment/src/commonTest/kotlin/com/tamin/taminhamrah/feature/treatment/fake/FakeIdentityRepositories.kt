@@ -4,12 +4,13 @@ import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDN
 import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
 import com.tamin.taminhamrah.model.certificate.RecipientDN
 import com.tamin.taminhamrah.model.common.CityDN
-import com.tamin.taminhamrah.model.common.CityListResultDN
 import com.tamin.taminhamrah.model.common.ProvinceDN
 import com.tamin.taminhamrah.model.erecords.images.ElectronicFileDN
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
+import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.subdominant.SubdominantDN
 import com.tamin.taminhamrah.model.subdominant.insuredActiveBranch.InsuredActiveBranchDN
 import com.tamin.taminhamrah.model.user.EditMobileResponseDN
@@ -96,9 +97,9 @@ class FakeUserRepository : UserRepository {
 class FakeCityProvinceRepository : CityProvinceRepository {
     override fun getCity(cityId: String): Flow<CityDN> = flow {}
     override fun getProvince(provinceId: String): Flow<ProvinceDN> = flow {}
-    override fun getProvinces(): Flow<List<ProvinceDN>> = flowOf(emptyList())
-    override fun getCities(cityName: String?, provinceCode: String?): Flow<List<CityDN>> = flowOf(emptyList())
-    override fun getCitiesByProvince(provinceCode: String): Flow<CityListResultDN> = flowOf(CityListResultDN(emptyList()))
+    override fun getProvincesPage(query: ApiQueryParamDN): Flow<PageDN<ProvinceDN>> = flowOf(PageDN(emptyList()))
+    override fun getCitiesPage(query: ApiQueryParamDN): Flow<PageDN<CityDN>> = flowOf(PageDN(emptyList()))
+    override fun getCitiesByProvincePage(provinceCode: String, query: ApiQueryParamDN): Flow<PageDN<CityDN>> = flowOf(PageDN(emptyList()))
 }
 
 

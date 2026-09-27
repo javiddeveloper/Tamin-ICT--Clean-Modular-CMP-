@@ -16,12 +16,15 @@ import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class PersonalInboxRepositoryImplTest {
 
@@ -137,18 +140,55 @@ class PersonalInboxRepositoryImplTest {
     }
 
     @Test
-    fun `getInboxItemsPage should not cache an appended page`() = runTest {
+    fun `getInboxItemsPage should emit the cached page then the network page`() = runTest {
         dao.itemsFlow.value = listOf(createEntity(id = 1L))
         remoteDataSource.getInboxItemsResult =
             PersonalInboxListDTO(list = listOf(createDTO(id = 2L)), total = "37")
 
-        repository.getInboxItemsPage(ApiQueryParamDN(page = 2, start = 10, limit = 10)).test {
-            val page = awaitItem()
+        repository.getInboxItemsPage(ApiQueryParamDN(page = 0, start = 0, limit = 10)).test {
+            val cached = awaitItem()
+            assertEquals(listOf(1L), cached.items.map { it.id })
+            assertTrue(cached.isFromCache)
+
+            val network = awaitItem()
+            assertEquals(listOf(2L), network.items.map { it.id })
+            assertEquals(37, network.total)
+            assertFalse(network.isFromCache)
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `getInboxItemsPage first page from network should replace the whole cache`() = runTest {
+        // Stale items from an earlier session, more than one page's worth.
+        dao.itemsFlow.value = (1L..15L).map { createEntity(id = it, sentDate = it) }
+        remoteDataSource.getInboxItemsResult =
+            PersonalInboxListDTO(list = listOf(createDTO(id = 100L)), total = "1")
+
+        repository.getInboxItemsPage(ApiQueryParamDN(page = 0, start = 0, limit = 10)).test {
+            awaitItem() // cache
+            awaitItem() // network
+            awaitComplete()
+        }
+
+        assertEquals(1, dao.replaceAllCalledCount)
+        assertEquals(listOf(100L), dao.itemsFlow.value.map { it.id })
+    }
+
+    @Test
+    fun `getInboxItemsPage should append a later page to the cache`() = runTest {
+        dao.itemsFlow.value = listOf(createEntity(id = 1L))
+        remoteDataSource.getInboxItemsResult =
+            PersonalInboxListDTO(list = listOf(createDTO(id = 2L)), total = "37")
+
+        repository.getInboxItemsPage(ApiQueryParamDN(page = 1, start = 10, limit = 10)).test {
+            val page = awaitItem() // nothing cached at offset 10, so only the network page
             assertEquals(listOf(2L), page.items.map { it.id })
             awaitComplete()
         }
+
         assertEquals(0, dao.replaceAllCalledCount)
-        assertEquals(listOf(1L), dao.itemsFlow.value.map { it.id })
+        assertEquals(setOf(1L, 2L), dao.itemsFlow.value.map { it.id }.toSet())
     }
 
     @Test
@@ -160,6 +200,21 @@ class PersonalInboxRepositoryImplTest {
             val page = awaitItem()
             assertEquals(listOf(1L), page.items.map { it.id })
             assertNull(page.total)
+            assertTrue(page.isFromCache)
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `getInboxItemsPage should serve a later page's slice from the cache offline`() = runTest {
+        // 15 cached items, newest first: the page at start 10 is the 5 oldest.
+        dao.itemsFlow.value = (1L..15L).map { createEntity(id = it, sentDate = it) }
+        remoteDataSource.shouldThrowError = true
+
+        repository.getInboxItemsPage(ApiQueryParamDN(page = 1, start = 10, limit = 10)).test {
+            val page = awaitItem()
+            assertEquals(listOf(5L, 4L, 3L, 2L, 1L), page.items.map { it.id })
+            assertTrue(page.isFromCache)
             awaitComplete()
         }
     }
@@ -175,7 +230,7 @@ class PersonalInboxRepositoryImplTest {
     }
 
     @Test
-    fun `getInboxItemsPage should throw when an appended page fails`() = runTest {
+    fun `getInboxItemsPage should throw when a later page fails and its slice is not cached`() = runTest {
         dao.itemsFlow.value = listOf(createEntity(id = 1L))
         remoteDataSource.shouldThrowError = true
 
@@ -217,14 +272,14 @@ class PersonalInboxRepositoryImplTest {
         }
     }
 
-    private fun createEntity(id: Long) = PersonalInboxItemEntity(
+    private fun createEntity(id: Long, sentDate: Long = 1000L) = PersonalInboxItemEntity(
         id = id,
         nationalCode = "123",
         mobileNumber = "0912",
         email = null,
         read = null,
         data = null,
-        sentDate = 1000L,
+        sentDate = sentDate,
         receiveDate = null,
         seenDate = null,
         seen = null,
@@ -297,10 +352,14 @@ class PersonalInboxRepositoryImplTest {
         val sizeFlow = MutableStateFlow<PersonalInboxSizeEntity?>(null)
         var replaceAllCalledCount = 0
 
-        override fun getInboxItems(): Flow<List<PersonalInboxItemEntity>> = itemsFlow
+        // Like the Room query: newest first.
+        override fun getInboxItems(): Flow<List<PersonalInboxItemEntity>> =
+            itemsFlow.map { items -> items.sortedByDescending { it.sentDate } }
 
+        // Like @Upsert: replaces rows with the same id, keeps the rest.
         override suspend fun upsertInboxItems(items: List<PersonalInboxItemEntity>) {
-            itemsFlow.value = items
+            val incomingIds = items.map { it.id }.toSet()
+            itemsFlow.value = itemsFlow.value.filterNot { it.id in incomingIds } + items
         }
 
         override suspend fun clearInboxItems() {

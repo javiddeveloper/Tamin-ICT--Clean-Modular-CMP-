@@ -218,6 +218,8 @@ fun ContractRowsContent(
                     actionLabel = stringResource(Res.string.contract_rows_pick_workshop),
                     onAction = { onIntent(ContractRowsIntent.PickerOpenChanged(isOpen = true)) },
                     showIconTile = true,
+                    actionBackground = colors.buttonGradient,
+                    actionIcon = vectorResource(Res.drawable.ic_tamin_search),
                 )
             },
         ) { row, itemModifier ->

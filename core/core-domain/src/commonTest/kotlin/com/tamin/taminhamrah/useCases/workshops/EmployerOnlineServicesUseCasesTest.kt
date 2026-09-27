@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.model.workshop.WorkshopSummaryDN
 import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDN
 import com.tamin.taminhamrah.repository.workshops.FakeWorkShopsRepository
 import com.tamin.taminhamrah.useCases.BaseUseCaseTest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -72,7 +73,7 @@ class EmployerOnlineServicesUseCasesTest : BaseUseCaseTest() {
             total = 1,
         )
 
-        val page = GetWorkshopsWithoutContractUseCase(repository)(page = 2)
+        val page = GetWorkshopsWithoutContractUseCase(repository)(page = 2).first()
 
         assertEquals(1, page.items.size)
         assertEquals("1071410004", page.items.first().workshopId)
@@ -92,7 +93,7 @@ class EmployerOnlineServicesUseCasesTest : BaseUseCaseTest() {
             workshopId = "0968210170",
             branchCode = "0960",
             page = 1,
-        )
+        ).first()
 
         assertEquals("علی پیمانکار", page.items.first().fullName)
         assertEquals(Triple("0968210170", "0960", 1), repository.lastContractRowsArgs)
@@ -123,7 +124,7 @@ class EmployerOnlineServicesUseCasesTest : BaseUseCaseTest() {
         repository.error = IllegalStateException("no connection")
 
         val error = assertFailsWith<IllegalStateException> {
-            GetWorkshopsWithoutContractUseCase(repository)(page = 0)
+            GetWorkshopsWithoutContractUseCase(repository)(page = 0).first()
         }
         assertEquals("no connection", error.message)
     }

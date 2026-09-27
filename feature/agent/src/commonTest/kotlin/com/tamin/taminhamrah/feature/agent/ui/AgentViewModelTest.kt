@@ -168,9 +168,14 @@ class FakeIdentityUserRepository(
 class FakeIdentityCityProvinceRepository : com.tamin.taminhamrah.repository.CityProvinceRepository {
     override fun getCity(cityId: String) = TODO("not used in AgentViewModelTest")
     override fun getProvince(provinceId: String) = TODO("not used in AgentViewModelTest")
-    override fun getProvinces() = TODO("not used in AgentViewModelTest")
-    override fun getCities(cityName: String?, provinceCode: String?) = TODO("not used in AgentViewModelTest")
-    override fun getCitiesByProvince(provinceCode: String) = TODO("not used in AgentViewModelTest")
+    override fun getProvincesPage(query: com.tamin.taminhamrah.model.request.ApiQueryParamDN) =
+        TODO("not used in AgentViewModelTest")
+    override fun getCitiesPage(query: com.tamin.taminhamrah.model.request.ApiQueryParamDN) =
+        TODO("not used in AgentViewModelTest")
+    override fun getCitiesByProvincePage(
+        provinceCode: String,
+        query: com.tamin.taminhamrah.model.request.ApiQueryParamDN,
+    ) = TODO("not used in AgentViewModelTest")
 }
 
 class FakeAgentRepository : AgentRepository {

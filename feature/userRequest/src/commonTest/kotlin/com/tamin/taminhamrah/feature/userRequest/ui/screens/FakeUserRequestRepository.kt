@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.model.userRequest.UserRequestDetailsDN
 import com.tamin.taminhamrah.model.userRequest.UserRequestSearchParams
 import com.tamin.taminhamrah.model.userRequest.UserRequestTypeDN
 import com.tamin.taminhamrah.repository.userRequest.UserRequestRepository
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -25,11 +26,14 @@ class FakeUserRequestRepository : UserRequestRepository {
     var requestErrorsResult: List<RequestErrorDN> = emptyList()
     var lastErrorsRequestId: Long? = null
     var lastSearch: UserRequestSearchParams? = null
+    var keepRequestsFlowOpen = false
 
     override fun getUserRequests(search: UserRequestSearchParams): Flow<List<UserRequestDN>> = flow {
         lastSearch = search
         if (shouldThrowError) throw error
         emit(userRequestsResult)
+        // The real repository keeps observing the Room cache after its first emissions.
+        if (keepRequestsFlowOpen) awaitCancellation()
     }
 
     override suspend fun refreshUserRequests(search: UserRequestSearchParams): List<UserRequestDN> {

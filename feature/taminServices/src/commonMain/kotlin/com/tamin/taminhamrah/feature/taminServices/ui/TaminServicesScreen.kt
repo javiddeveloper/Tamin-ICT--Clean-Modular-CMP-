@@ -1,13 +1,9 @@
 package com.tamin.taminhamrah.feature.taminServices.ui
 
-import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
-import androidx.compose.foundation.gestures.snapping.snapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,26 +19,21 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.layout
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tamin.taminhamrah.feature.taminServices.model.RolePR
 import com.tamin.taminhamrah.feature.taminServices.ui.components.ServiceCard
 import com.tamin.taminhamrah.feature.taminServices.ui.components.TabSelector
 import com.tamin.taminhamrah.feature.taminServices.ui.components.TaminServicesHeader
@@ -54,18 +45,27 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.CustomSearchBar
 import com.tamin.taminhamrah.ui.components.EmptyStateMessage
+import com.tamin.taminhamrah.ui.components.TaminTopAppBar
+import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
-import com.tamin.taminhamrah.ui.components.toast.LocalToaster
-import com.tamin.taminhamrah.ui.components.toast.warning
-import com.tamin.taminhamrah.ui.theme.CornerRadius
-import com.tamin.taminhamrah.ui.theme.Elevation
+import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
+import com.tamin.taminhamrah.ui.toparea.TopAreaState
+import com.tamin.taminhamrah.ui.toparea.driveTopArea
+import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
+import com.tamin.taminhamrah.ui.toparea.reportTopAreaHeight
+import com.tamin.taminhamrah.ui.toparea.topAreaContentPadding
+import com.tamin.taminhamrah.ui.toparea.topAreaHide
 import kotlinx.coroutines.flow.Flow
-import kotlin.math.abs
-
-private val HeaderSnapAnimationSpec: AnimationSpec<Float> = spring(stiffness = Spring.StiffnessLow)
+import org.jetbrains.compose.resources.stringResource
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.tamin_services_badge_count
+import taminx.core.core_ui.tamin_services_no_results_title
+import taminx.core.core_ui.tamin_services_search_placeholder
+import taminx.core.core_ui.tamin_services_section_title
+import taminx.core.core_ui.tamin_services_title
 
 @Composable
 fun TaminServicesRoute(
@@ -80,12 +80,10 @@ fun TaminServicesRoute(
         viewModel.sendIntent(TaminServicesIntent.OnSearchQueryChanged(""))
     }
 
-    val toaster = LocalToaster.current
     HandleTaminServicesEvents(
         events = viewModel.events,
         onNavigateToService = onNavigateToService,
         onOpenUrl = onOpenUrl,
-        onShowMessage = { toaster.warning(it) },
         onBackClicked = onBackClicked
     )
 
@@ -100,7 +98,6 @@ fun HandleTaminServicesEvents(
     events: Flow<TaminSericesEvent>,
     onNavigateToService: (FeatureFlag) -> Unit,
     onOpenUrl: (String) -> Unit,
-    onShowMessage: (String) -> Unit,
     onBackClicked: () -> Unit
 ) {
     LaunchedEffect(events) {
@@ -118,9 +115,7 @@ fun HandleTaminServicesEvents(
                     onBackClicked()
                 }
 
-                // The server's reason a service is off; without it the tap did nothing.
                 is TaminSericesEvent.ShowMessage -> {
-                    onShowMessage(event.message)
                 }
             }
         }
@@ -133,133 +128,47 @@ fun TaminServicesScreen(
     state: TaminServicesUiState,
     onIntent: (TaminServicesIntent) -> Unit,
 ) {
-    val scrollState = rememberTaminServicesScrollState()
-    val motionState = rememberTaminServicesMotionState(scrollState)
-    // Remembers completed entrance animation keys across list scrolls and back-navigation to eliminate glitches.
+    val taminColors = LocalTaminColors.current
     val staggerState = rememberStaggeredEntranceState(key = state.selectedTab?.roleId to state.searchQuery)
-    val headerShape = remember {
-        RoundedCornerShape(bottomStart = CornerRadius.x2l, bottomEnd = CornerRadius.x2l)
-    }
-
-    val decaySpec = rememberSplineBasedDecay<Float>()
-    val snapLayoutInfoProvider = remember(scrollState) {
-        object : SnapLayoutInfoProvider {
-            override fun calculateSnapOffset(velocity: Float): Float {
-                val lazyListState = scrollState.lazyListState
-                if (lazyListState.firstVisibleItemIndex == 0) {
-                    val currentOffset = lazyListState.firstVisibleItemScrollOffset.toFloat()
-                    val maxOffset = scrollState.collapseDistancePx
-                    if (currentOffset > 0 && currentOffset < maxOffset) {
-                        val targetOffset = if (abs(velocity) > 500f) {
-                            if (velocity > 0) maxOffset else 0f
-                        } else {
-                            if (currentOffset < maxOffset / 2f) 0f else maxOffset
-                        }
-                        return targetOffset - currentOffset
-                    }
-                }
-                return 0f
-            }
-        }
-    }
-
-    val snapFlingBehavior = snapFlingBehavior(
-        snapLayoutInfoProvider = snapLayoutInfoProvider,
-        decayAnimationSpec = decaySpec,
-        snapAnimationSpec = HeaderSnapAnimationSpec
-    )
     val chunkedServices = remember(state.filteredServices) {
         state.filteredServices.chunked(2)
     }
-    Column(
+
+    val topArea = rememberMeasuredTopAreaState(key = state.tabs) { topAreaState ->
+        TaminServicesTopArea(
+            query = state.searchQuery,
+            onQueryChange = { onIntent(TaminServicesIntent.OnSearchQueryChanged(it)) },
+            tabs = state.tabs,
+            selectedTab = state.selectedTab,
+            onTabSelected = { onIntent(TaminServicesIntent.OnTabSelected(it)) },
+            topAreaState = topAreaState,
+        )
+    }
+    val lazyListState = rememberLazyListState()
+
+    Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(taminColors.bgPage),
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .shadow(
-                    elevation = Elevation.lg,
-                    shape = headerShape,
-                    clip = false
-                )
-                .background(
-                    color = MaterialTheme.colorScheme.surface,
-                    shape = headerShape
-                )
-                .collapsibleHeaderPadding(
-                    top = { motionState.headerTopPadding },
-                    horizontal = Spacing.xlg,
-                    bottom = Spacing.xlg
-                )
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .graphicsLayer {
-                        alpha = 1f - motionState.headerProgress
-                    }
-                    .layout { measurable, constraints ->
-                        val progress = motionState.headerProgress
-                        val placeable = measurable.measure(constraints)
-                        val height = (placeable.height * (1f - progress)).toInt().coerceAtLeast(0)
-                        layout(placeable.width, height) {
-                            placeable.placeRelative(0, height - placeable.height)
-                        }
-                    }
-            ) {
-                Column {
-                    Text(
-                        text = "خدمات",
-                        style = MaterialTheme.typography.headlineSmall.copy(color = MaterialTheme.colorScheme.onSurface),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = Spacing.md)
-                    )
-
-                    Spacer(modifier = Modifier.height(Spacing.sm))
-                }
-            }
-
-            CustomSearchBar(
-                query = state.searchQuery,
-                onQueryChange = { onIntent(TaminServicesIntent.OnSearchQueryChanged(it)) },
-                placeHolder = "جست‌وجو در میان خدمات ..."
-            )
-        }
-
-        Spacer(modifier = Modifier.height(Spacing.xlg))
-
-        if (state.tabs.isNotEmpty()) {
-            TabSelector(
-                tabs = state.tabs,
-                selectedTab = state.selectedTab,
-                onTabSelected = { onIntent(TaminServicesIntent.OnTabSelected(it)) },
-                modifier = Modifier.padding(horizontal = Spacing.xlg)
-            )
-        }
-
         LazyColumn(
-            state = scrollState.lazyListState,
-            flingBehavior = snapFlingBehavior,
+            state = lazyListState,
             modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            contentPadding = PaddingValues(
-                top = Spacing.xlg,
-                bottom = 80.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-            )
+                .fillMaxSize()
+                .driveTopArea(topArea, lazyListState),
+            contentPadding = topAreaContentPadding(
+                state = topArea,
+                rest = PaddingValues(
+                    bottom = 80.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
+                ),
+            ),
+            overscrollEffect = rememberJellyOverscroll(),
         ) {
             item {
                 TaminServicesHeader(
-                    title = "خدمات ${state.selectedTab?.title ?: ""}",
-                    badgeText = "${state.filteredServices.size} خدمت",
-                    modifier = Modifier
-                        .padding(horizontal = Spacing.xlg)
-                        .onSizeChanged { size ->
-                            scrollState.collapseDistancePx = size.height.toFloat()
-                        }
+                    title = stringResource(Res.string.tamin_services_section_title, state.selectedTab?.title ?: ""),
+                    badgeText = stringResource(Res.string.tamin_services_badge_count, state.filteredServices.size.toString()),
+                    modifier = Modifier.padding(horizontal = Spacing.xlg)
                 )
             }
 
@@ -278,7 +187,7 @@ fun TaminServicesScreen(
                 item {
                     EmptyStateMessage(
                         icon = Icons.Outlined.SearchOff,
-                        title = "نتیجه‌ای یافت نشد",
+                        title = stringResource(Res.string.tamin_services_no_results_title),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(200.dp)
@@ -324,39 +233,71 @@ fun TaminServicesScreen(
                 Spacer(modifier = Modifier.height(Spacing.xl))
             }
         }
+
+        TaminServicesTopArea(
+            query = state.searchQuery,
+            onQueryChange = { onIntent(TaminServicesIntent.OnSearchQueryChanged(it)) },
+            tabs = state.tabs,
+            selectedTab = state.selectedTab,
+            onTabSelected = { onIntent(TaminServicesIntent.OnTabSelected(it)) },
+            topAreaState = topArea,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .reportTopAreaHeight(topArea),
+        )
     }
 }
 
-private fun Modifier.collapsibleHeaderPadding(
-    top: () -> Dp,
-    horizontal: Dp,
-    bottom: Dp,
-): Modifier = this.layout { measurable, constraints ->
-    val topPx = top().roundToPx()
-    val horizontalPx = horizontal.roundToPx()
-    val bottomPx = bottom.roundToPx()
+@Composable
+private fun TaminServicesTopArea(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    tabs: List<RolePR>,
+    selectedTab: RolePR?,
+    onTabSelected: (RolePR) -> Unit,
+    topAreaState: TopAreaState,
+    modifier: Modifier = Modifier,
+) {
+    val taminColors = LocalTaminColors.current
+    val gradient = remember(taminColors.profileGradientStops) {
+        Brush.horizontalGradient(taminColors.profileGradientStops)
+    }
 
-    val horizontalTotal = horizontalPx * 2
-    val verticalTotal = topPx + bottomPx
-
-    val loosenedConstraints = Constraints(
-        minWidth = (constraints.minWidth - horizontalTotal).coerceAtLeast(0),
-        maxWidth = if (constraints.hasBoundedWidth) {
-            (constraints.maxWidth - horizontalTotal).coerceAtLeast(0)
-        } else constraints.maxWidth,
-        minHeight = (constraints.minHeight - verticalTotal).coerceAtLeast(0),
-        maxHeight = if (constraints.hasBoundedHeight) {
-            (constraints.maxHeight - verticalTotal).coerceAtLeast(0)
-        } else constraints.maxHeight
-    )
-
-    val placeable = measurable.measure(loosenedConstraints)
-
-    val width = (placeable.width + horizontalTotal).coerceIn(constraints.minWidth, constraints.maxWidth)
-    val height = (placeable.height + verticalTotal).coerceIn(constraints.minHeight, constraints.maxHeight)
-
-    layout(width, height) {
-        placeable.placeRelative(horizontalPx, topPx)
+    Column(
+        // Opaque below the gradient bar (which paints its own background) so the list scrolling
+        // underneath this floating area never shows through the gaps around TabSelector.
+        modifier = modifier
+            .fillMaxWidth()
+            .background(taminColors.bgPage),
+    ) {
+        TaminTopAppBar(
+            title = stringResource(Res.string.tamin_services_title),
+            background = gradient,
+            bottomPadding = Spacing.lg,
+        ) {
+            CustomSearchBar(
+                query = query,
+                onQueryChange = onQueryChange,
+                placeHolder = stringResource(Res.string.tamin_services_search_placeholder),
+                containerColor = taminColors.onGradient.copy(alpha = 0.15f),
+                textColor = taminColors.onGradient,
+                placeholderColor = taminColors.textHeaderSubtitle,
+                iconTint = taminColors.onGradient,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .topAreaHide(topAreaState)
+            )
+        }
+        if (tabs.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(Spacing.xlg))
+            TabSelector(
+                tabs = tabs,
+                selectedTab = selectedTab,
+                onTabSelected = onTabSelected,
+                modifier = Modifier.padding(horizontal = Spacing.xlg)
+            )
+        }
+        Spacer(modifier = Modifier.height(Spacing.xlg))
     }
 }
 

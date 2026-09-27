@@ -1,9 +1,13 @@
 package com.tamin.taminhamrah.data.repository.constructionInsurance
 
 import com.tamin.taminhamrah.data.local.dao.ConstructionFileDao
+import com.tamin.taminhamrah.data.local.dao.ConstructionInsurancePageDao
 import com.tamin.taminhamrah.data.local.entity.ConstructionFileEntity
+import com.tamin.taminhamrah.data.local.entity.ConstructionFilePageEntity
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
+import com.tamin.taminhamrah.data.mapper.toPageEntity
+import com.tamin.taminhamrah.data.repository.paging.pageCacheKey
 import com.tamin.taminhamrah.dataSource.constructionInsurance.ConstructionInsuranceRemoteDataSource
 import com.tamin.taminhamrah.model.constructionInsurance.BeneficiaryConstructionDN
 import com.tamin.taminhamrah.model.constructionInsurance.BuildingRequestSummaryDN
@@ -34,6 +38,7 @@ import kotlinx.coroutines.flow.map
 internal class ConstructionInsuranceRepositoryImpl(
     private val remoteDataSource: ConstructionInsuranceRemoteDataSource,
     private val constructionFileDao: ConstructionFileDao,
+    private val pageDao: ConstructionInsurancePageDao,
 ) : ConstructionInsuranceRepository {
 
     override fun getConstructionFiles(
@@ -42,9 +47,6 @@ internal class ConstructionInsuranceRepositoryImpl(
         return flow {
             val matchingLocalFiles = constructionFileDao.getConstructionFiles().first()
                 .filter { it.matches(search) }
-            // Only the file(s) from the last detail search are ever cached (the paged list never
-            // writes to it), so most searches find nothing here. Emitting an empty list anyway
-            // would show as "not found" until the network answers instead of the loading state.
             if (matchingLocalFiles.isNotEmpty()) {
                 emit(matchingLocalFiles.map { it.toDomain() })
             }
@@ -89,22 +91,51 @@ internal class ConstructionInsuranceRepositoryImpl(
     }
 
     override fun getConstructionFilesPage(query: ApiQueryParamDN): Flow<PageDN<ConstructionFileDN>> = flow {
-        val response = remoteDataSource.getConstructionFiles(query)
+        val listKey = query.pageCacheKey()
+        val cached = constructionFileDao.getPageSlice(listKey, limit = query.limit, offset = query.start)
+        if (cached.isNotEmpty()) {
+            emit(PageDN(items = cached.map { it.file.toDomain() }, isFromCache = true))
+        }
+
+        val response = try {
+            remoteDataSource.getConstructionFiles(query)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            if (cached.isEmpty()) throw e
+            return@flow
+        }
+        val remoteFiles = response.list.orEmpty()
+        val rows = remoteFiles.mapIndexed { index, file ->
+            ConstructionFilePageEntity(listKey = listKey, position = query.start + index, file = file.toEntity())
+        }
+        if (query.start == 0) {
+            constructionFileDao.replacePages(listKey, rows)
+        } else {
+            constructionFileDao.upsertPage(rows)
+        }
         emit(
             PageDN(
-                items = response.list.orEmpty().map { it.toDomain() },
+                items = remoteFiles.map { it.toDomain() },
                 total = response.total,
             )
         )
     }
 
-    override fun getBeneficiariesWorkshopPage(query: ApiQueryParamDN): Flow<PageDN<BeneficiaryConstructionDN>> = flow {
-        val response = remoteDataSource.getBeneficiariesWorkshop(query)
-        emit(
-            PageDN(
-                items = response.list.orEmpty().map { it.toDomain() },
-                total = response.total,
-            )
+    /** Offline-first, same contract as [getConstructionFilesPage]; cached per filters/sorts. */
+    override fun getBeneficiariesWorkshopPage(query: ApiQueryParamDN): Flow<PageDN<BeneficiaryConstructionDN>> {
+        val listKey = query.pageCacheKey()
+        return offlineFirstPage(
+            query = query,
+            readCached = { pageDao.getBeneficiariesSlice(listKey, query.limit, query.start).map { it.toDomain() } },
+            fetch = {
+                val response = remoteDataSource.getBeneficiariesWorkshop(query)
+                PageDN(items = response.list.orEmpty().map { it.toDomain() }, total = response.total)
+            },
+            write = { items, replace ->
+                val rows = items.mapIndexed { i, item -> item.toPageEntity(listKey, query.start + i) }
+                if (replace) pageDao.replaceBeneficiaries(listKey, rows) else pageDao.upsertBeneficiaries(rows)
+            },
         )
     }
 
@@ -126,46 +157,93 @@ internal class ConstructionInsuranceRepositoryImpl(
         emit(remoteDataSource.issuancePaymentSheet(debitNumber))
     }
 
+    /** Offline-first, same contract as [getConstructionFilesPage]; cached per workshop + branch. */
     override fun getInstallmentLetterListPage(
         workshopId: String,
         branchId: String,
         query: ApiQueryParamDN,
-    ): Flow<PageDN<InstallmentLetterDN>> = flow {
-        val response = remoteDataSource.getInstallmentLetterList(workshopId, branchId, query)
-        emit(
-            PageDN(
-                items = response.list.orEmpty().map { it.toDomain() },
-                total = response.total,
-            )
+    ): Flow<PageDN<InstallmentLetterDN>> {
+        val listKey = query.pageCacheKey(workshopId, branchId)
+        return offlineFirstPage(
+            query = query,
+            readCached = { pageDao.getInstallmentLettersSlice(listKey, query.limit, query.start).map { it.toDomain() } },
+            fetch = {
+                val response = remoteDataSource.getInstallmentLetterList(workshopId, branchId, query)
+                PageDN(items = response.list.orEmpty().map { it.toDomain() }, total = response.total)
+            },
+            write = { items, replace ->
+                val rows = items.mapIndexed { i, item -> item.toPageEntity(listKey, query.start + i) }
+                if (replace) pageDao.replaceInstallmentLetters(listKey, rows) else pageDao.upsertInstallmentLetters(rows)
+            },
         )
     }
 
+    /** Offline-first, same contract as [getConstructionFilesPage]; cached per debit letter + branch. */
     override fun getDetailDebitListPage(
         debitNumber: String,
         branchId: String,
         query: ApiQueryParamDN,
-    ): Flow<PageDN<InstallmentDebitListDN>> = flow {
-        val response = remoteDataSource.getDetailDebitList(debitNumber, branchId, query)
-        emit(
-            PageDN(
-                items = response.list.orEmpty().map { it.toDomain() },
-                total = response.total,
-            )
+    ): Flow<PageDN<InstallmentDebitListDN>> {
+        val listKey = query.pageCacheKey(debitNumber, branchId)
+        return offlineFirstPage(
+            query = query,
+            readCached = { pageDao.getDebitsSlice(listKey, query.limit, query.start).map { it.toDomain() } },
+            fetch = {
+                val response = remoteDataSource.getDetailDebitList(debitNumber, branchId, query)
+                PageDN(items = response.list.orEmpty().map { it.toDomain() }, total = response.total)
+            },
+            write = { items, replace ->
+                val rows = items.mapIndexed { i, item -> item.toPageEntity(listKey, query.start + i) }
+                if (replace) pageDao.replaceDebits(listKey, rows) else pageDao.upsertDebits(rows)
+            },
         )
     }
 
+    /** Offline-first, same contract as [getConstructionFilesPage]; cached per debit letter + branch. */
     override fun getInstallmentConstructionListPage(
         debitNumber: String,
         branchId: String,
         query: ApiQueryParamDN,
-    ): Flow<PageDN<InstallmentConstructionListDN>> = flow {
-        val response = remoteDataSource.getInstallmentConstructionList(debitNumber, branchId, query)
-        emit(
-            PageDN(
-                items = response.list.orEmpty().map { it.toDomain() },
-                total = response.total,
-            )
+    ): Flow<PageDN<InstallmentConstructionListDN>> {
+        val listKey = query.pageCacheKey(debitNumber, branchId)
+        return offlineFirstPage(
+            query = query,
+            readCached = { pageDao.getInstallmentsSlice(listKey, query.limit, query.start).map { it.toDomain() } },
+            fetch = {
+                val response = remoteDataSource.getInstallmentConstructionList(debitNumber, branchId, query)
+                PageDN(items = response.list.orEmpty().map { it.toDomain() }, total = response.total)
+            },
+            write = { items, replace ->
+                val rows = items.mapIndexed { i, item -> item.toPageEntity(listKey, query.start + i) }
+                if (replace) pageDao.replaceInstallments(listKey, rows) else pageDao.upsertInstallments(rows)
+            },
         )
+    }
+
+    /**
+     * The offline-first page shape shared by the lists above: cached slice (if any), then the
+     * network page, written back (first page replaces the list, later pages append). Offline with
+     * a cached slice the flow just completes; with nothing cached the error is rethrown.
+     */
+    private fun <T> offlineFirstPage(
+        query: ApiQueryParamDN,
+        readCached: suspend () -> List<T>,
+        fetch: suspend () -> PageDN<T>,
+        write: suspend (items: List<T>, replace: Boolean) -> Unit,
+    ): Flow<PageDN<T>> = flow {
+        val cached = readCached()
+        if (cached.isNotEmpty()) emit(PageDN(items = cached, isFromCache = true))
+
+        val page = try {
+            fetch()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            if (cached.isEmpty()) throw e
+            return@flow
+        }
+        write(page.items, query.start == 0)
+        emit(page)
     }
 
     private fun buildQuery(search: ConstructionFileSearchParamsDN?): ApiQueryParamDN {
