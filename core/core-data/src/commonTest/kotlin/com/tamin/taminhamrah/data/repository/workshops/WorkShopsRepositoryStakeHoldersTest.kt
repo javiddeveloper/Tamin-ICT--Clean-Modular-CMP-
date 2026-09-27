@@ -27,7 +27,7 @@ class WorkShopsRepositoryStakeHoldersTest {
     @BeforeTest
     fun setup() {
         remote = FakeRemote()
-        repository = WorkShopsRepositoryImpl(remote)
+        repository = WorkShopsRepositoryImpl(remote, FakeEmployerServicesPageDao())
     }
 
     @Test

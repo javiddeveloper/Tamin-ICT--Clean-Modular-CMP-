@@ -187,12 +187,12 @@ internal class FakeCascadeWorkShopsRepository : WorkShopsRepository {
     override suspend fun deleteLegalRepresentative(ticket: String, stakeId: Long): Unit = unusedValue()
     override suspend fun requestEmployerAgreementTicket(mobile: String, email: String): String = unusedValue()
     override suspend fun getEmployerAgreementContactInfo(verificationCode: String): EmployerContactInfoDN = unusedValue()
-    override suspend fun getWorkshopsWithoutContract(page: Int): PagedListDN<WorkshopWithoutContractDN> = unusedValue()
-    override suspend fun getWorkshopContractRows(
+    override fun getWorkshopsWithoutContract(page: Int): Flow<PageDN<WorkshopWithoutContractDN>> = unused()
+    override fun getWorkshopContractRows(
         workshopId: String,
         branchCode: String,
         page: Int
-    ): PagedListDN<WorkshopContractRowDN> = unusedValue()
+    ): Flow<PageDN<WorkshopContractRowDN>> = unused()
     override suspend fun submitEmployerAgreement(request: EmployerAgreementSubmissionDN): String = unusedValue()
 }
 

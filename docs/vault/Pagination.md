@@ -163,7 +163,13 @@ bump wipes local data. Then:
    `ConstructionInsurancePageDao` + `ConstructionInsurancePageEntities.kt` — beneficiaries,
    installment letters (keyed by workshop + branch), debit list and installments (keyed by debit
    number + branch), same private helper in `ConstructionInsuranceRepositoryImpl`. A child list
-   (e.g. one debit letter's installments) is only available offline if it was opened online.
+   (e.g. one debit letter's installments) is only available offline if it was opened online;
+   `EmployerServicesPageDao` + `EmployerServicesPageEntities.kt` — خدمات غیرحضوری کارفرمایان's
+   workshops-without-agreement and contract rows (keyed by workshop + branch). These were `suspend`
+   methods returning `PagedListDN`; they became `Flow<PageDN<…>>` (a suspend fun can't emit the
+   cache and then the network) and every fake was updated. The nested workshop block is stored via
+   `@Embedded(prefix = "workshop_") WorkshopSummaryColumns`. **`getEmployerAgreements` is still
+   network-only** — it is shared with 4 feature/workshops ViewModels and was left for later.
 
    The inbox's `drop/take` over a plain table loads the whole table; fine for tens–hundreds of rows. For bigger tables add a
    `LIMIT :limit OFFSET :offset` query (`CityProvinceDao.getCitiesSlice`). If the list has

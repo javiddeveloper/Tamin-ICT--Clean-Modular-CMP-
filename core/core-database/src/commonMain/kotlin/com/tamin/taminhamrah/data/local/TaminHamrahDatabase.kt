@@ -68,6 +68,9 @@ import com.tamin.taminhamrah.data.local.entity.ContractAffairPageEntity
 import com.tamin.taminhamrah.data.local.dao.ContractAffairDao
 import com.tamin.taminhamrah.data.local.dao.InspectionDao
 import com.tamin.taminhamrah.data.local.dao.ConstructionInsurancePageDao
+import com.tamin.taminhamrah.data.local.dao.EmployerServicesPageDao
+import com.tamin.taminhamrah.data.local.entity.WorkshopContractRowPageEntity
+import com.tamin.taminhamrah.data.local.entity.WorkshopWithoutContractPageEntity
 import com.tamin.taminhamrah.data.local.entity.ConstructionBeneficiaryPageEntity
 import com.tamin.taminhamrah.data.local.entity.InstallmentConstructionPageEntity
 import com.tamin.taminhamrah.data.local.entity.InstallmentDebitPageEntity
@@ -122,6 +125,8 @@ import com.tamin.taminhamrah.data.local.dao.ConstructionFileDao
         InstallmentLetterPageEntity::class,
         InstallmentDebitPageEntity::class,
         InstallmentConstructionPageEntity::class,
+        WorkshopWithoutContractPageEntity::class,
+        WorkshopContractRowPageEntity::class,
         HomeContentEntity::class,
     ],
     // v5: FeatureFlag ids changed; cached home_content stored the old flagId.
@@ -152,6 +157,7 @@ expect abstract class TaminXDatabase : RoomDatabase {
     abstract fun contractAffairDao(): ContractAffairDao
     abstract fun inspectionDao(): InspectionDao
     abstract fun constructionInsurancePageDao(): ConstructionInsurancePageDao
+    abstract fun employerServicesPageDao(): EmployerServicesPageDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT")
