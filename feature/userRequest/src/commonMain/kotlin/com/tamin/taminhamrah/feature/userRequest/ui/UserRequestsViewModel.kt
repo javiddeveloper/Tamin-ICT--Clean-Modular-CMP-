@@ -11,6 +11,7 @@ import com.tamin.taminhamrah.mapper.userRequest.toSmartGuidePresentation
 import com.tamin.taminhamrah.mapper.userRequest.toTypePresentation
 import com.tamin.taminhamrah.model.userRequest.SmartGuideSearchParams
 import com.tamin.taminhamrah.model.userRequest.UserRequestSearchParams
+import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.userRequest.GetSmartGuideListUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestErrorsUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestTypesUseCase
@@ -24,7 +25,6 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import org.jetbrains.compose.resources.getString
 import taminx.feature.userrequest.generated.resources.Res
-import taminx.feature.userrequest.generated.resources.user_request_detail_load_error
 import taminx.feature.userrequest.generated.resources.user_request_smart_guide_not_found
 import taminx.feature.userrequest.generated.resources.user_request_tracking_code_copied
 import taminx.feature.userrequest.generated.resources.user_request_no_errors_to_show
@@ -140,7 +140,7 @@ class UserRequestsViewModel(
         } catch (e: Exception) {
             emit(PartialState.Error(e.message))
             // A tap-triggered load must say it failed; state.error isn't rendered on this screen.
-            sendEvent(UserRequestsEvent.ShowToast(e.message ?: loadErrorMessage()))
+            sendEvent(UserRequestsEvent.ShowToast(e.toSingleLineMessage()))
         }
     }
 
@@ -162,13 +162,9 @@ class UserRequestsViewModel(
         } catch (e: Exception) {
             emit(PartialState.Error(e.message))
             // A tap-triggered load must say it failed; state.error isn't rendered on this screen.
-            sendEvent(UserRequestsEvent.ShowToast(e.message ?: loadErrorMessage()))
+            sendEvent(UserRequestsEvent.ShowToast(e.toSingleLineMessage()))
         }
     }
-
-    private suspend fun loadErrorMessage(): String =
-        runCatching { getString(Res.string.user_request_detail_load_error) }
-            .getOrElse { Res.string.user_request_detail_load_error.toString() }
 
     private fun handleViewDetails(intent: UserRequestsIntent.ViewDetails): Flow<PartialState> = flow {
         sendEvent(

@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.feature.userRequest.ui.screens.FakeUserRequestRepos
 import com.tamin.taminhamrah.model.userRequest.RequestErrorDN
 import com.tamin.taminhamrah.model.userRequest.UserRequestDN
 import com.tamin.taminhamrah.model.userRequest.UserRequestPR
+import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.userRequest.GetSmartGuideListUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestErrorsUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestTypesUseCase
@@ -213,7 +214,7 @@ class UserRequestsViewModelTest {
             viewModel.sendIntent(UserRequestsIntent.OpenSmartGuide(requestType = 1, requestStatus = "0018", title = "راهنما"))
 
             val event = assertIs<UserRequestsEvent.ShowToast>(awaitItem())
-            assertEquals("boom", event.message)
+            assertEquals(RuntimeException("boom").toSingleLineMessage(), event.message)
         }
     }
 
@@ -230,7 +231,7 @@ class UserRequestsViewModelTest {
             viewModel.sendIntent(UserRequestsIntent.OpenSmartGuide(requestType = 1, requestStatus = "0018", title = "راهنما"))
 
             val event = assertIs<UserRequestsEvent.ShowToast>(awaitItem())
-            assertEquals("boom", event.message)
+            assertEquals(RuntimeException("boom").toSingleLineMessage(), event.message)
         }
     }
 
