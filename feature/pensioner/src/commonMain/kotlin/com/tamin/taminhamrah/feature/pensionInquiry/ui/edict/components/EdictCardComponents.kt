@@ -35,8 +35,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -67,10 +65,13 @@ import com.tamin.taminhamrah.model.pension.EdictPensionerPR
 import com.tamin.taminhamrah.model.pension.SurvivorInfoPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.components.BannerCard
+import com.tamin.taminhamrah.ui.components.BannerType
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.ui.theme.TaminColors
 import com.tamin.taminhamrah.ui.toLongStringOrZero
 import com.tamin.taminhamrah.ui.toPriceFormat
@@ -729,31 +730,15 @@ private fun EdictInfoList(edict: EdictPensionerPR) {
             }
         }
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(CornerRadius.card),
-            colors = CardDefaults.cardColors(containerColor = taminColors.blueBg),
-        ) {
-            Row(
-                modifier = Modifier.padding(Spacing.md),
-                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-                verticalAlignment = Alignment.Top,
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Info,
-                    contentDescription = null,
-                    tint = taminColors.blueText,
-                    modifier = Modifier.size(18.dp),
-                )
-                TaminText(
-                    text = stringResource(Res.string.edict_info_note),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = taminColors.blueText,
-                    lineHeight = 20.sp,
-                    modifier = Modifier.weight(1f),
-                )
-            }
-        }
+        // The teal rail on the reading-start (right) edge: the banner is inset from a teal fill.
+        BannerCard(
+            message = stringResource(Res.string.edict_info_note),
+            type = BannerType.Tip,
+            modifier = Modifier
+                .clip(RoundedCornerShape(CornerRadius.listRow))
+                .background(taminColors.teal)
+                .padding(start = Thickness.chartBar),
+        )
     }
 }
 
