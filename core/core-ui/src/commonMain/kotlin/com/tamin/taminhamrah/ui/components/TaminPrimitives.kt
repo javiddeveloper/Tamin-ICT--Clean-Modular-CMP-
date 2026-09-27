@@ -506,17 +506,21 @@ fun DetailRow(
      * classification rather than a plain reading («نوع فعالیت» on جزئیات کارگاه).
      */
     valueBoxed: Boolean = false,
-    /** Draws a [copyValue] row's value as a [CopyCodeChip] instead of a glyph beside plain text. */
+    /**
+     * Draws a [copyValue] row's value as a [CopyCodeChip] instead of a glyph beside plain text. The
+     * row stays the target; a tap beside the chip ticks it as a tap on it does.
+     */
     copyAsChip: Boolean = false,
 ) {
-    val chipCopy = if (copyAsChip && copyValue != null) rememberCopyAction(copyValue, announce = false) else null
-    val copy = if (chipCopy == null) copyValue?.let { rememberCopyAction(it) } else null
+    val chip = if (copyAsChip && copyValue != null) rememberCopyCodeChipState() else null
+    // The chip's tick is the confirmation, so it gets no toast on top.
+    val copy = copyValue?.let { rememberCopyAction(it, announce = chip == null) }
     val colors = LocalTaminColors.current
     val boxShape = RoundedCornerShape(CornerRadius.md)
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .then(if (copy != null) Modifier.clickable(onClick = copy) else Modifier)
+            .then(if (copy != null) Modifier.clickable { copy(); chip?.isCopied = true } else Modifier)
             .padding(vertical = verticalPadding),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -533,8 +537,8 @@ fun DetailRow(
         ) {
             // First child, so under the app's right-to-left layout the glyph sits to the *right*
             // of the value it copies rather than drifting off to the far edge.
-            if (chipCopy != null) {
-                CopyCodeChip(text = value, onCopy = chipCopy, contentDescription = label)
+            if (chip != null && copy != null) {
+                CopyCodeChip(text = value, onCopy = copy, contentDescription = label, state = chip)
                 return@Row
             }
             if (copyValue != null) {

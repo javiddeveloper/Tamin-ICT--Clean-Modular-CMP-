@@ -45,13 +45,18 @@ fun CopyCodeChip(
     enabled: Boolean = true,
     /** False for prose — a drug name — which may wrap; codes never do (see [NumericText]). */
     numeric: Boolean = true,
+    /**
+     * Hoisted when a bigger target around the chip copies the same value — a whole [DetailRow] —
+     * so a tap there ticks the chip just as a tap on the chip does.
+     */
+    state: CopyCodeChipState = rememberCopyCodeChipState(),
 ) {
     val colors = LocalTaminColors.current
-    var isCopied by remember { mutableStateOf(false) }
+    val isCopied = state.isCopied
     LaunchedEffect(isCopied) {
         if (!isCopied) return@LaunchedEffect
         delay(CopiedFeedbackMillis.milliseconds)
-        isCopied = false
+        state.isCopied = false
     }
 
     Row(
@@ -59,7 +64,7 @@ fun CopyCodeChip(
             .clip(ChipShape)
             .clickable(enabled = enabled) {
                 onCopy()
-                isCopied = true
+                state.isCopied = true
             }
             .background(colors.blueBg)
             .dashedOutline(colors.blueBorder, ChipCorner, ChipBorderWidth)
@@ -90,6 +95,14 @@ fun CopyCodeChip(
         )
     }
 }
+
+/** Whether a [CopyCodeChip] is showing its tick in place of the copy glyph. */
+class CopyCodeChipState {
+    var isCopied by mutableStateOf(false)
+}
+
+@Composable
+fun rememberCopyCodeChipState(): CopyCodeChipState = remember { CopyCodeChipState() }
 
 /** `padding:4px 9px; border-radius:11px; border:1.4px dashed`, with a 13px glyph. */
 private val ChipCorner = 11.dp
