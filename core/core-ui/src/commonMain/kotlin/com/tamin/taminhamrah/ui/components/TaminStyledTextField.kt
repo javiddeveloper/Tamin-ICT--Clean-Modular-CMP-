@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
@@ -99,6 +100,11 @@ fun TaminStyledTextField(
      * field does.
      */
     visualTransformation: VisualTransformation = VisualTransformation.None,
+    /**
+     * The typed value's base style. Null, the default, is `bodyLarge`, as every existing field draws
+     * it; the field's own color, weight and font are applied on top either way.
+     */
+    textStyle: TextStyle? = null,
 ) {
     val taminColors = LocalTaminColors.current
     var isFocused by remember { mutableStateOf(false) }
@@ -170,7 +176,7 @@ fun TaminStyledTextField(
                     readOnly = readOnly || onClick != null,
                     keyboardOptions = keyboardOptions,
                     visualTransformation = visualTransformation,
-                    textStyle = MaterialTheme.typography.bodyLarge.copy(
+                    textStyle = (textStyle ?: MaterialTheme.typography.bodyLarge).copy(
                         color = taminColors.textPrimary,
                         fontWeight = FontWeight.Medium,
                         fontFamily = applicationFont(),
