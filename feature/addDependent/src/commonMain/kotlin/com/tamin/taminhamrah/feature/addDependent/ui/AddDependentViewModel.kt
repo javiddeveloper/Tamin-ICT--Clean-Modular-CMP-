@@ -41,7 +41,6 @@ import com.tamin.taminhamrah.useCases.addDependent.UploadDependentImageUseCase
 import com.tamin.taminhamrah.useCases.common.GetCitiesPageUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
@@ -84,7 +83,7 @@ class AddDependentViewModel(
 ) {
 
     private val cityPaginator = Paginator(
-        loadPage = { query -> getCitiesPageUseCase(query).first() },
+        loadPages = { query -> getCitiesPageUseCase(query) },
     )
 
     override fun handleIntent(intent: AddDependentIntent): Flow<PartialState> {

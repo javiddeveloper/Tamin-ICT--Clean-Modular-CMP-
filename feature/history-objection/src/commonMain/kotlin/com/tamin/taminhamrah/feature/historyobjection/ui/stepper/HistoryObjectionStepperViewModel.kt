@@ -389,16 +389,26 @@ class HistoryObjectionStepperViewModel(
     }
 
     private fun loadProvinces(): Flow<PartialState> = flow {
-        // Not migrated to incremental paging (Paginator) yet — this stepper has no infinite-scroll
-        // picker, so a single generously-sized page stands in for "all provinces" for now.
-        getProvincesUseCase(ApiQueryParamDN(limit = ALL_PROVINCES_PAGE_SIZE)).collect { page ->
-            emit(PartialState.ProvincesLoaded(page.items.toProvincePresentation().toPersistentList()))
+        try {
+            getProvincesUseCase(ApiQueryParamDN(limit = ALL_PROVINCES_PAGE_SIZE)).collect { page ->
+                emit(PartialState.ProvincesLoaded(page.items.toProvincePresentation().toPersistentList()))
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.toSingleLineMessage()))
         }
     }
 
     private fun loadInsuranceTypes(): Flow<PartialState> = flow {
-        val insuranceTypes = getInsuranceTypesUseCase().first().toInsuranceTypePresentation()
-        emit(PartialState.InsuranceTypesLoaded(insuranceTypes.toPersistentList()))
+        try {
+            val insuranceTypes = getInsuranceTypesUseCase().first().toInsuranceTypePresentation()
+            emit(PartialState.InsuranceTypesLoaded(insuranceTypes.toPersistentList()))
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.toSingleLineMessage()))
+        }
     }
 
     private fun loadEditModeCitiesAndBranches(provinceCode: String?, cityCode: String?): Flow<PartialState> = flow {
@@ -478,7 +488,12 @@ class HistoryObjectionStepperViewModel(
             editRequestNumber = partialState.editRequestNumber,
             editRowIndex = partialState.editRowIndex,
         )
-        is PartialState.Loading -> currentState.copy(isLoading = partialState.isLoading, error = null)
+        // Clear the error when a load starts, not when it ends — otherwise the Loading(false) that
+        // follows a failure wipes the error it just reported.
+        is PartialState.Loading -> currentState.copy(
+            isLoading = partialState.isLoading,
+            error = if (partialState.isLoading) null else currentState.error,
+        )
         is PartialState.Submitting -> currentState.copy(isSubmitting = partialState.isSubmitting)
         PartialState.SubmitSucceeded -> currentState.copy(hasSubmitted = true)
         is PartialState.Error -> currentState.copy(error = partialState.message)

@@ -29,6 +29,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -87,6 +88,25 @@ class HistoryObjectionStepperViewModelTest {
             val afterBranchLoad = awaitUntil { it.branches.isNotEmpty() }
             assertEquals("1158", contractsRepository.lastBranchCityCode)
             assertEquals(1, afterBranchLoad.branches.size)
+        }
+    }
+
+    @Test
+    fun insuranceTypesFailure_doesNotCancelProvinceLoad() = runTest(testDispatcher) {
+        // Offline: insurance types are network-only and throw, provinces come from the cache.
+        val province = ProvinceDN(provinceCode = "04", provinceName = "اصفهان", status = "1", statusStartDate = "1")
+        cityProvinceRepository.provincesResult = listOf(province)
+        commonRepository.shouldThrowError = true
+
+        viewModel.uiState.test {
+            awaitItem()
+            viewModel.sendIntent(HistoryObjectionStepperIntent.Load(null))
+            // StateFlow conflates, so wait for the settled state only: provinces loaded and
+            // loading finished. The error must still be there (the modal used to flash and close).
+            val finished = awaitUntil { it.provinces.isNotEmpty() && !it.isLoading }
+            assertEquals(1, finished.provinces.size)
+            assertNotNull(finished.error)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 

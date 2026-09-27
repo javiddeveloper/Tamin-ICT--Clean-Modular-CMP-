@@ -79,7 +79,7 @@ class WorkshopRecentlyAddedMembersViewModel(
         loadPage = { query -> getJobTitlePage(query).first() },
     )
     private val cityPaginator = Paginator(
-        loadPage = { query -> getCitiesPage(query).first() },
+        loadPages = { query -> getCitiesPage(query) },
     )
 
     init {

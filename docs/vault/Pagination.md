@@ -74,9 +74,9 @@ and a generation counter makes `refresh()` win over a page that is still in flig
 ## Adding pagination to a screen
 
 1. **Repository** — add `fun getXPage(query: ApiQueryParamDN): Flow<PageDN<XDN>>`. Keep the
-   existing non-paged method if other features use it. Cache to Room **only when
-   `query.start == 0`**: `replaceAll*` clears the table, so caching an appended page would
-   drop everything before it.
+   existing non-paged method if other features use it. If the list is cached, never
+   `replaceAll*` an appended page — it would drop everything before it. Reference data
+   (cities, provinces) is only upserted; see "Offline-first" below.
 2. **Use case** — a thin `GetXPageUseCase(query)`; register it in `DomainModule`.
 3. **ViewModel** — `private val paginator = Paginator(loadPage = { getXPageUseCase(it).first() })`,
    then map `paginator.state` into a single `PagingChanged` partial state, and add
@@ -86,6 +86,65 @@ and a generation counter makes `refresh()` win over a page that is still in flig
    and a `PagingFooter` item after the list content.
 
 The worked example is `feature/my-inbox` against `getPersonalInboxItemsPageUseCase`.
+
+## Offline-first (optional)
+
+Offline-first lives in the **existing** `getXPage` repository method — same as every other
+cached flow in the app ([[Database]]); no extra method, flag or use case. Per request it emits:
+
+1. this page's slice from Room — same `start`/`limit` **and filters** the server gets — as
+   `PageDN(items, isFromCache = true)`, if non-empty;
+2. then the network page (and writes it to Room);
+3. if the network fails, it throws **only when that slice was empty** — otherwise the flow
+   just completes after the cached slice.
+
+Because the method now emits twice, **every caller must consume the whole flow** — `.first()`
+would stop at the cache and never reach the network, silently. Making a method offline-first
+therefore means updating all its callers:
+
+```kotlin
+Paginator(loadPages = { query -> getXPageUseCase(query) })   // pager
+getXUseCase(...).collect { ... }                            // re-render on each emission
+getXUseCase(...).last()                                     // one-shot: network, or cache offline
+```
+
+If the cached load runs under `merge(...)` alongside a network-only loader, give **each** loader
+its own try/catch: offline, the network-only one throws and `merge` cancels its siblings, so the
+cache never reaches the UI (history-objection stepper: insurance types killed the cached provinces).
+
+`Paginator` collects every emission of one request:
+
+- a cached **first** page shows immediately (`isFromCache`, `isRefreshing`, no full-screen spinner);
+- the last emission wins — normally the network page, which replaces it;
+- if the last emission is still the cache (offline) it is used like any page: end-of-list
+  comes from its size / `total`, so cached slices keep paging offline until a short one;
+- a thrown error after the cache keeps the cached items and sets `error`.
+
+Network-only callers use the secondary constructor: `Paginator(loadPage = { getXPageUseCase(it).first() })`.
+
+**Worked example — cities and provinces** (`CityProvinceRepositoryImpl.getCitiesPage`,
+`getCitiesByProvincePage`, `getProvincesPage` — all three; a screen's city list may use either
+city method, e.g. complete-employer-info uses `getCitiesByProvincePage`):
+
+- A fresh **first page** (`start == 0`) from the network **replaces** the cached list for that
+  scope in one transaction (`replaceCitiesMatching(cityName, provinceCode)` — same WHERE as the
+  read; `replaceAllProvinces`), so stale rows are dropped. Later pages are appended. Scoping
+  matters: opening province 07 must not wipe province 08, and a "teh" search must not wipe other
+  cities. Trade-off: after a refresh, the cache holds only the pages fetched since.
+- Cities are read with `CityProvinceDao.getCitiesSlice(cityName, provinceCode, limit, offset)`.
+  The server filters from `CityListQuery` (`CITY_NAME` LIKE `*term*`, `PROVINCE_CODE_CITY`) are
+  translated to that query (province codes compared ignoring leading zeros). Any other filter
+  or a sort skips the cache, so it never shows rows
+  the server wouldn't return.
+- Provinces (~31 rows) are sliced in memory from `getAllProvinces()`; filtered requests skip the cache.
+- Offline order is `cityName`/`provinceName` ASC, which may differ from the server's order; a
+  list mixing online and offline pages can show a duplicate or a gap at the seam.
+- Callers: ill-days, add-dependent, workshop recently-added-members (`loadPages`), complete
+  employer info provinces and cities (`loadPages`), history-objection and contract flow (`collect`),
+  fraction contract (`.last()`).
+
+`feature/my-inbox` is still network-first with a cache fallback on failure (its own
+`getInboxItemsPage`), not this pattern.
 
 ## Mutations reset the pager
 

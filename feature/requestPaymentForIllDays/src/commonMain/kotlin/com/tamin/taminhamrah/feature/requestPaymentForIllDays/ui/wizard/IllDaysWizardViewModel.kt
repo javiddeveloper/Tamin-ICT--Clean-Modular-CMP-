@@ -48,8 +48,9 @@ class IllDaysWizardViewModel(
 ) : BaseViewModel<IllDaysWizardUiState, PartialState, IllDaysWizardEvent, IllDaysWizardIntent>(
     initialState = IllDaysWizardUiState(),
 ) {
+    // Offline-first: collect the whole flow (cached page, then network page) — not `.first()`.
     private val cityPaginator = Paginator(
-        loadPage = { query -> getCitiesPageUseCase(query).first() },
+        loadPages = { query -> getCitiesPageUseCase(query) },
     )
 
     init {

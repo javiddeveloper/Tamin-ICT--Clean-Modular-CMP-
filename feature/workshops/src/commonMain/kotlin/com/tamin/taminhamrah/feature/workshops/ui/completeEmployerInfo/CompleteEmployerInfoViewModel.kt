@@ -42,7 +42,6 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.transform
@@ -69,13 +68,13 @@ class CompleteEmployerInfoViewModel(
     private var currentProvinceCode: String = ""
 
     private val provincePaginator = Paginator(
-        loadPage = { query -> getProvincesPageUseCase(query).first() },
+        loadPages = { query -> getProvincesPageUseCase(query) },
     )
     // One large page (matching the pre-pagination code's `limit = 200` for this endpoint) so the
     // sheet's local text filter has full coverage of a province's cities on first load.
     private val cityPaginator = Paginator(
         config = PaginationConfig(pageSize = CITIES_PER_PROVINCE_PAGE_SIZE),
-        loadPage = { query -> getCitiesByProvincePageUseCase(currentProvinceCode, query).first() },
+        loadPages = { query -> getCitiesByProvincePageUseCase(currentProvinceCode, query) },
     )
 
     init {

@@ -6,7 +6,7 @@ import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.CityProvinceRepository
 import kotlinx.coroutines.flow.Flow
 
-/** Online search by city name (with optional province filter), paged. Network-only. */
+/** Search by city name (with optional province filter), paged. Offline-first: emits the cached page, then the network page — collect the whole flow, not `.first()`. */
 class GetCitiesPageUseCase(
     private val repository: CityProvinceRepository
 ) {

@@ -22,6 +22,42 @@ interface CityProvinceDao {
     @Query("SELECT * FROM cities WHERE provinceCode = :provinceCode ORDER BY cityName ASC")
     fun getCitiesByProvinceCode(provinceCode: String): Flow<List<CityEntity>>
 
+    /**
+     * One page of cached cities, filtered like the server's city search (`null` = no filter).
+     * Province codes are compared ignoring leading zeros — endpoints disagree on "07" vs "7".
+     */
+    @Query(
+        "SELECT * FROM cities " +
+            "WHERE (:cityName IS NULL OR cityName LIKE '%' || :cityName || '%') " +
+            "AND (:provinceCode IS NULL OR LTRIM(provinceCode, '0') = LTRIM(:provinceCode, '0')) " +
+            "ORDER BY cityName ASC, cityCode ASC " +
+            "LIMIT :limit OFFSET :offset"
+    )
+    suspend fun getCitiesSlice(
+        cityName: String?,
+        provinceCode: String?,
+        limit: Int,
+        offset: Int,
+    ): List<CityEntity>
+
+    /** Deletes exactly the rows [getCitiesSlice] would return for the same filter (any offset). */
+    @Query(
+        "DELETE FROM cities " +
+            "WHERE (:cityName IS NULL OR cityName LIKE '%' || :cityName || '%') " +
+            "AND (:provinceCode IS NULL OR LTRIM(provinceCode, '0') = LTRIM(:provinceCode, '0'))"
+    )
+    suspend fun clearCitiesMatching(cityName: String?, provinceCode: String?)
+
+    /**
+     * A fresh first page from the network replaces the whole cached list for that filter —
+     * atomically, so observers never see it half-empty. Other filters' rows are untouched.
+     */
+    @Transaction
+    suspend fun replaceCitiesMatching(cityName: String?, provinceCode: String?, cities: List<CityEntity>) {
+        clearCitiesMatching(cityName, provinceCode)
+        upsertCities(cities)
+    }
+
     @Query("DELETE FROM cities WHERE provinceCode = :provinceCode")
     suspend fun clearCitiesByProvinceCode(provinceCode: String)
 
