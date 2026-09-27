@@ -7,6 +7,9 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.tappableElement
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -339,10 +342,16 @@ internal fun TaminHamrahNavGraph(
                     animationSpec = tween(durationMillis = 300),
                 ),
             ) {
+                // tappableElement bottom is 0 under gesture nav, >0 when OS nav buttons are shown.
+                val hasOsNavButtons = WindowInsets.tappableElement
+                    .asPaddingValues().calculateBottomPadding() > 0.dp
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(brush = AppBarScrim.bottomGradient)
+                        .background(
+                            brush = if (hasOsNavButtons) AppBarScrim.bottomGradientStrong
+                            else AppBarScrim.bottomGradient
+                        )
                 ) {
                     val selectedIndex = remember(currentTab) {
                         navigationItems.indexOfFirst { it.isSelected }.coerceAtLeast(0)

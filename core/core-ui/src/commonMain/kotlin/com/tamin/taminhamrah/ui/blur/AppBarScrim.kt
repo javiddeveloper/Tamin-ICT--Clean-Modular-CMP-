@@ -25,6 +25,16 @@ object AppBarScrim {
         colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.6f))
     )
 
+    /**
+     * Heavier [bottomGradient] for when the OS shows 3-button navigation: darkens sooner and
+     * deeper so the system buttons stay readable over scrolling content.
+     */
+    val bottomGradientStrong: Brush = Brush.verticalGradient(
+        0f to Color.Transparent,
+        0.4f to Color.Black.copy(alpha = 0.5f),
+        1f to Color.Black.copy(alpha = 0.85f),
+    )
+
     /** Fades from a dark wash (top) into transparent (bottom) — sits under the status bar. */
     val topGradient: Brush = Brush.verticalGradient(
         colors = listOf(Color.Black.copy(alpha = 0.35f), Color.Transparent)
