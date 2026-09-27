@@ -169,6 +169,9 @@ fun HomeScreen(
         onRetryHistorySummary = remember(viewModel) {
             { viewModel.sendIntent(HomeIntent.LoadHistorySummary) }
         },
+        onSupportClick = remember(viewModel) {
+            { viewModel.sendIntent(HomeIntent.OnSupportClick) }
+        },
         storyRail = {
             // «تازه‌ها» sits directly above the campaigns, as on the design, and is full-bleed for
             // the same reason: a row that scrolls has to be able to run a ring off the screen edge.
@@ -202,6 +205,7 @@ private fun HomeScreenContent(
     /** Anywhere on خلاصهٔ سابقه — the card, its year pill and «جزئیات ماه‌به‌ماه» all open سوابق. */
     onHistorySummaryClick: () -> Unit = {},
     onRetryHistorySummary: () -> Unit = {},
+    onSupportClick: () -> Unit = {},
     storyRail: @Composable () -> Unit = {},
 ) {
     // Folds HomeHeader's name + status-chips row from the column's own drag, snapping on release --
@@ -214,6 +218,7 @@ private fun HomeScreenContent(
         HomeTopArea(
             uiState = uiState,
             onNavigateToAgent = onNavigateToAgent,
+            onSupportClick = onSupportClick,
             topAreaState = topAreaState,
         )
     }
@@ -368,6 +373,7 @@ private fun HomeScreenContent(
         HomeTopArea(
             uiState = uiState,
             onNavigateToAgent = onNavigateToAgent,
+            onSupportClick = onSupportClick,
             topAreaState = topArea,
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -386,6 +392,7 @@ private fun HomeScreenContent(
 private fun HomeTopArea(
     uiState: HomeUiState,
     onNavigateToAgent: () -> Unit,
+    onSupportClick: () -> Unit,
     topAreaState: TopAreaState,
     modifier: Modifier = Modifier,
 ) {
@@ -405,6 +412,7 @@ private fun HomeTopArea(
                 // Only the name + chips row folds inside HomeHeader; the shield/title/support row
                 // stays fixed, same shape as HistoryJobInfoHeader's persistent title bar.
                 topAreaState = topAreaState,
+                onSupportClick = onSupportClick,
             )
             if (uiState.isAgentEnabled) {
                 Spacer(modifier = Modifier.height(HomeAskBarOverlap))

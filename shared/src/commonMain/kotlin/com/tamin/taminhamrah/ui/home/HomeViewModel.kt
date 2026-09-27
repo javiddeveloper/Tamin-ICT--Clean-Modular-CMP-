@@ -109,6 +109,9 @@ class HomeViewModel(
             is HomeIntent.OnHistorySummaryClick -> {
                 handleFeatureClick(FeatureFlag.COMBINED_RECORD)
             }
+            is HomeIntent.OnSupportClick -> {
+                sendEvent(HomeEvent.NavigateToWeb("tel:1420"))
+            }
             is HomeIntent.RefreshAgentAccess -> {
                 // Like the native dashboard: the answer is cached by the use case and drives the
                 // assistant's entry point. A failure keeps the last known answer, so it is ignored.

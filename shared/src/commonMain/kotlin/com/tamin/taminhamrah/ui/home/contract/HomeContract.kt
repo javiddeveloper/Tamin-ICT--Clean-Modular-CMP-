@@ -80,6 +80,8 @@ sealed interface HomeIntent {
     data class OnSectionSelected(val section: HomeServiceSection) : HomeIntent
     /** Anywhere on خلاصهٔ سابقه — the card, its year pill and «جزئیات ماه‌به‌ماه» all open سوابق. */
     object OnHistorySummaryClick : HomeIntent
+    /** The header's support icon — dials 1420, same as پروفایل › پشتیبانی. */
+    object OnSupportClick : HomeIntent
 }
 
 sealed interface HomeEvent {
