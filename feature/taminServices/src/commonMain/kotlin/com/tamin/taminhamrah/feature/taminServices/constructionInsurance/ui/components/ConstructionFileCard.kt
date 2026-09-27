@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFilePR
 import com.tamin.taminhamrah.model.constructionInsurance.INSTALLMENT_DEBIT_STATUS_CODE
 import com.tamin.taminhamrah.model.constructionInsurance.WorkshopIdInfoPR
@@ -37,7 +38,6 @@ import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
-import com.tamin.taminhamrah.ui.components.coloredShadow
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -81,12 +81,6 @@ fun ConstructionFileCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .coloredShadow(
-                color = colors.shadowSubtle,
-                borderRadius = CornerRadius.card,
-                blurRadius = 26.dp,
-                offsetY = 10.dp,
-            )
             .taminSurface(),
     ) {
         // Header: file number title on the leading (right, RTL) edge, payment-type pill trailing.
@@ -108,7 +102,7 @@ fun ConstructionFileCard(
                 Spacer(Modifier.width(4.dp))
                 Text(
                     text = "${item.fileNumber ?: "-"}",
-                    style = MaterialTheme.typography.titleSmall,
+                    style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Bold,
                     color = colors.textPrimary,
                 )
@@ -192,6 +186,8 @@ fun ConstructionFileCard(
                     text = stringResource(Res.string.btn_action),
                     onClick = { menuOpen = true },
                     icon = Icons.Default.Settings,
+                    // End = icon placed first in the Row, i.e. on the right edge under RTL.
+                    iconPosition = IconPosition.End,
                     height = ButtonHeight,
                     textStyle = MaterialTheme.typography.labelMedium,
                     background = Brush.linearGradient(listOf(TaminNavy300, TaminNavy900)),
@@ -259,10 +255,10 @@ private fun InfoBox(
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelSmall,
+            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
             color = colors.textMuted,
         )
-        val valueStyle = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold)
+        val valueStyle = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
         val resolvedValueColor = valueColor ?: colors.textPrimary
         if (unit != null) {
             Row(

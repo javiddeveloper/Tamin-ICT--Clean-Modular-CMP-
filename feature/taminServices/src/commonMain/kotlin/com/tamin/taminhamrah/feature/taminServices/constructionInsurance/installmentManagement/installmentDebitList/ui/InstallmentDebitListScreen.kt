@@ -15,7 +15,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -44,7 +43,6 @@ import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.components.coloredShadow
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.ToasterState
@@ -59,7 +57,9 @@ import com.tamin.taminhamrah.util.toFormattedDate
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.action_back
+import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.from_date
 import taminx.core.core_ui.ic_tamin_calendar
 import taminx.core.core_ui.installment_debit_list_empty
@@ -136,7 +136,7 @@ fun InstallmentDebitListScreen(
                 title = stringResource(CoreRes.string.installment_debit_list_title),
                 navigationIcon = {
                     TaminTopAppBarButton(
-                        icon = Icons.AutoMirrored.Filled.ArrowBack,
+                        icon = vectorResource(CoreRes.drawable.ic_tamin_chevron_back),
                         contentDescription = stringResource(CoreRes.string.action_back),
                         onClick = onBackClicked,
                         bordered = true,
@@ -220,12 +220,6 @@ private fun InstallmentDebitCard(item: InstallmentDebitListPR, modifier: Modifie
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .coloredShadow(
-                color = colors.shadowSubtle,
-                borderRadius = CornerRadius.card,
-                blurRadius = 20.dp,
-                offsetY = 8.dp,
-            )
             .taminSurface()
             .padding(Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(Spacing.md),

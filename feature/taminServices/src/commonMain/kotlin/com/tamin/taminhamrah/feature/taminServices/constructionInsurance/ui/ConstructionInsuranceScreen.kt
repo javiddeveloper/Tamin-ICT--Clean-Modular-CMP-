@@ -40,15 +40,12 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.TaminEmptyState
-import com.tamin.taminhamrah.ui.components.coloredShadow
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.ToasterState
 import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.paging.OnLoadMore
 import com.tamin.taminhamrah.ui.paging.PagingFooter
-import com.tamin.taminhamrah.ui.theme.CornerRadius
-import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
@@ -341,7 +338,6 @@ private fun ConstructionInsuranceTopArea(
     topAreaState: TopAreaState,
     modifier: Modifier = Modifier,
 ) {
-    val taminColors = LocalTaminColors.current
     Column(modifier = modifier.fillMaxWidth()) {
         ConstructionInsuranceHeader(
             onBackClicked = onBackClicked,
@@ -359,13 +355,7 @@ private fun ConstructionInsuranceTopArea(
             // footprint instead of counting the overlap twice as reserved list space.
             modifier = Modifier
                 .straddlePreviousSibling(UserInfoCardOverhang)
-                .padding(horizontal = Spacing.page)
-                .coloredShadow(
-                    color = taminColors.shadowSubtle,
-                    borderRadius = CornerRadius.lg,
-                    blurRadius = Elevation.lg,
-                    offsetY = Spacing.xs,
-                ),
+                .padding(horizontal = Spacing.page),
         )
         Spacer(Modifier.height(Spacing.sm))
     }

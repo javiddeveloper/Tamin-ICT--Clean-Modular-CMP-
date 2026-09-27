@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -47,7 +46,6 @@ import com.tamin.taminhamrah.ui.components.SectionLabel
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.components.coloredShadow
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.ToasterState
@@ -64,6 +62,7 @@ import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.action_back
+import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.beneficiaries_count
 import taminx.core.core_ui.beneficiaries_empty
 import taminx.core.core_ui.beneficiaries_title
@@ -144,7 +143,7 @@ fun BeneficiariesScreen(
                 title = stringResource(CoreRes.string.beneficiaries_title),
                 navigationIcon = {
                     TaminTopAppBarButton(
-                        icon = Icons.AutoMirrored.Filled.ArrowBack,
+                        icon = vectorResource(CoreRes.drawable.ic_tamin_chevron_back),
                         contentDescription = stringResource(CoreRes.string.action_back),
                         onClick = onBackClicked,
                         bordered = true,
@@ -311,23 +310,17 @@ private fun BeneficiaryCard(item: BeneficiaryConstructionPR, modifier: Modifier 
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .coloredShadow(
-                color = colors.shadowSubtle,
-                borderRadius = CornerRadius.card,
-                blurRadius = 20.dp,
-                offsetY = 8.dp
-            )
             .taminSurface(),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(Spacing.lg),
+                .padding(Spacing.md),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 BeneficiaryAvatar(
@@ -338,7 +331,7 @@ private fun BeneficiaryCard(item: BeneficiaryConstructionPR, modifier: Modifier 
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.xxs)) {
                     Text(
                         text = fullName,
-                        style = MaterialTheme.typography.titleSmall,
+                        style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Bold,
                         color = colors.textPrimary,
                         maxLines = 1,
@@ -346,7 +339,7 @@ private fun BeneficiaryCard(item: BeneficiaryConstructionPR, modifier: Modifier 
                     )
                     NumericText(
                         text = item.nationalCode ?: "-",
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.labelSmall,
                         color = colors.textMuted,
                     )
                 }
@@ -361,17 +354,19 @@ private fun BeneficiaryCard(item: BeneficiaryConstructionPR, modifier: Modifier 
         }
         Box(
             modifier = Modifier
-                .padding(horizontal = Spacing.lg, vertical = Spacing.lg)
+                // No top padding: the header row's own bottom padding already spaces it.
+                .padding(start = Spacing.md, end = Spacing.md, bottom = Spacing.md)
                 .fillMaxWidth()
                 .background(
                     colors.bgPage,
                     RoundedCornerShape(CornerRadius.lg),
                 )
-                .padding(horizontal = Spacing.sm, vertical = Spacing.sm),
+                .padding(horizontal = Spacing.sm, vertical = Spacing.xxs),
         ) {
             DetailRow(
                 label = stringResource(CoreRes.string.label_mobile),
                 value = item.mobile ?: "-",
+                valueStyle = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
             )
         }
     }
@@ -386,13 +381,13 @@ private fun BeneficiaryAvatar(
 ) {
     Box(
         modifier = modifier
-            .size(IconSize.xlarge)
+            .size(IconSize.large)
             .background(containerColor, RoundedCornerShape(CornerRadius.lg)),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = letter,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold,
             color = contentColor,
         )

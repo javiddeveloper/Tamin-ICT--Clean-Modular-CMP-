@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -53,7 +53,6 @@ import com.tamin.taminhamrah.ui.components.LoadingStateOverlay
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.components.coloredShadow
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.ToasterState
 import com.tamin.taminhamrah.ui.components.toast.error
@@ -131,7 +130,7 @@ fun ViewDetailRequestScreen(
                 title = stringResource(CoreRes.string.view_detail_request_title),
                 navigationIcon = {
                     TaminTopAppBarButton(
-                        icon = Icons.AutoMirrored.Filled.ArrowBack,
+                        icon = vectorResource(CoreRes.drawable.ic_tamin_chevron_back),
                         contentDescription = stringResource(CoreRes.string.action_back),
                         onClick = onBackClicked,
                         bordered = true,
@@ -183,9 +182,6 @@ fun ViewDetailRequestScreen(
     }
 }
 
-private val SectionShadowBlur = 26.dp
-private val SectionShadowOffsetY = 10.dp
-
 @Composable
 private fun ViewDetailContent(file: ConstructionFilePR, modifier: Modifier = Modifier) {
     LazyColumn(
@@ -205,16 +201,18 @@ private fun ViewDetailContent(file: ConstructionFilePR, modifier: Modifier = Mod
             ExpandableDetailCard(
                 title = stringResource(CoreRes.string.view_detail_section_computing_info),
                 items = file.getComputingInfo(),
+                // Amounts + ریال in the same blue as the values on the list screen's user card.
+                amountColor = LocalTaminColors.current.blueText,
                 headerPreview = {
                     NumericText(
                         text = (file.totalPayment ?: 0L).toPriceFormat(),
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                        color = LocalTaminColors.current.textPrimary,
+                        color = LocalTaminColors.current.blueText,
                     )
                     Text(
                         text = rialUnit,
                         style = MaterialTheme.typography.labelMedium,
-                        color = LocalTaminColors.current.textPrimary,
+                        color = LocalTaminColors.current.blueText,
                     )
                 },
             )
@@ -229,6 +227,8 @@ private fun ExpandableDetailCard(
     modifier: Modifier = Modifier,
     initiallyExpanded: Boolean = false,
     headerPreview: (@Composable () -> Unit)? = null,
+    /** Color for rows that carry a unit (the ریال amounts); null keeps them [textPrimary]. */
+    amountColor: Color? = null,
 ) {
     val colors = LocalTaminColors.current
     var expanded by rememberSaveable(title) { mutableStateOf(initiallyExpanded) }
@@ -240,12 +240,6 @@ private fun ExpandableDetailCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .coloredShadow(
-                color = colors.shadowSubtle,
-                borderRadius = CornerRadius.card,
-                blurRadius = SectionShadowBlur,
-                offsetY = SectionShadowOffsetY,
-            )
             .clip(RoundedCornerShape(CornerRadius.lg))
             .background(colors.bgSurface)
             .border(1.dp, colors.border, RoundedCornerShape(CornerRadius.lg)),
@@ -296,7 +290,7 @@ private fun ExpandableDetailCard(
                     DetailRow(
                         label = label,
                         value = value,
-                        valueColor = LocalTaminColors.current.textPrimary,
+                        valueColor = amountColor?.takeIf { kv.unit != null } ?: colors.textPrimary,
                         numeric = kv.numeric,
                         unit = kv.unit,
                     )

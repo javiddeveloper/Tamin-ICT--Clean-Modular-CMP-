@@ -17,15 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.ui.components.coloredShadow
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
-
-private val SectionShadowBlur = 26.dp
-private val SectionShadowOffsetY = 10.dp
 
 /** Row counts per placeholder card — just enough visual variety to read as two distinct sections. */
 private val SKELETON_ROW_COUNTS = listOf(5, 4)
@@ -57,12 +53,6 @@ private fun ExpandableDetailCardSkeleton(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .coloredShadow(
-                color = colors.shadowSubtle,
-                borderRadius = CornerRadius.card,
-                blurRadius = SectionShadowBlur,
-                offsetY = SectionShadowOffsetY,
-            )
             .background(colors.bgSurface, cardShape)
             .border(1.dp, colors.border, cardShape),
     ) {
