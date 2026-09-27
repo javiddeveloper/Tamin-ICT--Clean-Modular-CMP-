@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.dataSource.inspection
 
+import com.tamin.taminhamrah.tools.readPdfChannel
 import io.ktor.serialization.JsonConvertException
 import com.tamin.taminhamrah.apiService.inspection.InspectionApiService
 import com.tamin.taminhamrah.model.inspection.BranchDTO
@@ -201,7 +202,7 @@ internal class InspectionRemoteDataSourceImpl(
             val response = apiService.getInspectionReportPDF(inspectionNo)
             PdfDownloadDTO(
                 pdf = InputStreamDTO(
-                    pdf = response.body()
+                    pdf = response.readPdfChannel()
                 )
             )
         } catch (e: TaminErrorUriException) {
@@ -226,7 +227,7 @@ internal class InspectionRemoteDataSourceImpl(
             )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.UNKNOWN)
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
             )
         }
     }

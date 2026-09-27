@@ -16,7 +16,13 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
 import com.tamin.taminhamrah.tools.readPdfChannel
-import com.tamin.taminhamrah.tools.safeCall
+import kotlinx.coroutines.CancellationException
+import io.ktor.serialization.JsonConvertException
+import io.ktor.client.plugins.HttpRequestTimeoutException
+import io.ktor.client.network.sockets.ConnectTimeoutException
+import io.ktor.client.network.sockets.SocketTimeoutException
+import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
+import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 
 internal class ConstructionInsuranceRemoteDataSourceImpl(
     private val apiService: ConstructionInsuranceApiService,
@@ -26,59 +32,266 @@ internal class ConstructionInsuranceRemoteDataSourceImpl(
 
     override suspend fun getConstructionFiles(
         query: ApiQueryParamDN
-    ): ListData<ConstructionFileDTO> = errorParser.safeCall("getConstructionFiles") {
-        apiService.getConstructionFiles(queryBuilder.buildQuery(query)).extractData()
+    ): ListData<ConstructionFileDTO> {
+        return try {
+            apiService.getConstructionFiles(queryBuilder.buildQuery(query)).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
     }
 
     override suspend fun getBeneficiariesWorkshop(
         query: ApiQueryParamDN
-    ): ListData<BeneficiaryConstructionDTO> = errorParser.safeCall("getBeneficiariesWorkshop") {
-        apiService.getBeneficiariesWorkshop(queryBuilder.buildQuery(query)).extractData()
+    ): ListData<BeneficiaryConstructionDTO> {
+        return try {
+            apiService.getBeneficiariesWorkshop(queryBuilder.buildQuery(query)).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
     }
 
     override suspend fun getPaymentSheetConstructionInfo(
         debitNumber: String
-    ): ListData<PaymentSheetConstructionFileDTO> = errorParser.safeCall("getPaymentSheetConstructionInfo") {
-        apiService.getPaymentSheetConstructionInfo(debitNumber).extractData()
+    ): ListData<PaymentSheetConstructionFileDTO> {
+        return try {
+            apiService.getPaymentSheetConstructionInfo(debitNumber).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
     }
 
     override suspend fun getCertificatePaymentSheetPdf(
         debitNumber: String,
         branchCode: String,
-    ): PdfDownloadDTO = errorParser.safeCall("getCertificatePaymentSheetPdf") {
-        PdfDownloadDTO(
-            pdf = InputStreamDTO(
-                pdf = apiService.getCertificatePaymentSheetPdf(debitNumber, branchCode).readPdfChannel()
+    ): PdfDownloadDTO {
+        return try {
+            PdfDownloadDTO(
+                pdf = InputStreamDTO(
+                    pdf = apiService.getCertificatePaymentSheetPdf(debitNumber, branchCode).readPdfChannel()
+                )
             )
-        )
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
     }
 
-    override suspend fun issuancePaymentSheet(debitNumber: String): String =
-        errorParser.safeCall("issuancePaymentSheet") {
+    override suspend fun issuancePaymentSheet(debitNumber: String): String {
+        return try {
             apiService.issuancePaymentSheet(debitNumber).extractMessage()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
+    }
 
     override suspend fun getInstallmentLetterList(
         workshopId: String,
         branchId: String,
         query: ApiQueryParamDN,
-    ): ListData<InstallmentLetterDTO> = errorParser.safeCall("getInstallmentLetterList") {
-        apiService.getInstallmentLetterList(workshopId, branchId, queryBuilder.buildQuery(query)).extractData()
+    ): ListData<InstallmentLetterDTO> {
+        return try {
+            apiService.getInstallmentLetterList(workshopId, branchId, queryBuilder.buildQuery(query)).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
     }
 
     override suspend fun getDetailDebitList(
         debitNumber: String,
         branchId: String,
         query: ApiQueryParamDN,
-    ): ListData<InstallmentDebitListDTO> = errorParser.safeCall("getDetailDebitList") {
-        apiService.getDetailDebitList(debitNumber, branchId, queryBuilder.buildQuery(query)).extractData()
+    ): ListData<InstallmentDebitListDTO> {
+        return try {
+            apiService.getDetailDebitList(debitNumber, branchId, queryBuilder.buildQuery(query)).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
     }
 
     override suspend fun getInstallmentConstructionList(
         debitNumber: String,
         branchId: String,
         query: ApiQueryParamDN,
-    ): ListData<InstallmentConstructionListDTO> = errorParser.safeCall("getInstallmentConstructionList") {
-        apiService.getInstallmentConstructionList(debitNumber, branchId, queryBuilder.buildQuery(query)).extractData()
+    ): ListData<InstallmentConstructionListDTO> {
+        return try {
+            apiService.getInstallmentConstructionList(debitNumber, branchId, queryBuilder.buildQuery(query)).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
     }
 }

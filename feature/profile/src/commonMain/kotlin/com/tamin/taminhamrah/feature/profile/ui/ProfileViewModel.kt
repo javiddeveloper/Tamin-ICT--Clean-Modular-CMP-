@@ -17,14 +17,11 @@ import com.tamin.taminhamrah.useCases.auth.GetSignOutUrlUseCase
 import com.tamin.taminhamrah.useCases.auth.SignOutUseCase
 import com.tamin.taminhamrah.useCases.common.SetThemeUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
-import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
-import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
 import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
 import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
-import com.tamin.taminhamrah.useCases.user.VerifyChangeMobileUseCase
 import com.tamin.taminhamrah.util.HeaderConstant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -42,10 +39,7 @@ class ProfileViewModel(
     private val subdominantUseCase: SubdominantUseCase,
     private val signOutUseCase: SignOutUseCase,
     private val getSignOutUrlUseCase: GetSignOutUrlUseCase,
-    private val getInsuredActiveBranchUseCase: GetInsuredActiveBranchUseCase,
     private val getRelationTaminAllUseCase: GetRelationTaminAllUseCase,
-    private val changeMobileUseCase: ChangeMobileUseCase,
-    private val verifyChangeMobileUseCase: VerifyChangeMobileUseCase,
     private val setThemeUseCase: SetThemeUseCase
 ) : BaseViewModel<ProfileUiState, PartialState, ProfileEvent, ProfileIntent>(
     initialState = ProfileUiState()
@@ -194,24 +188,6 @@ class ProfileViewModel(
         }
     }
 
-    private fun handleGetInsuranceActiveBranch(): Flow<PartialState> {
-        return flow {
-            emit(PartialState.ScreenStateChanged.Loading)
-            getInsuredActiveBranchUseCase.invoke().collect {
-                emit(PartialState.ScreenStateChanged.Success)
-            }
-        }
-    }
-
-    private fun handleGetRelationTaminAll(): Flow<PartialState> {
-        return flow {
-            emit(PartialState.ScreenStateChanged.Loading)
-            getRelationTaminAllUseCase.invoke().collect {
-                emit(PartialState.ScreenStateChanged.Success)
-            }
-        }
-    }
-
     private fun handleToggleTheme(isDark: Boolean): Flow<PartialState> {
         viewModelScope.launch {
             val config = if (isDark) DarkThemeConfig.DARK else DarkThemeConfig.LIGHT
@@ -273,12 +249,6 @@ class ProfileViewModel(
             isImageRequestLoading = false,
             imageRequestError = partialState.message
         )
-
-        is PartialState.ScreenStateChanged -> when (partialState) {
-            is PartialState.ScreenStateChanged.Loading -> currentState.copy(isLoading = true)
-            is PartialState.ScreenStateChanged.Success -> currentState.copy(isLoading = false)
-            is PartialState.ScreenStateChanged.Error -> currentState.copy(isLoading = false, error = partialState.message)
-        }
     }
 
     override fun createErrorState(message: String): PartialState =

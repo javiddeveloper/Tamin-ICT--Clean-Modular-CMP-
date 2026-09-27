@@ -201,7 +201,7 @@ internal class CommonRemoteDataSourceImpl(
             )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.UNKNOWN)
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
             )
         }
     }
@@ -267,7 +267,7 @@ internal class CommonRemoteDataSourceImpl(
             )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.UNKNOWN)
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
             )
         }
     }
@@ -275,6 +275,8 @@ internal class CommonRemoteDataSourceImpl(
     override suspend fun getRegistrationDeclarationForm(): HttpStatement {
         return try {
             commonApiService.getRegistrationDeclarationForm()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
         } catch (e: CancellationException) {
             throw e
         } catch (e: JsonConvertException) {

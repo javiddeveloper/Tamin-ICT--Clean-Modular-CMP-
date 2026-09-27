@@ -14,7 +14,7 @@ class TaminExceptionTest {
         assertEquals(ErrorUri.NO_CONNECTION_ERROR, parsed.taminErrorUriOrNull())
     }
 
-    /** The unparsed form, which `safeCall` rethrows straight through for a known uri. */
+    /** The unparsed form, as a repository sees it when a download fails outside a data source's catch. */
     @Test
     fun `a bare uri exception reports its own uri`() {
         val bare = TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)

@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.dataSource.contractAffair
 
+import com.tamin.taminhamrah.tools.readPdfChannel
 import kotlinx.coroutines.CancellationException
 import io.ktor.serialization.JsonConvertException
 import com.tamin.taminhamrah.tools.requireSuccessStatus
@@ -184,7 +185,7 @@ class ContractAffairRemoteDataSourceImpl(
                 ContractPremiumType.FREELANCE ->
                     contractAffairApiService.getFreelanceContractReport(timestamp)
             }
-            PdfDownloadDTO(pdf = InputStreamDTO(pdf = statement.body()))
+            PdfDownloadDTO(pdf = InputStreamDTO(pdf = statement.readPdfChannel()))
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: CancellationException) {

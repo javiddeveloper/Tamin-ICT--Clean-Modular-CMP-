@@ -66,9 +66,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlin.math.abs
 
 private val HeaderSnapAnimationSpec: AnimationSpec<Float> = spring(stiffness = Spring.StiffnessLow)
-private const val StaggerStepMs = 50L
-private const val StaggerMaxSteps = 8
-private const val ItemEnterDurationMs = 320
 
 @Composable
 fun TaminServicesRoute(

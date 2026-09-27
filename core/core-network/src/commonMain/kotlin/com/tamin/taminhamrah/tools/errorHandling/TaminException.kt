@@ -23,7 +23,6 @@ data class TaminErrorUriException(
     // the `hasError`/`problems` envelope, e.g. BaseDTO.problemMessage.
     // When set, ErrorParser prefers this over the generic per-ErrorUri copy.
     val serverMessage: String? = null,
-    val errorCode: Int? = null,
     val navigateBack: Boolean = false,
 ) : Exception()
 
@@ -49,10 +48,7 @@ fun Throwable.asTaminApiException(): TaminApiException = when (this) {
     )
 }
 
-fun Throwable.getTaminApiExceptionTitle() = this.asTaminApiException().title
-fun Throwable.getTaminApiExceptionSubtitle() = this.asTaminApiException().subtitle
 fun Throwable.getTaminErrorUri() = (this.asTaminApiException().cause as TaminErrorUriException).uri
-fun Throwable.getServerErrorCode() = (this.asTaminApiException().cause as? TaminErrorUriException)?.errorCode
 
 /**
  * Which [ErrorUri] this failure was classified as, or null when it carries none.

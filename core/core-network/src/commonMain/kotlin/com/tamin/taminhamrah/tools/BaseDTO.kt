@@ -134,12 +134,10 @@ fun BaseDTO<JsonElement?>.extractMessage(): String {
  * it into a generic "something went wrong" string.
  */
 private fun <T> BaseDTO<T>.throwProblemError(): Nothing {
-    val firstProblem = problems?.firstOrNull()
     println("BaseDTO: Business error: family=$family reason=$reason problems=$problems")
     throw TaminErrorUriException(
         uri = ErrorUri.SERVER_PROBLEM,
-        serverMessage = getServerMessage(),
-        errorCode = firstProblem?.errorCode
+        serverMessage = getServerMessage()
     )
 }
 
