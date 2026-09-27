@@ -2,6 +2,11 @@ package com.tamin.taminhamrah.data.repository.constructionInsurance
 
 import app.cash.turbine.test
 import com.tamin.taminhamrah.data.local.dao.ConstructionFileDao
+import com.tamin.taminhamrah.data.local.dao.ConstructionInsurancePageDao
+import com.tamin.taminhamrah.data.local.entity.ConstructionBeneficiaryPageEntity
+import com.tamin.taminhamrah.data.local.entity.InstallmentConstructionPageEntity
+import com.tamin.taminhamrah.data.local.entity.InstallmentDebitPageEntity
+import com.tamin.taminhamrah.data.local.entity.InstallmentLetterPageEntity
 import com.tamin.taminhamrah.data.local.entity.ConstructionFileEntity
 import com.tamin.taminhamrah.data.local.entity.ConstructionFilePageEntity
 import com.tamin.taminhamrah.dataSource.constructionInsurance.ConstructionInsuranceRemoteDataSource
@@ -36,13 +41,15 @@ class ConstructionInsuranceRepositoryImplTest {
 
     private lateinit var remoteDataSource: FakeConstructionInsuranceRemoteDataSource
     private lateinit var dao: FakeConstructionFileDao
+    private lateinit var pageDao: FakeConstructionInsurancePageDao
     private lateinit var repository: ConstructionInsuranceRepositoryImpl
 
     @BeforeTest
     fun setup() {
         remoteDataSource = FakeConstructionInsuranceRemoteDataSource()
         dao = FakeConstructionFileDao()
-        repository = ConstructionInsuranceRepositoryImpl(remoteDataSource, dao)
+        pageDao = FakeConstructionInsurancePageDao()
+        repository = ConstructionInsuranceRepositoryImpl(remoteDataSource, dao, pageDao)
     }
 
     @Test
@@ -271,6 +278,83 @@ class ConstructionInsuranceRepositoryImplTest {
 
         assertEquals(0, dao.replaceAllCalledCount)
         assertTrue(dao.filesFlow.value.isEmpty())
+    }
+
+    @Test
+    fun `getBeneficiariesWorkshopPage should emit the cached page then the network page`() = runTest {
+        remoteDataSource.beneficiariesResult = ListData(total = 1, list = listOf(BeneficiaryConstructionDTO(name = "قدیم")))
+        repository.getBeneficiariesWorkshopPage(ApiQueryParamDN()).test { awaitItem(); awaitComplete() }
+        remoteDataSource.beneficiariesResult = ListData(total = 1, list = listOf(BeneficiaryConstructionDTO(name = "جدید")))
+
+        repository.getBeneficiariesWorkshopPage(ApiQueryParamDN()).test {
+            val cached = awaitItem()
+            assertEquals(listOf("قدیم"), cached.items.map { it.name })
+            assertTrue(cached.isFromCache)
+            val network = awaitItem()
+            assertEquals(listOf("جدید"), network.items.map { it.name })
+            assertFalse(network.isFromCache)
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `installment lists should serve their cache offline, kept apart per parent`() = runTest {
+        remoteDataSource.installmentLettersResult =
+            ListData(total = 1, list = listOf(InstallmentLetterDTO(debitNumber = "A")))
+        repository.getInstallmentLetterListPage("w1", "b1", ApiQueryParamDN()).test { awaitItem(); awaitComplete() }
+        remoteDataSource.installmentLettersResult =
+            ListData(total = 1, list = listOf(InstallmentLetterDTO(debitNumber = "B")))
+        repository.getInstallmentLetterListPage("w2", "b1", ApiQueryParamDN()).test { awaitItem(); awaitComplete() }
+        remoteDataSource.detailDebitListResult =
+            ListData(total = 1, list = listOf(InstallmentDebitListDTO(debitNumber = "D")))
+        repository.getDetailDebitListPage("D", "b1", ApiQueryParamDN()).test { awaitItem(); awaitComplete() }
+        remoteDataSource.installmentConstructionListResult =
+            ListData(total = 1, list = listOf(InstallmentConstructionListDTO(debitSubCode = "S1")))
+        repository.getInstallmentConstructionListPage("D", "b1", ApiQueryParamDN()).test { awaitItem(); awaitComplete() }
+        remoteDataSource.shouldThrowError = true
+
+        repository.getInstallmentLetterListPage("w1", "b1", ApiQueryParamDN()).test {
+            val page = awaitItem()
+            assertEquals(listOf("A"), page.items.map { it.debitNumber })
+            assertTrue(page.isFromCache)
+            awaitComplete()
+        }
+        repository.getInstallmentLetterListPage("w2", "b1", ApiQueryParamDN()).test {
+            assertEquals(listOf("B"), awaitItem().items.map { it.debitNumber })
+            awaitComplete()
+        }
+        repository.getDetailDebitListPage("D", "b1", ApiQueryParamDN()).test {
+            assertEquals(listOf("D"), awaitItem().items.map { it.debitNumber })
+            awaitComplete()
+        }
+        repository.getInstallmentConstructionListPage("D", "b1", ApiQueryParamDN()).test {
+            assertEquals(listOf("S1"), awaitItem().items.map { it.debitSubCode })
+            awaitComplete()
+        }
+        // A letter that was never opened online has nothing to fall back to.
+        repository.getInstallmentLetterListPage("w3", "b1", ApiQueryParamDN()).test { awaitError() }
+    }
+
+    @Test
+    fun `installment letters first page should replace stale rows of that list`() = runTest {
+        remoteDataSource.installmentLettersResult = ListData(
+            total = 2,
+            list = listOf(InstallmentLetterDTO(debitNumber = "A"), InstallmentLetterDTO(debitNumber = "B")),
+        )
+        repository.getInstallmentLetterListPage("w1", "b1", ApiQueryParamDN()).test { awaitItem(); awaitComplete() }
+        remoteDataSource.installmentLettersResult =
+            ListData(total = 1, list = listOf(InstallmentLetterDTO(debitNumber = "C")))
+        repository.getInstallmentLetterListPage("w1", "b1", ApiQueryParamDN()).test {
+            awaitItem() // cache
+            awaitItem() // network
+            awaitComplete()
+        }
+        remoteDataSource.shouldThrowError = true
+
+        repository.getInstallmentLetterListPage("w1", "b1", ApiQueryParamDN()).test {
+            assertEquals(listOf("C"), awaitItem().items.map { it.debitNumber })
+            awaitComplete()
+        }
     }
 
     @Test
@@ -577,5 +661,54 @@ class ConstructionInsuranceRepositoryImplTest {
         override suspend fun clearPages(listKey: String) {
             pageRows.removeAll { it.listKey == listKey }
         }
+    }
+}
+
+/** Page tables keyed like Room's composite primary key (listKey, position). */
+private class FakeConstructionInsurancePageDao : ConstructionInsurancePageDao {
+    private val beneficiaries = mutableListOf<ConstructionBeneficiaryPageEntity>()
+    private val letters = mutableListOf<InstallmentLetterPageEntity>()
+    private val debits = mutableListOf<InstallmentDebitPageEntity>()
+    private val installments = mutableListOf<InstallmentConstructionPageEntity>()
+
+    override suspend fun getBeneficiariesSlice(listKey: String, limit: Int, offset: Int) =
+        beneficiaries.slice(listKey, limit, offset) { it.listKey to it.position }
+    override suspend fun upsertBeneficiaries(rows: List<ConstructionBeneficiaryPageEntity>) =
+        beneficiaries.upsert(rows) { it.listKey to it.position }
+    override suspend fun clearBeneficiaries(listKey: String) {
+        beneficiaries.removeAll { it.listKey == listKey }
+    }
+
+    override suspend fun getInstallmentLettersSlice(listKey: String, limit: Int, offset: Int) =
+        letters.slice(listKey, limit, offset) { it.listKey to it.position }
+    override suspend fun upsertInstallmentLetters(rows: List<InstallmentLetterPageEntity>) =
+        letters.upsert(rows) { it.listKey to it.position }
+    override suspend fun clearInstallmentLetters(listKey: String) {
+        letters.removeAll { it.listKey == listKey }
+    }
+
+    override suspend fun getDebitsSlice(listKey: String, limit: Int, offset: Int) =
+        debits.slice(listKey, limit, offset) { it.listKey to it.position }
+    override suspend fun upsertDebits(rows: List<InstallmentDebitPageEntity>) =
+        debits.upsert(rows) { it.listKey to it.position }
+    override suspend fun clearDebits(listKey: String) {
+        debits.removeAll { it.listKey == listKey }
+    }
+
+    override suspend fun getInstallmentsSlice(listKey: String, limit: Int, offset: Int) =
+        installments.slice(listKey, limit, offset) { it.listKey to it.position }
+    override suspend fun upsertInstallments(rows: List<InstallmentConstructionPageEntity>) =
+        installments.upsert(rows) { it.listKey to it.position }
+    override suspend fun clearInstallments(listKey: String) {
+        installments.removeAll { it.listKey == listKey }
+    }
+
+    private fun <E> List<E>.slice(listKey: String, limit: Int, offset: Int, key: (E) -> Pair<String, Int>): List<E> =
+        filter { key(it).first == listKey }.sortedBy { key(it).second }.drop(offset).take(limit)
+
+    private fun <E> MutableList<E>.upsert(rows: List<E>, key: (E) -> Pair<String, Int>) {
+        val incoming = rows.map(key).toSet()
+        removeAll { key(it) in incoming }
+        addAll(rows)
     }
 }

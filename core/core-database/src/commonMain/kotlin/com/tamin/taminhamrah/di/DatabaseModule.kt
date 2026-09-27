@@ -29,5 +29,6 @@ val databaseModule = module {
     single { get<TaminXDatabase>().constructionFileDao() }
     single { get<TaminXDatabase>().contractAffairDao() }
     single { get<TaminXDatabase>().inspectionDao() }
+    single { get<TaminXDatabase>().constructionInsurancePageDao() }
     single { get<TaminXDatabase>().homeContentDao() }
 }

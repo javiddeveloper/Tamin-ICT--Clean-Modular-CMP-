@@ -159,7 +159,11 @@ bump wipes local data. Then:
    `InspectionDao` + `InspectionPageEntities.kt` + `InspectionRepositoryImpl` — four lists in one
    repository (inspections, workshop inspections, branches, job titles), so it uses a private
    `offlineFirstPage(query, readCached, fetch, write)` helper; the two inspection lists share one
-   table and are told apart by a `pageCacheKey(scope)` prefix.
+   table and are told apart by a `pageCacheKey(scope)` prefix;
+   `ConstructionInsurancePageDao` + `ConstructionInsurancePageEntities.kt` — beneficiaries,
+   installment letters (keyed by workshop + branch), debit list and installments (keyed by debit
+   number + branch), same private helper in `ConstructionInsuranceRepositoryImpl`. A child list
+   (e.g. one debit letter's installments) is only available offline if it was opened online.
 
    The inbox's `drop/take` over a plain table loads the whole table; fine for tens–hundreds of rows. For bigger tables add a
    `LIMIT :limit OFFSET :offset` query (`CityProvinceDao.getCitiesSlice`). If the list has

@@ -67,6 +67,11 @@ import com.tamin.taminhamrah.data.local.entity.ConstructionFilePageEntity
 import com.tamin.taminhamrah.data.local.entity.ContractAffairPageEntity
 import com.tamin.taminhamrah.data.local.dao.ContractAffairDao
 import com.tamin.taminhamrah.data.local.dao.InspectionDao
+import com.tamin.taminhamrah.data.local.dao.ConstructionInsurancePageDao
+import com.tamin.taminhamrah.data.local.entity.ConstructionBeneficiaryPageEntity
+import com.tamin.taminhamrah.data.local.entity.InstallmentConstructionPageEntity
+import com.tamin.taminhamrah.data.local.entity.InstallmentDebitPageEntity
+import com.tamin.taminhamrah.data.local.entity.InstallmentLetterPageEntity
 import com.tamin.taminhamrah.data.local.entity.InspectionBranchPageEntity
 import com.tamin.taminhamrah.data.local.entity.InspectionJobPageEntity
 import com.tamin.taminhamrah.data.local.entity.InspectionPerformedPageEntity
@@ -113,6 +118,10 @@ import com.tamin.taminhamrah.data.local.dao.ConstructionFileDao
         InspectionPerformedPageEntity::class,
         InspectionBranchPageEntity::class,
         InspectionJobPageEntity::class,
+        ConstructionBeneficiaryPageEntity::class,
+        InstallmentLetterPageEntity::class,
+        InstallmentDebitPageEntity::class,
+        InstallmentConstructionPageEntity::class,
         HomeContentEntity::class,
     ],
     // v5: FeatureFlag ids changed; cached home_content stored the old flagId.
@@ -142,6 +151,7 @@ expect abstract class TaminXDatabase : RoomDatabase {
     abstract fun constructionFileDao(): ConstructionFileDao
     abstract fun contractAffairDao(): ContractAffairDao
     abstract fun inspectionDao(): InspectionDao
+    abstract fun constructionInsurancePageDao(): ConstructionInsurancePageDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT")
