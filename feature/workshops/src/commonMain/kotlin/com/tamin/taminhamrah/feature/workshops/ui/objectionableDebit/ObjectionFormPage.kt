@@ -231,6 +231,7 @@ private fun ObjectionSubmitConfirmDialog(
         description = stringResource(Res.string.obj_form_confirm_body),
         confirmButton = {
             TaminFilledButton(
+                background = LocalTaminColors.current.buttonGradient,
                 text = stringResource(Res.string.action_confirm),
                 onClick = onConfirm,
                 modifier = Modifier.fillMaxWidth(),

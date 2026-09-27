@@ -1,11 +1,14 @@
 ﻿package com.tamin.taminhamrah.feature.workshops.ui
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.MaterialTheme
@@ -43,8 +46,15 @@ import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.rideUpIntoHeader
+import com.tamin.taminhamrah.ui.navigationFade
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toparea.TopAreaState
+import com.tamin.taminhamrah.ui.toparea.driveTopArea
+import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
+import com.tamin.taminhamrah.ui.toparea.reportTopAreaHeight
+import com.tamin.taminhamrah.ui.toparea.topAreaContentPadding
+import com.tamin.taminhamrah.ui.toparea.topAreaHide
 import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -56,7 +66,9 @@ import taminx.core.core_ui.btn_understood
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_search
 import taminx.core.core_ui.ic_tamin_workshop
+import taminx.core.core_ui.workshop_empty_list
 import taminx.core.core_ui.workshop_search
+import taminx.core.core_ui.workshops_empty
 import taminx.core.core_ui.workshops_header_subtitle
 import taminx.core.core_ui.workshops_title
 
@@ -90,123 +102,83 @@ fun WorkshopsScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // جزئیات کارگاه is the same destination in the design's own model: picking a workshop
-    // swaps the page, and back returns to the list. Everything it draws already traveled
-    // with the workshop, so it costs no request and needs no route of its own.
-    state.detailFor?.let { workshop ->
-        BackHandler { onIntent(WorkshopsIntent.DetailDismissed) }
-        Box(modifier = modifier) {
-            WorkshopDetailScreen(
-                workshop = workshop,
-                actions = state.availableActions,
-                onBack = { onIntent(WorkshopsIntent.DetailDismissed) },
-                onAction = { action -> onIntent(WorkshopsIntent.ActionSelected(action, workshop)) },
-            )
-            // رسیدگی به بدهی ماده ۱۶ asks for the workshop's debts before it opens.
-            if (state.isCheckingDebts) LoadingStateOverlay()
-        }
-        if (state.isNoDebtDialogOpen) {
-            TaminConfirmationDialog(
-                title = stringResource(Res.string.article_sixteen_no_debt_title),
-                description = stringResource(Res.string.article_sixteen_no_debt_body),
-                icon = Icons.Outlined.Info,
-                confirmButton = {
-                    TaminFilledButton(
-                        text = stringResource(Res.string.btn_understood),
-                        onClick = { onIntent(WorkshopsIntent.NoDebtDialogDismissed) },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                },
-                dismissButton = {},
-                onDismissRequest = { onIntent(WorkshopsIntent.NoDebtDialogDismissed) },
-            )
-        }
-        return
-    }
-
-    val colors = LocalTaminColors.current
-    val headerGradient = remember(colors.profileGradientStops) {
-        Brush.horizontalGradient(colors.profileGradientStops)
-    }
-
-    val workshops = state.workshops
     val stats = state.stats
     val isSearchOpen = state.isSearchOpen
-    val hasActiveFilter = state.hasActiveFilter
+    val onSearchClick = { onIntent(WorkshopsIntent.SearchOpenChanged(!isSearchOpen)) }
 
-    Column(modifier = modifier.fillMaxSize()) {
-        TaminTopAppBar(
-            title = stringResource(Res.string.workshops_title),
-            navigationIcon = {
-                TaminTopAppBarButton(
-                    icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                    contentDescription = null,
-                    onClick = onBack,
-                )
-            },
-            action = {
-                TaminTopAppBarButton(
-                    icon = vectorResource(Res.drawable.ic_tamin_search),
-                    contentDescription = stringResource(Res.string.workshop_search),
-                    onClick = { onIntent(WorkshopsIntent.SearchOpenChanged(!isSearchOpen)) },
-                )
-            },
-            background = headerGradient,
-            bottomPadding = WorkshopDimens.headerBottomPadding,
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = Spacing.lg),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(Spacing.md),
-            ) {
-                AnimatedRingHeaderIcon(icon = vectorResource(Res.drawable.ic_tamin_workshop))
-                Text(
-                    text = stringResource(Res.string.workshops_header_subtitle),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.textHeaderSubtitle,
-                    textAlign = TextAlign.Center,
-                )
-            }
-        }
-
-        // The strip rides 42dp up into the navy, which means drawing outside the list's bounds —
-        // and a scrollable container clips to those. So it sits here, a sibling of the bar in a
-        // Column that does not clip, and the list starts below it.
-        WorkshopStatsCard(
+    // The list's own drag folds the ring icon and subtitle away, snapping on release; the stats
+    // strip is never wrapped in a topArea behavior, so it stays pinned, unchanged, under the slim
+    // bar. Same shape as ObjectionStatusScreen — see docs/vault/TopArea-System.md.
+    //
+    // Both live above the swap below, because both have to outlive it: the list is torn down while
+    // a workshop is open, and back should land on the row it was opened from, header fold included.
+    val topArea = rememberMeasuredTopAreaState { topAreaState ->
+        WorkshopsTopArea(
             stats = stats,
-            modifier = Modifier
-                .padding(horizontal = Spacing.page)
-                .rideUpIntoHeader(
-                    progress = { 0f },
-                    expandedOverlap = WorkshopDimens.statsCardOverlap,
-                    collapsedOverlap = WorkshopDimens.statsCardOverlap,
-                ),
+            onBack = onBack,
+            onSearchClick = onSearchClick,
+            topAreaState = topAreaState,
         )
+    }
+    val listState = rememberLazyListState()
 
-        WorkshopListScaffold(
-            state = state.list,
-            onLoadMore = { onIntent(WorkshopsIntent.LoadMore) },
-            onRetry = { onIntent(WorkshopsIntent.Load) },
-            key = { "${it.workshopId}_${it.branchCode}" },
-            header = {
-                WorkshopSectionHeader(
-                    count = workshops.size,
-                    isFilterActive = hasActiveFilter,
-                    onFilterClick = { onIntent(WorkshopsIntent.FilterSheetOpenChanged(true)) },
+    // جزئیات کارگاه is the same destination in the design's own model: picking a workshop
+    // swaps the page, and back returns to the list. Everything it draws already traveled
+    // with the workshop, so it costs no request and needs no route of its own — but to the person
+    // tapping it is the next screen, so it arrives with the same fade every route in the app uses.
+    // Keyed on open/closed only, so a refreshed copy of the open workshop never replays it.
+    AnimatedContent(
+        targetState = state.detailFor,
+        contentKey = { it != null },
+        transitionSpec = { navigationFade() },
+        label = "workshop-detail",
+        modifier = modifier.fillMaxSize(),
+    ) { workshop ->
+        if (workshop != null) {
+            BackHandler { onIntent(WorkshopsIntent.DetailDismissed) }
+            Box(modifier = Modifier.fillMaxSize()) {
+                WorkshopDetailScreen(
+                    workshop = workshop,
+                    actions = state.availableActions,
+                    onBack = { onIntent(WorkshopsIntent.DetailDismissed) },
+                    onAction = { action -> onIntent(WorkshopsIntent.ActionSelected(action, workshop)) },
                 )
-            },
-        ) { workshop, itemModifier ->
-            WorkshopCard(
-                workshop = workshop,
-                onOpenDetails = { onIntent(WorkshopsIntent.DetailRequested(workshop)) },
-                modifier = itemModifier,
+                // رسیدگی به بدهی ماده ۱۶ asks for the workshop's debts before it opens.
+                if (state.isCheckingDebts) LoadingStateOverlay()
+            }
+        } else {
+            WorkshopsListPage(
+                list = state.list,
+                stats = stats,
+                hasActiveFilter = state.hasActiveFilter,
+                topArea = topArea,
+                listState = listState,
+                onSearchClick = onSearchClick,
+                onBack = onBack,
+                onIntent = onIntent,
             )
         }
     }
 
-    if (isSearchOpen) {
+    if (state.detailFor != null && state.isNoDebtDialogOpen) {
+        TaminConfirmationDialog(
+            title = stringResource(Res.string.article_sixteen_no_debt_title),
+            description = stringResource(Res.string.article_sixteen_no_debt_body),
+            icon = Icons.Outlined.Info,
+            confirmButton = {
+                TaminFilledButton(
+                    background = LocalTaminColors.current.buttonGradient,
+                    text = stringResource(Res.string.btn_understood),
+                    onClick = { onIntent(WorkshopsIntent.NoDebtDialogDismissed) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            },
+            dismissButton = {},
+            onDismissRequest = { onIntent(WorkshopsIntent.NoDebtDialogDismissed) },
+        )
+    }
+    // Both belong to the list, so neither is offered while a workshop is open.
+    if (state.detailFor == null && isSearchOpen) {
         WorkshopSearchDialog(
             onDismiss = { onIntent(WorkshopsIntent.SearchOpenChanged(false)) },
         ) {
@@ -221,11 +193,139 @@ fun WorkshopsScreen(
         }
     }
 
-    if (state.isFilterSheetOpen) {
+    if (state.detailFor == null && state.isFilterSheetOpen) {
         WorkshopFilterSheet(
             selected = state.statusFilter,
             onDismiss = { onIntent(WorkshopsIntent.FilterSheetOpenChanged(false)) },
             onSelect = { status -> onIntent(WorkshopsIntent.StatusFilterChanged(status)) },
+        )
+    }
+}
+
+/** کارگاه‌ها itself: the list, with its folding header floating over it. */
+@Composable
+private fun WorkshopsListPage(
+    list: PagedListState<WorkshopPR>,
+    stats: WorkshopStats?,
+    hasActiveFilter: Boolean,
+    topArea: TopAreaState,
+    listState: LazyListState,
+    onSearchClick: () -> Unit,
+    onBack: () -> Unit,
+    onIntent: (WorkshopsIntent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    // Overlaid rather than a Column, so the list passes underneath the header as it scrolls.
+    Box(modifier = modifier.fillMaxSize()) {
+        WorkshopListScaffold(
+            emptyIcon = vectorResource(Res.drawable.ic_tamin_workshop),
+            emptyMessage = stringResource(if (hasActiveFilter) Res.string.workshop_empty_list else Res.string.workshops_empty),
+            state = list,
+            listState = listState,
+            modifier = Modifier.fillMaxSize().driveTopArea(topArea, listState),
+            contentPadding = topAreaContentPadding(state = topArea, rest = WorkshopDimens.listContentPadding),
+            onLoadMore = { onIntent(WorkshopsIntent.LoadMore) },
+            onRetry = { onIntent(WorkshopsIntent.Load) },
+            key = { "${it.workshopId}_${it.branchCode}" },
+            header = {
+                WorkshopSectionHeader(
+                    count = list.items.size,
+                    isFilterActive = hasActiveFilter,
+                    onFilterClick = { onIntent(WorkshopsIntent.FilterSheetOpenChanged(true)) },
+                )
+            },
+        ) { workshop, itemModifier ->
+            WorkshopCard(
+                workshop = workshop,
+                onOpenDetails = { onIntent(WorkshopsIntent.DetailRequested(workshop)) },
+                modifier = itemModifier,
+            )
+        }
+
+        WorkshopsTopArea(
+            stats = stats,
+            onBack = onBack,
+            onSearchClick = onSearchClick,
+            topAreaState = topArea,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .reportTopAreaHeight(topArea),
+        )
+    }
+}
+
+/**
+ * The list's floating top area: the gradient bar, whose ring icon and subtitle fold away, and the
+ * stats strip riding [WorkshopDimens.statsCardOverlap] up into it, pinned there at every fold.
+ */
+@Composable
+private fun WorkshopsTopArea(
+    stats: WorkshopStats?,
+    onBack: () -> Unit,
+    onSearchClick: () -> Unit,
+    topAreaState: TopAreaState,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+    val headerGradient = remember(colors.profileGradientStops) {
+        Brush.horizontalGradient(colors.profileGradientStops)
+    }
+    Column(modifier = modifier.fillMaxWidth()) {
+        TaminTopAppBar(
+            title = stringResource(Res.string.workshops_title),
+            navigationIcon = {
+                TaminTopAppBarButton(
+                    icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                    contentDescription = null,
+                    onClick = onBack,
+                    bordered = true,
+                )
+            },
+            action = {
+                TaminTopAppBarButton(
+                    icon = vectorResource(Res.drawable.ic_tamin_search),
+                    contentDescription = stringResource(Res.string.workshop_search),
+                    onClick = onSearchClick,
+                    bordered = true,
+                )
+            },
+            background = headerGradient,
+            bottomPadding = WorkshopDimens.headerBottomPadding,
+        ) {
+            // Hidden together with its top gap, so the folded bar closes up under the title row.
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .topAreaHide(topAreaState)
+                    .padding(top = Spacing.lg),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(Spacing.md),
+            ) {
+                // Static while this is one of rememberMeasuredTopAreaState's off-screen probes.
+                AnimatedRingHeaderIcon(
+                    icon = vectorResource(Res.drawable.ic_tamin_workshop),
+                    animated = !topAreaState.isMeasureProbe,
+                )
+                Text(
+                    text = stringResource(Res.string.workshops_header_subtitle),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.textHeaderSubtitle,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
+
+        // Rides up into the bar's reserved bottom space and reports a height reduced by the same
+        // overlap, so reportTopAreaHeight sees the block's true footprint, not the overlap twice.
+        WorkshopStatsCard(
+            stats = stats,
+            modifier = Modifier
+                .padding(horizontal = Spacing.page)
+                .rideUpIntoHeader(
+                    progress = { 0f },
+                    expandedOverlap = WorkshopDimens.statsCardOverlap,
+                    collapsedOverlap = WorkshopDimens.statsCardOverlap,
+                ),
         )
     }
 }

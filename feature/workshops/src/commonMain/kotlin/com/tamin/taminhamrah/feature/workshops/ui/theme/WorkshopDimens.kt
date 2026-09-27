@@ -76,9 +76,17 @@ object WorkshopDimens {
     const val cardButtonOutlineAlpha = 0.35f
 
     // ------------------------------------------------------------ expand toggle
-    /** `margin-top:10px; padding-top:9px; border-top:1px dashed`, then a 14px chevron. */
+    /** `margin-top:10px; border-top:1px dashed`, then a 14px chevron. */
     val toggleTopMargin = 10.dp
-    val toggleTopPadding = 9.dp
+
+    /**
+     * Above and below the «جزئیات بیشتر» label, inside its tap area.
+     *
+     * The design puts 9px above the label and leaves the card's 12px bottom padding below it, which
+     * sets the label visibly high between the rule and the card's edge. The same 21px, split evenly,
+     * centres it without changing the card's height — and the tap area now reaches the bottom.
+     */
+    val toggleVerticalPadding = 10.5.dp
     val toggleDashOn = 3.dp
     val toggleDashOff = 3.dp
     val toggleChevronSize = 14.dp

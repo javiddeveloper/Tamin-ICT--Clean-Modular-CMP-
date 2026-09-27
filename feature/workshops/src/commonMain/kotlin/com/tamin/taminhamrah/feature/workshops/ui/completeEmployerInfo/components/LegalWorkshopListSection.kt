@@ -245,17 +245,16 @@ private fun WorkshopCardItem(
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut(),
         ) {
+            // Its own inset panel, like the code and branch tiles above: the rows get room from
+            // the panel edge instead of running into a hairline box drawn right against them.
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 9.dp)
-                    .border(
-                        width = 1.dp,
-                        color = colors.divider,
-                        shape = RoundedCornerShape(0.dp),
-                    )
-                    .padding(top = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(7.dp),
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(colors.bgPage)
+                    .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+                verticalArrangement = Arrangement.spacedBy(Spacing.xs),
             ) {
                 DetailRow(
                     label = stringResource(Res.string.employer_info_let_date),
@@ -328,7 +327,7 @@ private fun WorkshopCardItem(
                         spotColor = colors.shadowPrimary,
                     )
                     .clip(RoundedCornerShape(14.dp))
-                    .background(colors.buttonGradient)
+                    .background(EmployerInfoButtonGradient)
                     .clickable(onClick = onSelectWorkshop),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,

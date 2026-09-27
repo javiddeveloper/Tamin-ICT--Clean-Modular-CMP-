@@ -176,6 +176,21 @@ object PushTransition {
 }
 
 /**
+ * The crossfade every route in the nav graph changes screens with, as plain transitions — for the
+ * same reason [PushTransition] exists: a page that swaps in a body the person reads as a screen of
+ * its own should arrive the way the app's screens do, and read the motion from here rather than
+ * keep a copy of it.
+ */
+object FadeTransition {
+    val enter: EnterTransition = fadeIn(tween(DEFAULT_FADE_TRANSITION_TIME_MS))
+    val exit: ExitTransition = fadeOut(tween(DEFAULT_FADE_TRANSITION_TIME_MS))
+}
+
+/** One body replacing another the way the nav graph replaces one screen with the next. */
+fun navigationFade(): ContentTransform =
+    FadeTransition.enter togetherWith FadeTransition.exit
+
+/**
  * One body replacing another inside a page — a list and the form that takes its place, a wizard's
  * next step, a row and its detail.
  *
@@ -211,9 +226,7 @@ private fun <S> AnimatedContentTransitionScope<S>.pushTowards(
 
 object RootTransitionProviders {
     object Enter {
-        val fadeIn: NonNullEnterTransitionProvider = {
-            fadeIn(tween(DEFAULT_FADE_TRANSITION_TIME_MS))
-        }
+        val fadeIn: NonNullEnterTransitionProvider = { FadeTransition.enter }
         val none: NonNullEnterTransitionProvider = {
             EnterTransition.None
         }
@@ -233,9 +246,7 @@ object RootTransitionProviders {
         }
     }
     object Exit {
-        val fadeOut: NonNullExitTransitionProvider = {
-            fadeOut(tween(DEFAULT_FADE_TRANSITION_TIME_MS))
-        }
+        val fadeOut: NonNullExitTransitionProvider = { FadeTransition.exit }
         val none: NonNullExitTransitionProvider = {
             ExitTransition.None
         }
