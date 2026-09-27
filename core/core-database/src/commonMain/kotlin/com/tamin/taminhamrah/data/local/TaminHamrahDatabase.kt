@@ -63,6 +63,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 
 import com.tamin.taminhamrah.data.local.entity.ConstructionFileEntity
+import com.tamin.taminhamrah.data.local.entity.ConstructionFilePageEntity
 import com.tamin.taminhamrah.data.local.dao.ConstructionFileDao
 
 @Database(
@@ -101,6 +102,7 @@ import com.tamin.taminhamrah.data.local.dao.ConstructionFileDao
         HistoryYearEntity::class,
         HistoryWageRowEntity::class,
         ConstructionFileEntity::class,
+        ConstructionFilePageEntity::class,
         HomeContentEntity::class,
     ],
     // v5: FeatureFlag ids changed; cached home_content stored the old flagId.

@@ -143,7 +143,17 @@ bump wipes local data. Then:
    }
    ```
 
-   `drop/take` loads the whole table; fine for tens–hundreds of rows. For bigger tables add a
+   **Preferred table shape for a paged list** (used from construction files on): a dedicated
+   `XPageEntity(listKey, position, @Embedded row)` with `primaryKeys = ["listKey", "position"]`,
+   written with `position = query.start + index` and read with
+   `WHERE listKey = :k ORDER BY position LIMIT :limit OFFSET :offset`. `listKey` comes from
+   `query.pageCacheKey(parentIds…)` (core-data `repository/paging/PageCacheKey.kt`): parent ids +
+   filters + sorts, so each search/parent is its own list and replacing one never wipes another.
+   `position` keeps the server's order exactly. The DAO gets `getPageSlice` / `upsertPage` /
+   `clearPages(listKey)` / `@Transaction replacePages`. Worked example:
+   `ConstructionFilePageEntity` + `ConstructionFileDao` + `getConstructionFilesPage`.
+
+   The inbox's `drop/take` over a plain table loads the whole table; fine for tens–hundreds of rows. For bigger tables add a
    `LIMIT :limit OFFSET :offset` query (`CityProvinceDao.getCitiesSlice`). If the list has
    **filters**, the slice and the replace must use the same filter, or one screen's list wipes
    another's — see the cities example below.

@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.data.repository.constructionInsurance
 import app.cash.turbine.test
 import com.tamin.taminhamrah.data.local.dao.ConstructionFileDao
 import com.tamin.taminhamrah.data.local.entity.ConstructionFileEntity
+import com.tamin.taminhamrah.data.local.entity.ConstructionFilePageEntity
 import com.tamin.taminhamrah.dataSource.constructionInsurance.ConstructionInsuranceRemoteDataSource
 import com.tamin.taminhamrah.model.constructionInsurance.BeneficiaryConstructionDTO
 import com.tamin.taminhamrah.model.constructionInsurance.ConstructionFileDTO
@@ -14,7 +15,9 @@ import com.tamin.taminhamrah.model.constructionInsurance.PaymentSheetConstructio
 import com.tamin.taminhamrah.model.constructionInsurance.WorkshopIdInfoDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDTO
+import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.model.utils.ListData
 import kotlin.test.AfterTest
@@ -22,6 +25,8 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -178,12 +183,94 @@ class ConstructionInsuranceRepositoryImplTest {
     }
 
     @Test
-    fun `getConstructionFilesPage should propagate remote errors`() = runTest {
+    fun `getConstructionFilesPage should throw when remote fails and nothing is cached`() = runTest {
         remoteDataSource.shouldThrowError = true
 
         repository.getConstructionFilesPage(ApiQueryParamDN()).test {
             awaitError()
         }
+    }
+
+    @Test
+    fun `getConstructionFilesPage should emit the cached page then the network page`() = runTest {
+        remoteDataSource.constructionFilesResult = ListData(total = 2, list = listOf(createFileDTO(fileNumber = 1L)))
+        repository.getConstructionFilesPage(ApiQueryParamDN(start = 0, limit = 10)).test {
+            awaitItem()
+            awaitComplete()
+        }
+        remoteDataSource.constructionFilesResult = ListData(total = 2, list = listOf(createFileDTO(fileNumber = 2L)))
+
+        repository.getConstructionFilesPage(ApiQueryParamDN(start = 0, limit = 10)).test {
+            val cached = awaitItem()
+            assertEquals(listOf(1L), cached.items.map { it.fileNumber })
+            assertTrue(cached.isFromCache)
+            val network = awaitItem()
+            assertEquals(listOf(2L), network.items.map { it.fileNumber })
+            assertFalse(network.isFromCache)
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `getConstructionFilesPage should serve cached pages in server order when offline`() = runTest {
+        remoteDataSource.constructionFilesResult =
+            ListData(total = 4, list = listOf(createFileDTO(fileNumber = 9L), createFileDTO(fileNumber = 3L)))
+        repository.getConstructionFilesPage(ApiQueryParamDN(start = 0, limit = 2)).test { awaitItem(); awaitComplete() }
+        remoteDataSource.constructionFilesResult =
+            ListData(total = 4, list = listOf(createFileDTO(fileNumber = 7L), createFileDTO(fileNumber = 1L)))
+        repository.getConstructionFilesPage(ApiQueryParamDN(start = 2, limit = 2)).test { awaitItem(); awaitComplete() }
+        remoteDataSource.shouldThrowError = true
+
+        repository.getConstructionFilesPage(ApiQueryParamDN(start = 2, limit = 2)).test {
+            val page = awaitItem()
+            assertEquals(listOf(7L, 1L), page.items.map { it.fileNumber })
+            assertTrue(page.isFromCache)
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `getConstructionFilesPage first page should replace only its own list's cache`() = runTest {
+        val search = ApiQueryParamDN(
+            start = 0, limit = 10,
+            filters = listOf(ApiFilterDN(FilterProperty.FILE_NO, "5", FilterOperator.EQ)),
+        )
+        remoteDataSource.constructionFilesResult = ListData(total = 1, list = listOf(createFileDTO(fileNumber = 5L)))
+        repository.getConstructionFilesPage(search).test { awaitItem(); awaitComplete() }
+        remoteDataSource.constructionFilesResult =
+            ListData(total = 2, list = listOf(createFileDTO(fileNumber = 1L), createFileDTO(fileNumber = 2L)))
+        repository.getConstructionFilesPage(ApiQueryParamDN(start = 0, limit = 10)).test { awaitItem(); awaitComplete() }
+
+        // Unfiltered list refreshed with fewer rows: its stale row is dropped, the search is untouched.
+        remoteDataSource.constructionFilesResult = ListData(total = 1, list = listOf(createFileDTO(fileNumber = 3L)))
+        repository.getConstructionFilesPage(ApiQueryParamDN(start = 0, limit = 10)).test {
+            awaitItem() // cache
+            awaitItem() // network
+            awaitComplete()
+        }
+
+        remoteDataSource.shouldThrowError = true
+        repository.getConstructionFilesPage(ApiQueryParamDN(start = 0, limit = 10)).test {
+            assertEquals(listOf(3L), awaitItem().items.map { it.fileNumber })
+            awaitComplete()
+        }
+        repository.getConstructionFilesPage(search).test {
+            assertEquals(listOf(5L), awaitItem().items.map { it.fileNumber })
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `getConstructionFilesPage should not touch the file-search cache`() = runTest {
+        remoteDataSource.constructionFilesResult = ListData(total = 1, list = listOf(createFileDTO(fileNumber = 2L)))
+
+        repository.getConstructionFilesPage(ApiQueryParamDN(start = 0, limit = 10)).test {
+            awaitItem()
+            awaitComplete()
+        }
+
+        assertEquals(0, dao.replaceAllCalledCount)
+        assertTrue(dao.filesFlow.value.isEmpty())
     }
 
     @Test
@@ -474,6 +561,21 @@ class ConstructionInsuranceRepositoryImplTest {
             replaceAllCalledCount++
             clearAll()
             insertAll(files)
+        }
+
+        // Paged-list table, keyed like Room's composite primary key (listKey, position).
+        val pageRows = mutableListOf<ConstructionFilePageEntity>()
+
+        override suspend fun getPageSlice(listKey: String, limit: Int, offset: Int): List<ConstructionFilePageEntity> =
+            pageRows.filter { it.listKey == listKey }.sortedBy { it.position }.drop(offset).take(limit)
+
+        override suspend fun upsertPage(rows: List<ConstructionFilePageEntity>) {
+            rows.forEach { row -> pageRows.removeAll { it.listKey == row.listKey && it.position == row.position } }
+            pageRows += rows
+        }
+
+        override suspend fun clearPages(listKey: String) {
+            pageRows.removeAll { it.listKey == listKey }
         }
     }
 }

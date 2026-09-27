@@ -2,8 +2,10 @@ package com.tamin.taminhamrah.data.repository.constructionInsurance
 
 import com.tamin.taminhamrah.data.local.dao.ConstructionFileDao
 import com.tamin.taminhamrah.data.local.entity.ConstructionFileEntity
+import com.tamin.taminhamrah.data.local.entity.ConstructionFilePageEntity
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
+import com.tamin.taminhamrah.data.repository.paging.pageCacheKey
 import com.tamin.taminhamrah.dataSource.constructionInsurance.ConstructionInsuranceRemoteDataSource
 import com.tamin.taminhamrah.model.constructionInsurance.BeneficiaryConstructionDN
 import com.tamin.taminhamrah.model.constructionInsurance.BuildingRequestSummaryDN
@@ -89,10 +91,32 @@ internal class ConstructionInsuranceRepositoryImpl(
     }
 
     override fun getConstructionFilesPage(query: ApiQueryParamDN): Flow<PageDN<ConstructionFileDN>> = flow {
-        val response = remoteDataSource.getConstructionFiles(query)
+        val listKey = query.pageCacheKey()
+        val cached = constructionFileDao.getPageSlice(listKey, limit = query.limit, offset = query.start)
+        if (cached.isNotEmpty()) {
+            emit(PageDN(items = cached.map { it.file.toDomain() }, isFromCache = true))
+        }
+
+        val response = try {
+            remoteDataSource.getConstructionFiles(query)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            if (cached.isEmpty()) throw e
+            return@flow
+        }
+        val remoteFiles = response.list.orEmpty()
+        val rows = remoteFiles.mapIndexed { index, file ->
+            ConstructionFilePageEntity(listKey = listKey, position = query.start + index, file = file.toEntity())
+        }
+        if (query.start == 0) {
+            constructionFileDao.replacePages(listKey, rows)
+        } else {
+            constructionFileDao.upsertPage(rows)
+        }
         emit(
             PageDN(
-                items = response.list.orEmpty().map { it.toDomain() },
+                items = remoteFiles.map { it.toDomain() },
                 total = response.total,
             )
         )
