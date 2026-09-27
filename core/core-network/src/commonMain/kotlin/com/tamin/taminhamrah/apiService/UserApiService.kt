@@ -32,6 +32,7 @@ import de.jensklingenberg.ktorfit.http.QueryMap
 import de.jensklingenberg.ktorfit.http.Url
 
 import com.tamin.taminhamrah.model.user.CurrentUserDto
+import com.tamin.taminhamrah.model.user.SendImageRequestDTO
 import com.tamin.taminhamrah.model.user.UserProfileDto
 import com.tamin.taminhamrah.model.bankAccount.BankAccountCreatedDTO
 import com.tamin.taminhamrah.model.bankAccount.BankAccountRequestDTO
@@ -51,7 +52,7 @@ internal interface UserApiService {
     suspend fun sendImageRequest(
         @Path("branchCode") branchCode: String,
         @Query("filter") filter: String
-    ): BaseDTO<String>
+    ): BaseDTO<SendImageRequestDTO>
 
 
 

@@ -26,6 +26,8 @@ import com.tamin.taminhamrah.feature.profile.ui.dependents.DependentsListRoute
 import com.tamin.taminhamrah.feature.profile.ui.dependents.DependentsListViewModel
 import com.tamin.taminhamrah.feature.profile.ui.versionHistory.VersionHistoryRoute
 import com.tamin.taminhamrah.feature.profile.ui.versionHistory.VersionHistoryViewModel
+import com.tamin.taminhamrah.feature.profile.ui.editPhoto.EditProfilePhotoRoute
+import com.tamin.taminhamrah.feature.profile.ui.editPhoto.EditProfilePhotoViewModel
 
 @Serializable
 sealed interface ProfileRoute {
@@ -61,6 +63,9 @@ sealed interface ProfileRoute {
 
     @Serializable
     data object SaveEvents : ProfileRoute
+
+    @Serializable
+    data object EditProfilePhoto : ProfileRoute
 }
 
 fun NavGraphBuilder.profileGraph(
@@ -99,6 +104,7 @@ fun NavGraphBuilder.profileGraph(
                 onNavigateToSettings = onNavigateToSettings,
                 onNavigateToUserRequests = onNavigateToUserRequests,
                 onNavigateToSaveEvents = { navController.navigate(ProfileRoute.SaveEvents) },
+                onNavigateToEditProfilePhoto = { navController.navigate(ProfileRoute.EditProfilePhoto) },
                 onOpenUrl = onOpenUrl,
                 onBackClicked = onBack
             )
@@ -141,8 +147,8 @@ fun NavGraphBuilder.profileGraph(
         }
 
         composable<ProfileRoute.DependentsList> {
-            val viewModel = koinViewModel<com.tamin.taminhamrah.feature.profile.ui.dependents.DependentsListViewModel>()
-            com.tamin.taminhamrah.feature.profile.ui.dependents.DependentsListRoute(
+            val viewModel = koinViewModel<DependentsListViewModel>()
+            DependentsListRoute(
                 viewModel = viewModel,
                 onNavigateToAddDependent = onNavigateToAddDependent,
                 onBackClicked = { navController.popBackStack() }
@@ -182,6 +188,15 @@ fun NavGraphBuilder.profileGraph(
             val viewModel = koinViewModel<com.tamin.taminhamrah.feature.profile.ui.saveEvents.SaveEventsViewModel>()
 
             com.tamin.taminhamrah.feature.profile.ui.saveEvents.SaveEventsRoute(
+                viewModel = viewModel,
+                onBackClicked = { navController.popBackStack() }
+            )
+        }
+
+        composableWithFadeTransitions<ProfileRoute.EditProfilePhoto> {
+            val viewModel = koinViewModel<EditProfilePhotoViewModel>()
+
+            EditProfilePhotoRoute(
                 viewModel = viewModel,
                 onBackClicked = { navController.popBackStack() }
             )

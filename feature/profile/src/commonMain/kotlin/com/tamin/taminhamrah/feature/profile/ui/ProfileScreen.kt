@@ -3,8 +3,9 @@ package com.tamin.taminhamrah.feature.profile.ui
 
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Code
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,10 +21,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Code
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -33,8 +40,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -65,6 +74,8 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.UserAvatar
 import com.tamin.taminhamrah.ui.components.ValidationStatusCard
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
+import com.tamin.taminhamrah.ui.components.toast.LocalToaster
+import com.tamin.taminhamrah.ui.components.toast.info
 import com.tamin.taminhamrah.ui.motion.ScrollMotionState
 import com.tamin.taminhamrah.ui.motion.motionFade
 import com.tamin.taminhamrah.ui.motion.motionParallax
@@ -76,9 +87,13 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.TaminCameraBadgeBorder
+import com.tamin.taminhamrah.ui.theme.TaminCameraBadgeShadow
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
-import com.tamin.taminhamrah.util.AppConfig
+import com.tamin.taminhamrah.ui.theme.TaminNavy300
+import com.tamin.taminhamrah.ui.theme.TaminNavy900
 import com.tamin.taminhamrah.ui.util.ExternalAppLauncher
+import com.tamin.taminhamrah.util.AppConfig
 import com.tamin.taminhamrah.util.toPersianDigits
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
@@ -89,6 +104,8 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.active_relation_header_status_error
+import taminx.core.core_ui.active_relation_header_status_ok
 import taminx.core.core_ui.action_cancel
 import taminx.core.core_ui.profile_logout_confirm_description
 import taminx.core.core_ui.contact_us_title
@@ -107,20 +124,21 @@ import taminx.core.core_ui.ic_send
 import taminx.core.core_ui.ic_setting
 import taminx.core.core_ui.ic_share
 import taminx.core.core_ui.ic_sun
-import taminx.core.core_ui.ic_tamin_calendar
 import taminx.core.core_ui.ic_support
+import taminx.core.core_ui.ic_tamin_calendar
+import taminx.core.core_ui.ic_tamin_camera_lens
 import taminx.core.core_ui.profile_active_relation
 import taminx.core.core_ui.profile_bank_account
 import taminx.core.core_ui.profile_cartable
 import taminx.core.core_ui.profile_change_mobile
 import taminx.core.core_ui.profile_dependents
-import taminx.core.core_ui.profile_dependents_badge_test
 import taminx.core.core_ui.profile_developer_options
 import taminx.core.core_ui.profile_electronic_file
 import taminx.core.core_ui.profile_identity_info
 import taminx.core.core_ui.profile_logout
 import taminx.core.core_ui.profile_personal_inbox
 import taminx.core.core_ui.profile_personal_info
+import taminx.core.core_ui.profile_photo_screen_title
 import taminx.core.core_ui.profile_requests
 import taminx.core.core_ui.profile_save_events
 import taminx.core.core_ui.profile_security
@@ -131,8 +149,6 @@ import taminx.core.core_ui.profile_support
 import taminx.core.core_ui.profile_support_section
 import taminx.core.core_ui.profile_title
 import taminx.core.core_ui.profile_version_history
-import taminx.core.core_ui.active_relation_header_status_error
-import taminx.core.core_ui.active_relation_header_status_ok
 import taminx.core.core_ui.validation_status_badge_invalid
 import taminx.core.core_ui.validation_status_badge_valid
 import androidx.compose.ui.unit.lerp as dpLerp
@@ -153,6 +169,7 @@ fun ProfileScreen(
     onNavigateToSettings: () -> Unit = {},
     onNavigateToUserRequests: () -> Unit = {},
     onNavigateToSaveEvents: () -> Unit = {},
+    onNavigateToEditProfilePhoto: () -> Unit = {},
     onOpenUrl: (String) -> Unit = {},
     onNavigateToSecurity: () -> Unit = {},
     onNavigateToDeveloperOptions: () -> Unit = {},
@@ -188,6 +205,7 @@ fun ProfileScreen(
         onNavigateToSettings = onNavigateToSettings,
         onNavigateToUserRequests = onNavigateToUserRequests,
         onNavigateToSaveEvents = onNavigateToSaveEvents,
+        onNavigateToEditProfilePhoto = onNavigateToEditProfilePhoto,
         onOpenUrl = onOpenUrl,
         onBackClicked = onBackClicked
     )
@@ -218,6 +236,7 @@ fun HandleProfileEvents(
     onNavigateToSettings: () -> Unit,
     onNavigateToUserRequests: () -> Unit,
     onNavigateToSaveEvents: () -> Unit,
+    onNavigateToEditProfilePhoto: () -> Unit,
     onNavigateToSecurity: () -> Unit,
     onNavigateToDeveloperOptions: () -> Unit,
     onOpenUrl: (String) -> Unit,
@@ -225,6 +244,7 @@ fun HandleProfileEvents(
 ) {
 
     val launcher = remember { ExternalAppLauncher() }
+    val toaster = LocalToaster.current
 
     events.collectWithLifecycleAware {
         when (it) {
@@ -279,12 +299,16 @@ fun HandleProfileEvents(
                 onNavigateToSaveEvents()
             }
 
+            ProfileEvent.NavigateToEditProfilePhoto -> {
+                onNavigateToEditProfilePhoto()
+            }
+
             is ProfileEvent.OpenUrl -> {
                 onOpenUrl(it.url)
             }
 
             is ProfileEvent.ShowToast -> {
-                // Handle toast
+                toaster.info(it.message)
             }
 
             ProfileEvent.NavigateToSecurity -> {
@@ -428,9 +452,10 @@ fun ProfileContent(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(Spacing.md)
                             ) {
-                                UserAvatar(
-                                    model = state.profileImage,
-                                    isLoading = state.isProfileImageLoading
+                                ProfileAvatarWithCameraBadge(
+                                    profileImage = state.profileImage,
+                                    isLoading = state.isProfileImageLoading,
+                                    onClick = { onIntent(ProfileIntent.EditPhotoClicked) },
                                 )
                                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.xxs)) {
                                     if (state.identityInfo == null) {
@@ -795,3 +820,46 @@ private fun ProfileScreenPreviewDark() {
     }
 }
 
+// Top-left to bottom-right, the design's 145deg within a few degrees.
+private val CameraBadgeGradient = Brush.linearGradient(listOf(TaminNavy300, TaminNavy900))
+private val CameraBadgeBorderStroke = BorderStroke(2.dp, TaminCameraBadgeBorder)
+
+@Composable
+private fun ProfileAvatarWithCameraBadge(
+    profileImage: String?,
+    isLoading: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    // Not clipped: the badge sits partly outside the avatar, as in the design.
+    Box(
+        modifier = modifier.clickable(
+            onClickLabel = stringResource(Res.string.profile_photo_screen_title),
+            onClick = onClick,
+        ),
+    ) {
+        UserAvatar(model = profileImage, isLoading = isLoading)
+        Box(
+            modifier = Modifier
+                .align(AbsoluteAlignment.BottomLeft)
+                .absoluteOffset(x = (-4).dp, y = 4.dp)
+                .size(26.dp)
+                .shadow(
+                    elevation = 4.dp,
+                    shape = CircleShape,
+                    ambientColor = TaminCameraBadgeShadow,
+                    spotColor = TaminCameraBadgeShadow,
+                )
+                .background(CameraBadgeGradient, CircleShape)
+                .border(CameraBadgeBorderStroke, CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                painter = painterResource(Res.drawable.ic_tamin_camera_lens),
+                contentDescription = null,
+                tint = LocalTaminColors.current.onGradient,
+                modifier = Modifier.size(13.dp),
+            )
+        }
+    }
+}
