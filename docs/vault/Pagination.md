@@ -150,8 +150,12 @@ bump wipes local data. Then:
    `query.pageCacheKey(parentIds…)` (core-data `repository/paging/PageCacheKey.kt`): parent ids +
    filters + sorts, so each search/parent is its own list and replacing one never wipes another.
    `position` keeps the server's order exactly. The DAO gets `getPageSlice` / `upsertPage` /
-   `clearPages(listKey)` / `@Transaction replacePages`. Worked example:
-   `ConstructionFilePageEntity` + `ConstructionFileDao` + `getConstructionFilesPage`.
+   `clearPages(listKey)` / `@Transaction replacePages`. Worked examples:
+   `ConstructionFilePageEntity` + `ConstructionFileDao` + `getConstructionFilesPage`;
+   `ContractAffairPageEntity` + `ContractAffairDao` + `ContractAffairRepositoryImpl.getContractsPage`
+   (embeds the existing `ContractEntity`; its read mapper is `toContractAffairDomain()` because
+   `ContractEntity.toDomain()` already maps to the contracts feature's model, and it returns `null`
+   for a nested object whose columns are all empty, so a cached row equals the network one).
 
    The inbox's `drop/take` over a plain table loads the whole table; fine for tens–hundreds of rows. For bigger tables add a
    `LIMIT :limit OFFSET :offset` query (`CityProvinceDao.getCitiesSlice`). If the list has

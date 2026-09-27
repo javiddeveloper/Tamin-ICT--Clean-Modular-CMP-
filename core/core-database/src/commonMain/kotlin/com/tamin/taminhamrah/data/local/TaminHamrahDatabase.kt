@@ -64,6 +64,8 @@ import kotlinx.coroutines.IO
 
 import com.tamin.taminhamrah.data.local.entity.ConstructionFileEntity
 import com.tamin.taminhamrah.data.local.entity.ConstructionFilePageEntity
+import com.tamin.taminhamrah.data.local.entity.ContractAffairPageEntity
+import com.tamin.taminhamrah.data.local.dao.ContractAffairDao
 import com.tamin.taminhamrah.data.local.dao.ConstructionFileDao
 
 @Database(
@@ -103,6 +105,7 @@ import com.tamin.taminhamrah.data.local.dao.ConstructionFileDao
         HistoryWageRowEntity::class,
         ConstructionFileEntity::class,
         ConstructionFilePageEntity::class,
+        ContractAffairPageEntity::class,
         HomeContentEntity::class,
     ],
     // v5: FeatureFlag ids changed; cached home_content stored the old flagId.
@@ -130,6 +133,7 @@ expect abstract class TaminXDatabase : RoomDatabase {
     abstract fun historyCacheDao(): HistoryCacheDao
     abstract fun homeContentDao(): HomeContentDao
     abstract fun constructionFileDao(): ConstructionFileDao
+    abstract fun contractAffairDao(): ContractAffairDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT")
