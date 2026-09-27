@@ -410,6 +410,7 @@ fun MedicalRecordsContent(
                 background = taminHeroGradient(colors.treatmentHubStops),
                 navigationIcon = {
                     TaminTopAppBarButton(
+                        bordered = true,
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                         contentDescription = stringResource(Res.string.action_back),
                         onClick = onBack,

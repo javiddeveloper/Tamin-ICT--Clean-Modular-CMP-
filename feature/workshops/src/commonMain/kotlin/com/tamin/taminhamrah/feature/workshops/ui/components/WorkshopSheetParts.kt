@@ -138,6 +138,11 @@ fun ColumnScope.WorkshopQuickPickList(
      * default — keeps the spinner ردیف‌های پیمان shows.
      */
     shimmerLoadingMore: Boolean = false,
+    /**
+     * Draws each unselected row as a bordered surface card, the way the document-type sheet lists its
+     * choices, for a sheet on the page color. False — the default — keeps the gray chip rows.
+     */
+    cardRows: Boolean = false,
 ) {
     val listState = rememberLazyListState()
     listState.OnLoadMore(
@@ -172,6 +177,7 @@ fun ColumnScope.WorkshopQuickPickList(
                 isSelected = workshop.workshopId == selectedWorkshopId &&
                     (selectedBranchCode.isBlank() || workshop.branchCode == selectedBranchCode),
                 onPick = { onPick(workshop.workshopId, workshop.branchCode) },
+                cardRows = cardRows,
             )
         }
         if (workshops.isLoadingMore) {
@@ -199,20 +205,27 @@ private fun WorkshopQuickPickRow(
     isSelected: Boolean,
     onPick: () -> Unit,
     modifier: Modifier = Modifier,
+    cardRows: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
-    val shape = remember { RoundedCornerShape(CornerRadius.md) }
+    val shape = remember(cardRows) { RoundedCornerShape(if (cardRows) CornerRadius.lg else CornerRadius.md) }
     Row(
         modifier = modifier
             .fillMaxWidth()
             .clip(shape)
             .clickable(onClick = onPick)
-            .background(if (isSelected) colors.blueBg else colors.chipBg)
+            .background(
+                when {
+                    isSelected -> colors.blueBg
+                    cardRows -> colors.bgSurface
+                    else -> colors.chipBg
+                },
+            )
             .then(
-                if (isSelected) {
-                    Modifier.border(Thickness.border, colors.blueBorder, shape)
-                } else {
-                    Modifier
+                when {
+                    isSelected -> Modifier.border(Thickness.border, colors.blueBorder, shape)
+                    cardRows -> Modifier.border(Thickness.border, colors.border, shape)
+                    else -> Modifier
                 },
             )
             .padding(horizontal = Spacing.lg, vertical = Spacing.md),

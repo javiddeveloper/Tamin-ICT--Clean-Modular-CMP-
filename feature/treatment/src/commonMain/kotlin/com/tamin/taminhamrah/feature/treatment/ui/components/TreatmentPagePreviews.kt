@@ -84,6 +84,7 @@ private fun PreviewPage(content: @Composable BoxScope.() -> Unit) {
 @Composable
 private fun BackButton() {
     TaminTopAppBarButton(
+        bordered = true,
         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
         contentDescription = "برگشت",
         onClick = {},
@@ -296,6 +297,7 @@ private fun RecordsHeader() {
         navigationIcon = { BackButton() },
         action = {
             TaminTopAppBarButton(
+                bordered = true,
                 icon = vectorResource(Res.drawable.ic_tamin_print),
                 contentDescription = "اشتراک‌گذاری",
                 onClick = {},
@@ -329,6 +331,7 @@ private fun RecordDetailPagePreview() {
                 navigationIcon = { BackButton() },
                 action = {
                     TaminTopAppBarButton(
+                        bordered = true,
                         icon = vectorResource(Res.drawable.ic_tamin_print),
                         contentDescription = "اشتراک‌گذاری",
                         onClick = {},

@@ -3788,4 +3788,54 @@
     <string name="fraction_contract_submit_conclude">انعقاد قرارداد</string>
     <string name="fraction_contract_submit_commitment">اینجانب %1$s دارای کد ملی شماره %2$s با آگاهی کامل از مفاد آئین نامه و مقررات تکمیل سوابق کسری از ماه، و با سلامت کامل عقل، صحت اطلاعات و اسناد مربوطه را تایید می‌نمایم و چنانچه در هر زمان خلاف آن ثابت گردد، قرارداد منعقده باطل بوده و از این نظر هیچ‌گونه حقی نخواهم داشت و ملزم به جبران خسارات احتمالی وارده به سازمان تأمین‌ اجتماعی خواهم بود.\nدرخواست تکمیل سوابق کسری از ماه با نرخ %3$s و تاریخ شروع %4$s را تایید می‌نمایم.</string>
 
+    <!-- Funeral Allowance -->
+    <string name="funeral_allowance_title">کمک هزینه مراسم ترحیم</string>
+    <string name="funeral_allowance_applicant_info">مشخصات متقاضی</string>
+    <string name="funeral_allowance_full_name">نام و نام خانوادگی</string>
+    <string name="funeral_allowance_insurance_number">شماره بیمه</string>
+    <string name="funeral_allowance_account_number">شماره حساب</string>
+    <string name="funeral_allowance_bank_name">نام بانک</string>
+    <string name="funeral_allowance_mobile">تلفن همراه</string>
+    <string name="funeral_allowance_last_branch">آخرین شعبه بیمه‌پردازی</string>
+    <string name="funeral_allowance_deceased_info">مشخصات متوفی</string>
+    <string name="funeral_allowance_deceased_national_code">کد ملی متوفی</string>
+    <string name="funeral_allowance_deceased_national_code_placeholder">کد ملی متوفی را وارد کنید</string>
+    <string name="funeral_allowance_check_eligibility">استعلام شرایط</string>
+    <string name="funeral_allowance_full_name_deceased">نام و نام خانوادگی متوفی</string>
+    <string name="funeral_allowance_deceased_relative">نسبت متوفی</string>
+    <string name="funeral_allowance_submit_request">ثبت درخواست</string>
+    <string name="funeral_allowance_error_invalid_national_id">کد ملی معتبر نیست</string>
+    <string name="funeral_allowance_empty">اطلاعاتی برای نمایش وجود ندارد.</string>
+    <string name="funeral_allowance_not_eligible">شما دارای شرایط دریافت کمک هزینه مراسم ترحیم نمی‌باشید</string>
+    <string name="funeral_allowance_registered_request_title">درخواست ثبت‌شده</string>
+    <string name="funeral_allowance_death_date">تاریخ فوت</string>
+    <string name="funeral_allowance_request_date">تاریخ درخواست</string>
+    <string name="funeral_allowance_request_status">وضعیت درخواست</string>
+    <string name="funeral_allowance_bank_issue_desc">درخواست شما به دلیل مشکل در شماره حساب بانکی، امکان تأیید توسط شعبه را ندارد. لطفاً پس از اصلاح شماره حساب، روی دکمهٔ «مشکل شماره حساب خود را برطرف نموده‌ام» کلیک نمایید.</string>
+    <string name="funeral_allowance_fix_bank_account">مشکل شماره حساب خود را برطرف نموده‌ام</string>
+    <string name="funeral_allowance_dialog_dismiss">متوجه شدم</string>
+    <string name="funeral_allowance_continue_request">ادامه درخواست</string>
+    <string name="funeral_allowance_cancel">انصراف</string>
+    <string name="funeral_allowance_previous_step">مرحله قبلی</string>
+    <string name="funeral_allowance_deceased_inquired_info">اطلاعات استعلام‌شده متوفی</string>
+    <string name="funeral_allowance_national_id">کد ملی</string>
+    <string name="funeral_allowance_relationship_with_insured">نسبت با بیمه‌شده</string>
+    <string name="funeral_allowance_eligibility_banner">شرایط برخورداری از کمک‌هزینه مراسم ترحیم احراز شد. برای ادامه، اطلاعات متوفی را تأیید کنید.</string>
+    <string name="funeral_allowance_national_id_length_hint">۱۰ رقم</string>
+    <string name="funeral_allowance_deceased_national_code_hint">کد ملی متوفی باید در سوابق افراد تبعی شما ثبت شده باشد. با استعلام، رابطه خویشاوندی و تاریخ فوت از ثبت احوال خوانده می‌شود.</string>
+    <string name="funeral_allowance_eligibility_success_title">شرایط برخورداری احراز شد</string>
+    <string name="funeral_allowance_submit_success_title">درخواست شما ثبت شد</string>
+    <string name="funeral_allowance_back_to_services">بازگشت به خدمات</string>
+    <string name="funeral_allowance_exit_confirmation_title">فرم را رها می‌کنید؟</string>
+    <string name="funeral_allowance_exit_confirmation_desc">اطلاعات واردشده ذخیره نشده و در صورت خروج از بین می‌رود.</string>
+    <string name="funeral_allowance_exit_confirmation_confirm">ادامه تکمیل فرم</string>
+    <string name="funeral_allowance_exit_confirmation_dismiss">بی‌خیال، خروج از فرم</string>
+    <string name="funeral_allowance_eligibility_success_desc">بر اساس استعلام انجام‌شده، شما واجد شرایط دریافت کمک‌هزینه مراسم ترحیم هستید. در ادامه اطلاعات متوفی را تأیید و درخواست را ثبت کنید.</string>
+
+    <!-- Bank Account Modal (shown before short-term benefit requests when the user has no registered bank account) -->
+    <string name="no_bank_account_title">انجام درخواست امکان‌پذیر نیست</string>
+    <string name="no_bank_account_desc">شما فاقد شماره حساب بانکی می باشید. لطفا به ثبت شماره حساب بانکی جدید(منوی حساب کاربری) اقدام نمایید.</string>
+    <string name="register_bank_account">ثبت شماره حساب بانکی</string>
+    <string name="later">بعداً</string>
+
 </resources>
