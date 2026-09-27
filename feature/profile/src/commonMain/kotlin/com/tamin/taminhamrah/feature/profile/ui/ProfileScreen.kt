@@ -57,6 +57,9 @@ import com.tamin.taminhamrah.ui.components.ListItemColors
 import com.tamin.taminhamrah.ui.components.ListItemData
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.SectionHeaderTitle
+import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
+import com.tamin.taminhamrah.ui.components.TaminFilledButton
+import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.UserAvatar
@@ -86,6 +89,8 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.action_cancel
+import taminx.core.core_ui.profile_logout_confirm_description
 import taminx.core.core_ui.contact_us_title
 import taminx.core.core_ui.ic_communication
 import taminx.core.core_ui.ic_exit
@@ -324,6 +329,36 @@ fun ProfileContent(
         motionState = motionState,
         decayAnimationSpec = decaySpec
     )
+    var showLogoutDialog by remember { mutableStateOf(false) }
+
+    if (showLogoutDialog) {
+        TaminConfirmationDialog(
+            title = stringResource(Res.string.profile_logout),
+            description = stringResource(Res.string.profile_logout_confirm_description),
+            icon = vectorResource(Res.drawable.ic_exit),
+            iconTint = Color.White,
+            iconBackgroundBrush = taminColors.iconGradientDanger,
+            confirmButton = {
+                TaminFilledButton(
+                    text = stringResource(Res.string.profile_logout),
+                    background = taminColors.iconGradientDanger,
+                    onClick = {
+                        showLogoutDialog = false
+                        onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.LOGOUT))
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            dismissButton = {
+                TaminOutlinedButton(
+                    text = stringResource(Res.string.action_cancel),
+                    onClick = { showLogoutDialog = false },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            onDismissRequest = { showLogoutDialog = false }
+        )
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -679,7 +714,7 @@ fun ProfileContent(
                                     leadingIconBackgroundGradient = taminColors.iconGradientDanger
                                 ),
                                 showArrow = false,
-                                onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.LOGOUT)) }
+                                onClick = { showLogoutDialog = true }
                             )
                         )
                     )

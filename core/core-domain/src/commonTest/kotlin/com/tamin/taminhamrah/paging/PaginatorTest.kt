@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
@@ -140,9 +141,9 @@ class PaginatorTest {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun `concurrent loadNext calls issue a single request`() = runTest {
+    fun `concurrent loadNext calls collapse into one request plus one follow-up`() = runTest {
         val gate = CompletableDeferred<Unit>()
-        val loader = FakePageLoader(pages = mapOf(1 to page("a", "b")), gate = gate)
+        val loader = FakePageLoader(pages = mapOf(1 to page("a", "b"), 2 to page("c")), gate = gate)
         val paginator = paginatorOf(loader)
 
         repeat(5) { launch { paginator.loadNext() } }
@@ -154,8 +155,65 @@ class PaginatorTest {
         gate.complete(Unit)
         advanceUntilIdle()
 
-        assertEquals(listOf("a", "b"), paginator.state.value.items)
+        // The calls made during the in-flight load are replayed once, not dropped and not x4.
+        assertEquals(listOf(1, 2), loader.requestedQueries.map { it.page })
+        assertEquals(listOf("a", "b", "c"), paginator.state.value.items)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `a loadNext fired while a cached first page is shown still loads the next page`() = runTest {
+        // Regression: the ill-days city sheet fills with the cached page, OnLoadMore fires while
+        // the network page 0 is in flight, and never fires again — so paging must not drop it.
+        val gate = CompletableDeferred<Unit>()
+        val requested = mutableListOf<Int>()
+        val paginator = Paginator(
+            config = config,
+            loadPages = { query ->
+                flow {
+                    requested += query.page
+                    if (query.page == 1) {
+                        emit(cachedPage("x", "y"))
+                        gate.await()
+                        emit(page("a", "b"))
+                    } else {
+                        emit(page("c", "d"))
+                    }
+                }
+            },
+        )
+
+        launch { paginator.loadNext() }
+        runCurrent()
+        assertEquals(listOf("x", "y"), paginator.state.value.items)
+
+        launch { paginator.loadNext() }   // the scroll trigger, while page 1 is still loading
+        runCurrent()
+
+        gate.complete(Unit)
+        advanceUntilIdle()
+
+        assertEquals(listOf(1, 2), requested)
+        assertEquals(listOf("a", "b", "c", "d"), paginator.state.value.items)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `a pending loadNext is not replayed after a failure`() = runTest {
+        val gate = CompletableDeferred<Unit>()
+        val loader = FakePageLoader(pages = emptyMap(), gate = gate, failWith = RuntimeException("x"))
+        val paginator = paginatorOf(loader)
+
+        launch { paginator.loadNext() }
+        runCurrent()
+        launch { paginator.loadNext() }
+        runCurrent()
+
+        gate.complete(Unit)
+        advanceUntilIdle()
+
         assertEquals(1, loader.requestedQueries.size)
+        assertTrue(paginator.state.value.error != null)
     }
 
     @Test
@@ -373,8 +431,114 @@ class PaginatorTest {
         assertTrue(paginator.state.value.endReached)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `a cached page is shown while the network page loads then replaced`() = runTest {
+        val gate = CompletableDeferred<Unit>()
+        val paginator = Paginator(
+            config = config,
+            loadPages = { _ ->
+                flow {
+                    emit(cachedPage("x"))
+                    gate.await()
+                    emit(page("a", "b"))
+                }
+            },
+        )
+
+        launch { paginator.loadNext() }
+        runCurrent()
+
+        with(paginator.state.value) {
+            assertEquals(listOf("x"), items)
+            assertTrue(isFromCache)
+            assertTrue(isRefreshing)
+            assertFalse(isLoadingFirstPage)
+        }
+
+        gate.complete(Unit)
+        advanceUntilIdle()
+
+        with(paginator.state.value) {
+            assertEquals(listOf("a", "b"), items)
+            assertFalse(isFromCache)
+            assertFalse(isRefreshing)
+            assertFalse(endReached)
+        }
+    }
+
+    @Test
+    fun `offline cached slices keep paging until a short slice ends the list`() = runTest {
+        val cachedSlices = mapOf(1 to cachedPage("x", "y"), 2 to cachedPage("z"))
+        val paginator = Paginator(
+            config = config,
+            loadPages = { query -> flow { cachedSlices[query.page]?.let { emit(it) } } },
+        )
+
+        paginator.loadNext()
+        with(paginator.state.value) {
+            assertEquals(listOf("x", "y"), items)
+            assertTrue(isFromCache)
+            assertFalse(endReached)
+            assertNull(error)
+        }
+
+        paginator.loadNext()
+        with(paginator.state.value) {
+            assertEquals(listOf("x", "y", "z"), items)
+            assertTrue(isFromCache)
+            assertTrue(endReached)
+        }
+    }
+
+    @Test
+    fun `a network page after an offline cached page clears the cache flag`() = runTest {
+        var online = false
+        val paginator = Paginator(
+            config = config,
+            loadPages = { _ ->
+                flow {
+                    emit(cachedPage("x"))
+                    if (online) emit(page("a", "b"))
+                }
+            },
+        )
+
+        paginator.loadNext()
+        assertTrue(paginator.state.value.isFromCache)
+
+        online = true
+        paginator.refresh()
+        assertEquals(listOf("a", "b"), paginator.state.value.items)
+        assertFalse(paginator.state.value.isFromCache)
+    }
+
+    @Test
+    fun `a failure after the cache keeps the cached items and reports the error`() = runTest {
+        val failure = RuntimeException("boom")
+        val paginator = Paginator(
+            config = config,
+            loadPages = { _ ->
+                flow {
+                    emit(cachedPage("x"))
+                    throw failure
+                }
+            },
+        )
+
+        paginator.loadNext()
+
+        with(paginator.state.value) {
+            assertEquals(listOf("x"), items)
+            assertSame(failure, error)
+            assertFalse(isRefreshing)
+        }
+    }
+
     private fun paginatorOf(loader: FakePageLoader) =
         Paginator(config = config, loadPage = loader::load)
+
+    private fun cachedPage(vararg items: String) = PageDN(items.toList(), isFromCache = true)
 
     private fun page(vararg items: String) = PageDN(items.toList())
 

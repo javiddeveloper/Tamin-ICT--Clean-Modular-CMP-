@@ -1,8 +1,9 @@
 package com.tamin.taminhamrah.feature.fractionContract.fake
 
 import com.tamin.taminhamrah.model.common.CityDN
-import com.tamin.taminhamrah.model.common.CityListResultDN
 import com.tamin.taminhamrah.model.common.ProvinceDN
+import com.tamin.taminhamrah.model.paging.PageDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.contracts.BranchDN
 import com.tamin.taminhamrah.model.contracts.ContractDN
 import com.tamin.taminhamrah.model.contracts.FreeJobDN
@@ -226,8 +227,8 @@ internal class FakeFractionCityProvinceRepository : CityProvinceRepository {
             statusStartDate = null,
         ),
     )
-    override fun getProvinces(): Flow<List<ProvinceDN>> = flowOf(emptyList())
-    override fun getCities(cityName: String?, provinceCode: String?): Flow<List<CityDN>> = flowOf(citiesResult)
-    override fun getCitiesByProvince(provinceCode: String): Flow<CityListResultDN> =
-        flowOf(CityListResultDN(emptyList()))
+    override fun getProvincesPage(query: ApiQueryParamDN): Flow<PageDN<ProvinceDN>> = flowOf(PageDN(emptyList()))
+    override fun getCitiesPage(query: ApiQueryParamDN): Flow<PageDN<CityDN>> = flowOf(PageDN(citiesResult))
+    override fun getCitiesByProvincePage(provinceCode: String, query: ApiQueryParamDN): Flow<PageDN<CityDN>> =
+        flowOf(PageDN(emptyList()))
 }

@@ -12,7 +12,7 @@ import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDN
 import com.tamin.taminhamrah.model.bankAccount.BankAccountDN
 import com.tamin.taminhamrah.model.certificate.RecipientDN
 import com.tamin.taminhamrah.model.common.CityDN
-import com.tamin.taminhamrah.model.common.CityListResultDN
+import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.model.common.ProvinceDN
 import com.tamin.taminhamrah.model.common.ProvincePR
@@ -54,8 +54,9 @@ import com.tamin.taminhamrah.repository.CityProvinceRepository
 import com.tamin.taminhamrah.repository.UserRepository
 import com.tamin.taminhamrah.repository.contracts.ContractsRepository
 import com.tamin.taminhamrah.repository.employerInfo.EmployerInfoRepository
-import com.tamin.taminhamrah.useCases.common.GetCitiesByProvinceUseCase
-import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.useCases.common.GetCitiesByProvincePageUseCase
+import com.tamin.taminhamrah.useCases.common.GetProvincesPageUseCase
 import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
 import com.tamin.taminhamrah.useCases.employerInfo.GetLegalWorkshopCeoUseCase
 import com.tamin.taminhamrah.useCases.employerInfo.GetLegalWorkshopUseCase
@@ -113,8 +114,8 @@ class CompleteEmployerInfoViewModelTest {
             submitLegalWorkshopInfoUseCase = SubmitLegalWorkshopInfoUseCase(fakeEmployerInfoRepo),
             requestRealTicketUseCase = RequestRealTicketUseCase(fakeEmployerInfoRepo),
             submitRealWorkshopInfoUseCase = SubmitRealWorkshopInfoUseCase(fakeEmployerInfoRepo),
-            getProvincesUseCase = GetProvincesUseCase(fakeCityProvinceRepo),
-            getCitiesByProvinceUseCase = GetCitiesByProvinceUseCase(fakeCityProvinceRepo),
+            getProvincesPageUseCase = GetProvincesPageUseCase(fakeCityProvinceRepo),
+            getCitiesByProvincePageUseCase = GetCitiesByProvincePageUseCase(fakeCityProvinceRepo),
             getBranchesUseCase = GetBranchesUseCase(fakeContractsRepo),
         )
     }
@@ -457,18 +458,20 @@ private class FakeTestUserRepo : UserRepository {
 }
 
 private class FakeTestCityProvinceRepo : CityProvinceRepository {
-    override fun getProvinces(): Flow<List<ProvinceDN>> = flowOf(
-        listOf(
-            ProvinceDN(provinceCode = "07", provinceName = "تهران", status = null, statusStartDate = null),
-            ProvinceDN(provinceCode = "04", provinceName = "اصفهان", status = null, statusStartDate = null),
+    override fun getProvincesPage(query: ApiQueryParamDN): Flow<PageDN<ProvinceDN>> = flowOf(
+        PageDN(
+            listOf(
+                ProvinceDN(provinceCode = "07", provinceName = "تهران", status = null, statusStartDate = null),
+                ProvinceDN(provinceCode = "04", provinceName = "اصفهان", status = null, statusStartDate = null),
+            )
         )
     )
 
-    override fun getCitiesByProvince(provinceCode: String): Flow<CityListResultDN> = flowOf(
-        CityListResultDN(cities = listOf(CityDN(cityCode = "0701", cityName = "تهران", provinceCode = provinceCode)))
+    override fun getCitiesByProvincePage(provinceCode: String, query: ApiQueryParamDN): Flow<PageDN<CityDN>> = flowOf(
+        PageDN(listOf(CityDN(cityCode = "0701", cityName = "تهران", provinceCode = provinceCode)))
     )
 
-    override fun getCities(cityName: String?, provinceCode: String?): Flow<List<CityDN>> = flowOf(emptyList())
+    override fun getCitiesPage(query: ApiQueryParamDN): Flow<PageDN<CityDN>> = flowOf(PageDN(emptyList()))
     override fun getCity(cityId: String): Flow<CityDN> = flowOf(CityDN(cityCode = cityId, cityName = "تهران", provinceCode = "07"))
     override fun getProvince(provinceId: String): Flow<ProvinceDN> = flowOf(ProvinceDN(provinceCode = provinceId, provinceName = "تهران", status = null, statusStartDate = null))
 }

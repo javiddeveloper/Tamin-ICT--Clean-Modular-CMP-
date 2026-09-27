@@ -6,6 +6,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -35,8 +37,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -57,6 +61,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -69,6 +74,7 @@ import com.tamin.taminhamrah.ui.components.InputRestriction
 import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
 import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.components.TaminImageViewer
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
 import com.tamin.taminhamrah.ui.components.animatedErrorBorder
@@ -90,8 +96,12 @@ import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.name
 import io.github.vinceglb.filekit.readBytes
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
@@ -359,27 +369,35 @@ fun WorkshopReviewGroup(
             }
             Row(
                 modifier = Modifier.fillMaxWidth().padding(vertical = ReviewRowPadding),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                // A value that wraps grows downward from the label's line, not around its middle.
+                verticalAlignment = Alignment.Top,
             ) {
                 Text(
                     text = row.label,
                     style = MaterialTheme.typography.bodySmall,
                     color = colors.textMuted,
+                    maxLines = 1,
                 )
                 if (row.isNumeric) {
-                    NumericText(
-                        text = row.value,
-                        style = MaterialTheme.typography.labelLarge
-                            .copy(fontWeight = FontWeight.Bold),
-                        color = colors.textPrimary,
-                    )
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
+                        NumericText(
+                            text = row.value,
+                            style = MaterialTheme.typography.labelLarge
+                                .copy(fontWeight = FontWeight.Bold),
+                            color = colors.textPrimary,
+                        )
+                    }
                 } else {
+                    // Takes what the label leaves and wraps inside it: a long workshop name or
+                    // address used to push the label out of the row instead of breaking a line.
                     Text(
                         text = row.value,
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
                         color = colors.textPrimary,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.weight(1f),
                     )
                 }
             }
@@ -475,6 +493,18 @@ fun WorkshopDocumentsPanel(
      * opens straight away under that type.
      */
     asksForType: Boolean = true,
+    /**
+     * Where the panel keeps each uploaded image's bytes, by guid, so its card can show the image as
+     * a thumbnail and open it full screen on tap — core-ui's [TaminDocumentUploadCard] preview, the
+     * one the occurrence report and pension forms use.
+     *
+     * Null — the default — keeps the plain green tick every existing form shows. Owned by the caller
+     * rather than the panel because a multi-step form drops the panel whenever it leaves its step.
+     * Held in memory only: image bytes are far too large for saved state. A card whose bytes are not
+     * here — a PDF, or an image uploaded before the process was recreated — keeps the tick, with no
+     * preview to open.
+     */
+    previewCache: SnapshotStateMap<String, ByteArray>? = null,
 ) {
     val colors = LocalTaminColors.current
     val scope = rememberCoroutineScope()
@@ -497,6 +527,17 @@ fun WorkshopDocumentsPanel(
         if (attachments.size <= countAtHandOff) return@LaunchedEffect
         fingerprints[attachments.last().guid] = fingerprint
         pendingFingerprint = null
+    }
+    // The same hand-off for the preview: the picked bytes are filed under the guid the upload came
+    // back with, once it lands. A PDF is not an image the card could draw, so it is never filed.
+    var pendingPreviewBytes by remember { mutableStateOf<ByteArray?>(null) }
+    var previewing by remember { mutableStateOf<WorkshopAttachment?>(null) }
+    LaunchedEffect(attachments) {
+        val bytes = pendingPreviewBytes ?: return@LaunchedEffect
+        if (attachments.size <= countAtHandOff) return@LaunchedEffect
+        val newest = attachments.last()
+        if (!newest.isPdf) previewCache?.set(newest.guid, bytes)
+        pendingPreviewBytes = null
     }
     // The picker answers after the pick, so it reads the list as it is then, not as it was when
     // the launcher was built.
@@ -538,6 +579,7 @@ fun WorkshopDocumentsPanel(
                 return@launch
             }
             pendingFingerprint = fingerprint
+            pendingPreviewBytes = if (previewCache != null) bytes else null
             countAtHandOff = currentAttachments.size
             onAdd(file.name, bytes, type.code)
         }
@@ -583,27 +625,36 @@ fun WorkshopDocumentsPanel(
             )
         }
 
+        // Each card sits in its own padded box instead of taking the gap as its own modifier. The
+        // card applies its modifier to its content only, while the wave fills the card's outer box,
+        // so a top padding passed to the card left the wave spilling into the gap above it.
         settled.forEachIndexed { index, attachment ->
-            TaminDocumentUploadCard(
-                title = stringResource(attachment.type.label),
-                state = TaminDocumentUploadState.Uploaded,
-                statusText = stringResource(Res.string.ws_form_file_size, attachment.size),
-                onDeleteClick = { onRemove(index) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = Spacing.cardGap),
-            )
+            // Keyed by guid, so a card's thumbnail stays with its file when one above is removed.
+            key(attachment.guid) {
+                val thumbnail = rememberBase64(previewCache?.get(attachment.guid))
+                Box(modifier = Modifier.fillMaxWidth().padding(top = Spacing.cardGap)) {
+                    TaminDocumentUploadCard(
+                        title = stringResource(attachment.type.label),
+                        state = TaminDocumentUploadState.Uploaded,
+                        statusText = stringResource(Res.string.ws_form_file_size, attachment.size),
+                        thumbnailBase64 = thumbnail,
+                        onPreviewClick = thumbnail?.let { { previewing = attachment } },
+                        onDeleteClick = { onRemove(index) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
         }
 
         if (isWaving) {
             val waving = attachments.lastOrNull()?.type?.takeIf { hasLanded } ?: pendingType
-            TaminDocumentUploadCard(
-                title = waving?.label?.let { stringResource(it) }.orEmpty(),
-                state = TaminDocumentUploadState.Uploading,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = Spacing.cardGap),
-            )
+            Box(modifier = Modifier.fillMaxWidth().padding(top = Spacing.cardGap)) {
+                TaminDocumentUploadCard(
+                    title = waving?.label?.let { stringResource(it) }.orEmpty(),
+                    state = TaminDocumentUploadState.Uploading,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
         }
 
         if (attachments.size < capacity && !isWaving) {
@@ -645,6 +696,18 @@ fun WorkshopDocumentsPanel(
         }
     }
 
+    // The app's full-screen viewer, the one every other form previews its documents in.
+    previewing?.let { attachment ->
+        val image = rememberBase64(previewCache?.get(attachment.guid))
+        if (image != null) {
+            TaminImageViewer(
+                title = stringResource(attachment.type.label),
+                url = image,
+                onDismiss = { previewing = null },
+            )
+        }
+    }
+
     if (isTypeSheetOpen) {
         WorkshopDocumentTypeSheet(
             types = types,
@@ -657,6 +720,17 @@ fun WorkshopDocumentsPanel(
         )
     }
 }
+
+/**
+ * [bytes] as base64, the form core-ui's image loader and viewer take — encoded off the main thread,
+ * the way the pension and occurrence forms build their thumbnails. Null while encoding, or for none.
+ */
+@OptIn(ExperimentalEncodingApi::class)
+@Composable
+private fun rememberBase64(bytes: ByteArray?): String? =
+    produceState<String?>(initialValue = null, bytes) {
+        value = bytes?.let { withContext(Dispatchers.Default) { Base64.Default.encode(it) } }
+    }.value
 
 /** How long the upload wave keeps playing after the file has actually landed. */
 private const val WAVE_TAIL_MILLIS = 1600L
@@ -860,7 +934,10 @@ fun WorkshopFormFooter(
                 end = Spacing.page,
                 top = Spacing.md,
                 bottom = Spacing.xlg,
-            ),
+            )
+            // The page draws edge to edge, so the bar's own fill runs under the system navigation
+            // bar while its buttons stay above it.
+            .navigationBarsPadding(),
         horizontalArrangement = Arrangement.spacedBy(Spacing.cardGap),
     ) {
         if (onPrev != null) {
@@ -972,10 +1049,13 @@ fun WorkshopDocumentTypeSheet(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
+    // Drawn as orotez-protez's document sheet is: the page color behind, a bold title, and each
+    // choice on its own bordered surface card.
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = colors.bgSurface,
+        containerColor = colors.bgPage,
+        shape = DocTypeSheetShape,
         modifier = modifier,
     ) {
         LazyColumn(
@@ -984,31 +1064,36 @@ fun WorkshopDocumentTypeSheet(
                 .padding(horizontal = Spacing.page)
                 .padding(
                     bottom = WindowInsets.navigationBars.asPaddingValues()
-                        .calculateBottomPadding() + Spacing.lg,
+                        .calculateBottomPadding() + Spacing.md,
                 ),
             verticalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             item(key = "title") {
                 Text(
                     text = stringResource(Res.string.ws_form_doc_type_title),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = colors.textPrimary,
-                    modifier = Modifier.padding(bottom = Spacing.sm),
+                    modifier = Modifier.padding(bottom = Spacing.md),
                 )
             }
             items(types, key = { it.code }) { type ->
-                Text(
-                    text = stringResource(type.label),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = colors.textPrimary,
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .heightIn(min = DocTypeItemMinHeight)
                         .clip(DocTypeItemShape)
+                        .background(colors.bgSurface)
+                        .border(Thickness.border, colors.border, DocTypeItemShape)
                         .clickable { onSelect(type) }
-                        .background(colors.chipBg)
                         .padding(horizontal = Spacing.lg, vertical = Spacing.md),
-                )
+                    contentAlignment = Alignment.CenterStart,
+                ) {
+                    Text(
+                        text = stringResource(type.label),
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = colors.textPrimary,
+                    )
+                }
             }
         }
     }
@@ -1177,6 +1262,8 @@ private val CheckCardShape = RoundedCornerShape(CornerRadius.xl)
 private val CheckBoxShape = RoundedCornerShape(CheckBoxCorner)
 private val TextAreaShape = RoundedCornerShape(TextAreaCorner)
 private val FooterButtonShape = RoundedCornerShape(FooterButtonCorner)
-private val DocTypeItemShape = RoundedCornerShape(CornerRadius.md)
+private val DocTypeItemShape = RoundedCornerShape(CornerRadius.lg)
+private val DocTypeSheetShape = RoundedCornerShape(topStart = CornerRadius.sheet, topEnd = CornerRadius.sheet)
+private val DocTypeItemMinHeight = 56.dp
 private val OptionItemShape = RoundedCornerShape(CornerRadius.md)
 private val BannerShape = RoundedCornerShape(CornerRadius.chip)

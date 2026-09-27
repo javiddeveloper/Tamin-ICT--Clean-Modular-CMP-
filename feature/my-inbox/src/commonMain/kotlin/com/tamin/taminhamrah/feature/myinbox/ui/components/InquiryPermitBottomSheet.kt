@@ -11,6 +11,13 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.unit.Velocity
+import com.tamin.taminhamrah.ui.theme.SheetDimens
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -67,6 +74,13 @@ fun InquiryPermitBottomSheet(
     var showDurationPicker by remember { mutableStateOf(false) }
     var selectedDuration by remember { mutableStateOf<PermitDurationPR?>(null) }
     val toaster = LocalToaster.current
+    // Leftover fling at the text's scroll bounds must not start a sheet dismiss / bounce.
+    val consumeOverscroll = remember {
+        object : NestedScrollConnection {
+            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity =
+                available
+        }
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -104,10 +118,14 @@ fun InquiryPermitBottomSheet(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // Content Box
+            // Content Box — capped and scrollable: at full screen height the sheet's status-bar
+            // padding changes with its offset, which re-anchors it mid-drag and makes it jump.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .weight(1f, fill = false)
+                    .heightIn(max = SheetDimens.contentMaxHeight)
+                    .nestedScroll(consumeOverscroll)
                     .clip(TaminHamrahShapes.large)
                     .background(LocalTaminColors.current.bgSurface)
                     .border(
@@ -124,7 +142,9 @@ fun InquiryPermitBottomSheet(
                         lineHeight = MaterialTheme.typography.bodySmall.lineHeight * 1.4
                     ),
                     textAlign = TextAlign.Right,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
                 )
             }
 

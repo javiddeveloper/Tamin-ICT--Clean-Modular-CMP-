@@ -65,6 +65,9 @@ data class IllDaysWizardUiState(
     val insuredMainInfo: IllDaysInsuredMainInfoPR? = null,
     val branchOptions: ImmutableList<IllDaysBranchWorkshopPR> = persistentListOf(),
     val cityOptions: ImmutableList<CityPR> = persistentListOf(),
+    val isCitiesLoading: Boolean = false,
+    val isCitiesLoadingMore: Boolean = false,
+    val canLoadMoreCities: Boolean = false,
     val selectedBranch: IllDaysBranchWorkshopPR? = null,
     val selectedCity: CityPR? = null,
     val isCovid: Boolean = false,
@@ -106,7 +109,12 @@ data class IllDaysWizardUiState(
             val branches: ImmutableList<IllDaysBranchWorkshopPR>,
             val selected: IllDaysBranchWorkshopPR?,
         ) : PartialState
-        data class CitiesLoaded(val cities: ImmutableList<CityPR>) : PartialState
+        data class CityPagingChanged(
+            val items: ImmutableList<CityPR>,
+            val isLoadingFirstPage: Boolean,
+            val isLoadingNextPage: Boolean,
+            val endReached: Boolean,
+        ) : PartialState
         data class BranchSelected(val branch: IllDaysBranchWorkshopPR) : PartialState
         data class CitySelected(val city: CityPR) : PartialState
         data class StepChanged(val step: IllDaysWizardStep) : PartialState
@@ -139,10 +147,11 @@ sealed interface IllDaysWizardIntent {
     data object Retry : IllDaysWizardIntent
     data object OpenBranchPicker : IllDaysWizardIntent
     data object OpenCityPicker : IllDaysWizardIntent
-    data class CitySearchQuery(val query: String) : IllDaysWizardIntent
     data object DismissPicker : IllDaysWizardIntent
     data class BranchPicked(val branch: IllDaysBranchWorkshopPR) : IllDaysWizardIntent
     data class CityPicked(val city: CityPR) : IllDaysWizardIntent
+    data class CitySearchQueryChanged(val query: String) : IllDaysWizardIntent
+    data object CityPickerLoadMore : IllDaysWizardIntent
     data object NextStep : IllDaysWizardIntent
     data object PreviousStep : IllDaysWizardIntent
     data class CovidChanged(val enabled: Boolean) : IllDaysWizardIntent

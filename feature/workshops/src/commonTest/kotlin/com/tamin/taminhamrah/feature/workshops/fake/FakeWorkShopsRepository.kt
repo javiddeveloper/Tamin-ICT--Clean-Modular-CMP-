@@ -51,6 +51,7 @@ import com.tamin.taminhamrah.model.workshop.SettlementRequestDN
 import com.tamin.taminhamrah.model.workshop.SettlementSubjectDN
 import com.tamin.taminhamrah.repository.WorkShopsRepository
 import kotlinx.coroutines.CompletableDeferred
+import com.tamin.taminhamrah.model.paging.PageDN
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -409,15 +410,21 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         verificationCode: String,
     ): EmployerContactInfoDN = answer { employerContactInfo }
 
-    override suspend fun getWorkshopsWithoutContract(
+    override fun getWorkshopsWithoutContract(
         page: Int,
-    ): PagedListDN<WorkshopWithoutContractDN> = answer { workshopsWithoutContract }
+    ): Flow<PageDN<WorkshopWithoutContractDN>> = flow {
+        val result = answer { workshopsWithoutContract }
+        emit(PageDN(items = result.items, total = result.total))
+    }
 
-    override suspend fun getWorkshopContractRows(
+    override fun getWorkshopContractRows(
         workshopId: String,
         branchCode: String,
         page: Int,
-    ): PagedListDN<WorkshopContractRowDN> = answer { workshopContractRows }
+    ): Flow<PageDN<WorkshopContractRowDN>> = flow {
+        val result = answer { workshopContractRows }
+        emit(PageDN(items = result.items, total = result.total))
+    }
 
     override suspend fun submitEmployerAgreement(request: EmployerAgreementSubmissionDN): String =
         answer {

@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.data.mapper
 
+import com.tamin.taminhamrah.data.local.entity.ContractEntity
 import com.tamin.taminhamrah.model.contractAffair.CancelContractParamsDN
 import com.tamin.taminhamrah.model.contractAffair.CancelContractRequestDTO
 import com.tamin.taminhamrah.model.contractAffair.ContractDN
@@ -162,3 +163,182 @@ fun CancelContractParamsDN.toRequestDto(): CancelContractRequestDTO = CancelCont
     canceldesc = description,
     contractStatus = stateChange.value,
 )
+
+// ---- Offline cache (contract_affair_pages) ----
+// Reuses ContractEntity's flattened columns. The read mapper has its own name because
+// ContractsMapper already defines ContractEntity.toDomain() for the contracts feature's model.
+
+internal fun ContractDN.toEntity(): ContractEntity = ContractEntity(
+    contractNumber = contractNumber ?: 0,
+    adultLetterDate = adultLetterDate,
+    adultLetterNumber = adultLetterNumber,
+    age = age,
+    branchCode = branchCode,
+    brchCodeNew = brchCodeNew,
+    cancelDate = cancelDate,
+    cancelUID = cancelUID,
+    canceldesc = canceldesc,
+    cityCode = cityCode,
+    cntDrmn = cntDrmn,
+    cntFreeJobCode = cntFreeJobCode,
+    cntIncPayDate3t4 = cntIncPayDate3t4,
+    cntMedicalFlag = cntMedicalFlag,
+    comment = comment,
+    commissionStatus = commissionStatus,
+    confirmDate = confirmDate,
+    confirmUID = confirmUID,
+    contractDate = contractDate,
+    contractStatus = contractStatus,
+    contractStatusDesc = contractStatusObject?.selfIsuContStatDesc,
+    contractStatusCode = contractStatusObject?.selfIsuContStatCode,
+    creatDate = creatDate,
+    createDate = createDate,
+    createUID = createUID,
+    eligibilityStatus = eligibilityStatus,
+    freeJobDescription = freeJob?.discrioption,
+    freeJobEndDate = freeJob?.endDate,
+    freeJobFixRank = freeJob?.fixRank,
+    freeJobId = freeJob?.id,
+    freeJobIscoCode = freeJob?.iscoCode,
+    freeJobCode = freeJob?.jobCode,
+    freeJobStartDate = freeJob?.startDate,
+    freeJobStatus = freeJob?.status,
+    guid = guid,
+    guidName = guidName,
+    history = history,
+    insuranceId = insuranceId,
+    isStudent = isStudent,
+    medicalExemptionStatus = medicalExemptionStatus,
+    militaryServiceLicense = militaryServiceLicense,
+    mobileNumber = mobileNumber,
+    natinoalCode = natinoalCode,
+    physicalStatus = physicalStatus,
+    premiumRateGovermentPercent = premiumRate?.govermentPercent,
+    premiumRateInsurDpercent = premiumRate?.insurDpercent,
+    premiumRatePayrespitelOne = premiumRate?.payrespitelOne,
+    premiumRatePayrespitelTwo = premiumRate?.payrespitelTwo,
+    premiumRateSelfIsuTypeCode = premiumRate?.selfIsuTypeCode,
+    premiumRateSpcLowDayWage = premiumRate?.spcLowDayWage,
+    premiumRateSpcrateCode = premiumRate?.spcrateCode,
+    premiumRateSpcrateDescription = premiumRate?.spcrateDescription,
+    premiumRateStatus = premiumRate?.status,
+    premiumRateStatusStDate = premiumRate?.statusStDate,
+    premiumRateTreatmentPercap = premiumRate?.treatmentPercap,
+    premiumRateCode = premiumRateCode,
+    premiumTypeInsuranceDescription = premiumType?.insuranceDescription,
+    premiumTypeInsuranceKind = premiumType?.insuranceKind,
+    premiumTypeInsuranceTypeCode = premiumType?.insuranceTypeCode,
+    premiumTypeStatus = premiumType?.status,
+    premiumTypeStatusDate = premiumType?.statusDate,
+    premiumTypeCode = premiumTypeCode,
+    provinceCode = provinceCode,
+    provinceName = provinceName,
+    refCode = refCode,
+    salary = salary,
+    startDate = startDate,
+    statusDate = statusDate,
+    wage = wage,
+)
+
+internal fun ContractEntity.toContractAffairDomain(): ContractDN = ContractDN(
+    adultLetterDate = adultLetterDate,
+    adultLetterNumber = adultLetterNumber,
+    age = age,
+    branchCode = branchCode,
+    brchCodeNew = brchCodeNew,
+    cancelDate = cancelDate,
+    cancelUID = cancelUID,
+    canceldesc = canceldesc,
+    cityCode = cityCode,
+    cntDrmn = cntDrmn,
+    cntFreeJobCode = cntFreeJobCode,
+    cntIncPayDate3t4 = cntIncPayDate3t4,
+    cntMedicalFlag = cntMedicalFlag,
+    comment = comment,
+    commissionStatus = commissionStatus,
+    confirmDate = confirmDate,
+    confirmUID = confirmUID,
+    contractDate = contractDate,
+    contractNumber = contractNumber,
+    contractStatus = contractStatus,
+    // A nested object whose columns are all empty was null on the network model; keep it null.
+    contractStatusObject = ifAnyPresent(contractStatusDesc, contractStatusCode) {
+        ContractStatusObjectDN(
+            selfIsuContStatDesc = contractStatusDesc,
+            selfIsuContStatCode = contractStatusCode,
+        )
+    },
+    creatDate = creatDate,
+    createDate = createDate,
+    createUID = createUID,
+    eligibilityStatus = eligibilityStatus,
+    freeJob = ifAnyPresent(
+        freeJobDescription, freeJobEndDate, freeJobFixRank, freeJobId,
+        freeJobIscoCode, freeJobCode, freeJobStartDate, freeJobStatus,
+    ) {
+        FreeJobDN(
+            discrioption = freeJobDescription,
+            endDate = freeJobEndDate,
+            fixRank = freeJobFixRank,
+            id = freeJobId,
+            iscoCode = freeJobIscoCode,
+            jobCode = freeJobCode,
+            startDate = freeJobStartDate,
+            status = freeJobStatus,
+        )
+    },
+    guid = guid,
+    guidName = guidName,
+    history = history,
+    insuranceId = insuranceId,
+    isStudent = isStudent,
+    medicalExemptionStatus = medicalExemptionStatus,
+    militaryServiceLicense = militaryServiceLicense,
+    mobileNumber = mobileNumber,
+    natinoalCode = natinoalCode,
+    physicalStatus = physicalStatus,
+    premiumRate = ifAnyPresent(
+        premiumRateGovermentPercent, premiumRateInsurDpercent, premiumRatePayrespitelOne,
+        premiumRatePayrespitelTwo, premiumRateSelfIsuTypeCode, premiumRateSpcLowDayWage,
+        premiumRateSpcrateCode, premiumRateSpcrateDescription, premiumRateStatus,
+        premiumRateStatusStDate, premiumRateTreatmentPercap,
+    ) {
+        PremiumRateDN(
+            govermentPercent = premiumRateGovermentPercent,
+            insurDpercent = premiumRateInsurDpercent,
+            payrespitelOne = premiumRatePayrespitelOne,
+            payrespitelTwo = premiumRatePayrespitelTwo,
+            selfIsuTypeCode = premiumRateSelfIsuTypeCode,
+            spcLowDayWage = premiumRateSpcLowDayWage,
+            spcrateCode = premiumRateSpcrateCode,
+            spcrateDescription = premiumRateSpcrateDescription,
+            status = premiumRateStatus,
+            statusStDate = premiumRateStatusStDate,
+            treatmentPercap = premiumRateTreatmentPercap,
+        )
+    },
+    premiumRateCode = premiumRateCode,
+    premiumType = ifAnyPresent(
+        premiumTypeInsuranceDescription, premiumTypeInsuranceKind, premiumTypeInsuranceTypeCode,
+        premiumTypeStatus, premiumTypeStatusDate,
+    ) {
+        PremiumTypeDN(
+            insuranceDescription = premiumTypeInsuranceDescription,
+            insuranceKind = premiumTypeInsuranceKind,
+            insuranceTypeCode = premiumTypeInsuranceTypeCode,
+            status = premiumTypeStatus,
+            statusDate = premiumTypeStatusDate,
+        )
+    },
+    premiumTypeCode = premiumTypeCode,
+    provinceCode = provinceCode,
+    provinceName = provinceName,
+    refCode = refCode,
+    salary = salary,
+    startDate = startDate,
+    statusDate = statusDate,
+    wage = wage,
+)
+
+private inline fun <T> ifAnyPresent(vararg columns: Any?, build: () -> T): T? =
+    if (columns.any { it != null }) build() else null

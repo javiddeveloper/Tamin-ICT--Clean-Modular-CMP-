@@ -16,7 +16,6 @@ import com.tamin.taminhamrah.useCases.constructionInsurance.GetBeneficiariesWork
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
@@ -35,7 +34,7 @@ class BeneficiariesViewModel(
     private var hasLoaded = false
 
     private val paginator = Paginator(
-        loadPage = { query -> getBeneficiariesWorkshopPageUseCase(query).first() },
+        loadPages = { query -> getBeneficiariesWorkshopPageUseCase(query) }, // offline-first: collect the whole flow, not `.first()`
     )
 
     override fun handleIntent(intent: BeneficiariesIntent): Flow<PartialState> =

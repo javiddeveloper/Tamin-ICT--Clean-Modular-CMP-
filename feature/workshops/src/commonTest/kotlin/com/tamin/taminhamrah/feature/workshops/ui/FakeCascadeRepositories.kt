@@ -1,8 +1,9 @@
 package com.tamin.taminhamrah.feature.workshops.ui
 
 import com.tamin.taminhamrah.model.common.CityDN
-import com.tamin.taminhamrah.model.common.CityListResultDN
 import com.tamin.taminhamrah.model.common.ProvinceDN
+import com.tamin.taminhamrah.model.paging.PageDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeContractListDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeListDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeRequestDN
@@ -72,21 +73,26 @@ internal class FakeCascadeCityProvinceRepository : CityProvinceRepository {
         CityDN(cityCode = "0401", provinceCode = "04", cityName = "اصفهان"),
     )
 
-    override fun getProvinces(): Flow<List<ProvinceDN>> = flowOf(
-        listOf(
-            ProvinceDN("07", "تهران", null, null),
-            ProvinceDN("04", "اصفهان", null, null),
+    override fun getProvincesPage(query: ApiQueryParamDN): Flow<PageDN<ProvinceDN>> = flowOf(
+        PageDN(
+            listOf(
+                ProvinceDN("07", "تهران", null, null),
+                ProvinceDN("04", "اصفهان", null, null),
+            ),
         ),
     )
 
-    override fun getCities(cityName: String?, provinceCode: String?): Flow<List<CityDN>> = flow {
+    override fun getCitiesPage(query: ApiQueryParamDN): Flow<PageDN<CityDN>> = flow {
+        val provinceCode = query.filters.firstOrNull {
+            it.property == com.tamin.taminhamrah.model.request.FilterProperty.PROVINCE_CODE_CITY
+        }?.value
         lastRequestedProvinceCode = provinceCode
-        emit(allCities.filter { provinceCode == null || it.provinceCode == provinceCode })
+        emit(PageDN(allCities.filter { provinceCode == null || it.provinceCode == provinceCode }))
     }
 
     override fun getCity(cityId: String): Flow<CityDN> = flowOf()
     override fun getProvince(provinceId: String): Flow<ProvinceDN> = flowOf()
-    override fun getCitiesByProvince(provinceCode: String): Flow<CityListResultDN> = unused()
+    override fun getCitiesByProvincePage(provinceCode: String, query: ApiQueryParamDN): Flow<PageDN<CityDN>> = unused()
 }
 
 internal class FakeCascadeWorkShopsRepository : WorkShopsRepository {
@@ -181,12 +187,12 @@ internal class FakeCascadeWorkShopsRepository : WorkShopsRepository {
     override suspend fun deleteLegalRepresentative(ticket: String, stakeId: Long): Unit = unusedValue()
     override suspend fun requestEmployerAgreementTicket(mobile: String, email: String): String = unusedValue()
     override suspend fun getEmployerAgreementContactInfo(verificationCode: String): EmployerContactInfoDN = unusedValue()
-    override suspend fun getWorkshopsWithoutContract(page: Int): PagedListDN<WorkshopWithoutContractDN> = unusedValue()
-    override suspend fun getWorkshopContractRows(
+    override fun getWorkshopsWithoutContract(page: Int): Flow<PageDN<WorkshopWithoutContractDN>> = unused()
+    override fun getWorkshopContractRows(
         workshopId: String,
         branchCode: String,
         page: Int
-    ): PagedListDN<WorkshopContractRowDN> = unusedValue()
+    ): Flow<PageDN<WorkshopContractRowDN>> = unused()
     override suspend fun submitEmployerAgreement(request: EmployerAgreementSubmissionDN): String = unusedValue()
 }
 

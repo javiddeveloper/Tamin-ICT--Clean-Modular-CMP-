@@ -12,7 +12,6 @@ import com.tamin.taminhamrah.useCases.constructionInsurance.GetDetailDebitListPa
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
@@ -30,7 +29,7 @@ class InstallmentDebitListViewModel(
     private var hasLoaded = false
 
     private val paginator = Paginator(
-        loadPage = { query -> getDetailDebitListPageUseCase(debitNumber, branchId, query).first() },
+        loadPages = { query -> getDetailDebitListPageUseCase(debitNumber, branchId, query) }, // offline-first: collect the whole flow, not `.first()`
     )
 
     override fun handleIntent(intent: InstallmentDebitListIntent): Flow<PartialState> =

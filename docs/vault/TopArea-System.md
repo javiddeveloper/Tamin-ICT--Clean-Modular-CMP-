@@ -34,15 +34,17 @@ for it instead of every feature hand-rolling its own `NestedScrollConnection`.
 > two in one screen; when touching one of the three older screens, that's a separate decision
 > (ask the user) rather than a silent migration.
 
-Real consumers so far: `feature/profile`'s `ActiveRelationScreen` (see the use case below);
-`feature/workshops`'s `LegalRepresentativeWorkshopsScreen` (معرفی نماینده اشخاص حقوقی's hub page —
-folding header + a `straddlePreviousSibling` identity card, file-local, not shared); and
-`feature/workshops`'s `ObjectionStatusScreen` (پیگیری وضعیت اعتراض's list page), wired up to match
-`LegalRepresentativeWorkshopsScreen` on explicit request — same `straddlePreviousSibling` idiom,
-independently re-declared file-local there too rather than extracted, following that same
-precedent. If a fourth screen needs this "folding header + pinned identity card" shape, that
-repetition is worth revisiting — extract `straddlePreviousSibling` into this package rather than
-writing a fourth copy.
+Real consumers so far: `feature/profile`'s `ActiveRelationScreen` (see the use case below, no
+straddling card); `feature/workshops`'s `LegalRepresentativeWorkshopsScreen` (معرفی نماینده اشخاص
+حقوقی's hub page) and `ObjectionStatusScreen` (پیگیری وضعیت اعتراض's list page), and
+`feature/taminServices`'s `EmployerOnlineServicesScreen` — all three re-declared an identical
+file-local `straddlePreviousSibling` for a "folding header + pinned card that rides up into its
+seam" shape; and `feature/calculateWagePension`'s `CalculateWagePensionScreen`
+(`CalculateWagePensionTopArea`, folding header + `CalculateWagePensionStatsCard`), the fourth such
+screen, which is what finally triggered the extraction: **`Modifier.straddlePreviousSibling(overlap)`
+now lives in `TopAreaBehaviors.kt` itself**, public. The three earlier screens still carry their own
+identical private copy — migrating them to the shared one is a small, safe follow-up, not done yet
+since it wasn't required to add the fourth.
 
 ## Mental model
 
@@ -72,6 +74,7 @@ pixel.
 | `Modifier.driveTopArea(state, listState)` | Wires the header's fold to a `LazyListState`'s own drag. Overloads also exist for `LazyGridState` and `ScrollState`. Apply to the scrollable itself. |
 | `Modifier.reportTopAreaHeight(state)` | Put on the real (interactive) header. Feeds its actual rendered height back into `state` every time it changes. |
 | `Modifier.topAreaContentSpacer(state)` / `topAreaContentPadding(state, rest)` | Reserves the header's current height as space for the list underneath (the header floats on top, overlapping the list). Spacer = a leading list item; content-padding = `LazyColumn`'s `contentPadding` (avoids double-gapping with `verticalArrangement.spacedBy`). |
+| `Modifier.straddlePreviousSibling(overlap)` | Shifts a child (typically a card) up by `overlap` to ride into the previous sibling's (the header's) reserved bottom space, reporting a height reduced by that same amount so `reportTopAreaHeight` sees the true visual footprint. The header must itself reserve at least `overlap` of empty bottom space (e.g. via its own `bottomPadding`) or the card rides onto real content instead of blank gradient. |
 
 ### Behavior modifiers (put these on the header's *children*)
 
@@ -189,5 +192,13 @@ inset handling and push the header down.
   `animated: Boolean` parameter on `AnimatedRingHeaderIcon`/`RippleRing` (`GlassIconTile.kt`) so the
   probe instances render statically instead. If a future header adopts another infinitely-animating
   child, gate it the same way rather than assuming "side-effect-free" alone will catch it.
+- **`Modifier.driveTopArea(state, scrollState)` must sit *above* (before, i.e. outer to)
+  `Modifier.verticalScroll(scrollState)` in the chain** — a `nestedScroll` modifier only sees
+  dispatch from scrollables *nested inside* it, so `.verticalScroll(scrollState).driveTopArea(...)`
+  compiles fine but never folds anything. `CalculateWagePensionScreen` is the first screen to use
+  the `ScrollState` overload (a plain `Column`, not a `LazyColumn`); its body orders this as
+  `.driveTopArea(topArea, scrollState).verticalScroll(scrollState)`. The `LazyColumn`/`LazyGridState`
+  overloads don't have this footgun — the caller's whole `modifier` is inherently outer to the
+  list's own internal scrolling implementation regardless of chain order.
 
 Related: [[Overview]] · [[MVI-Pattern]] · [[Adding-a-Feature]]

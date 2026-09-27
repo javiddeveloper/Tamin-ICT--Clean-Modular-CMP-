@@ -37,10 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.historyobjection.ui.stepper.contract.HistoryObjectionStepperEvent
 import com.tamin.taminhamrah.feature.historyobjection.ui.stepper.contract.HistoryObjectionStepperIntent
@@ -54,9 +51,7 @@ import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.ErrorStateView
-import com.tamin.taminhamrah.ui.components.GlassIconTile
 import com.tamin.taminhamrah.ui.components.LoadingButton
-import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
 import com.tamin.taminhamrah.ui.components.StepIndicator
 import com.tamin.taminhamrah.ui.components.StepIndicatorModel
 import com.tamin.taminhamrah.ui.components.StepState
@@ -90,11 +85,8 @@ import taminx.core.core_ui.history_objection_submit_success_message
 import taminx.core.core_ui.history_objection_submit_success_title
 import taminx.core.core_ui.history_objection_title
 import taminx.core.core_ui.ic_close
-import taminx.core.core_ui.ic_moon
-import taminx.core.core_ui.ic_sun
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_chevron_forward
-import taminx.core.core_ui.orotez_protez_confirm_and_continue
 import taminx.core.core_ui.step_number_1
 import taminx.core.core_ui.step_number_2
 import taminx.core.core_ui.step_number_3
@@ -260,49 +252,36 @@ private fun HistoryObjectionStepperContent(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = Spacing.page, vertical = Spacing.md)
+                            .padding(vertical = Spacing.md)
                             .navigationBarsPadding(),
                         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                     ) {
-                        TaminTopAppBarButton(
-                            icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                            contentDescription = null,
-                            onClick = handleBack,
-                            bordered = true,
-                            containerColor = LocalTaminColors.current.bgSurface,
-                            contentColor = LocalTaminColors.current.textPrimary,
-                            borderColor = LocalTaminColors.current.border,
-                        )
+                        HistoryObjectionStepBackButton(onClick = handleBack)
                         LoadingButton(
                             text = stringResource(Res.string.history_objection_confirm),
                             onClick = { onIntent(HistoryObjectionStepperIntent.OnConfirmClicked) },
                             enabled = state.canGoNextFromCurrentStep && !state.isSubmitting,
                             isLoading = state.isSubmitting,
+                            modifier = Modifier.weight(1f),
                         )
                     }
                 } else {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = Spacing.page, vertical = Spacing.md)
+                            .padding(vertical = Spacing.md)
                             .navigationBarsPadding(),
                         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                     ) {
-                        TaminTopAppBarButton(
-                            icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                            contentDescription = null,
-                            onClick = handleBack,
-                            bordered = true,
-                            containerColor = LocalTaminColors.current.bgSurface,
-                            contentColor = LocalTaminColors.current.textPrimary,
-                            borderColor = LocalTaminColors.current.border,
-                        )
+                        HistoryObjectionStepBackButton(onClick = handleBack)
                         TaminFilledButton(
                             icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
                             text = stringResource(Res.string.history_objection_next_step),
                             enabled = state.canGoNextFromCurrentStep,
                             onClick = { onIntent(HistoryObjectionStepperIntent.OnNextClicked) },
-                            background = colors.buttonGradient
+                            background = colors.buttonGradient,
+                            height = ButtonDimens.height,
+                            modifier = Modifier.weight(1f),
                         )
                     }
                 }
@@ -388,6 +367,30 @@ private fun HistoryObjectionSubmitSuccessDialog(onAcknowledged: () -> Unit) {
         iconTint = colors.greenText,
         iconBackground = colors.greenBg,
     )
+}
+
+@Composable
+private fun HistoryObjectionStepBackButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+    val shape = RoundedCornerShape(CornerRadius.xl)
+    Box(
+        modifier = modifier
+            .size(ButtonDimens.height)
+            .clip(shape)
+            .background(colors.bgSurface)
+            .border(Thickness.border, colors.border, shape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_back),
+            contentDescription = stringResource(Res.string.action_back),
+            tint = colors.textPrimary,
+        )
+    }
 }
 
 @Composable

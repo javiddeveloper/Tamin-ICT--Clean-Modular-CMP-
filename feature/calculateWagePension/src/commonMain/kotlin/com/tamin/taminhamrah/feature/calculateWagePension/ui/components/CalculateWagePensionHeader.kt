@@ -1,6 +1,5 @@
 package com.tamin.taminhamrah.feature.calculateWagePension.ui.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,9 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.ui.components.CustomChip
+import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -28,8 +29,10 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.ui.toPriceFormat
+import com.tamin.taminhamrah.ui.toparea.TopAreaState
+import com.tamin.taminhamrah.ui.toparea.rememberTopAreaState
+import com.tamin.taminhamrah.ui.toparea.topAreaHide
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -47,8 +50,11 @@ import taminx.core.core_ui.unit_rial
 
 /**
  * Hero header built on [TaminTopAppBar]: circular back/info in the bar row, large title +
- * amount + status chips in the content slot. Host must leave bottom spacer room so the
- * overlapping stats card can sit on the gradient (same pattern as profile + ValidationStatusCard).
+ * amount + status chips in the content slot. The expanded-only block (subtitle, amount, chips)
+ * folds away entirely as [topAreaState] collapses, handing off to a title that fades into the bar
+ * row instead -- same split as `ActiveRelationHeader`. [bottomPadding] is the caller's reserved
+ * bottom space for the overlapping stats card to ride into (see `CalculateWagePensionScreen`'s
+ * `CalculateWagePensionTopArea`), same pattern as profile + `ValidationStatusCard`.
  */
 @Composable
 internal fun CalculateWagePensionHeader(
@@ -57,7 +63,9 @@ internal fun CalculateWagePensionHeader(
     isMultipleWorkshopsEnabled: Boolean,
     onBack: () -> Unit,
     onInfoClick: () -> Unit,
+    topAreaState: TopAreaState,
     modifier: Modifier = Modifier,
+    bottomPadding: Dp = Spacing.lg,
     isLoading: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
@@ -66,10 +74,10 @@ internal fun CalculateWagePensionHeader(
     }
 
     TaminTopAppBar(
-        title = "",
+        title = stringResource(Res.string.calculate_wage_pension_title),
         modifier = modifier,
         background = gradient,
-        bottomPadding = Spacing.lg,
+        bottomPadding = bottomPadding,
         navigationIcon = {
             TaminTopAppBarButton(
                 icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
@@ -90,17 +98,10 @@ internal fun CalculateWagePensionHeader(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .topAreaHide(topAreaState)
                 .padding(horizontal = Spacing.sm),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                text = stringResource(Res.string.calculate_wage_pension_title),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = colors.onGradient,
-                textAlign = TextAlign.Center,
-            )
-
             Spacer(modifier = Modifier.height(Spacing.md))
 
             Text(
@@ -123,7 +124,7 @@ internal fun CalculateWagePensionHeader(
                 )
             } else {
                 Row(
-                    verticalAlignment = Alignment.Bottom,
+                    verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
                 ) {
                     Text(
@@ -141,7 +142,7 @@ internal fun CalculateWagePensionHeader(
                 }
             }
 
-            Spacer(modifier = Modifier.height(Spacing.lg))
+            Spacer(modifier = Modifier.height(Spacing.sm))
 
             if (isLoading) {
                 Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
@@ -172,20 +173,22 @@ internal fun CalculateWagePensionHeader(
                         else -> null
                     }
                     if (secondaryLabel != null) {
-                        CustomChip(
+                        StatusPill(
                             text = secondaryLabel,
                             containerColor = colors.onGradient.copy(alpha = 0.12f),
-                            textColor = colors.onGradient,
-                            border = BorderStroke(Thickness.border, colors.onGradient.copy(alpha = 0.35f)),
+                            contentColor = colors.onGradient,
+                            borderColor = colors.onGradient.copy(alpha = 0.35f),
                         )
                     }
-                    CustomChip(
+                    StatusPill(
                         text = stringResource(Res.string.calculate_wage_pension_chip_estimated),
-                        containerColor = colors.onGradient.copy(alpha = 0.18f),
-                        textColor = colors.onGradient,
+                        containerColor = colors.onGradient.copy(alpha = 0.12f),
+                        contentColor = colors.onGradient,
+                        borderColor = colors.onGradient.copy(alpha = 0.35f),
                     )
                 }
             }
+            Spacer(Modifier.height(Spacing.xs))
         }
     }
 }
@@ -200,6 +203,7 @@ private fun CalculateWagePensionHeaderPreview() {
             isMultipleWorkshopsEnabled = false,
             onBack = {},
             onInfoClick = {},
+            topAreaState = rememberTopAreaState(224.dp, 64.dp),
         )
     }
 }
@@ -215,6 +219,7 @@ private fun CalculateWagePensionHeaderLoadingPreview() {
             onBack = {},
             onInfoClick = {},
             isLoading = true,
+            topAreaState = rememberTopAreaState(224.dp, 64.dp),
         )
     }
 }

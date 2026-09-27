@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,6 +50,8 @@ import kotlin.math.roundToInt
 private val OuterStripShape = RoundedCornerShape(CornerRadius.xl)
 private val SegmentShape = RoundedCornerShape(CornerRadius.lg)
 private val SegmentHeight = 40.dp
+private val BadgeSize = 20.dp
+private val BadgeLineHeight = 12.sp
 
 /**
  * Combined filter strip for assigner contracts: جاری / خاتمه‌یافته tabs alongside a total count
@@ -146,17 +150,30 @@ fun AssignerTabsRow(
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                 )
-                                Text(
-                                    text = badgeText,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = textColor,
-                                    maxLines = 1,
+                                // A circle, not a pill: at least as wide as it is tall, so a one- or
+                                // two-digit count sits in a round badge and only a longer one widens it.
+                                Box(
                                     modifier = Modifier
+                                        .defaultMinSize(minWidth = BadgeSize, minHeight = BadgeSize)
                                         .clip(CircleShape)
                                         .background(badgeBg)
-                                        .padding(horizontal = Spacing.xs, vertical = Spacing.xxs),
-                                )
+                                        .padding(horizontal = Spacing.xxs),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Text(
+                                        text = badgeText,
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            lineHeight = BadgeLineHeight,
+                                            lineHeightStyle = LineHeightStyle(
+                                                alignment = LineHeightStyle.Alignment.Center,
+                                                trim = LineHeightStyle.Trim.Both,
+                                            ),
+                                        ),
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = textColor,
+                                        maxLines = 1,
+                                    )
+                                }
                             }
                         }
                     }

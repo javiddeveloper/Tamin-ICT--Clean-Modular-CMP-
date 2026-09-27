@@ -5,10 +5,13 @@ import com.tamin.taminhamrah.feature.requestPaymentForIllDays.ui.wizard.IllDaysW
 import com.tamin.taminhamrah.mapper.common.toCityPresentation
 import com.tamin.taminhamrah.mapper.requestPaymentForIllDays.toPresentation
 import com.tamin.taminhamrah.model.contracts.UploadImageRequestDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.requestPaymentForIllDays.IllDaysRequestFileDN
 import com.tamin.taminhamrah.model.requestPaymentForIllDays.SaveShortTermIllnessRequestDN
+import com.tamin.taminhamrah.paging.Paginator
+import com.tamin.taminhamrah.query.city.CityListQuery
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
-import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
+import com.tamin.taminhamrah.useCases.common.GetCitiesPageUseCase
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.GetCovidResultUseCase
 import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.GetIllDaysInsuredMainInfoUseCase
@@ -17,8 +20,11 @@ import com.tamin.taminhamrah.util.PersianDateFormatter
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.transform
 import org.jetbrains.compose.resources.getString
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ill_days_doc_duplicate_error
@@ -35,25 +41,32 @@ import kotlin.math.max
 
 class IllDaysWizardViewModel(
     private val getIllDaysInsuredMainInfoUseCase: GetIllDaysInsuredMainInfoUseCase,
-    private val getCitiesUseCase: GetCitiesUseCase,
+    private val getCitiesPageUseCase: GetCitiesPageUseCase,
     private val getCovidResultUseCase: GetCovidResultUseCase,
     private val uploadImageUseCase: UploadImageUseCase,
     private val sendRequestForIllDayUseCase: SendRequestForIllDayUseCase,
 ) : BaseViewModel<IllDaysWizardUiState, PartialState, IllDaysWizardEvent, IllDaysWizardIntent>(
     initialState = IllDaysWizardUiState(),
 ) {
+    // Offline-first: collect the whole flow (cached page, then network page) — not `.first()`.
+    private val cityPaginator = Paginator(
+        loadPages = { query -> getCitiesPageUseCase(query) },
+    )
+
     init {
         sendIntent(IllDaysWizardIntent.Load)
     }
 
     override fun handleIntent(intent: IllDaysWizardIntent): Flow<PartialState> = flow {
         when (intent) {
-            IllDaysWizardIntent.Load,
-            IllDaysWizardIntent.Retry -> loadInitial()
+            // Observed once, on Load: it never completes, so a Retry that started another would
+            // stack a second collector and toast every paging error twice.
+            IllDaysWizardIntent.Load -> emitAll(merge(loadMainInfo(), observeCityPaging()))
+            IllDaysWizardIntent.Retry -> emitAll(loadMainInfo())
             IllDaysWizardIntent.OpenBranchPicker ->
                 emit(PartialState.PickerChanged(IllDaysWizardPicker.Branch))
-            IllDaysWizardIntent.OpenCityPicker -> openCityPicker()
-            is IllDaysWizardIntent.CitySearchQuery -> searchCities(intent.query)
+            IllDaysWizardIntent.OpenCityPicker ->
+                emit(PartialState.PickerChanged(IllDaysWizardPicker.City))
             IllDaysWizardIntent.DismissPicker ->
                 emit(PartialState.PickerChanged(IllDaysWizardPicker.None))
             is IllDaysWizardIntent.BranchPicked -> {
@@ -64,6 +77,11 @@ class IllDaysWizardViewModel(
                 emit(PartialState.CitySelected(intent.city))
                 emit(PartialState.PickerChanged(IllDaysWizardPicker.None))
             }
+            is IllDaysWizardIntent.CitySearchQueryChanged ->
+                cityPaginator.refresh(cityBaseQuery(intent.query))
+            // A failed page blocks loadNext() until the error is cleared, so retry it first.
+            IllDaysWizardIntent.CityPickerLoadMore ->
+                if (cityPaginator.state.value.error != null) cityPaginator.retry() else cityPaginator.loadNext()
             IllDaysWizardIntent.NextStep -> handleNext()
             IllDaysWizardIntent.PreviousStep -> handlePrevious()
             is IllDaysWizardIntent.CovidChanged -> handleCovidToggle(intent.enabled)
@@ -154,22 +172,21 @@ class IllDaysWizardViewModel(
         emit(createErrorState(error.toSingleLineMessage()))
     }
 
-    private suspend fun kotlinx.coroutines.flow.FlowCollector<PartialState>.loadInitial() {
+    private fun loadMainInfo(): Flow<PartialState> = flow {
         emit(PartialState.Loading(true))
         try {
             val info = getIllDaysInsuredMainInfoUseCase().first()?.toPresentation()
             if (info == null) {
                 emit(PartialState.Loading(false))
                 emit(PartialState.Error(getString(Res.string.ill_days_error_info_not_loaded)))
-                return
+                return@flow
             }
             emit(PartialState.InsuredLoaded(info))
             val branches = info.branchWorkshops.toImmutableList()
             val selected = branches.singleOrNull()
             emit(PartialState.BranchesLoaded(branches = branches, selected = selected))
-            val cities = getCitiesUseCase().first().toCityPresentation().toImmutableList()
-            emit(PartialState.CitiesLoaded(cities))
             emit(PartialState.Loading(false))
+            cityPaginator.refresh(cityBaseQuery(""))
         } catch (error: Throwable) {
             emit(PartialState.Loading(false))
             emit(PartialState.Error(error.toSingleLineMessage()))
@@ -177,33 +194,21 @@ class IllDaysWizardViewModel(
         }
     }
 
-    private suspend fun kotlinx.coroutines.flow.FlowCollector<PartialState>.openCityPicker() {
-        if (uiState.value.cityOptions.isEmpty()) {
-            emit(PartialState.Loading(true))
-            try {
-                val cities = getCitiesUseCase().first().toCityPresentation().toImmutableList()
-                emit(PartialState.CitiesLoaded(cities))
-                emit(PartialState.Loading(false))
-            } catch (error: Throwable) {
-                emit(PartialState.Loading(false))
-                sendEvent(IllDaysWizardEvent.ShowToast(error.toSingleLineMessage()))
-                return
-            }
-        }
-        emit(PartialState.PickerChanged(IllDaysWizardPicker.City))
+    private fun observeCityPaging(): Flow<PartialState> = cityPaginator.state.transform { paging ->
+        emit(
+            PartialState.CityPagingChanged(
+                items = paging.items.toCityPresentation().toImmutableList(),
+                isLoadingFirstPage = paging.isLoadingFirstPage,
+                isLoadingNextPage = paging.isLoadingNextPage,
+                endReached = paging.endReached,
+            ),
+        )
+        paging.error?.let { sendEvent(IllDaysWizardEvent.ShowToast(it.toSingleLineMessage())) }
     }
 
-    private suspend fun kotlinx.coroutines.flow.FlowCollector<PartialState>.searchCities(query: String) {
-        try {
-            val cities = getCitiesUseCase(cityName = query.takeIf { it.isNotBlank() })
-                .first()
-                .toCityPresentation()
-                .toImmutableList()
-            emit(PartialState.CitiesLoaded(cities))
-        } catch (error: Throwable) {
-            sendEvent(IllDaysWizardEvent.ShowToast(error.toSingleLineMessage()))
-        }
-    }
+    private fun cityBaseQuery(query: String): ApiQueryParamDN = ApiQueryParamDN(
+        filters = CityListQuery.filters(cityName = query.takeIf { it.isNotBlank() }),
+    )
 
     private suspend fun kotlinx.coroutines.flow.FlowCollector<PartialState>.handleNext() {
         when (uiState.value.currentStep) {
@@ -404,7 +409,12 @@ class IllDaysWizardViewModel(
             branchOptions = partialState.branches,
             selectedBranch = partialState.selected,
         )
-        is PartialState.CitiesLoaded -> currentState.copy(cityOptions = partialState.cities)
+        is PartialState.CityPagingChanged -> currentState.copy(
+            cityOptions = partialState.items,
+            isCitiesLoading = partialState.isLoadingFirstPage,
+            isCitiesLoadingMore = partialState.isLoadingNextPage,
+            canLoadMoreCities = !partialState.endReached,
+        )
         is PartialState.BranchSelected -> currentState.copy(selectedBranch = partialState.branch)
         is PartialState.CitySelected -> currentState.copy(selectedCity = partialState.city)
         is PartialState.StepChanged -> currentState.copy(currentStep = partialState.step)
