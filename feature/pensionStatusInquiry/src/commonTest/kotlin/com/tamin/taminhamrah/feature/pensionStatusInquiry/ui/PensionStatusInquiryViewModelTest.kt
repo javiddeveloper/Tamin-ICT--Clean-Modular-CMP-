@@ -5,6 +5,7 @@ import app.cash.turbine.test
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.ui.contract.PensionStatusInquiryEvent
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.ui.contract.PensionStatusInquiryIntent
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.ui.contract.PensionStatusInquiryUiState
+import com.tamin.taminhamrah.model.certificate.RecipientDN
 import com.tamin.taminhamrah.model.certificate.RecipientPR
 import com.tamin.taminhamrah.model.pension.InquirePensionCertificateDN
 import com.tamin.taminhamrah.model.pension.PensionInquiryDN
@@ -40,16 +41,18 @@ class PensionStatusInquiryViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var repository: TestPensionRepository
+    private lateinit var userRepository: TestUserRepository
     private lateinit var viewModel: PensionStatusInquiryViewModel
 
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         repository = TestPensionRepository()
+        userRepository = TestUserRepository()
         viewModel = PensionStatusInquiryViewModel(
             getPensionInquiryUseCase = GetPensionInquiryUseCase(repository),
             sendRequestInquirePensionCertificateUseCase = SendRequestInquirePensionCertificateUseCase(repository),
-            getRecipientsUseCase = GetRecipientsUseCase(UnusedUserRepository()),
+            getRecipientsUseCase = GetRecipientsUseCase(userRepository),
         )
     }
 
@@ -119,6 +122,34 @@ class PensionStatusInquiryViewModelTest {
         assertEquals("بانک ملت", buildCertificateTarget("بانک ملت", " "))
         assertEquals("بانک ملت شعبه  ونک", buildCertificateTarget("بانک ملت", "ونک"))
         assertEquals("بانک ملت شعبه ونک", buildCertificateTarget("بانک ملت", "شعبه ونک"))
+    }
+
+    @Test
+    fun selectRecipient_loadsRecipientsOnce() = runTest(testDispatcher) {
+        userRepository.recipientsResult = listOf(RecipientDN("01", "بانک ملت"))
+
+        viewModel.sendIntent(PensionStatusInquiryIntent.OnSelectRecipientClicked)
+        viewModel.sendIntent(PensionStatusInquiryIntent.DismissRecipientsSheet)
+        viewModel.sendIntent(PensionStatusInquiryIntent.OnSelectRecipientClicked)
+
+        val state = viewModel.uiState.value
+        assertTrue(state.showRecipientsSheet)
+        assertFalse(state.isLoadingRecipients)
+        assertEquals(listOf(RecipientPR("01", "بانک ملت")), state.recipients)
+        assertEquals(1, userRepository.recipientsCalls)
+    }
+
+    @Test
+    fun selectRecipient_failure_closesSheetAndShowsToast() = runTest(testDispatcher) {
+        userRepository.recipientsError = TaminApiException(title = "recipients failed")
+
+        viewModel.events.test {
+            viewModel.sendIntent(PensionStatusInquiryIntent.OnSelectRecipientClicked)
+            assertEquals(PensionStatusInquiryEvent.ShowToast("recipients failed"), awaitItem())
+        }
+        val state = viewModel.uiState.value
+        assertFalse(state.showRecipientsSheet)
+        assertFalse(state.isLoadingRecipients)
     }
 
     @Test
@@ -209,8 +240,16 @@ private class TestPensionRepository : PensionRepository {
     private fun unused(): Nothing = error("not used")
 }
 
-private class UnusedUserRepository : UserRepository {
-    override suspend fun getRecipients(filters: List<ApiFilterDN>) = unused()
+private class TestUserRepository : UserRepository {
+    var recipientsResult: List<RecipientDN> = emptyList()
+    var recipientsError: Throwable? = null
+    var recipientsCalls = 0
+
+    override suspend fun getRecipients(filters: List<ApiFilterDN>): Flow<List<RecipientDN>> = flow {
+        recipientsCalls++
+        recipientsError?.let { throw it }
+        emit(recipientsResult)
+    }
     override suspend fun getWageCertificateReport(filters: List<ApiFilterDN>) = unused()
     override fun getIdentityInfo() = unused()
     override suspend fun getUserProfileImage() = unused()
