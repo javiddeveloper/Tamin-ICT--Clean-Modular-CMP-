@@ -192,7 +192,7 @@ fun SmartGuideDTO.toDomain(): SmartGuideDN {
         reply = reply,
         requestCode = requestCode ?: requestStatus?.requestCode,
         requestDesc = requestDesc ?: requestStatus?.requestDesc,
-        isPublic = isPublic,
+        isPublic = isPublic?.let { it == "1" },
         title = title ?: requestType?.title,
         description = description ?: requestType?.description,
     )

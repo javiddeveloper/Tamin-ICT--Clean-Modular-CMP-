@@ -13,7 +13,10 @@ import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
 import com.tamin.taminhamrah.feature.treatment.ui.records.MedicalRecordsScreen
 import com.tamin.taminhamrah.feature.treatment.ui.records.RecordDetailScreen
 import com.tamin.taminhamrah.feature.treatment.ui.treatmentCosts.TreatmentCostsRoute
+import com.tamin.taminhamrah.feature.treatment.ui.medicalConfirmations.MedicalConfirmationDetailRoute
 import com.tamin.taminhamrah.feature.treatment.ui.medicalConfirmations.MedicalConfirmationsRoute
+import com.tamin.taminhamrah.model.treatment.MedicalConfirmationPR
+import com.tamin.taminhamrah.ui.sharedViewModel
 import com.tamin.taminhamrah.ui.theme.LocalSynchronizedShimmer
 import kotlinx.serialization.Serializable
 
@@ -52,9 +55,28 @@ sealed interface TreatmentRoute {
     @Serializable
     data object TreatmentCosts : TreatmentRoute
 
-    /** «تاییدیه‌های پزشکی» — medical confirmations and council decisions. */
+    /**
+     * «تاییدیه‌های پزشکی» — medical confirmations and council decisions.
+     *
+     * A graph rather than a single destination: the list and one row's detail are two screens
+     * sharing one ViewModel, so the detail reads the row from the list already loaded and the
+     * system back button unwinds through the back stack like every other sub-flow.
+     */
     @Serializable
     data object MedicalConfirmations : TreatmentRoute
+
+    /** The confirmations list itself — [MedicalConfirmations]'s start destination. */
+    @Serializable
+    data object MedicalConfirmationsList : TreatmentRoute
+
+    /**
+     * One confirmation, addressed by [MedicalConfirmationPR.listKey].
+     *
+     * The service sends no row identifier (see the DTO), so the list's own key is what identifies
+     * a row between the two screens.
+     */
+    @Serializable
+    data class MedicalConfirmationDetail(val listKey: String) : TreatmentRoute
 
     /** One record: prescribed items, cost breakdown and the PDF exports. */
     @Serializable
@@ -123,8 +145,31 @@ fun NavGraphBuilder.treatmentGraph(
             TreatmentShimmers { TreatmentCostsRoute(onBackClicked = onBack) }
         }
 
-        composable<TreatmentRoute.MedicalConfirmations> {
-            TreatmentShimmers { MedicalConfirmationsRoute(onBackClicked = onBack) }
+        navigation<TreatmentRoute.MedicalConfirmations>(
+            startDestination = TreatmentRoute.MedicalConfirmationsList,
+        ) {
+            composableWithFadeTransitions<TreatmentRoute.MedicalConfirmationsList> { backStackEntry ->
+                TreatmentShimmers {
+                    MedicalConfirmationsRoute(
+                        viewModel = backStackEntry.sharedViewModel(navController),
+                        onBackClicked = onBack,
+                        onOpenDetail = { item ->
+                            navController.navigate(TreatmentRoute.MedicalConfirmationDetail(item.listKey))
+                        },
+                    )
+                }
+            }
+
+            composableWithFadeTransitions<TreatmentRoute.MedicalConfirmationDetail> { backStackEntry ->
+                val route = backStackEntry.toRoute<TreatmentRoute.MedicalConfirmationDetail>()
+                TreatmentShimmers {
+                    MedicalConfirmationDetailRoute(
+                        viewModel = backStackEntry.sharedViewModel(navController),
+                        listKey = route.listKey,
+                        onBackClicked = onBack,
+                    )
+                }
+            }
         }
 
         composableWithFadeTransitions<TreatmentRoute.MedicalRecords> { backStackEntry ->

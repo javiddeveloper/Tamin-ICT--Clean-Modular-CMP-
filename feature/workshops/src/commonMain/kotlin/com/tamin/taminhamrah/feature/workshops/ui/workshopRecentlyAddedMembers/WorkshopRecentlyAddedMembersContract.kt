@@ -84,10 +84,13 @@ data class WorkshopRecentlyAddedMembersUiState(
         data class DeclarationPdfChanged(val pdf: PdfDownloadPR?) : PartialState
         data class FormPickerOpened(val picker: RegistrationPicker?) : PartialState
         data class FormPickerQueryChanged(val query: String) : PartialState
-        data class FormPickerLoading(val isLoading: Boolean) : PartialState
-        data class FormPickerOptionsLoaded(val options: PersistentList<PickedOption>) :
-            PartialState
         data class FormPickerJobPagingChanged(
+            val items: PersistentList<PickedOption>,
+            val isLoadingFirstPage: Boolean,
+            val isLoadingNextPage: Boolean,
+            val endReached: Boolean,
+        ) : PartialState
+        data class FormPickerCityPagingChanged(
             val items: PersistentList<PickedOption>,
             val isLoadingFirstPage: Boolean,
             val isLoadingNextPage: Boolean,
@@ -257,10 +260,10 @@ sealed interface WorkshopRecentlyAddedMembersIntent {
 
     data class FormPickerQueryChanged(val query: String) : WorkshopRecentlyAddedMembersIntent
 
-    /** Loads the next page of options for paginated pickers (Job). */
+    /** Loads the next page of options for the open picker (Job or City). */
     data object FormPickerLoadMore : WorkshopRecentlyAddedMembersIntent
 
-    /** Subscribes the job paginator's state to the UI. */
+    /** Subscribes the job and city paginators' state to the UI. */
     data object InitJobPaging : WorkshopRecentlyAddedMembersIntent
 
     /** «دریافت فرم اظهارنامهٔ نام‌نویسی» — the blank declaration the person fills in. */

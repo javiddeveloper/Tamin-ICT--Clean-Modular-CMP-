@@ -89,26 +89,41 @@ fun HomeAgentAskBar(
     contentDescription: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    // False inside rememberMeasuredTopAreaState's measurement probe (see TopAreaState.isMeasureProbe)
+    // -- the probe's layout size doesn't depend on the sweep/glow animation state, only on this
+    // Row's own content, so pausing the animation there is free. Same gate as
+    // AnimatedRingHeaderIcon's `animated` param (GlassIconTile.kt).
+    animated: Boolean = true,
 ) {
     val transition = rememberInfiniteTransition(label = "ask_bar")
-    val sweepAngle by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(NeonSweepDurationMs, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart,
-        ),
-        label = "sweep_angle",
-    )
-    val glowBlur by transition.animateFloat(
-        initialValue = GlowBlurMin.value,
-        targetValue = GlowBlurMax.value,
-        animationSpec = infiniteRepeatable(
-            animation = tween(GlowPulseDurationMs, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
-        label = "glow_blur",
-    )
+    val sweepAngle = if (animated) {
+        val angle by transition.animateFloat(
+            initialValue = 0f,
+            targetValue = 360f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(NeonSweepDurationMs, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart,
+            ),
+            label = "sweep_angle",
+        )
+        angle
+    } else {
+        0f
+    }
+    val glowBlur = if (animated) {
+        val blur by transition.animateFloat(
+            initialValue = GlowBlurMin.value,
+            targetValue = GlowBlurMax.value,
+            animationSpec = infiniteRepeatable(
+                animation = tween(GlowPulseDurationMs, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+            label = "glow_blur",
+        )
+        blur
+    } else {
+        GlowBlurMin.value
+    }
 
     val pillShape = RoundedCornerShape(CornerRadius.max)
 

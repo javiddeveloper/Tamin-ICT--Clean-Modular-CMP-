@@ -209,6 +209,8 @@ internal fun ContractRowTile(
                 color = valueColor.takeOrElse { colors.textPrimary },
                 maxLines = if (singleLine) 1 else Int.MAX_VALUE,
                 overflow = TextOverflow.Ellipsis,
+                // Laid out left-to-right so the digits keep their order, but sat on the right like
+                // the label above it — the page's own side — rather than at the LTR start.
                 textAlign = if (numeric) TextAlign.Right else TextAlign.Unspecified,
                 modifier = if (numeric) Modifier.fillMaxWidth() else Modifier,
             )

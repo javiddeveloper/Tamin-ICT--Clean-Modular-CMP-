@@ -56,6 +56,7 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheet
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetResult
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminSearchableListSheet
 import com.tamin.taminhamrah.ui.components.buttons.SquareIconButton
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -69,6 +70,8 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.add_dependent_close
 import taminx.core.core_ui.add_dependent_subtitle
 import taminx.core.core_ui.add_dependent_title
+import taminx.core.core_ui.city_birth_picker_title
+import taminx.core.core_ui.city_issuance_picker_title
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_chevron_forward
 import taminx.core.core_ui.ic_tamin_search
@@ -119,6 +122,33 @@ fun AddDependentRoute(
             }
         )
     }
+
+    state.activeCityPicker?.let { target ->
+        TaminSearchableListSheet(
+            title = stringResource(
+                when (target) {
+                    BottomSheetTarget.CITY_ISSUANCE -> Res.string.city_issuance_picker_title
+                    else -> Res.string.city_birth_picker_title
+                },
+            ),
+            items = state.cities,
+            itemLabel = { it.cityName },
+            itemKey = { it.cityCode },
+            onSearchQueryChange = { viewModel.sendIntent(AddDependentIntent.CitySearchQueryChanged(it)) },
+            isLoading = state.isCitiesLoading,
+            canLoadMore = state.canLoadMoreCities,
+            isLoadingMore = state.isCitiesLoadingMore,
+            onLoadMore = { viewModel.sendIntent(AddDependentIntent.CityPickerLoadMore) },
+            onItemSelected = {
+                val selected = when (target) {
+                    BottomSheetTarget.CITY_ISSUANCE -> AddDependentIntent.OnCityIssuanceSelected(it)
+                    else -> AddDependentIntent.OnCityBirthSelected(it)
+                }
+                viewModel.sendIntent(selected)
+            },
+            onDismiss = { viewModel.sendIntent(AddDependentIntent.DismissCityPicker) },
+        )
+    }
 }
 
 private fun resolvePickerSelection(
@@ -132,19 +162,13 @@ private fun resolvePickerSelection(
             state.familyRelationships.find { it.id == selectedId }
                 ?.let { AddDependentIntent.OnRelationshipSelected(it) }
 
-        BottomSheetTarget.CITY_BIRTH ->
-            state.cities.getOrNull(selectedId)
-                ?.let { AddDependentIntent.OnCityBirthSelected(it) }
-
-        BottomSheetTarget.CITY_ISSUANCE ->
-            state.cities.getOrNull(selectedId)
-                ?.let { AddDependentIntent.OnCityIssuanceSelected(it) }
-
         BottomSheetTarget.BRANCH ->
             state.activeBranches.getOrNull(selectedId)
                 ?.let { AddDependentIntent.OnBranchSelected(it) }
 
-        null -> null
+        // City pickers render through TaminSearchableListSheet (state.activeCityPicker), not
+        // the shared TaminBottomSheet this function resolves selections for.
+        BottomSheetTarget.CITY_BIRTH, BottomSheetTarget.CITY_ISSUANCE, null -> null
     }
 }
 

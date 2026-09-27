@@ -17,15 +17,20 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopConstants
 import com.tamin.taminhamrah.feature.workshops.ui.model.PersonSearch
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
@@ -159,7 +164,15 @@ fun WorkshopFieldSlot(
     errorText: String? = null,
     content: @Composable () -> Unit,
 ) {
-    val caption = if (isRequired) "$label *" else label
+    val danger = LocalTaminColors.current.dangerText
+    // The star in red, the way TaminStyledTextField marks its own required label — a form mixing
+    // typed fields and pickers otherwise showed two different stars side by side.
+    val caption = remember(label, isRequired, danger) {
+        buildAnnotatedString {
+            append(label)
+            if (isRequired) withStyle(SpanStyle(color = danger)) { append(" *") }
+        }
+    }
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(WorkshopDimens.fieldLabelGap),
@@ -202,6 +215,8 @@ fun WorkshopTextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     /** The field's fill. The surface colour, the default, suits a field on the page background. */
     containerColor: Color = LocalTaminColors.current.bgSurface,
+    /** Passed through; null, the default, keeps the field's own size. */
+    textStyle: TextStyle? = null,
 ) {
     TaminStyledTextField(
         value = value,
@@ -222,6 +237,7 @@ fun WorkshopTextField(
         } else {
             TextAlign.Unspecified
         },
+        textStyle = textStyle,
     )
 }
 

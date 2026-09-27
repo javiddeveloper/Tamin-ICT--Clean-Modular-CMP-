@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.ActionMenuItem
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -129,6 +130,9 @@ fun <T> RecordCard(
     modifier: Modifier = Modifier,
     actionsEnabled: Boolean = true,
     toggleButtonContentColor: Color = LocalTaminColors.current.teal,
+    dateColor: Color = LocalTaminColors.current.textMuted,
+    shadowBlur: Dp = CardShadowBlur,
+    shadowOffsetY: Dp = CardShadowOffsetY,
     details: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = LocalTaminColors.current
@@ -143,8 +147,8 @@ fun <T> RecordCard(
             .coloredShadow(
                 color = colors.shadowSubtle,
                 borderRadius = CardCorner,
-                blurRadius = CardShadowBlur,
-                offsetY = CardShadowOffsetY,
+                blurRadius = shadowBlur,
+                offsetY = shadowOffsetY,
             )
             .clip(RoundedCornerShape(CardCorner))
             .background(colors.bgSurface)
@@ -195,7 +199,7 @@ fun <T> RecordCard(
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.SemiBold,
                 ),
-                color = colors.textMuted,
+                color = dateColor,
             )
         }
 

@@ -31,15 +31,17 @@ interface PdfSaver {
      * Already there: nothing is written — no duplicate lands in Downloads — and the notification
      * says it was downloaded before. Otherwise [bytes] are written and it reports a finished
      * download.
+     *
+     * @return what the person was told, for an in-app toast to repeat, or null if nothing was saved.
      */
-    suspend fun save(fileName: String, bytes: ByteArray)
+    suspend fun save(fileName: String, bytes: ByteArray): String?
 }
 
 /** The platform [PdfSaver], scoped to the current composition (and requests notification permission). */
 @Composable
 expect fun rememberPdfSaver(): PdfSaver
 
-/** Notification body, shared by both platforms so the two apps say the same thing. */
+/** Notification and toast body, shared by both platforms so the two apps say the same thing. */
 internal const val DOWNLOAD_DONE_MESSAGE = "دانلود انجام شد"
 internal const val ALREADY_DOWNLOADED_MESSAGE = "قبلاً دانلود شده است"
 

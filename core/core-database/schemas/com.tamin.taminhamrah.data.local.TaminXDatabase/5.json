@@ -1,0 +1,3136 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 5,
+    "identityHash": "f5fca04522d0a224fd88a5556403a8ae",
+    "entities": [
+      {
+        "tableName": "test_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "provinces",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`provinceCode` TEXT NOT NULL, `provinceName` TEXT, `status` TEXT, `statusStartDate` TEXT, PRIMARY KEY(`provinceCode`))",
+        "fields": [
+          {
+            "fieldPath": "provinceCode",
+            "columnName": "provinceCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "provinceName",
+            "columnName": "provinceName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "statusStartDate",
+            "columnName": "statusStartDate",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "provinceCode"
+          ]
+        }
+      },
+      {
+        "tableName": "cities",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cityCode` TEXT NOT NULL, `provinceCode` TEXT, `cityName` TEXT, PRIMARY KEY(`cityCode`))",
+        "fields": [
+          {
+            "fieldPath": "cityCode",
+            "columnName": "cityCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "provinceCode",
+            "columnName": "provinceCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cityName",
+            "columnName": "cityName",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "cityCode"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_cities_provinceCode",
+            "unique": false,
+            "columnNames": [
+              "provinceCode"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_cities_provinceCode` ON `${TABLE_NAME}` (`provinceCode`)"
+          }
+        ]
+      },
+      {
+        "tableName": "identity_info",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER, `cityOfBirthId` TEXT, `cityOfIssueId` TEXT, `countryId` TEXT, `dateOfBirth` INTEGER, `fatherName` TEXT, `firstName` TEXT, `gender` TEXT, `idCardNumber` TEXT, `idCardSerial1` TEXT, `idCardSerial2` TEXT, `lastName` TEXT, `nationalId` TEXT, `ssn` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cityOfBirthId",
+            "columnName": "cityOfBirthId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cityOfIssueId",
+            "columnName": "cityOfIssueId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "countryId",
+            "columnName": "countryId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "dateOfBirth",
+            "columnName": "dateOfBirth",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "fatherName",
+            "columnName": "fatherName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "firstName",
+            "columnName": "firstName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "gender",
+            "columnName": "gender",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "idCardNumber",
+            "columnName": "idCardNumber",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "idCardSerial1",
+            "columnName": "idCardSerial1",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "idCardSerial2",
+            "columnName": "idCardSerial2",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastName",
+            "columnName": "lastName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "nationalId",
+            "columnName": "nationalId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ssn",
+            "columnName": "ssn",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "recipients",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`recipientCode` TEXT NOT NULL, `recipientName` TEXT, PRIMARY KEY(`recipientCode`))",
+        "fields": [
+          {
+            "fieldPath": "recipientCode",
+            "columnName": "recipientCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "recipientName",
+            "columnName": "recipientName",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "recipientCode"
+          ]
+        }
+      },
+      {
+        "tableName": "user_requests",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `refCode` TEXT, `title` TEXT, `comment` TEXT, `creationTime` INTEGER, `createByName` TEXT, `statusCode` TEXT, `statusDesc` TEXT, `requestTypeId` INTEGER, `requestTypeTitle` TEXT, `requestTypeDescription` TEXT, `referenceId` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "refCode",
+            "columnName": "refCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "comment",
+            "columnName": "comment",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "creationTime",
+            "columnName": "creationTime",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "createByName",
+            "columnName": "createByName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "statusCode",
+            "columnName": "statusCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "statusDesc",
+            "columnName": "statusDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "requestTypeId",
+            "columnName": "requestTypeId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "requestTypeTitle",
+            "columnName": "requestTypeTitle",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "requestTypeDescription",
+            "columnName": "requestTypeDescription",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "referenceId",
+            "columnName": "referenceId",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "personal_info",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`insuranceId` TEXT NOT NULL, `branch` TEXT, `mobileNumber` TEXT, `provinceName` TEXT, `firstName` TEXT, `lastName` TEXT, `fatherName` TEXT, `nationalId` TEXT, `ssn` TEXT, `genderDesc` TEXT, `dateOfBirth` INTEGER, PRIMARY KEY(`insuranceId`))",
+        "fields": [
+          {
+            "fieldPath": "insuranceId",
+            "columnName": "insuranceId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "branch",
+            "columnName": "branch",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "mobileNumber",
+            "columnName": "mobileNumber",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "provinceName",
+            "columnName": "provinceName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "firstName",
+            "columnName": "firstName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastName",
+            "columnName": "lastName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "fatherName",
+            "columnName": "fatherName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "nationalId",
+            "columnName": "nationalId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ssn",
+            "columnName": "ssn",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "genderDesc",
+            "columnName": "genderDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "dateOfBirth",
+            "columnName": "dateOfBirth",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "insuranceId"
+          ]
+        }
+      },
+      {
+        "tableName": "personal_inbox_items",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `nationalCode` TEXT, `mobileNumber` TEXT, `email` TEXT, `read` TEXT, `data` TEXT, `sentDate` INTEGER, `receiveDate` INTEGER, `seenDate` INTEGER, `seen` INTEGER, `hasImage` INTEGER, `hasText` INTEGER, `hasPdf` INTEGER, `updateable` INTEGER, `status` TEXT, `referenceId` TEXT, `pdf` TEXT, `typeDesc` TEXT, `typeCode` TEXT, `subTypeDesc` TEXT, `subTypeCode` TEXT, `permissionPassword` INTEGER, `permissionDateFrom` INTEGER, `permissionDateTo` INTEGER, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nationalCode",
+            "columnName": "nationalCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "mobileNumber",
+            "columnName": "mobileNumber",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "email",
+            "columnName": "email",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "read",
+            "columnName": "read",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "data",
+            "columnName": "data",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "sentDate",
+            "columnName": "sentDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "receiveDate",
+            "columnName": "receiveDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "seenDate",
+            "columnName": "seenDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "seen",
+            "columnName": "seen",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "hasImage",
+            "columnName": "hasImage",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "hasText",
+            "columnName": "hasText",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "hasPdf",
+            "columnName": "hasPdf",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "updateable",
+            "columnName": "updateable",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "referenceId",
+            "columnName": "referenceId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "pdf",
+            "columnName": "pdf",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "typeDesc",
+            "columnName": "typeDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "typeCode",
+            "columnName": "typeCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "subTypeDesc",
+            "columnName": "subTypeDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "subTypeCode",
+            "columnName": "subTypeCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "permissionPassword",
+            "columnName": "permissionPassword",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "permissionDateFrom",
+            "columnName": "permissionDateFrom",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "permissionDateTo",
+            "columnName": "permissionDateTo",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "personal_inbox_size",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `usage` TEXT, `total` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "usage",
+            "columnName": "usage",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "total",
+            "columnName": "total",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "contracts",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`contractNumber` INTEGER NOT NULL, `adultLetterDate` TEXT, `adultLetterNumber` TEXT, `age` TEXT, `branchCode` TEXT, `brchCodeNew` TEXT, `cancelDate` INTEGER, `cancelUID` TEXT, `canceldesc` TEXT, `cityCode` TEXT, `cntDrmn` TEXT, `cntFreeJobCode` TEXT, `cntIncPayDate3t4` TEXT, `cntMedicalFlag` TEXT, `comment` TEXT, `commissionStatus` TEXT, `confirmDate` INTEGER, `confirmUID` TEXT, `contractDate` INTEGER, `contractStatus` TEXT, `contractStatusDesc` TEXT, `contractStatusCode` INTEGER, `creatDate` INTEGER, `createDate` INTEGER, `createUID` TEXT, `eligibilityStatus` TEXT, `freeJobDescription` TEXT, `freeJobEndDate` TEXT, `freeJobFixRank` TEXT, `freeJobId` INTEGER, `freeJobIscoCode` TEXT, `freeJobCode` TEXT, `freeJobStartDate` TEXT, `freeJobStatus` TEXT, `guid` TEXT, `guidName` TEXT, `history` TEXT, `insuranceId` TEXT, `isStudent` TEXT, `medicalExemptionStatus` TEXT, `militaryServiceLicense` TEXT, `mobileNumber` TEXT, `natinoalCode` TEXT, `physicalStatus` TEXT, `premiumRateGovermentPercent` TEXT, `premiumRateInsurDpercent` TEXT, `premiumRatePayrespitelOne` TEXT, `premiumRatePayrespitelTwo` TEXT, `premiumRateSelfIsuTypeCode` TEXT, `premiumRateSpcLowDayWage` TEXT, `premiumRateSpcrateCode` TEXT, `premiumRateSpcrateDescription` TEXT, `premiumRateStatus` TEXT, `premiumRateStatusStDate` TEXT, `premiumRateTreatmentPercap` TEXT, `premiumRateCode` TEXT, `premiumTypeInsuranceDescription` TEXT, `premiumTypeInsuranceKind` TEXT, `premiumTypeInsuranceTypeCode` TEXT, `premiumTypeStatus` TEXT, `premiumTypeStatusDate` INTEGER, `premiumTypeCode` TEXT, `provinceCode` TEXT, `provinceName` TEXT, `refCode` TEXT, `salary` INTEGER, `startDate` INTEGER, `statusDate` INTEGER, `wage` INTEGER, PRIMARY KEY(`contractNumber`))",
+        "fields": [
+          {
+            "fieldPath": "contractNumber",
+            "columnName": "contractNumber",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "adultLetterDate",
+            "columnName": "adultLetterDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "adultLetterNumber",
+            "columnName": "adultLetterNumber",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "age",
+            "columnName": "age",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "branchCode",
+            "columnName": "branchCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "brchCodeNew",
+            "columnName": "brchCodeNew",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cancelDate",
+            "columnName": "cancelDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "cancelUID",
+            "columnName": "cancelUID",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "canceldesc",
+            "columnName": "canceldesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cityCode",
+            "columnName": "cityCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cntDrmn",
+            "columnName": "cntDrmn",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cntFreeJobCode",
+            "columnName": "cntFreeJobCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cntIncPayDate3t4",
+            "columnName": "cntIncPayDate3t4",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cntMedicalFlag",
+            "columnName": "cntMedicalFlag",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "comment",
+            "columnName": "comment",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "commissionStatus",
+            "columnName": "commissionStatus",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "confirmDate",
+            "columnName": "confirmDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "confirmUID",
+            "columnName": "confirmUID",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contractDate",
+            "columnName": "contractDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "contractStatus",
+            "columnName": "contractStatus",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contractStatusDesc",
+            "columnName": "contractStatusDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contractStatusCode",
+            "columnName": "contractStatusCode",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "creatDate",
+            "columnName": "creatDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "createDate",
+            "columnName": "createDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "createUID",
+            "columnName": "createUID",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "eligibilityStatus",
+            "columnName": "eligibilityStatus",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "freeJobDescription",
+            "columnName": "freeJobDescription",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "freeJobEndDate",
+            "columnName": "freeJobEndDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "freeJobFixRank",
+            "columnName": "freeJobFixRank",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "freeJobId",
+            "columnName": "freeJobId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "freeJobIscoCode",
+            "columnName": "freeJobIscoCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "freeJobCode",
+            "columnName": "freeJobCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "freeJobStartDate",
+            "columnName": "freeJobStartDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "freeJobStatus",
+            "columnName": "freeJobStatus",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "guid",
+            "columnName": "guid",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "guidName",
+            "columnName": "guidName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "history",
+            "columnName": "history",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "insuranceId",
+            "columnName": "insuranceId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "isStudent",
+            "columnName": "isStudent",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "medicalExemptionStatus",
+            "columnName": "medicalExemptionStatus",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "militaryServiceLicense",
+            "columnName": "militaryServiceLicense",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "mobileNumber",
+            "columnName": "mobileNumber",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "natinoalCode",
+            "columnName": "natinoalCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "physicalStatus",
+            "columnName": "physicalStatus",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "premiumRateGovermentPercent",
+            "columnName": "premiumRateGovermentPercent",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "premiumRateInsurDpercent",
+            "columnName": "premiumRateInsurDpercent",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "premiumRatePayrespitelOne",
+            "columnName": "premiumRatePayrespitelOne",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "premiumRatePayrespitelTwo",
+            "columnName": "premiumRatePayrespitelTwo",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "premiumRateSelfIsuTypeCode",
+            "columnName": "premiumRateSelfIsuTypeCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "premiumRateSpcLowDayWage",
+            "columnName": "premiumRateSpcLowDayWage",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "premiumRateSpcrateCode",
+            "columnName": "premiumRateSpcrateCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "premiumRateSpcrateDescription",
+            "columnName": "premiumRateSpcrateDescription",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "premiumRateStatus",
+            "columnName": "premiumRateStatus",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "premiumRateStatusStDate",
+            "columnName": "premiumRateStatusStDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "premiumRateTreatmentPercap",
+            "columnName": "premiumRateTreatmentPercap",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "premiumRateCode",
+            "columnName": "premiumRateCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "premiumTypeInsuranceDescription",
+            "columnName": "premiumTypeInsuranceDescription",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "premiumTypeInsuranceKind",
+            "columnName": "premiumTypeInsuranceKind",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "premiumTypeInsuranceTypeCode",
+            "columnName": "premiumTypeInsuranceTypeCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "premiumTypeStatus",
+            "columnName": "premiumTypeStatus",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "premiumTypeStatusDate",
+            "columnName": "premiumTypeStatusDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "premiumTypeCode",
+            "columnName": "premiumTypeCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "provinceCode",
+            "columnName": "provinceCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "provinceName",
+            "columnName": "provinceName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "refCode",
+            "columnName": "refCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "salary",
+            "columnName": "salary",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "startDate",
+            "columnName": "startDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "statusDate",
+            "columnName": "statusDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "wage",
+            "columnName": "wage",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "contractNumber"
+          ]
+        }
+      },
+      {
+        "tableName": "registration_info",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `insuranceId` TEXT, `insuranceIdValidity` INTEGER NOT NULL, `mobileNumber` TEXT, `firstName` TEXT, `lastName` TEXT, `nationalId` TEXT, `dateOfBirth` INTEGER, `genderCode` TEXT, `genderDesc` TEXT, `ssn` TEXT, `contactAddress` TEXT, `contactZipCode` TEXT, `contactMobile` TEXT, `contactPhoneNumber` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "insuranceId",
+            "columnName": "insuranceId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "insuranceIdValidity",
+            "columnName": "insuranceIdValidity",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mobileNumber",
+            "columnName": "mobileNumber",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "firstName",
+            "columnName": "firstName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastName",
+            "columnName": "lastName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "nationalId",
+            "columnName": "nationalId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "dateOfBirth",
+            "columnName": "dateOfBirth",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "genderCode",
+            "columnName": "genderCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "genderDesc",
+            "columnName": "genderDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ssn",
+            "columnName": "ssn",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contactAddress",
+            "columnName": "contactAddress",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contactZipCode",
+            "columnName": "contactZipCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contactMobile",
+            "columnName": "contactMobile",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contactPhoneNumber",
+            "columnName": "contactPhoneNumber",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "branches",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`code` TEXT NOT NULL, `name` TEXT NOT NULL, `branchAddress` TEXT NOT NULL, `cityCode` TEXT NOT NULL, `minCode` TEXT, `maxCode` TEXT, PRIMARY KEY(`code`))",
+        "fields": [
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "branchAddress",
+            "columnName": "branchAddress",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cityCode",
+            "columnName": "cityCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "minCode",
+            "columnName": "minCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "maxCode",
+            "columnName": "maxCode",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "code"
+          ]
+        }
+      },
+      {
+        "tableName": "menu_items",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `name` TEXT, `subtitle` TEXT, `icon` TEXT, `active` INTEGER, `newService` INTEGER, `sorting` INTEGER, `url` TEXT, `status` TEXT, `message` TEXT, `showRole` TEXT NOT NULL, `hiddenForVersions` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "subtitle",
+            "columnName": "subtitle",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "icon",
+            "columnName": "icon",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "active",
+            "columnName": "active",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "newService",
+            "columnName": "newService",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "sorting",
+            "columnName": "sorting",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "url",
+            "columnName": "url",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "message",
+            "columnName": "message",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "showRole",
+            "columnName": "showRole",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hiddenForVersions",
+            "columnName": "hiddenForVersions",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "patient_general",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`natCode` TEXT NOT NULL, `ptientID` INTEGER, `patientName` TEXT, `patientFamily` TEXT, `patientNatCode` TEXT, `patientAge` TEXT, `patientGender` TEXT, `patientBirthDate` TEXT, `patientMobile` TEXT, `patientAddress` TEXT, `patientFather` TEXT, `emergencyAddress` TEXT, `emergencyArea` TEXT, `emergencyCity` TEXT, `emergencyCityCode` INTEGER, `emergencyEmail` TEXT, `emergencyFamily` TEXT, `emergencyMobile` TEXT, `emergencyName` TEXT, `emergencyProvince` TEXT, `emergencyProvinceCode` INTEGER, `emergencyRelation` TEXT, `emergencyRelationshipCode` INTEGER, `lastUpdateDate` TEXT, `lastVisitDate` TEXT, `patientArea` TEXT, `patientBMI` TEXT, `patientBloodGroup` TEXT, `patientBloodGroupCode` INTEGER, `patientCitizenship` TEXT, `patientCity` TEXT, `patientCityCode` INTEGER, `patientEmail` TEXT, `patientGenderCode` INTEGER, `patientHeight` TEXT, `patientInsurance` TEXT, `patientInsuranceCode` INTEGER, `patientJob` TEXT, `patientMarriage` TEXT, `patientMarriageCode` INTEGER, `patientNationality` TEXT, `patientProvince` TEXT, `patientProvinceCode` INTEGER, `patientWeight` TEXT, PRIMARY KEY(`natCode`))",
+        "fields": [
+          {
+            "fieldPath": "natCode",
+            "columnName": "natCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ptientID",
+            "columnName": "ptientID",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "patientName",
+            "columnName": "patientName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientFamily",
+            "columnName": "patientFamily",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientNatCode",
+            "columnName": "patientNatCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientAge",
+            "columnName": "patientAge",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientGender",
+            "columnName": "patientGender",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientBirthDate",
+            "columnName": "patientBirthDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientMobile",
+            "columnName": "patientMobile",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientAddress",
+            "columnName": "patientAddress",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientFather",
+            "columnName": "patientFather",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "emergencyAddress",
+            "columnName": "emergencyAddress",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "emergencyArea",
+            "columnName": "emergencyArea",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "emergencyCity",
+            "columnName": "emergencyCity",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "emergencyCityCode",
+            "columnName": "emergencyCityCode",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "emergencyEmail",
+            "columnName": "emergencyEmail",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "emergencyFamily",
+            "columnName": "emergencyFamily",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "emergencyMobile",
+            "columnName": "emergencyMobile",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "emergencyName",
+            "columnName": "emergencyName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "emergencyProvince",
+            "columnName": "emergencyProvince",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "emergencyProvinceCode",
+            "columnName": "emergencyProvinceCode",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "emergencyRelation",
+            "columnName": "emergencyRelation",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "emergencyRelationshipCode",
+            "columnName": "emergencyRelationshipCode",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "lastUpdateDate",
+            "columnName": "lastUpdateDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastVisitDate",
+            "columnName": "lastVisitDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientArea",
+            "columnName": "patientArea",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientBMI",
+            "columnName": "patientBMI",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientBloodGroup",
+            "columnName": "patientBloodGroup",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientBloodGroupCode",
+            "columnName": "patientBloodGroupCode",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "patientCitizenship",
+            "columnName": "patientCitizenship",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientCity",
+            "columnName": "patientCity",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientCityCode",
+            "columnName": "patientCityCode",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "patientEmail",
+            "columnName": "patientEmail",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientGenderCode",
+            "columnName": "patientGenderCode",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "patientHeight",
+            "columnName": "patientHeight",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientInsurance",
+            "columnName": "patientInsurance",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientInsuranceCode",
+            "columnName": "patientInsuranceCode",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "patientJob",
+            "columnName": "patientJob",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientMarriage",
+            "columnName": "patientMarriage",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientMarriageCode",
+            "columnName": "patientMarriageCode",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "patientNationality",
+            "columnName": "patientNationality",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientProvince",
+            "columnName": "patientProvince",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientProvinceCode",
+            "columnName": "patientProvinceCode",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "patientWeight",
+            "columnName": "patientWeight",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "natCode"
+          ]
+        }
+      },
+      {
+        "tableName": "patient_self_declarative",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`natCode` TEXT NOT NULL, `alcoholDesc` TEXT, `alcoholUsage` INTEGER, `alcoholUsageTitle` TEXT, `exerciseDesc` TEXT, `exerciseFreq` INTEGER, `exerciseFreqTitle` TEXT, `lastUpdateDate` TEXT, `objectID` INTEGER, `smokingDesc` TEXT, `smokingStatus` INTEGER, `smokingStatusTitle` TEXT, `substanceDesc` TEXT, `substanceUsage` INTEGER, `substanceUsageTitle` TEXT, PRIMARY KEY(`natCode`))",
+        "fields": [
+          {
+            "fieldPath": "natCode",
+            "columnName": "natCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "alcoholDesc",
+            "columnName": "alcoholDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "alcoholUsage",
+            "columnName": "alcoholUsage",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "alcoholUsageTitle",
+            "columnName": "alcoholUsageTitle",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "exerciseDesc",
+            "columnName": "exerciseDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "exerciseFreq",
+            "columnName": "exerciseFreq",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "exerciseFreqTitle",
+            "columnName": "exerciseFreqTitle",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastUpdateDate",
+            "columnName": "lastUpdateDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "objectID",
+            "columnName": "objectID",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "smokingDesc",
+            "columnName": "smokingDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "smokingStatus",
+            "columnName": "smokingStatus",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "smokingStatusTitle",
+            "columnName": "smokingStatusTitle",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "substanceDesc",
+            "columnName": "substanceDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "substanceUsage",
+            "columnName": "substanceUsage",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "substanceUsageTitle",
+            "columnName": "substanceUsageTitle",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "natCode"
+          ]
+        }
+      },
+      {
+        "tableName": "patient_drug_allergies",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `natCode` TEXT NOT NULL, `allergyComments` TEXT, `drugId` INTEGER, `drugName` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "localId",
+            "columnName": "localId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "natCode",
+            "columnName": "natCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "allergyComments",
+            "columnName": "allergyComments",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "drugId",
+            "columnName": "drugId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "drugName",
+            "columnName": "drugName",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "localId"
+          ]
+        }
+      },
+      {
+        "tableName": "patient_hospitalizations",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `natCode` TEXT NOT NULL, `admId` INTEGER, `admSource` TEXT, `admType` TEXT, `comments` TEXT, `docID` TEXT, `docSpeciality` TEXT, `doctorName` TEXT, `finalDiagCode` TEXT, `finalDiagDesc` TEXT, `firstDiagCode` TEXT, `firstDiagDesc` TEXT, `healthcareProvider` TEXT, `hospitalizedDays` INTEGER, `hospitalizedEndDate` TEXT, `hospitalizedStartDate` TEXT, `outcomeDesc` TEXT, `referDocId` TEXT, `referDocName` TEXT, `referDocSpeciality` TEXT, `referHealthcareProvider` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "localId",
+            "columnName": "localId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "natCode",
+            "columnName": "natCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "admId",
+            "columnName": "admId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "admSource",
+            "columnName": "admSource",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "admType",
+            "columnName": "admType",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "comments",
+            "columnName": "comments",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "docID",
+            "columnName": "docID",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "docSpeciality",
+            "columnName": "docSpeciality",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "doctorName",
+            "columnName": "doctorName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "finalDiagCode",
+            "columnName": "finalDiagCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "finalDiagDesc",
+            "columnName": "finalDiagDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "firstDiagCode",
+            "columnName": "firstDiagCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "firstDiagDesc",
+            "columnName": "firstDiagDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "healthcareProvider",
+            "columnName": "healthcareProvider",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "hospitalizedDays",
+            "columnName": "hospitalizedDays",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "hospitalizedEndDate",
+            "columnName": "hospitalizedEndDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "hospitalizedStartDate",
+            "columnName": "hospitalizedStartDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "outcomeDesc",
+            "columnName": "outcomeDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "referDocId",
+            "columnName": "referDocId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "referDocName",
+            "columnName": "referDocName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "referDocSpeciality",
+            "columnName": "referDocSpeciality",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "referHealthcareProvider",
+            "columnName": "referHealthcareProvider",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "localId"
+          ]
+        }
+      },
+      {
+        "tableName": "patient_visits",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `natCode` TEXT NOT NULL, `comments` TEXT, `diagCode` TEXT, `diagDesc` TEXT, `docID` TEXT, `docSpeciality` TEXT, `docSpecialityCode` TEXT, `doctorName` TEXT, `healthcareProvider` TEXT, `serviceName` TEXT, `serviceProvideType` TEXT, `serviceResult` TEXT, `sourceSystem` INTEGER, `visitDate` TEXT, `visitType` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "localId",
+            "columnName": "localId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "natCode",
+            "columnName": "natCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "comments",
+            "columnName": "comments",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "diagCode",
+            "columnName": "diagCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "diagDesc",
+            "columnName": "diagDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "docID",
+            "columnName": "docID",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "docSpeciality",
+            "columnName": "docSpeciality",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "docSpecialityCode",
+            "columnName": "docSpecialityCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "doctorName",
+            "columnName": "doctorName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "healthcareProvider",
+            "columnName": "healthcareProvider",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "serviceName",
+            "columnName": "serviceName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "serviceProvideType",
+            "columnName": "serviceProvideType",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "serviceResult",
+            "columnName": "serviceResult",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "sourceSystem",
+            "columnName": "sourceSystem",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "visitDate",
+            "columnName": "visitDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "visitType",
+            "columnName": "visitType",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "localId"
+          ]
+        }
+      },
+      {
+        "tableName": "patient_labs",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `natCode` TEXT NOT NULL, `deliveredQty` INTEGER, `diagCode` TEXT, `diagDesc` TEXT, `docSpeciality` TEXT, `docSpecialityCode` TEXT, `doctorName` TEXT, `examName` TEXT, `healthcareProvider` TEXT, `itemComments` TEXT, `objectId` INTEGER, `prescribedQty` INTEGER, `resultDesc` TEXT, `resultValue` TEXT, `serviceProvideType` INTEGER, `sourceSystem` INTEGER, `visitDate` TEXT, `visitType` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "localId",
+            "columnName": "localId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "natCode",
+            "columnName": "natCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deliveredQty",
+            "columnName": "deliveredQty",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "diagCode",
+            "columnName": "diagCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "diagDesc",
+            "columnName": "diagDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "docSpeciality",
+            "columnName": "docSpeciality",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "docSpecialityCode",
+            "columnName": "docSpecialityCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "doctorName",
+            "columnName": "doctorName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "examName",
+            "columnName": "examName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "healthcareProvider",
+            "columnName": "healthcareProvider",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "itemComments",
+            "columnName": "itemComments",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "objectId",
+            "columnName": "objectId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "prescribedQty",
+            "columnName": "prescribedQty",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "resultDesc",
+            "columnName": "resultDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "resultValue",
+            "columnName": "resultValue",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "serviceProvideType",
+            "columnName": "serviceProvideType",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "sourceSystem",
+            "columnName": "sourceSystem",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "visitDate",
+            "columnName": "visitDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "visitType",
+            "columnName": "visitType",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "localId"
+          ]
+        }
+      },
+      {
+        "tableName": "patient_imaging",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `natCode` TEXT NOT NULL, `deliverStatus` TEXT, `diagCode` TEXT, `diagDesc` TEXT, `docSpeciality` TEXT, `doctorName` TEXT, `healthcareProvider` TEXT, `imagingName` TEXT, `itemComments` TEXT, `modality` TEXT, `objectId` INTEGER, `resultDesc` TEXT, `visitDate` TEXT, `visitType` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "localId",
+            "columnName": "localId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "natCode",
+            "columnName": "natCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deliverStatus",
+            "columnName": "deliverStatus",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "diagCode",
+            "columnName": "diagCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "diagDesc",
+            "columnName": "diagDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "docSpeciality",
+            "columnName": "docSpeciality",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "doctorName",
+            "columnName": "doctorName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "healthcareProvider",
+            "columnName": "healthcareProvider",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "imagingName",
+            "columnName": "imagingName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "itemComments",
+            "columnName": "itemComments",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "modality",
+            "columnName": "modality",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "objectId",
+            "columnName": "objectId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "resultDesc",
+            "columnName": "resultDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "visitDate",
+            "columnName": "visitDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "visitType",
+            "columnName": "visitType",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "localId"
+          ]
+        }
+      },
+      {
+        "tableName": "deserved_treatments",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nationalCode` TEXT NOT NULL, `birthDate` TEXT, `brhCode` TEXT, `brhName` TEXT, `dependenceType` TEXT, `fatherName` TEXT, `feranshiz` TEXT, `firstName` TEXT, `gender` TEXT, `healthBookletDate` INTEGER, `id` INTEGER, `idNumber` TEXT, `insuranceType` TEXT, `lastBookletDate` TEXT, `lastName` TEXT, `natCode` TEXT, `nationalId` TEXT, `parentRisuid` TEXT, `provinceCode` TEXT, `provinceName` TEXT, `regWorkshopId` TEXT, `regWorkshopName` TEXT, `risuid` TEXT, `message` TEXT, `finalDesc` TEXT, `illness` TEXT, `trackingCode` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "localId",
+            "columnName": "localId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nationalCode",
+            "columnName": "nationalCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "birthDate",
+            "columnName": "birthDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "brhCode",
+            "columnName": "brhCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "brhName",
+            "columnName": "brhName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "dependenceType",
+            "columnName": "dependenceType",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "fatherName",
+            "columnName": "fatherName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "feranshiz",
+            "columnName": "feranshiz",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "firstName",
+            "columnName": "firstName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "gender",
+            "columnName": "gender",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "healthBookletDate",
+            "columnName": "healthBookletDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "idNumber",
+            "columnName": "idNumber",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "insuranceType",
+            "columnName": "insuranceType",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastBookletDate",
+            "columnName": "lastBookletDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastName",
+            "columnName": "lastName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "natCode",
+            "columnName": "natCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "nationalId",
+            "columnName": "nationalId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "parentRisuid",
+            "columnName": "parentRisuid",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "provinceCode",
+            "columnName": "provinceCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "provinceName",
+            "columnName": "provinceName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "regWorkshopId",
+            "columnName": "regWorkshopId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "regWorkshopName",
+            "columnName": "regWorkshopName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "risuid",
+            "columnName": "risuid",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "message",
+            "columnName": "message",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "finalDesc",
+            "columnName": "finalDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "illness",
+            "columnName": "illness",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "trackingCode",
+            "columnName": "trackingCode",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "localId"
+          ]
+        }
+      },
+      {
+        "tableName": "electronic_prescriptions",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `patientNationalCode` TEXT NOT NULL, `id` TEXT, `docId` TEXT, `docName` TEXT, `flagSata` TEXT, `location` TEXT, `noteHeadEprescID` INTEGER, `patientID` TEXT, `patientName` TEXT, `prescDate` TEXT, `prescName` TEXT, `specDesc` TEXT, `prescType` TEXT, `trackingCode` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "localId",
+            "columnName": "localId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "patientNationalCode",
+            "columnName": "patientNationalCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "docId",
+            "columnName": "docId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "docName",
+            "columnName": "docName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "flagSata",
+            "columnName": "flagSata",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "location",
+            "columnName": "location",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "noteHeadEprescID",
+            "columnName": "noteHeadEprescID",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "patientID",
+            "columnName": "patientID",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "patientName",
+            "columnName": "patientName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "prescDate",
+            "columnName": "prescDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "prescName",
+            "columnName": "prescName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "specDesc",
+            "columnName": "specDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "prescType",
+            "columnName": "prescType",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "trackingCode",
+            "columnName": "trackingCode",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "localId"
+          ]
+        }
+      },
+      {
+        "tableName": "electronic_prescription_details",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `noteHeadId` TEXT NOT NULL, `sumPriceItem` INTEGER, `ssoPayment` INTEGER, `insurancePayment` INTEGER, `serviceQuantity` INTEGER, `noteHeadEprescID` INTEGER, `serverCode` TEXT, `serverName` TEXT, `serviceName` TEXT, `drugInst` TEXT, `registerDate` TEXT, `drugInstruction` TEXT, `deliveredNo` INTEGER, `drugAmount` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "localId",
+            "columnName": "localId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "noteHeadId",
+            "columnName": "noteHeadId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sumPriceItem",
+            "columnName": "sumPriceItem",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "ssoPayment",
+            "columnName": "ssoPayment",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "insurancePayment",
+            "columnName": "insurancePayment",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "serviceQuantity",
+            "columnName": "serviceQuantity",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "noteHeadEprescID",
+            "columnName": "noteHeadEprescID",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "serverCode",
+            "columnName": "serverCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "serverName",
+            "columnName": "serverName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "serviceName",
+            "columnName": "serviceName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "drugInst",
+            "columnName": "drugInst",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "registerDate",
+            "columnName": "registerDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "drugInstruction",
+            "columnName": "drugInstruction",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deliveredNo",
+            "columnName": "deliveredNo",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "drugAmount",
+            "columnName": "drugAmount",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "localId"
+          ]
+        }
+      },
+      {
+        "tableName": "electronic_prescription_prices",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `noteHeadId` TEXT NOT NULL, `headInsuPayment` INTEGER, `headSsoPayment` INTEGER, `noteHeadEprescID` INTEGER, `requestPrice` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "localId",
+            "columnName": "localId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "noteHeadId",
+            "columnName": "noteHeadId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "headInsuPayment",
+            "columnName": "headInsuPayment",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "headSsoPayment",
+            "columnName": "headSsoPayment",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "noteHeadEprescID",
+            "columnName": "noteHeadEprescID",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "requestPrice",
+            "columnName": "requestPrice",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "localId"
+          ]
+        }
+      },
+      {
+        "tableName": "dependants_under_eighteen",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nationalCode` TEXT NOT NULL, `firstName` TEXT, `lastName` TEXT, `nationalId` TEXT, `id` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "localId",
+            "columnName": "localId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nationalCode",
+            "columnName": "nationalCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "firstName",
+            "columnName": "firstName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastName",
+            "columnName": "lastName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "nationalId",
+            "columnName": "nationalId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "localId"
+          ]
+        }
+      },
+      {
+        "tableName": "treatment_costs",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `accountNumber` TEXT, `bimeCode` TEXT, `datePaz` TEXT, `famil` TEXT, `healthcenterName` TEXT, `mainNational` TEXT, `maliCode` TEXT, `name` TEXT, `nameAsli` TEXT, `nameFamil` TEXT, `noPazir` TEXT, `payNatCode` TEXT, `payOtherService` TEXT, `payPrice` TEXT, `payService` TEXT, `payStatus` TEXT, `payType` TEXT, `province` TEXT, `rahgiriCode` TEXT, `releaseDate` TEXT, `repId` INTEGER, `serviceDate` TEXT, `status` TEXT, `statusDesc` TEXT, `payStatusDesc` TEXT, `estimatePayDate` TEXT, `returnReason` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "localId",
+            "columnName": "localId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "accountNumber",
+            "columnName": "accountNumber",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "bimeCode",
+            "columnName": "bimeCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "datePaz",
+            "columnName": "datePaz",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "famil",
+            "columnName": "famil",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "healthcenterName",
+            "columnName": "healthcenterName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "mainNational",
+            "columnName": "mainNational",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "maliCode",
+            "columnName": "maliCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "nameAsli",
+            "columnName": "nameAsli",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "nameFamil",
+            "columnName": "nameFamil",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "noPazir",
+            "columnName": "noPazir",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "payNatCode",
+            "columnName": "payNatCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "payOtherService",
+            "columnName": "payOtherService",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "payPrice",
+            "columnName": "payPrice",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "payService",
+            "columnName": "payService",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "payStatus",
+            "columnName": "payStatus",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "payType",
+            "columnName": "payType",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "province",
+            "columnName": "province",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "rahgiriCode",
+            "columnName": "rahgiriCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "releaseDate",
+            "columnName": "releaseDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "repId",
+            "columnName": "repId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "serviceDate",
+            "columnName": "serviceDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "statusDesc",
+            "columnName": "statusDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "payStatusDesc",
+            "columnName": "payStatusDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "estimatePayDate",
+            "columnName": "estimatePayDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "returnReason",
+            "columnName": "returnReason",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "localId"
+          ]
+        }
+      },
+      {
+        "tableName": "medical_confirmations",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `supportType` TEXT, `treatmentCenter` TEXT, `confirmInBranch` TEXT, `confirmStatus` TEXT, `insuranceNumber` TEXT, `nationalCode` TEXT, `firstName` TEXT, `lastName` TEXT, `outpatientRestStartDate` TEXT, `outpatientRestEndDate` TEXT, `numberOfOutpatientDays` TEXT, `hospitalizationStartDate` TEXT, `hospitalizationEndDate` TEXT, `numberOfHospitalizationDays` TEXT, `description` TEXT, `branch` TEXT, `fromDateNotConfirm` TEXT, `toDateNotConfirm` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "localId",
+            "columnName": "localId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "supportType",
+            "columnName": "supportType",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "treatmentCenter",
+            "columnName": "treatmentCenter",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "confirmInBranch",
+            "columnName": "confirmInBranch",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "confirmStatus",
+            "columnName": "confirmStatus",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "insuranceNumber",
+            "columnName": "insuranceNumber",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "nationalCode",
+            "columnName": "nationalCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "firstName",
+            "columnName": "firstName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastName",
+            "columnName": "lastName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "outpatientRestStartDate",
+            "columnName": "outpatientRestStartDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "outpatientRestEndDate",
+            "columnName": "outpatientRestEndDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "numberOfOutpatientDays",
+            "columnName": "numberOfOutpatientDays",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "hospitalizationStartDate",
+            "columnName": "hospitalizationStartDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "hospitalizationEndDate",
+            "columnName": "hospitalizationEndDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "numberOfHospitalizationDays",
+            "columnName": "numberOfHospitalizationDays",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "branch",
+            "columnName": "branch",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "fromDateNotConfirm",
+            "columnName": "fromDateNotConfirm",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "toDateNotConfirm",
+            "columnName": "toDateNotConfirm",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "localId"
+          ]
+        }
+      },
+      {
+        "tableName": "agent_sessions",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `userNationalCode` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `lastMessageAt` INTEGER NOT NULL, `messageCount` INTEGER NOT NULL, `lastEntity` TEXT, `agentState` TEXT, `agentHistory` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userNationalCode",
+            "columnName": "userNationalCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastMessageAt",
+            "columnName": "lastMessageAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "messageCount",
+            "columnName": "messageCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastEntity",
+            "columnName": "lastEntity",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "agentState",
+            "columnName": "agentState",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "agentHistory",
+            "columnName": "agentHistory",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "agent_messages",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `sessionId` TEXT NOT NULL, `sender` TEXT NOT NULL, `status` TEXT NOT NULL, `contentType` TEXT NOT NULL, `contentJson` TEXT NOT NULL, `voicePath` TEXT, `timestamp` INTEGER NOT NULL, `messageOrder` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`sessionId`) REFERENCES `agent_sessions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sessionId",
+            "columnName": "sessionId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sender",
+            "columnName": "sender",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentType",
+            "columnName": "contentType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentJson",
+            "columnName": "contentJson",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "voicePath",
+            "columnName": "voicePath",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "messageOrder",
+            "columnName": "messageOrder",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_agent_messages_sessionId",
+            "unique": false,
+            "columnNames": [
+              "sessionId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_agent_messages_sessionId` ON `${TABLE_NAME}` (`sessionId`)"
+          },
+          {
+            "name": "index_agent_messages_timestamp",
+            "unique": false,
+            "columnNames": [
+              "timestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_agent_messages_timestamp` ON `${TABLE_NAME}` (`timestamp`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "agent_sessions",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "sessionId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "version_history",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`versionCode` INTEGER NOT NULL, `versionName` TEXT NOT NULL, `releaseDate` TEXT NOT NULL, `isLatest` INTEGER NOT NULL, `newFeaturesRaw` TEXT NOT NULL, `debugRaw` TEXT NOT NULL, PRIMARY KEY(`versionCode`))",
+        "fields": [
+          {
+            "fieldPath": "versionCode",
+            "columnName": "versionCode",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "versionName",
+            "columnName": "versionName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "releaseDate",
+            "columnName": "releaseDate",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isLatest",
+            "columnName": "isLatest",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "newFeaturesRaw",
+            "columnName": "newFeaturesRaw",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "debugRaw",
+            "columnName": "debugRaw",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "versionCode"
+          ]
+        }
+      },
+      {
+        "tableName": "history_job_infos",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `risuid` TEXT NOT NULL, `rwshName` TEXT NOT NULL, `brhcode` TEXT NOT NULL, `jobDesc` TEXT NOT NULL, `startDate` TEXT NOT NULL, `rwshId` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "risuid",
+            "columnName": "risuid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rwshName",
+            "columnName": "rwshName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "brhcode",
+            "columnName": "brhcode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "jobDesc",
+            "columnName": "jobDesc",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startDate",
+            "columnName": "startDate",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rwshId",
+            "columnName": "rwshId",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "history_years",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`hisYear` TEXT NOT NULL, `months` TEXT NOT NULL, `historyYears` INTEGER NOT NULL, `historyMonths` INTEGER NOT NULL, `historyDays` INTEGER NOT NULL, `sumHistoryYears` INTEGER NOT NULL, `sumYear` INTEGER NOT NULL, `position` INTEGER NOT NULL, PRIMARY KEY(`hisYear`))",
+        "fields": [
+          {
+            "fieldPath": "hisYear",
+            "columnName": "hisYear",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "months",
+            "columnName": "months",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "historyYears",
+            "columnName": "historyYears",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "historyMonths",
+            "columnName": "historyMonths",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "historyDays",
+            "columnName": "historyDays",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sumHistoryYears",
+            "columnName": "sumHistoryYears",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sumYear",
+            "columnName": "sumYear",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "hisYear"
+          ]
+        }
+      },
+      {
+        "tableName": "history_wage_rows",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `hisYear` TEXT NOT NULL, `months` TEXT NOT NULL, `wages` TEXT NOT NULL, `workshopName` TEXT NOT NULL, `branchName` TEXT NOT NULL, `historyTypeDesc` TEXT NOT NULL, `workshopId` TEXT NOT NULL, `position` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hisYear",
+            "columnName": "hisYear",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "months",
+            "columnName": "months",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wages",
+            "columnName": "wages",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workshopName",
+            "columnName": "workshopName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "branchName",
+            "columnName": "branchName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "historyTypeDesc",
+            "columnName": "historyTypeDesc",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workshopId",
+            "columnName": "workshopId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "construction_files",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`fileNumber` INTEGER NOT NULL, `requestNumber` INTEGER, `requestDate` TEXT, `workshopId` TEXT, `workshopRegisterDate` TEXT, `brhCode` TEXT, `postalCode` TEXT, `address` TEXT, `mainPlaque` INTEGER, `subPlaque` INTEGER, `block` INTEGER, `propertyConstruction` INTEGER, `apartment` INTEGER, `trade` INTEGER, `partPlaque` INTEGER, `sumOfComplications` INTEGER, `debitNumber` TEXT, `totalPayment` INTEGER, `meterage` INTEGER, `debitStatusCode` TEXT, `protrusion` INTEGER, `applicationFees` INTEGER, `residentialServiceInfrastructureFees` INTEGER, `excessDensitySurchargeFees` INTEGER, `increasePropertyValue` INTEGER, `issuanceFencingWallConstructionFees` INTEGER, `coveredClause3Fees` INTEGER, `article100` INTEGER, `paymentDeadLine` TEXT, PRIMARY KEY(`fileNumber`))",
+        "fields": [
+          {
+            "fieldPath": "fileNumber",
+            "columnName": "fileNumber",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "requestNumber",
+            "columnName": "requestNumber",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "requestDate",
+            "columnName": "requestDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "workshopId",
+            "columnName": "workshopId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "workshopRegisterDate",
+            "columnName": "workshopRegisterDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "brhCode",
+            "columnName": "brhCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "postalCode",
+            "columnName": "postalCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "address",
+            "columnName": "address",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "mainPlaque",
+            "columnName": "mainPlaque",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "subPlaque",
+            "columnName": "subPlaque",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "block",
+            "columnName": "block",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "propertyConstruction",
+            "columnName": "propertyConstruction",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "apartment",
+            "columnName": "apartment",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "trade",
+            "columnName": "trade",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "partPlaque",
+            "columnName": "partPlaque",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "sumOfComplications",
+            "columnName": "sumOfComplications",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "debitNumber",
+            "columnName": "debitNumber",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "totalPayment",
+            "columnName": "totalPayment",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "meterage",
+            "columnName": "meterage",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "debitStatusCode",
+            "columnName": "debitStatusCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "protrusion",
+            "columnName": "protrusion",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "applicationFees",
+            "columnName": "applicationFees",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "residentialServiceInfrastructureFees",
+            "columnName": "residentialServiceInfrastructureFees",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "excessDensitySurchargeFees",
+            "columnName": "excessDensitySurchargeFees",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "increasePropertyValue",
+            "columnName": "increasePropertyValue",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "issuanceFencingWallConstructionFees",
+            "columnName": "issuanceFencingWallConstructionFees",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "coveredClause3Fees",
+            "columnName": "coveredClause3Fees",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "article100",
+            "columnName": "article100",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "paymentDeadLine",
+            "columnName": "paymentDeadLine",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "fileNumber"
+          ]
+        }
+      },
+      {
+        "tableName": "home_content",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `userInfo` TEXT, `stories` TEXT, `campaigns` TEXT, `quickAccess` TEXT, `specialServices` TEXT, `requests` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userInfo",
+            "columnName": "userInfo",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "stories",
+            "columnName": "stories",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "campaigns",
+            "columnName": "campaigns",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "quickAccess",
+            "columnName": "quickAccess",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "specialServices",
+            "columnName": "specialServices",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "requests",
+            "columnName": "requests",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f5fca04522d0a224fd88a5556403a8ae')"
+    ]
+  }
+}

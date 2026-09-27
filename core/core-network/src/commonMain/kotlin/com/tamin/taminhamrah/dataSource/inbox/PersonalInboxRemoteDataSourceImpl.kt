@@ -11,6 +11,7 @@ import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
+import com.tamin.taminhamrah.tools.ensureSuccess
 import com.tamin.taminhamrah.tools.extractData
 
 class PersonalInboxRemoteDataSourceImpl(
@@ -59,8 +60,7 @@ class PersonalInboxRemoteDataSourceImpl(
 
     override suspend fun deleteMyRequest(requestId: String) {
         try {
-            val response = personalInboxApiService.deleteMyRequest(requestId)
-            response.extractData()
+            personalInboxApiService.deleteMyRequest(requestId).ensureSuccess()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {
@@ -82,8 +82,7 @@ class PersonalInboxRemoteDataSourceImpl(
                     InboxPermissionRequestDTO(operation = it)
                 }
             )
-            val response = personalInboxApiService.inboxInquiryLicense(requestId, body)
-            response.extractData()
+            personalInboxApiService.inboxInquiryLicense(requestId, body).ensureSuccess()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
         } catch (e: Exception) {

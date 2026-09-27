@@ -305,12 +305,7 @@ private fun CampaignCardContent(
  * coordinates never mirror, and that is exactly what an RTL page needs here.
  */
 private fun Modifier.campaignSurface(kind: CampaignKind): Modifier = this
-    .coloredShadow(
-        color = kind.shadowTint,
-        borderRadius = CornerRadius.card,
-        blurRadius = CampaignDimens.cardShadowBlur,
-        offsetY = CampaignDimens.cardShadowOffsetY,
-    )
+    // No tinted drop shadow: its colored halo read as a band of padding around every card.
     .clip(CardShape)
     .drawWithCache {
         val gradient = angledLinearGradient(

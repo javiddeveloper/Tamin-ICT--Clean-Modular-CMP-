@@ -48,6 +48,7 @@ import com.tamin.taminhamrah.ui.pushForward
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toparea.TopAreaState
+import com.tamin.taminhamrah.ui.toparea.collapseWhileImeVisible
 import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
 import com.tamin.taminhamrah.ui.toparea.topAreaHide
 import kotlinx.collections.immutable.persistentListOf
@@ -140,6 +141,9 @@ fun ChangeMobileContent(
         ChangeMobileHeader(onBack = {}, profileGradientBrush = profileGradientBrush, topAreaState = probeState)
     }
     LaunchedEffect(currentStep) { topArea.expandFully() }
+    // The mobile/OTP field's keyboard must not leave the header stuck mid-fold: collapse it fully
+    // the moment the IME appears, expand it fully the moment it hides.
+    topArea.collapseWhileImeVisible()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),

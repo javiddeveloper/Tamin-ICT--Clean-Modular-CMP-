@@ -46,6 +46,8 @@ import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahShapes
+import com.tamin.taminhamrah.util.containsFoldedWords
+import com.tamin.taminhamrah.util.toFoldedWords
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.action_close
@@ -74,14 +76,15 @@ fun HistoryObjectionPickerBottomSheet(
     val filteredItems = if (inputText.isBlank()) {
         config.items
     } else {
-        config.items.filter { it.title.contains(inputText, ignoreCase = true) }
+        val words = inputText.toFoldedWords()
+        config.items.filter { it.title.containsFoldedWords(words) }
     }
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
         modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        containerColor = colors.bgPage,
         shape = RoundedCornerShape(topStart = CornerRadius.sheet, topEnd = CornerRadius.sheet),
     ) {
         Column(

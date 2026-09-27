@@ -327,7 +327,7 @@ private fun WorkshopCardItem(
                         spotColor = colors.shadowPrimary,
                     )
                     .clip(RoundedCornerShape(14.dp))
-                    .background(EmployerInfoButtonGradient)
+                    .background(colors.buttonGradient)
                     .clickable(onClick = onSelectWorkshop),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,

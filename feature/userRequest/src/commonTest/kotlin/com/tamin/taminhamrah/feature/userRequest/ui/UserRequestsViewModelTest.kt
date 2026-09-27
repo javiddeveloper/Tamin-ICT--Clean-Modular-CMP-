@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.feature.userRequest.ui.screens.FakeUserRequestRepos
 import com.tamin.taminhamrah.model.userRequest.RequestErrorDN
 import com.tamin.taminhamrah.model.userRequest.UserRequestDN
 import com.tamin.taminhamrah.model.userRequest.UserRequestPR
+import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.userRequest.GetSmartGuideListUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestErrorsUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestTypesUseCase
@@ -201,6 +202,36 @@ class UserRequestsViewModelTest {
 
             assertFalse(state.isLoading)
             assertEquals("boom", state.error)
+        }
+    }
+
+    @Test
+    fun `open smart guide failure emits show toast event`() = runTest(testDispatcher) {
+        repository.shouldThrowError = true
+        repository.error = RuntimeException("boom")
+
+        viewModel.events.test {
+            viewModel.sendIntent(UserRequestsIntent.OpenSmartGuide(requestType = 1, requestStatus = "0018", title = "راهنما"))
+
+            val event = assertIs<UserRequestsEvent.ShowToast>(awaitItem())
+            assertEquals(RuntimeException("boom").toSingleLineMessage(), event.message)
+        }
+    }
+
+    @Test
+    fun `repeated searches do not starve later intents`() = runTest(testDispatcher) {
+        // Each search's list flow stays open like the real Room-backed one; before the fix these
+        // filled flatMapMerge's 16 slots and the guide tap below was never handled.
+        repository.keepRequestsFlowOpen = true
+        repeat(20) { viewModel.sendIntent(UserRequestsIntent.SearchRequests) }
+        repository.shouldThrowError = true
+        repository.error = RuntimeException("boom")
+
+        viewModel.events.test {
+            viewModel.sendIntent(UserRequestsIntent.OpenSmartGuide(requestType = 1, requestStatus = "0018", title = "راهنما"))
+
+            val event = assertIs<UserRequestsEvent.ShowToast>(awaitItem())
+            assertEquals(RuntimeException("boom").toSingleLineMessage(), event.message)
         }
     }
 

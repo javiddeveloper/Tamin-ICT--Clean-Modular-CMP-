@@ -121,7 +121,7 @@ object UserRequestTestData {
                         "reply": "برای ثبت درخواست داشتن سابقه بیمه حداقل یک سال الزامی است.",
                         "requestCode": "0018",
                         "requestDesc": "درخواست راهنما",
-                        "isPublic": true,
+                        "isPublic": "1",
                         "title": "راهنمای هوشمند",
                         "description": "توضیحات تکمیلی"
                     }
@@ -365,6 +365,28 @@ object OccurrenceTestData {
 
     val submitOccurrenceSuccess: String
         get() = readResourceFile("mocks/occurrence/submit_occurrence_success.json")
+}
+
+object FuneralAllowanceTestData {
+    /** `data` block of `funeral-no-presence/getFuneralNoPresenceLoadData` — the normal (no bank issue) case. */
+    val infoSuccess: String
+        get() = readResourceFile("mocks/funeralAllowance/info_success.json")
+
+    /** Same endpoint, but `flag=true` with a stuck `request` block the branch could not confirm. */
+    val infoBankAccountIssueSuccess: String
+        get() = readResourceFile("mocks/funeralAllowance/info_bank_account_issue_success.json")
+
+    /** `data` of `shortterm/validateFuneral/{nationalCode}` — the positional string array. */
+    val validateDeceasedSuccess: String
+        get() = readResourceFile("mocks/funeralAllowance/validate_deceased_success.json")
+
+    /** `data` of `funeral-no-presence/saveShorttremFuneral` — a bare success-message string. */
+    val submitSuccess: String
+        get() = readResourceFile("mocks/funeralAllowance/submit_funeral_success.json")
+
+    /** `data` of `funeral-no-presence/confirmShorttremFuneral/{requestId}` — a bare success-message string. */
+    val confirmAccountCorrectionSuccess: String
+        get() = readResourceFile("mocks/funeralAllowance/confirm_account_correction_success.json")
 }
 
 object HistoryTestData {

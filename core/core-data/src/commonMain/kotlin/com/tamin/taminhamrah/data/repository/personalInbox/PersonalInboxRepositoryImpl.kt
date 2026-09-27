@@ -50,25 +50,34 @@ internal class PersonalInboxRepositoryImpl(
     override fun getInboxItemsPage(
         query: ApiQueryParamDN,
     ): Flow<PageDN<PersonalInboxItemDN>> = flow {
-        val isFirstPage = query.start == 0
-        val page = try {
-            val response = personalInboxRemoteDataSource.getInboxItems(query)
-            val remoteItems = response.list.orEmpty()
-            if (isFirstPage) {
-                personalInboxDao.replaceAllInboxItems(remoteItems.map { it.toEntity() })
-            }
+        val cachedItems = personalInboxDao.getInboxItems().first()
+            .drop(query.start)
+            .take(query.limit)
+        if (cachedItems.isNotEmpty()) {
+            emit(PageDN(items = cachedItems.map { it.toDomain() }, isFromCache = true))
+        }
+
+        val response = try {
+            personalInboxRemoteDataSource.getInboxItems(query)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            if (cachedItems.isEmpty()) throw e
+            return@flow
+        }
+        val remoteItems = response.list.orEmpty()
+        val entities = remoteItems.map { it.toEntity() }
+        if (query.start == 0) {
+            personalInboxDao.replaceAllInboxItems(entities)
+        } else {
+            personalInboxDao.upsertInboxItems(entities)
+        }
+        emit(
             PageDN(
                 items = remoteItems.map { it.toDomain() },
                 total = response.total?.toIntOrNull(),
             )
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            val cached = if (isFirstPage) personalInboxDao.getInboxItems().first() else emptyList()
-            if (cached.isEmpty()) throw e
-            PageDN(items = cached.map { it.toDomain() }, total = null)
-        }
-        emit(page)
+        )
     }
 
     override fun getInboxSize(): Flow<PersonalInboxSizeDN> = flow {

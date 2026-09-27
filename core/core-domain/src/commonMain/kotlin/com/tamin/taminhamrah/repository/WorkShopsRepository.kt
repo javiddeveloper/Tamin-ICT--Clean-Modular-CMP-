@@ -46,6 +46,7 @@ import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderDN
 import com.tamin.taminhamrah.model.workshop.WorkshopStackHolderQuery
 import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDN
 import com.tamin.taminhamrah.model.workshop.WorkshopsDebtListModelDN
+import com.tamin.taminhamrah.model.paging.PageDN
 import kotlinx.coroutines.flow.Flow
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionQuery
@@ -239,15 +240,20 @@ interface WorkShopsRepository {
     /** Step 2 — exchange the entered OTP for the employer's identity block. */
     suspend fun getEmployerAgreementContactInfo(verificationCode: String): EmployerContactInfoDN
 
-    /** Step 2 — one page of the employer's workshops that have no contract yet. */
-    suspend fun getWorkshopsWithoutContract(page: Int = 0): PagedListDN<WorkshopWithoutContractDN>
+    /**
+     * Step 2 — one page of the employer's workshops that have no contract yet.
+     *
+     * Offline-first: emits the cached page (if any, `isFromCache`), then the network page. Collect
+     * the whole flow (`Paginator(loadPages = …)`), not `.first()`.
+     */
+    fun getWorkshopsWithoutContract(page: Int = 0): Flow<PageDN<WorkshopWithoutContractDN>>
 
-    /** Contract / پیمانکار rows of one workshop. */
-    suspend fun getWorkshopContractRows(
+    /** Contract / پیمانکار rows of one workshop. Offline-first, same contract as [getWorkshopsWithoutContract]. */
+    fun getWorkshopContractRows(
         workshopId: String,
         branchCode: String,
         page: Int = 0,
-    ): PagedListDN<WorkshopContractRowDN>
+    ): Flow<PageDN<WorkshopContractRowDN>>
 
     /** Step 3 — submit the final agreement. Returns the backend's bare success message. */
     suspend fun submitEmployerAgreement(request: EmployerAgreementSubmissionDN): String

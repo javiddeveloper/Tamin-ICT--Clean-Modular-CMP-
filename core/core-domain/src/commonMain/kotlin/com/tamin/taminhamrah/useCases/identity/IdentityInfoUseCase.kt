@@ -3,11 +3,14 @@ package com.tamin.taminhamrah.useCases.identity
 import com.tamin.taminhamrah.model.common.CityDN
 import com.tamin.taminhamrah.model.common.ProvinceDN
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.query.city.CityListQuery
 import com.tamin.taminhamrah.repository.CityProvinceRepository
 import com.tamin.taminhamrah.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 
 class IdentityInfoUseCase(
     private val userRepository: UserRepository,
@@ -20,12 +23,18 @@ class IdentityInfoUseCase(
         }
     }
 
+    // Not migrated to incremental paging (Paginator) — this use case hands back a flat list, so a
+    // single generously-sized page stands in for "all results", as the old fixed-limit query did.
     fun getCities(
         cityName: String? = null,
         provinceCode: String? = null,
-    ): Flow<List<CityDN>> = cityProvinceRepository.getCities(cityName, provinceCode)
+    ): Flow<List<CityDN>> = cityProvinceRepository.getCitiesPage(
+        ApiQueryParamDN(filters = CityListQuery.filters(cityName, provinceCode), limit = ALL_CITIES_PAGE_SIZE),
+    ).map { it.items }
 
-    fun getProvinces(): Flow<List<ProvinceDN>> = cityProvinceRepository.getProvinces()
+    fun getProvinces(): Flow<List<ProvinceDN>> = cityProvinceRepository.getProvincesPage(
+        ApiQueryParamDN(limit = ALL_PROVINCES_PAGE_SIZE),
+    ).map { it.items }
 
     /**
      * Names the two cities separately.
@@ -56,5 +65,10 @@ class IdentityInfoUseCase(
         } catch (_: Exception) {
             null
         }
+    }
+
+    private companion object {
+        const val ALL_CITIES_PAGE_SIZE = 500
+        const val ALL_PROVINCES_PAGE_SIZE = 100
     }
 }

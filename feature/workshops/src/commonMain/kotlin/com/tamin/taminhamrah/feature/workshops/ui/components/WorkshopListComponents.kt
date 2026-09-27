@@ -20,11 +20,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,12 +33,12 @@ import androidx.compose.ui.text.font.FontWeight
 import com.tamin.taminhamrah.feature.workshops.ui.contract.WorkshopStats
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.model.workshop.WorkshopPR
+import com.tamin.taminhamrah.ui.components.CopyCodeChip
 import com.tamin.taminhamrah.ui.components.CopyIconButton
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminPrimaryButton
-import com.tamin.taminhamrah.ui.components.dashedOutline
 import com.tamin.taminhamrah.ui.components.rememberCopyAction
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -54,14 +49,11 @@ import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.util.toPersianDigits
-import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.ic_tamin_chevron_down
-import taminx.core.core_ui.ic_tamin_copy
 import taminx.core.core_ui.workshop_card_collapse
 import taminx.core.core_ui.workshop_card_expand
 import taminx.core.core_ui.workshop_code
@@ -74,7 +66,6 @@ import taminx.core.core_ui.workshop_start_activity_date
 import taminx.core.core_ui.workshop_stat_active
 import taminx.core.core_ui.workshop_stat_inactive
 import taminx.core.core_ui.workshop_stat_total
-import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * The three figures over the list, riding up into the gradient header.
@@ -335,12 +326,6 @@ internal fun WorkshopCodeRow(
     // top of it would say the same thing twice. It also keeps this row off LocalToaster, which has
     // no default, so the card still composes in a preview with no AppToastHost above it.
     val copy = rememberCopyAction(code, announce = false)
-    var isCopied by remember { mutableStateOf(false) }
-    LaunchedEffect(isCopied) {
-        if (!isCopied) return@LaunchedEffect
-        delay(WorkshopDimens.copiedFeedbackMillis.milliseconds)
-        isCopied = false
-    }
 
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -352,42 +337,12 @@ internal fun WorkshopCodeRow(
             style = MaterialTheme.typography.bodySmall,
             color = colors.textMuted,
         )
-        Row(
-            modifier = Modifier
-                .clip(CodeChipShape)
-                .clickable(enabled = code.isNotBlank()) {
-                    copy()
-                    isCopied = true
-                }
-                .background(colors.blueBg)
-                // The design pins the code behind a dashed outline, which is what marks it
-                // as something to lift rather than a plain tinted label.
-                .dashedOutline(colors.blueBorder, WorkshopDimens.codeChipCorner, WorkshopDimens.codeChipBorderWidth)
-                .padding(
-                    horizontal = WorkshopDimens.codeChipHorizontalPadding,
-                    vertical = WorkshopDimens.codeChipVerticalPadding,
-                ),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-        ) {
-            // Code first so that right-to-left puts it on the right and the copy glyph on the
-            // left, which is where the design draws it.
-            NumericText(
-                text = workshop.codeLabel,
-                style = MaterialTheme.typography.labelMedium,
-                color = colors.blueText,
-            )
-            // The design answers a copy by turning the glyph into a green tick for a beat,
-            // then back.
-            Icon(
-                imageVector = vectorResource(
-                    if (isCopied) Res.drawable.ic_tamin_check else Res.drawable.ic_tamin_copy,
-                ),
-                contentDescription = stringResource(Res.string.workshop_copy_code),
-                tint = if (isCopied) colors.greenText else colors.blueText,
-                modifier = Modifier.size(WorkshopDimens.codeChipGlyphSize),
-            )
-        }
+        CopyCodeChip(
+            text = workshop.codeLabel,
+            onCopy = copy,
+            contentDescription = stringResource(Res.string.workshop_copy_code),
+            enabled = code.isNotBlank(),
+        )
     }
 }
 
@@ -448,7 +403,6 @@ fun CardExpandToggle(
     }
 }
 
-private val CodeChipShape = RoundedCornerShape(WorkshopDimens.codeChipCorner)
 
 private val WorkshopCardShape = RoundedCornerShape(CornerRadius.lg)
 
