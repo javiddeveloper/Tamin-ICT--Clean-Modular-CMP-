@@ -11,7 +11,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.tamin.taminhamrah.feature.profile.ui.editPhoto.components.EditProfilePhotoDependantsCard
@@ -26,6 +25,7 @@ import com.tamin.taminhamrah.feature.profile.ui.editPhoto.contract.EditProfilePh
 import com.tamin.taminhamrah.model.subdominant.SubdominantItemPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
+import com.tamin.taminhamrah.ui.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminSearchableListSheet
@@ -43,7 +43,7 @@ fun EditProfilePhotoRoute(
     viewModel: EditProfilePhotoViewModel,
     onBackClicked: () -> Unit,
 ) {
-    val state by viewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     HandleEditProfilePhotoEvents(
         events = viewModel.events,

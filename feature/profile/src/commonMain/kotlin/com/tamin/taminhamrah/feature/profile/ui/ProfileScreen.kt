@@ -829,10 +829,11 @@ private fun ProfileAvatarWithCameraBadge(
     profileImage: String?,
     isLoading: Boolean,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     // Not clipped: the badge sits partly outside the avatar, as in the design.
     Box(
-        modifier = Modifier.clickable(
+        modifier = modifier.clickable(
             onClickLabel = stringResource(Res.string.profile_photo_screen_title),
             onClick = onClick,
         ),

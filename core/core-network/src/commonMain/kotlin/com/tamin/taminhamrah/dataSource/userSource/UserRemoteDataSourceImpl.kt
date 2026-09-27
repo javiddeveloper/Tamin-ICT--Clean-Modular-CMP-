@@ -13,7 +13,9 @@ import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
 import com.tamin.taminhamrah.tools.extractTypedData
-import com.tamin.taminhamrah.tools.safeCall
+import com.tamin.taminhamrah.tools.ensureSuccess
+import io.ktor.serialization.JsonConvertException
+import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import com.tamin.taminhamrah.apiService.UserApiService
@@ -88,8 +90,24 @@ internal class UserRemoteDataSourceImpl(
     override suspend fun sendImageRequest(
         branchCode: String,
         filter: List<ApiFilterDN>
-    ): String = errorParser.safeCall("sendImageRequest") {
-        userApiService.sendImageRequest(branchCode, queryBuilder.buildFilterJson(filter)).extractMessage()
+    ): String {
+        return try {
+            val response =
+                userApiService.sendImageRequest(branchCode, queryBuilder.buildFilterJson(filter))
+            // Success answers with `"data": null`, so the confirmation copy is `reason`.
+            response.ensureSuccess()
+            response.data?.message ?: response.reason
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.INTERNAL_ERROR))
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
     }
 
     override suspend fun getSubDominantsInfo(

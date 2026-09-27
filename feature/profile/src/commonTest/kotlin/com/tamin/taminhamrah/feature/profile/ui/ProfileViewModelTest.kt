@@ -11,15 +11,17 @@ import com.tamin.taminhamrah.model.DarkThemeConfig
 import com.tamin.taminhamrah.model.FontSizeOption
 import com.tamin.taminhamrah.model.UserData
 import com.tamin.taminhamrah.model.activeRelation.ActiveRelationDN
+import com.tamin.taminhamrah.model.agent.AgentMockMode
 import com.tamin.taminhamrah.model.auth.DebugLoginResultDN
 import com.tamin.taminhamrah.model.auth.TokenSlot
 import com.tamin.taminhamrah.model.common.CityDN
-import com.tamin.taminhamrah.model.common.CityListResultDN
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.common.ProvinceDN
 import com.tamin.taminhamrah.model.identity.IdentityInfoDN
+import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.model.payment.PaymentMockMode
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.AuthRepository
 import com.tamin.taminhamrah.repository.CityProvinceRepository
 import com.tamin.taminhamrah.repository.DeveloperOptionsRepository
@@ -462,6 +464,9 @@ private class FakeDeveloperOptionsRepository : DeveloperOptionsRepository {
     override fun getPaymentMockMode(): PaymentMockMode = unused()
     override fun observePaymentMockMode(): Flow<PaymentMockMode> = unused()
     override fun setPaymentMockMode(mode: PaymentMockMode) = unused()
+    override fun getAgentMockMode(): AgentMockMode = unused()
+    override fun observeAgentMockMode(): Flow<AgentMockMode> = unused()
+    override fun setAgentMockMode(mode: AgentMockMode) = unused()
 }
 
 private class FakeUserPreferencesRepository : UserPreferencesRepository {
@@ -481,7 +486,7 @@ private class FakeUserPreferencesRepository : UserPreferencesRepository {
 private object UnusedCityProvinceRepository : CityProvinceRepository {
     override fun getCity(cityId: String): Flow<CityDN> = unused()
     override fun getProvince(provinceId: String): Flow<ProvinceDN> = unused()
-    override fun getProvinces(): Flow<List<ProvinceDN>> = unused()
-    override fun getCities(cityName: String?, provinceCode: String?): Flow<List<CityDN>> = unused()
-    override fun getCitiesByProvince(provinceCode: String): Flow<CityListResultDN> = unused()
+    override fun getProvincesPage(query: ApiQueryParamDN): Flow<PageDN<ProvinceDN>> = unused()
+    override fun getCitiesPage(query: ApiQueryParamDN): Flow<PageDN<CityDN>> = unused()
+    override fun getCitiesByProvincePage(provinceCode: String, query: ApiQueryParamDN): Flow<PageDN<CityDN>> = unused()
 }

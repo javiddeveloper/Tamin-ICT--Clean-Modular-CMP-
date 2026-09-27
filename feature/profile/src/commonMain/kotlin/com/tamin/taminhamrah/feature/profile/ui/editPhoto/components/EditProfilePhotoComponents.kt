@@ -96,7 +96,10 @@ internal fun SubdominantItemPR.pickerLabel(): String =
 
 /** The profile subpages' header, as on the bank-account and dependants pages. */
 @Composable
-internal fun EditProfilePhotoHeader(onBack: () -> Unit) {
+internal fun EditProfilePhotoHeader(
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val taminColors = LocalTaminColors.current
     val profileGradientBrush = remember(taminColors.profileGradientStops) {
         Brush.horizontalGradient(taminColors.profileGradientStops)
@@ -104,6 +107,7 @@ internal fun EditProfilePhotoHeader(onBack: () -> Unit) {
 
     TaminTopAppBar(
         title = stringResource(Res.string.profile_photo_screen_title),
+        modifier = modifier,
         centerTitle = true,
         background = profileGradientBrush,
         bottomPadding = Spacing.xl,
@@ -148,9 +152,10 @@ internal fun EditProfilePhotoUserCard(
     userName: String,
     nationalCode: String,
     insuranceNumber: String,
+    modifier: Modifier = Modifier,
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(CornerRadius.card),
         colors = CardDefaults.cardColors(containerColor = LocalTaminColors.current.bgSurface),
         elevation = CardDefaults.cardElevation(defaultElevation = Elevation.sm),
@@ -182,10 +187,14 @@ internal fun EditProfilePhotoSerialField(
     isError: Boolean,
     onSerialChange: (String) -> Unit,
     onOpenGuide: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val taminColors = LocalTaminColors.current
 
-    Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -259,11 +268,12 @@ internal fun EditProfilePhotoDependantsCard(
     isError: Boolean,
     onToggle: (Boolean) -> Unit,
     onOpenPicker: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val taminColors = LocalTaminColors.current
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(CornerRadius.card),
         colors = CardDefaults.cardColors(containerColor = taminColors.bgSurface),
         elevation = CardDefaults.cardElevation(defaultElevation = Elevation.sm),
