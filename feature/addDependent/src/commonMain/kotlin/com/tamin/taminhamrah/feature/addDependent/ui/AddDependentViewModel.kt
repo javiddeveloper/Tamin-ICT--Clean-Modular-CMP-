@@ -23,8 +23,11 @@ import com.tamin.taminhamrah.feature.addDependent.ui.model.RegistryDataPR
 import com.tamin.taminhamrah.feature.addDependent.ui.model.RequestAddDependentPR
 import com.tamin.taminhamrah.feature.addDependent.ui.model.RequestFilePR
 import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
+import com.tamin.taminhamrah.paging.Paginator
+import com.tamin.taminhamrah.query.city.CityListQuery
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetConfig
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetItem
@@ -35,19 +38,19 @@ import com.tamin.taminhamrah.useCases.addDependent.GetFamilyRelationshipsFromPro
 import com.tamin.taminhamrah.useCases.addDependent.InquiryEducationCodeUseCase
 import com.tamin.taminhamrah.useCases.addDependent.InquiryRegistryUseCase
 import com.tamin.taminhamrah.useCases.addDependent.UploadDependentImageUseCase
-import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
+import com.tamin.taminhamrah.useCases.common.GetCitiesPageUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.transform
 import org.jetbrains.compose.resources.getString
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.error_title
 import taminx.core.core_ui.error_file_too_large
 import taminx.core.core_ui.error_image_duplicate
-import taminx.core.core_ui.city_birth_picker_title
-import taminx.core.core_ui.city_issuance_picker_title
 import taminx.core.core_ui.branch_picker_title
 import taminx.core.core_ui.picker_relationship_title
 import taminx.core.core_ui.error_select_birth_date
@@ -74,10 +77,14 @@ class AddDependentViewModel(
     private val inquiryEducationCodeUseCase: InquiryEducationCodeUseCase,
     private val uploadDependentImageUseCase: UploadDependentImageUseCase,
     private val addNewDependentUseCase: AddNewDependentUseCase,
-    private val getCitiesUseCase: GetCitiesUseCase
+    private val getCitiesPageUseCase: GetCitiesPageUseCase
 ) : BaseViewModel<AddDependentState, PartialState, AddDependentEvent, AddDependentIntent>(
     initialState = AddDependentState()
 ) {
+
+    private val cityPaginator = Paginator(
+        loadPages = { query -> getCitiesPageUseCase(query) },
+    )
 
     override fun handleIntent(intent: AddDependentIntent): Flow<PartialState> {
         return when (intent) {
@@ -102,19 +109,24 @@ class AddDependentViewModel(
             }
             is AddDependentIntent.OnCityBirthSelected -> flow {
                 emit(PartialState.CityBirthSelected(intent.city))
-                emit(dismissBottomSheet())
+                emit(PartialState.CityPickerOpened(null))
             }
             is AddDependentIntent.OnCityIssuanceSelected -> flow {
                 emit(PartialState.CityIssuanceSelected(intent.city))
-                emit(dismissBottomSheet())
+                emit(PartialState.CityPickerOpened(null))
             }
             is AddDependentIntent.OnBranchSelected -> flow {
                 emit(PartialState.BranchSelected(intent.branch))
                 emit(dismissBottomSheet())
             }
             is AddDependentIntent.ShowRelationshipPicker -> showRelationshipPicker()
-            is AddDependentIntent.ShowCityBirthPicker -> showCityPicker(Res.string.city_birth_picker_title, BottomSheetTarget.CITY_BIRTH) { it.selectedCityBirth?.cityCode }
-            is AddDependentIntent.ShowCityIssuancePicker -> showCityPicker(Res.string.city_issuance_picker_title, BottomSheetTarget.CITY_ISSUANCE) { it.selectedCityIssuance?.cityCode }
+            is AddDependentIntent.ShowCityBirthPicker -> openCityPicker(BottomSheetTarget.CITY_BIRTH)
+            is AddDependentIntent.ShowCityIssuancePicker -> openCityPicker(BottomSheetTarget.CITY_ISSUANCE)
+            is AddDependentIntent.DismissCityPicker -> flow { emit(PartialState.CityPickerOpened(null)) }
+            is AddDependentIntent.CitySearchQueryChanged -> flow {
+                cityPaginator.refresh(cityBaseQuery(intent.query))
+            }
+            is AddDependentIntent.CityPickerLoadMore -> flow { cityPaginator.loadNext() }
             is AddDependentIntent.ShowBranchPicker -> flow {
                 val state = uiState.value
                 val titleString = getString(Res.string.branch_picker_title)
@@ -149,7 +161,8 @@ class AddDependentViewModel(
 
     private fun dismissBottomSheet() = PartialState.BottomSheetStateChanged(null, null)
 
-    private fun initData(): Flow<PartialState> = loadActiveBranches().onStart { emit(PartialState.Loading(true)) }
+    private fun initData(): Flow<PartialState> =
+        merge(loadActiveBranches(), observeCityPaging()).onStart { emit(PartialState.Loading(true)) }
 
     private fun loadActiveBranches(): Flow<PartialState> = getActiveBranchesUseCase()
         .map { branchList ->
@@ -158,31 +171,26 @@ class AddDependentViewModel(
         }
         .catch { emit(PartialState.Error(it.toSingleLineMessage())) }
 
-    private fun loadCities(): Flow<PartialState> = getCitiesUseCase()
-        .map { cities -> PartialState.CitiesLoaded(cities.toCityPresentation()) as PartialState }
-        .catch { emit(PartialState.Error(it.toSingleLineMessage())) }
-
-    private fun showCityPicker(titleRes: org.jetbrains.compose.resources.StringResource, target: BottomSheetTarget, selectedCityCode: (AddDependentState) -> String?): Flow<PartialState> = flow {
-        val state = uiState.value
-        emit(PartialState.Loading(true))
-        loadCities().collect { partialState ->
-            emit(partialState)
-            if (partialState is PartialState.CitiesLoaded) {
-                emit(PartialState.BottomSheetStateChanged(
-                    config = TaminBottomSheetConfig(
-                        title = getString(titleRes),
-                        type = TaminBottomSheetType.CITY,
-                        items = partialState.cities.mapIndexed { index, city ->
-                            TaminBottomSheetItem(id = index, title = city.cityName, isSelected = city.cityCode == selectedCityCode(state))
-                        },
-                        singleSelection = true,
-                        showSearchInput = true
-                    ),
-                    target = target
-                ))
-            }
-        }
+    private fun openCityPicker(target: BottomSheetTarget): Flow<PartialState> = flow {
+        emit(PartialState.CityPickerOpened(target))
+        cityPaginator.refresh(cityBaseQuery(""))
     }
+
+    private fun observeCityPaging(): Flow<PartialState> = cityPaginator.state.transform { paging ->
+        emit(
+            PartialState.CityPagingChanged(
+                items = paging.items.toCityPresentation(),
+                isLoadingFirstPage = paging.isLoadingFirstPage,
+                isLoadingNextPage = paging.isLoadingNextPage,
+                endReached = paging.endReached,
+            ),
+        )
+        paging.error?.let { emit(PartialState.Error(it.toSingleLineMessage())) }
+    }
+
+    private fun cityBaseQuery(query: String): ApiQueryParamDN = ApiQueryParamDN(
+        filters = CityListQuery.filters(cityName = query.takeIf { it.isNotBlank() }),
+    )
 
     private fun showRelationshipPicker(): Flow<PartialState> = flow {
         val state = uiState.value
@@ -356,7 +364,13 @@ class AddDependentViewModel(
         is PartialState.Loading -> currentState.copy(isLoading = partialState.isLoading, error = null)
         is PartialState.ActiveBranchesLoaded -> currentState.copy(isLoading = false, activeBranches = partialState.branches, selectedBranch = currentState.selectedBranch ?: partialState.autoSelectedBranch, error = null)
         is PartialState.FamilyRelationshipsLoaded -> currentState.copy(isLoading = false, familyRelationships = partialState.relationships, error = null)
-        is PartialState.CitiesLoaded -> currentState.copy(isLoading = false, cities = partialState.cities, error = null)
+        is PartialState.CityPagingChanged -> currentState.copy(
+            cities = partialState.items,
+            isCitiesLoading = partialState.isLoadingFirstPage,
+            isCitiesLoadingMore = partialState.isLoadingNextPage,
+            canLoadMoreCities = !partialState.endReached,
+        )
+        is PartialState.CityPickerOpened -> currentState.copy(activeCityPicker = partialState.target)
         is PartialState.NationalIdChanged -> currentState.resetInquiry().copy(dependentNationalId = partialState.id)
         is PartialState.BirthDateSelected -> currentState.resetInquiry().copy(birthDatePersian = partialState.persianDate, birthDateGregorian = partialState.gregorianDate, birthDateTimeStamp = partialState.timestamp)
         is PartialState.RelationshipSelected -> currentState.resetInquiry().copy(selectedRelationship = partialState.relationship)

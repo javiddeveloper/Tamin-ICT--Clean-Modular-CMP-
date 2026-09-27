@@ -41,6 +41,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -100,6 +101,12 @@ fun TaminStyledTextField(
      * field does.
      */
     visualTransformation: VisualTransformation = VisualTransformation.None,
+    /**
+     * Where the typed value sits. Unspecified, the default, follows the text: a value of digits
+     * alone carries no direction of its own and so starts from the left, even on the RTL page —
+     * [TextAlign.Right] keeps a number field aligned with its Persian label and placeholder.
+     */
+    textAlign: TextAlign = TextAlign.Unspecified,
     /**
      * The typed value's base style. Null, the default, is `bodyLarge`, as every existing field draws
      * it; the field's own color, weight and font are applied on top either way.
@@ -180,6 +187,7 @@ fun TaminStyledTextField(
                         color = taminColors.textPrimary,
                         fontWeight = FontWeight.Medium,
                         fontFamily = applicationFont(),
+                        textAlign = textAlign,
                     ),
                     modifier = Modifier.weight(1f),
                     decorationBox = { innerTextField ->

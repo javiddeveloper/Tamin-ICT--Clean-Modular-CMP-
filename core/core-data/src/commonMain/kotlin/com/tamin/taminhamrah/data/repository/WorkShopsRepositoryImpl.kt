@@ -1,14 +1,18 @@
 package com.tamin.taminhamrah.data.repository
 
+import com.tamin.taminhamrah.data.local.dao.EmployerServicesPageDao
 import com.tamin.taminhamrah.data.mapper.requestId
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toDomainPage
 import com.tamin.taminhamrah.data.mapper.toDto
+import com.tamin.taminhamrah.data.mapper.toPageEntity
+import com.tamin.taminhamrah.data.repository.paging.pageCacheKey
 import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSource
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeContractListDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeListDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeRequestDN
 import com.tamin.taminhamrah.model.legalRepresentative.LegalRepresentativeWorkshopListDN
+import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
@@ -60,6 +64,7 @@ import com.tamin.taminhamrah.model.workshop.WorkShopObjectionDN
 import com.tamin.taminhamrah.model.workshop.WorkShopObjectionQuery
 import com.tamin.taminhamrah.model.workshop.SmsMessageDN
 import com.tamin.taminhamrah.repository.WorkShopsRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -76,6 +81,7 @@ private const val SETTLEMENT_SUBJECTS_PAGE_SIZE = 100
  */
 class WorkShopsRepositoryImpl(
     private val remoteDataSource: WorkShopsRemoteDataSource,
+    private val employerServicesPageDao: EmployerServicesPageDao,
 ) : WorkShopsRepository {
 
     // ------------------------------------------------------------ کارگاه‌های کارفرما
@@ -402,20 +408,88 @@ class WorkShopsRepositoryImpl(
     ): EmployerContactInfoDN =
         remoteDataSource.getEmployerAgreementUserInfo(verificationCode).toDomain()
 
-    override suspend fun getWorkshopsWithoutContract(
+    override fun getWorkshopsWithoutContract(
         page: Int,
-    ): PagedListDN<WorkshopWithoutContractDN> =
-        remoteDataSource.getEmployerWorkshopsWithoutContract(pageQuery(page))
-            .toDomainPage { it.toDomain() }
+    ): Flow<PageDN<WorkshopWithoutContractDN>> {
+        val query = pageQuery(page)
+        val listKey = query.pageCacheKey()
+        return offlineFirstPage(
+            query = query,
+            readCached = {
+                employerServicesPageDao.getWorkshopsWithoutContractSlice(listKey, query.limit, query.start)
+                    .map { it.toDomain() }
+            },
+            fetch = {
+                remoteDataSource.getEmployerWorkshopsWithoutContract(query)
+                    .toDomainPage { it.toDomain() }
+                    .let { PageDN(items = it.items, total = it.total) }
+            },
+            write = { items, replace ->
+                val rows = items.mapIndexed { i, item -> item.toPageEntity(listKey, query.start + i) }
+                if (replace) {
+                    employerServicesPageDao.replaceWorkshopsWithoutContract(listKey, rows)
+                } else {
+                    employerServicesPageDao.upsertWorkshopsWithoutContract(rows)
+                }
+            },
+        )
+    }
 
-    override suspend fun getWorkshopContractRows(
+    /** Offline-first, same contract as [getWorkshopsWithoutContract]; cached per workshop + branch. */
+    override fun getWorkshopContractRows(
         workshopId: String,
         branchCode: String,
         page: Int,
-    ): PagedListDN<WorkshopContractRowDN> =
-        remoteDataSource
-            .getEmployerWorkshopContractList(workshopId, branchCode, pageQuery(page))
-            .toDomainPage { it.toDomain() }
+    ): Flow<PageDN<WorkshopContractRowDN>> {
+        val query = pageQuery(page)
+        val listKey = query.pageCacheKey(workshopId, branchCode)
+        return offlineFirstPage(
+            query = query,
+            readCached = {
+                employerServicesPageDao.getContractRowsSlice(listKey, query.limit, query.start)
+                    .map { it.toDomain() }
+            },
+            fetch = {
+                remoteDataSource.getEmployerWorkshopContractList(workshopId, branchCode, query)
+                    .toDomainPage { it.toDomain() }
+                    .let { PageDN(items = it.items, total = it.total) }
+            },
+            write = { items, replace ->
+                val rows = items.mapIndexed { i, item -> item.toPageEntity(listKey, query.start + i) }
+                if (replace) {
+                    employerServicesPageDao.replaceContractRows(listKey, rows)
+                } else {
+                    employerServicesPageDao.upsertContractRows(rows)
+                }
+            },
+        )
+    }
+
+    /**
+     * The offline-first page shape of the two lists above: cached slice (if any), then the network
+     * page, written back (first page replaces the list, later pages append). Offline with a cached
+     * slice the flow just completes; with nothing cached the error is rethrown.
+     */
+    private fun <T> offlineFirstPage(
+        query: ApiQueryParamDN,
+        readCached: suspend () -> List<T>,
+        fetch: suspend () -> PageDN<T>,
+        write: suspend (items: List<T>, replace: Boolean) -> Unit,
+    ): Flow<PageDN<T>> = flow {
+        val cached = readCached()
+        if (cached.isNotEmpty()) emit(PageDN(items = cached, isFromCache = true))
+
+        val page = try {
+            fetch()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            if (cached.isEmpty()) throw e
+            return@flow
+        }
+        write(page.items, query.start == 0)
+        emit(page)
+    }
 
     override suspend fun submitEmployerAgreement(request: EmployerAgreementSubmissionDN): String =
         remoteDataSource.submitEmployerAgreement(request.toDto())

@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.calculateWagePension.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +12,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -40,6 +40,13 @@ import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toparea.TopAreaState
+import com.tamin.taminhamrah.ui.toparea.driveTopArea
+import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
+import com.tamin.taminhamrah.ui.toparea.reportTopAreaHeight
+import com.tamin.taminhamrah.ui.toparea.straddlePreviousSibling
+import com.tamin.taminhamrah.ui.toparea.topAreaContentPadding
+import com.tamin.taminhamrah.ui.toparea.topAreaContentSpacer
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import org.jetbrains.compose.resources.stringResource
@@ -51,6 +58,9 @@ import taminx.core.core_ui.calculate_wage_pension_multiple_info_body
 import taminx.core.core_ui.calculate_wage_pension_multiple_info_title
 import taminx.core.core_ui.calculate_wage_pension_retry
 import taminx.core.core_ui.ic_info
+
+/** How far [CalculateWagePensionStatsCard] rides up into the header's reserved bottom space. */
+private val StatsCardOverlap = Spacing.xxxl
 
 @Composable
 fun CalculateWagePensionScreen(
@@ -80,44 +90,31 @@ internal fun CalculateWagePensionScreenContent(
     onIntent: (CalculateWagePensionIntent) -> Unit,
 ) {
     val colors = LocalTaminColors.current
-    val hazeState = remember { HazeState(initialBlurEnabled = true) }
     val isInitialLoading = state.isLoading && state.calculation == null
 
-    Scaffold(
-        containerColor = colors.bgPage,
-        topBar = {
-            Box {
-                Column(modifier = Modifier.hazeSource(state = hazeState)) {
-                    CalculateWagePensionHeader(
-                        eligibleAmount = state.displayedEligibleAmount,
-                        legalFloorApplied = state.calculation?.legalFloorApplied == true,
-                        isMultipleWorkshopsEnabled = state.isMultipleWorkshopsEnabled,
-                        onBack = onBack,
-                        onInfoClick = { onIntent(CalculateWagePensionIntent.ShowInfo) },
-                        isLoading = isInitialLoading,
-                    )
-                    Spacer(modifier = Modifier.height(Spacing.xxxl))
-                }
+    val topArea = rememberMeasuredTopAreaState(key = isInitialLoading) { topAreaState ->
+        CalculateWagePensionTopArea(
+            state = state,
+            isLoading = isInitialLoading,
+            topAreaState = topAreaState,
+            onBack = onBack,
+            onInfoClick = { onIntent(CalculateWagePensionIntent.ShowInfo) },
+        )
+    }
+    val scrollState = rememberScrollState()
 
-                CalculateWagePensionStatsCard(
-                    hazeState = hazeState,
-                    premiumYears = state.calculation?.premiumPaymentHistoryYear ?: 0.0,
-                    averageSalary = state.calculation?.averageSalaryLastTwoYears ?: 0L,
-                    isLoading = isInitialLoading,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(horizontal = Spacing.lg),
-                )
-            }
-        },
-    ) { padding ->
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colors.bgPage),
+    ) {
         when {
             isInitialLoading -> {
                 CalculateWagePensionBodyShimmer(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(padding)
                         .navigationBarsPadding()
+                        .padding(topAreaContentPadding(state = topArea))
                         .padding(horizontal = Spacing.page)
                         .padding(top = Spacing.lg, bottom = Spacing.lg),
                 )
@@ -127,7 +124,8 @@ internal fun CalculateWagePensionScreenContent(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(padding)
+                        .navigationBarsPadding()
+                        .padding(topAreaContentPadding(state = topArea))
                         .padding(Spacing.page),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -148,13 +146,15 @@ internal fun CalculateWagePensionScreenContent(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(padding)
-                        .verticalScroll(rememberScrollState())
+                        .driveTopArea(topArea, scrollState)
+                        .verticalScroll(scrollState)
                         .navigationBarsPadding()
                         .padding(horizontal = Spacing.page)
-                        .padding(top = Spacing.lg, bottom = Spacing.lg),
+                        .padding(bottom = Spacing.lg),
                     verticalArrangement = Arrangement.spacedBy(Spacing.md),
                 ) {
+                    Spacer(modifier = Modifier.topAreaContentSpacer(topArea))
+
                     CalculateWagePensionWorkshopSwitchCard(
                         enabled = state.isMultipleWorkshopsEnabled,
                         isLoading = state.isMultipleWorkshopLoading,
@@ -183,6 +183,17 @@ internal fun CalculateWagePensionScreenContent(
                 }
             }
         }
+
+        CalculateWagePensionTopArea(
+            state = state,
+            isLoading = isInitialLoading,
+            topAreaState = topArea,
+            onBack = onBack,
+            onInfoClick = { onIntent(CalculateWagePensionIntent.ShowInfo) },
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .reportTopAreaHeight(topArea),
+        )
     }
 
     state.selectedChartYearIndex?.let { index ->
@@ -225,6 +236,39 @@ internal fun CalculateWagePensionScreenContent(
             },
             dismissButton = {},
         )
+    }
+}
+
+@Composable
+private fun CalculateWagePensionTopArea(
+    state: CalculateWagePensionUiState,
+    isLoading: Boolean,
+    topAreaState: TopAreaState,
+    onBack: () -> Unit,
+    onInfoClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        CalculateWagePensionHeader(
+            eligibleAmount = state.displayedEligibleAmount,
+            legalFloorApplied = state.calculation?.legalFloorApplied == true,
+            isMultipleWorkshopsEnabled = state.isMultipleWorkshopsEnabled,
+            onBack = onBack,
+            onInfoClick = onInfoClick,
+            isLoading = isLoading,
+            topAreaState = topAreaState,
+            bottomPadding = Spacing.lg + StatsCardOverlap,
+            modifier = Modifier,
+        )
+        CalculateWagePensionStatsCard(
+            premiumYears = state.calculation?.premiumPaymentHistoryYear ?: 0.0,
+            averageSalary = state.calculation?.averageSalaryLastTwoYears ?: 0L,
+            isLoading = isLoading,
+            modifier = Modifier
+                .straddlePreviousSibling(StatsCardOverlap)
+                .padding(horizontal = Spacing.lg),
+        )
+        Spacer(Modifier.height(Spacing.lg))
     }
 }
 

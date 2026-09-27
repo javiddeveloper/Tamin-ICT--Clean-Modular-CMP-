@@ -125,6 +125,7 @@ private fun CompleteEmployerInfoUiState.answer(
         branches = persistentListOf(),
         activeBottomSheet = null,
     )
+    CompleteEmployerInfoIntent.ProvincePickerLoadMore -> this
 
     is CompleteEmployerInfoIntent.SelectCity -> copy(
         selectedCity = intent.city,
@@ -132,6 +133,7 @@ private fun CompleteEmployerInfoUiState.answer(
         branches = PreviewBranches,
         activeBottomSheet = null,
     )
+    CompleteEmployerInfoIntent.CityPickerLoadMore -> this
 
     is CompleteEmployerInfoIntent.SelectBranch ->
         copy(selectedBranch = intent.branch, activeBottomSheet = null)

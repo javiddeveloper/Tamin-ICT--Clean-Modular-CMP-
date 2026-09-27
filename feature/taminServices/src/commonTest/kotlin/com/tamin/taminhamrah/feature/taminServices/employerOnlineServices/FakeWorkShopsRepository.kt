@@ -8,7 +8,9 @@ import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadDN
 import com.tamin.taminhamrah.model.util.PagedListDN
 import com.tamin.taminhamrah.model.workshop.*
 import com.tamin.taminhamrah.repository.WorkShopsRepository
+import com.tamin.taminhamrah.model.paging.PageDN
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 /**
  * A [WorkShopsRepository] scoped to what [com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.EmployerOnlineServicesViewModel]
@@ -95,20 +97,22 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         return contactInfo
     }
 
-    override suspend fun getWorkshopsWithoutContract(page: Int): PagedListDN<WorkshopWithoutContractDN> {
+    override fun getWorkshopsWithoutContract(page: Int): Flow<PageDN<WorkshopWithoutContractDN>> = flow {
         failIf(Call.WORKSHOPS_WITHOUT_CONTRACT)
         lastWorkshopsWithoutContractPage = page
-        return workshopsWithoutContract.page(page)
+        val result = workshopsWithoutContract.page(page)
+        emit(PageDN(items = result.items, total = result.total))
     }
 
-    override suspend fun getWorkshopContractRows(
+    override fun getWorkshopContractRows(
         workshopId: String,
         branchCode: String,
         page: Int,
-    ): PagedListDN<WorkshopContractRowDN> {
+    ): Flow<PageDN<WorkshopContractRowDN>> = flow {
         lastContractRowsArgs = Triple(workshopId, branchCode, page)
         failIf(Call.CONTRACT_ROWS)
-        return contractRows.page(page)
+        val result = contractRows.page(page)
+        emit(PageDN(items = result.items, total = result.total))
     }
     private fun <T> PagedListDN<T>.page(page: Int): PagedListDN<T> {
         val fromIndex = (page * WORKSHOP_PAGE_SIZE).coerceIn(0, items.size)

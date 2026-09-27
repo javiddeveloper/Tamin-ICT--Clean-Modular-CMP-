@@ -16,10 +16,10 @@ import com.tamin.taminhamrah.useCases.bankAccount.GetBankAccountListUseCase
 import com.tamin.taminhamrah.useCases.bankAccount.RegisterBankAccountUseCase
 import com.tamin.taminhamrah.useCases.common.GetRecipientListUseCase
 import com.tamin.taminhamrah.useCases.common.GetBeneficiaryUseCase
-import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
+import com.tamin.taminhamrah.useCases.common.GetCitiesPageUseCase
 import com.tamin.taminhamrah.useCases.common.GetCityUseCase
-import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
-import com.tamin.taminhamrah.useCases.common.GetCitiesByProvinceUseCase
+import com.tamin.taminhamrah.useCases.common.GetProvincesPageUseCase
+import com.tamin.taminhamrah.useCases.common.GetCitiesByProvincePageUseCase
 import com.tamin.taminhamrah.useCases.common.GetInsuranceTypesUseCase
 import com.tamin.taminhamrah.useCases.common.CheckUserTypeUseCase
 import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
@@ -385,10 +385,10 @@ val domainModule = module {
     factoryOf(::GetFinalSurvivorPensionPDFUseCase)
     factoryOf(::SubmitFinalSurvivorPensionUseCase)
     factoryOf(::GetAgeUseCase)
-    factoryOf(::GetCitiesUseCase)
+    factoryOf(::GetCitiesPageUseCase)
     factoryOf(::GetCityUseCase)
-    factoryOf(::GetProvincesUseCase)
-    factoryOf(::GetCitiesByProvinceUseCase)
+    factoryOf(::GetProvincesPageUseCase)
+    factoryOf(::GetCitiesByProvincePageUseCase)
     factoryOf(::GetInsuranceTypesUseCase)
     factoryOf(::CheckUserTypeUseCase)
     factoryOf(::ChangeMobileUseCase)
