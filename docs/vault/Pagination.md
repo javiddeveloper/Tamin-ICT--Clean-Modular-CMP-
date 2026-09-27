@@ -169,7 +169,10 @@ bump wipes local data. Then:
    methods returning `PagedListDN`; they became `Flow<PageDN<…>>` (a suspend fun can't emit the
    cache and then the network) and every fake was updated. The nested workshop block is stored via
    `@Embedded(prefix = "workshop_") WorkshopSummaryColumns`. **`getEmployerAgreements` is still
-   network-only** — it is shared with 4 feature/workshops ViewModels and was left for later.
+   network-only** — it is shared with 4 feature/workshops ViewModels and was left for later;
+   `JobTitlePageDao` + `JobTitlePageEntity` + `CommonRepositoryImpl.getJobTitlePage` — the
+   new-member form's job picker; its one-shot by-code lookup uses `.last()` and gets its own
+   `listKey` from the `JOB_CODE` filter.
 
    The inbox's `drop/take` over a plain table loads the whole table; fine for tens–hundreds of rows. For bigger tables add a
    `LIMIT :limit OFFSET :offset` query (`CityProvinceDao.getCitiesSlice`). If the list has

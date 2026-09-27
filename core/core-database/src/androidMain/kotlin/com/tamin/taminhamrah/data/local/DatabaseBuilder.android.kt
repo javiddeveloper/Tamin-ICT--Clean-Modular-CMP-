@@ -26,6 +26,7 @@ import com.tamin.taminhamrah.data.local.dao.ContractAffairDao
 import com.tamin.taminhamrah.data.local.dao.InspectionDao
 import com.tamin.taminhamrah.data.local.dao.ConstructionInsurancePageDao
 import com.tamin.taminhamrah.data.local.dao.EmployerServicesPageDao
+import com.tamin.taminhamrah.data.local.dao.JobTitlePageDao
 
 @Suppress("ACTUAL_ANNOTATIONS_NOT_MATCH_EXPECT")
 actual abstract class TaminXDatabase : RoomDatabase() {
@@ -51,6 +52,7 @@ actual abstract class TaminXDatabase : RoomDatabase() {
     actual abstract fun inspectionDao(): InspectionDao
     actual abstract fun constructionInsurancePageDao(): ConstructionInsurancePageDao
     actual abstract fun employerServicesPageDao(): EmployerServicesPageDao
+    actual abstract fun jobTitlePageDao(): JobTitlePageDao
     actual abstract fun homeContentDao(): HomeContentDao
 }
 

@@ -44,6 +44,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.transform
@@ -76,7 +77,7 @@ class WorkshopRecentlyAddedMembersViewModel(
     >(initialState = WorkshopRecentlyAddedMembersUiState()) {
 
     private val jobPaginator = Paginator(
-        loadPage = { query -> getJobTitlePage(query).first() },
+        loadPages = { query -> getJobTitlePage(query) },
     )
     private val cityPaginator = Paginator(
         loadPages = { query -> getCitiesPage(query) },
@@ -333,7 +334,7 @@ class WorkshopRecentlyAddedMembersViewModel(
                 filters = listOf(ApiFilterDN(FilterProperty.JOB_CODE, jobCode, FilterOperator.EQUAL)),
             )
             val name = runCatching {
-                getJobTitlePage(byCode).first().items
+                getJobTitlePage(byCode).last().items // offline-first: network, or the cache when offline
                     .firstOrNull { it.jobCode == jobCode }?.jobDescription
             }.getOrNull()
             if (name != null) {
