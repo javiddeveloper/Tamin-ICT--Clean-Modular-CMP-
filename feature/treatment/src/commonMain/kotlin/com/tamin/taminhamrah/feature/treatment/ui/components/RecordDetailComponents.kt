@@ -1,7 +1,6 @@
 package com.tamin.taminhamrah.feature.treatment.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,7 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.tamin.taminhamrah.ui.components.CopyIconButton
+import com.tamin.taminhamrah.ui.components.CopyCodeChip
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.rememberCopyAction
 import com.tamin.taminhamrah.ui.components.LabeledBlock
@@ -75,6 +74,7 @@ fun RecordSummaryCard(
             label = stringResource(Res.string.detail_tracking_code),
             value = trackingCode,
             copyValue = trackingCodeRaw,
+            copyAsChip = true,
         )
         TaminDivider(modifier = Modifier.padding(vertical = Spacing.xxs))
         DetailRow(label = stringResource(Res.string.detail_date), value = date)
@@ -109,26 +109,12 @@ fun PrescriptionItemCard(
         verticalArrangement = Arrangement.spacedBy(Spacing.cardGap),
     ) {
         // Drug names are long, Latin and easy to mistype — the one field on this card someone
-        // actually needs to carry somewhere else. The whole line copies, not just the glyph.
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = rememberCopyAction(name)),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-        ) {
-            Text(
-                text = name,
-                style = MaterialTheme.typography.titleSmall,
-                color = colors.blueText,
-                modifier = Modifier.weight(1f),
-            )
-            CopyIconButton(
-                value = name,
-                tint = colors.blueText,
-                interactive = false,
-            )
-        }
+        // actually needs to carry somewhere else, so it sits in the shared copy chip.
+        CopyCodeChip(
+            text = name,
+            onCopy = rememberCopyAction(name, announce = false),
+            numeric = false,
+        )
         Column(
             modifier = Modifier
                 .fillMaxWidth()

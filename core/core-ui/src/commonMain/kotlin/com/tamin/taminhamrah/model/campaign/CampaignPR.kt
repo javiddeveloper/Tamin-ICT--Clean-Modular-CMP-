@@ -5,15 +5,12 @@ import androidx.compose.ui.graphics.Color
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.ui.theme.CampaignFreelanceEnd
 import com.tamin.taminhamrah.ui.theme.CampaignFreelanceMid
-import com.tamin.taminhamrah.ui.theme.CampaignFreelanceShadow
 import com.tamin.taminhamrah.ui.theme.CampaignFreelanceStart
 import com.tamin.taminhamrah.ui.theme.CampaignHousewifeEnd
 import com.tamin.taminhamrah.ui.theme.CampaignHousewifeMid
-import com.tamin.taminhamrah.ui.theme.CampaignHousewifeShadow
 import com.tamin.taminhamrah.ui.theme.CampaignHousewifeStart
 import com.tamin.taminhamrah.ui.theme.CampaignStudentEnd
 import com.tamin.taminhamrah.ui.theme.CampaignStudentMid
-import com.tamin.taminhamrah.ui.theme.CampaignStudentShadow
 import com.tamin.taminhamrah.ui.theme.CampaignStudentStart
 
 /**
@@ -37,7 +34,6 @@ enum class CampaignKind(
     /** Where [gradientMid] sits along the gradient line. The design sets it per card. */
     val gradientMidStop: Float,
     val gradientEnd: Color,
-    val shadowTint: Color,
     val ctaTone: Color,
     /**
      * How much of the card width the body copy runs to. The design gives the first card 92% and
@@ -51,7 +47,6 @@ enum class CampaignKind(
         gradientMid = CampaignHousewifeMid,
         gradientMidStop = 0.60f,
         gradientEnd = CampaignHousewifeEnd,
-        shadowTint = CampaignHousewifeShadow,
         ctaTone = CampaignHousewifeStart,
         bodyWidthFraction = 0.92f,
     ),
@@ -61,7 +56,6 @@ enum class CampaignKind(
         gradientMid = CampaignFreelanceMid,
         gradientMidStop = 0.55f,
         gradientEnd = CampaignFreelanceEnd,
-        shadowTint = CampaignFreelanceShadow,
         ctaTone = CampaignFreelanceStart,
         bodyWidthFraction = 0.82f,
     ),
@@ -71,7 +65,6 @@ enum class CampaignKind(
         gradientMid = CampaignStudentMid,
         gradientMidStop = 0.58f,
         gradientEnd = CampaignStudentEnd,
-        shadowTint = CampaignStudentShadow,
         ctaTone = CampaignStudentStart,
         bodyWidthFraction = 0.82f,
     ),

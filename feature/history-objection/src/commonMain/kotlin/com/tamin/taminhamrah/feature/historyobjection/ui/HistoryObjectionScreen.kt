@@ -25,10 +25,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -44,7 +42,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius as CanvasCornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.SolidColor
@@ -60,13 +57,12 @@ import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
+import com.tamin.taminhamrah.ui.components.CopyCodeChip
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
 import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.ErrorStateView
-import com.tamin.taminhamrah.ui.components.GlassIconTile
 import com.tamin.taminhamrah.ui.components.IconBox
 import com.tamin.taminhamrah.ui.components.NumericText
-import com.tamin.taminhamrah.ui.components.SectionLabel
 import com.tamin.taminhamrah.ui.components.StatusPill
 import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminDivider
@@ -74,7 +70,6 @@ import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.components.dashedOutline
 import com.tamin.taminhamrah.ui.components.rememberCopyAction
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
@@ -94,14 +89,14 @@ import taminx.core.core_ui.action_cancel
 import taminx.core.core_ui.history_objection_active_request_message
 import taminx.core.core_ui.history_objection_active_request_title
 import taminx.core.core_ui.history_objection_add_new
-import taminx.core.core_ui.history_objection_denied_anonymous_message
-import taminx.core.core_ui.history_objection_denied_pensioner_message
 import taminx.core.core_ui.history_objection_confirm_send_action
 import taminx.core.core_ui.history_objection_confirm_send_message
 import taminx.core.core_ui.history_objection_confirm_send_title
 import taminx.core.core_ui.history_objection_delete
 import taminx.core.core_ui.history_objection_delete_confirm_message
 import taminx.core.core_ui.history_objection_delete_confirm_title
+import taminx.core.core_ui.history_objection_denied_anonymous_message
+import taminx.core.core_ui.history_objection_denied_pensioner_message
 import taminx.core.core_ui.history_objection_description_label
 import taminx.core.core_ui.history_objection_description_placeholder
 import taminx.core.core_ui.history_objection_edit
@@ -109,9 +104,8 @@ import taminx.core.core_ui.history_objection_empty_subtitle
 import taminx.core.core_ui.history_objection_empty_title
 import taminx.core.core_ui.history_objection_end_date
 import taminx.core.core_ui.history_objection_insurance_number
-import taminx.core.core_ui.history_objection_list_title
-import taminx.core.core_ui.history_objection_send_success_tracking_label
 import taminx.core.core_ui.history_objection_send_success_title
+import taminx.core.core_ui.history_objection_send_success_tracking_label
 import taminx.core.core_ui.history_objection_start_date
 import taminx.core.core_ui.history_objection_status_not_sent
 import taminx.core.core_ui.history_objection_submit
@@ -119,23 +113,20 @@ import taminx.core.core_ui.history_objection_submit_success_confirm
 import taminx.core.core_ui.history_objection_title
 import taminx.core.core_ui.history_objection_workshop_code
 import taminx.core.core_ui.history_objection_workshop_name
-import taminx.core.core_ui.ic_mobile
 import taminx.core.core_ui.ic_tamin_chevron_back
-import taminx.core.core_ui.ic_tamin_copy
 import taminx.core.core_ui.ic_tamin_edit
 import taminx.core.core_ui.ic_trash
 import taminx.core.core_ui.ic_warning
 import taminx.core.core_ui.send_history_access_denied_action
 import taminx.core.core_ui.send_history_access_denied_title
 import taminx.feature.history_objection.generated.resources.ic_history_objection
+import androidx.compose.ui.geometry.CornerRadius as CanvasCornerRadius
 import taminx.feature.history_objection.generated.resources.Res as FeatureRes
 
 private val EmptyStateIconSize = 64.dp
 private val AddButtonHeight = 50.dp
 private val AddButtonIconSize = 17.dp
 private val AddButtonBorderColor = Color(0xFFB9CBEF)
-private val WorkshopCodeIconSize = 14.dp
-private const val WorkshopCodeOutlineAlpha = 0.2f
 private val DescriptionFieldMinHeight = 96.dp
 
 @Composable
@@ -609,7 +600,8 @@ private fun WorkshopCodeRow(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    val copy = rememberCopyAction(code)
+    // announce = false: the chip's own tick is the confirmation.
+    val copy = rememberCopyAction(code, announce = false)
 
     Row(
         modifier = modifier
@@ -619,28 +611,7 @@ private fun WorkshopCodeRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(text = label, style = MaterialTheme.typography.bodySmall, color = colors.textMuted)
-        Row(
-            modifier = Modifier
-                .clip(RoundedCornerShape(CornerRadius.lg))
-                .background(colors.blueBg)
-                .dashedOutline(colors.blueText.copy(alpha = WorkshopCodeOutlineAlpha), CornerRadius.lg, Thickness.medium)
-                .clickable(onClick = copy)
-                .padding(horizontal = Spacing.sm, vertical = Spacing.xs),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
-        ) {
-            Icon(
-                imageVector = vectorResource(Res.drawable.ic_tamin_copy),
-                contentDescription = null,
-                tint = colors.blueText,
-                modifier = Modifier.size(WorkshopCodeIconSize),
-            )
-            NumericText(
-                text = code,
-                style = MaterialTheme.typography.titleSmall,
-                color = colors.blueText,
-            )
-        }
+        CopyCodeChip(text = code, onCopy = copy, contentDescription = label)
     }
 }
 

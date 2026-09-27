@@ -31,6 +31,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.components.CustomChip
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminDivider
+import com.tamin.taminhamrah.ui.components.startToEndGradient
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminHamrahTheme
@@ -61,11 +62,12 @@ internal fun ActiveRelationItemCard(
 ) {
     val taminColors = LocalTaminColors.current
 
-    val topHeaderBackgroundColor = if (item.isActive) {
-        taminColors.greenBg
-    } else {
-        taminColors.border.copy(alpha = 0.12f)
-    }
+    val topHeaderGradient = startToEndGradient(
+        listOf(
+            if (item.isActive) taminColors.greenBg else taminColors.border.copy(alpha = 0.12f),
+            taminColors.bgSurface,
+        ),
+    )
 
     Card(
         modifier = modifier
@@ -85,7 +87,7 @@ internal fun ActiveRelationItemCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(topHeaderBackgroundColor)
+                    .background(topHeaderGradient)
                     .padding(horizontal = Spacing.lg, vertical = Spacing.md),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically

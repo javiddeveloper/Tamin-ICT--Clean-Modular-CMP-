@@ -538,6 +538,12 @@ fun InsuranceCardCarousel(
     pageCount: Int,
     pagerState: PagerState,
     modifier: Modifier = Modifier,
+    /**
+     * False when the caller draws the dots itself. The hub does: its carousel sits in a header
+     * floating over the page, and dots left inside it are floating furniture the content scrolls
+     * *behind* instead of below.
+     */
+    showIndicator: Boolean = true,
     card: @Composable (page: Int) -> Unit,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
@@ -575,7 +581,7 @@ fun InsuranceCardCarousel(
                 card(page)
             }
         }
-        if (pageCount > 1) {
+        if (pageCount > 1 && showIndicator) {
             TaminPageIndicator(
                 pageCount = pageCount,
                 pagerState = pagerState,
