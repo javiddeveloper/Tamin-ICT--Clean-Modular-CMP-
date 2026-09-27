@@ -35,6 +35,7 @@ import com.tamin.taminhamrah.ui.components.DetailRow
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminDivider
 import com.tamin.taminhamrah.ui.components.rememberCopyAction
+import com.tamin.taminhamrah.ui.components.rememberCopyCodeChipState
 import com.tamin.taminhamrah.ui.components.startToEndGradient
 import com.tamin.taminhamrah.ui.theme.ButtonDimens
 import com.tamin.taminhamrah.ui.theme.CornerRadius
@@ -114,21 +115,15 @@ internal fun PensionStatusCard(
                     value = item.insuranceNumber,
                 )
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-                ) {
-                    InfoFieldRow(
-                        label = stringResource(Res.string.pension_status_establishment_date),
-                        value = item.pensionerBaseDate.toFormattedDate(),
-                        modifier = Modifier.weight(1f),
-                    )
-                    InfoFieldRow(
-                        label = stringResource(Res.string.pension_status_payment_date),
-                        value = item.paymentDate.toFormattedDate(),
-                        modifier = Modifier.weight(1f),
-                    )
-                }
+                // Full-width rows: at half width the label and the date ran into each other.
+                InfoFieldRow(
+                    label = stringResource(Res.string.pension_status_establishment_date),
+                    value = item.pensionerBaseDate.toFormattedDate(),
+                )
+                InfoFieldRow(
+                    label = stringResource(Res.string.pension_status_payment_date),
+                    value = item.paymentDate.toFormattedDate(),
+                )
 
                 InfoFieldRow(
                     label = stringResource(Res.string.pension_status_order_type),
@@ -293,7 +288,9 @@ private fun CopyableNumberBox(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    val copy = rememberCopyAction(value)
+    val copiedState = rememberCopyCodeChipState()
+    // The glyph's tick is the confirmation, so no toast on top.
+    val copy = rememberCopyAction(value, announce = false)
     val shape = RoundedCornerShape(CornerRadius.lg)
 
     Box(
@@ -301,7 +298,13 @@ private fun CopyableNumberBox(
             .clip(shape)
             .background(colors.bgPage)
             .border(Thickness.border, colors.border, shape)
-            .then(if (value.isNotBlank()) Modifier.clickable(onClick = copy) else Modifier)
+            .then(
+                if (value.isNotBlank()) {
+                    Modifier.clickable { copy(); copiedState.isCopied = true }
+                } else {
+                    Modifier
+                },
+            )
             .padding(Spacing.md),
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
@@ -322,6 +325,7 @@ private fun CopyableNumberBox(
                 label = label,
                 tint = colors.blueText,
                 interactive = false,
+                copiedState = copiedState,
                 modifier = Modifier.align(Alignment.TopEnd),
             )
         }

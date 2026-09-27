@@ -19,6 +19,7 @@ import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.action_copied
 import taminx.core.core_ui.action_copy
+import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.ic_tamin_copy
 
 /**
@@ -44,21 +45,34 @@ fun CopyIconButton(
      * already carries the action for a screen reader.
      */
     interactive: Boolean = true,
+    /**
+     * When set, the glyph turns into a green tick for a beat once copied — as [CopyCodeChip] does —
+     * and the tick replaces the toast. Hoisted so an enclosing row that copies can tick it too.
+     */
+    copiedState: CopyCodeChipState? = null,
 ) {
-    val copy = rememberCopyAction(value)
+    val copy = rememberCopyAction(value, announce = copiedState == null)
     val copyAction = stringResource(Res.string.action_copy)
+    val isCopied = copiedState?.isCopied == true
+    if (copiedState != null) ClearCopiedAfterFeedback(copiedState)
 
     Icon(
-        imageVector = vectorResource(Res.drawable.ic_tamin_copy),
+        imageVector = vectorResource(if (isCopied) Res.drawable.ic_tamin_check else Res.drawable.ic_tamin_copy),
         contentDescription = if (interactive) {
             label?.let { "$copyAction $it" } ?: copyAction
         } else {
             null
         },
-        tint = tint,
+        tint = if (isCopied) LocalTaminColors.current.greenText else tint,
         modifier = modifier
             .size(IconSize.small)
-            .then(if (interactive) Modifier.clickable(onClick = copy) else Modifier),
+            .then(
+                if (interactive) {
+                    Modifier.clickable { copy(); copiedState?.isCopied = true }
+                } else {
+                    Modifier
+                },
+            ),
     )
 }
 

@@ -53,11 +53,7 @@ fun CopyCodeChip(
 ) {
     val colors = LocalTaminColors.current
     val isCopied = state.isCopied
-    LaunchedEffect(isCopied) {
-        if (!isCopied) return@LaunchedEffect
-        delay(CopiedFeedbackMillis.milliseconds)
-        state.isCopied = false
-    }
+    ClearCopiedAfterFeedback(state)
 
     Row(
         modifier = modifier
@@ -103,6 +99,17 @@ class CopyCodeChipState {
 
 @Composable
 fun rememberCopyCodeChipState(): CopyCodeChipState = remember { CopyCodeChipState() }
+
+/** Puts the copy glyph back once the tick has stood in for it long enough. */
+@Composable
+internal fun ClearCopiedAfterFeedback(state: CopyCodeChipState) {
+    val isCopied = state.isCopied
+    LaunchedEffect(isCopied) {
+        if (!isCopied) return@LaunchedEffect
+        delay(CopiedFeedbackMillis.milliseconds)
+        state.isCopied = false
+    }
+}
 
 /** `padding:4px 9px; border-radius:11px; border:1.4px dashed`, with a 13px glyph. */
 private val ChipCorner = 11.dp
