@@ -138,6 +138,8 @@ import com.tamin.taminhamrah.feature.taminServices.navigateToInstallmentManageme
 import com.tamin.taminhamrah.feature.taminServices.navigateToInstallmentDebitList
 import com.tamin.taminhamrah.feature.taminServices.navigateToBeneficiaries
 import com.tamin.taminhamrah.feature.taminServices.sendInsuranceHistoryToInstitutionsScreen
+import com.tamin.taminhamrah.feature.taminServices.FuneralAllowanceRoute
+import com.tamin.taminhamrah.feature.taminServices.funeralAllowanceScreen
 import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
 import com.tamin.taminhamrah.feature.taminServices.workersPaymentInfoScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
@@ -612,6 +614,15 @@ internal fun TaminHamrahNavGraph(
                 )
 
                 calculateWagePensionScreen(onBack = { navController.popBackStack() })
+                funeralAllowanceScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToBankAccount = {
+                        navController.navigate(ProfileRoute.BankAccount) {
+                            popUpTo(FuneralAllowanceRoute) { inclusive = true }
+                        }
+                    },
+                )
+
                 retirementPensionScreen(onBack = { navController.popBackStack() })
                 prescriptionScreen(onBack = { navController.popBackStack() })
                 deservedTreatmentScreen(onBack = { navController.popBackStack() })
