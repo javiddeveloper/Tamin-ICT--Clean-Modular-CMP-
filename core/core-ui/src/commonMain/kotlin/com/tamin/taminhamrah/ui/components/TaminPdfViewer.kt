@@ -8,7 +8,7 @@ package com.tamin.taminhamrah.ui.components
  * second time, and the person is told it was already downloaded. Otherwise, it asks for the file,
  * drains the download's channel **once** (a [io.ktor.utils.io.ByteReadChannel] is single-use) and
  * uses those bytes for both jobs: rendering every page inline ([PdfPagesView]) and saving to the
- * device with a notification ([rememberPdfSaver]).
+ * device with a notification and an in-app toast ([rememberPdfSaver]).
  *
  * Callers own the file's name and how it is fetched; they never touch ktor or the file system.
  *
@@ -37,6 +37,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
+import com.tamin.taminhamrah.ui.components.toast.AppToastHost
+import com.tamin.taminhamrah.ui.components.toast.LocalToaster
+import com.tamin.taminhamrah.ui.components.toast.success
 import com.tamin.taminhamrah.ui.looksLikePdf
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -79,6 +82,8 @@ fun TaminPdfViewer(
     // Guards against an earlier screen's PDF still sitting in state: nothing is drained until this
     // viewer is the one that asked for a download.
     var awaitingDownload by remember(fileName) { mutableStateOf(false) }
+    // What the saver told the person, repeated as a toast at the top of the viewer.
+    var savedNotice by remember(fileName) { mutableStateOf<String?>(null) }
 
     LaunchedEffect(fileName, pdf) {
         val saved = saver.load(fileName)
@@ -90,7 +95,7 @@ fun TaminPdfViewer(
         } else {
             bytes = saved
             // Nothing to write — this only reports that the file was downloaded before.
-            saver.save(fileName, saved)
+            savedNotice = saver.save(fileName, saved)
         }
     }
 
@@ -111,45 +116,52 @@ fun TaminPdfViewer(
         // body is treated exactly like "no file at all": the message below, no render, no save.
         val usable = drained?.takeIf { it.looksLikePdf() }
         bytes = usable ?: ByteArray(0)
-        usable?.let { saver.save(fileName, it) }
+        usable?.let { savedNotice = saver.save(fileName, it) }
     }
 
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        Surface(modifier = Modifier.fillMaxSize(), color = colors.bgPage) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                TaminTopAppBar(
-                    title = title,
-                    background = background,
-                    navigationIcon = {
-                        TaminTopAppBarButton(
-                            icon = vectorResource(Res.drawable.ic_tamin_cross),
-                            contentDescription = stringResource(Res.string.document_viewer_close),
-                            onClick = onDismiss,
+        // Its own host: the dialog is a separate window, so the app's toaster would draw behind it.
+        Box(modifier = Modifier.fillMaxSize()) {
+            AppToastHost {
+                val toaster = LocalToaster.current
+                LaunchedEffect(savedNotice) { savedNotice?.let { toaster.success(it) } }
+                Surface(modifier = Modifier.fillMaxSize(), color = colors.bgPage) {
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        TaminTopAppBar(
+                            title = title,
+                            background = background,
+                            navigationIcon = {
+                                TaminTopAppBarButton(
+                                    icon = vectorResource(Res.drawable.ic_tamin_cross),
+                                    contentDescription = stringResource(Res.string.document_viewer_close),
+                                    onClick = onDismiss,
+                                )
+                            },
                         )
-                    },
-                )
-                when (val ready = bytes) {
-                    null -> Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(Spacing.page)
-                            .clip(RoundedCornerShape(CornerRadius.card))
-                            .shimmer(),
-                    )
-                    else -> if (ready.isEmpty()) {
-                        if (showEmptyStateTile) {
-                            EmptyStateMessage(
-                                icon = vectorResource(Res.drawable.ic_warning),
-                                title = emptyMessage,
-                                showIconTile = true,
+                        when (val ready = bytes) {
+                            null -> Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(Spacing.page)
+                                    .clip(RoundedCornerShape(CornerRadius.card))
+                                    .shimmer(),
                             )
-                        } else {
-                            Box(Modifier.fillMaxSize(), Alignment.Center) {
-                                Text(text = emptyMessage, color = colors.textSecondary)
+                            else -> if (ready.isEmpty()) {
+                                if (showEmptyStateTile) {
+                                    EmptyStateMessage(
+                                        icon = vectorResource(Res.drawable.ic_warning),
+                                        title = emptyMessage,
+                                        showIconTile = true,
+                                    )
+                                } else {
+                                    Box(Modifier.fillMaxSize(), Alignment.Center) {
+                                        Text(text = emptyMessage, color = colors.textSecondary)
+                                    }
+                                }
+                            } else {
+                                PdfPagesView(pdfBytes = ready, modifier = Modifier.fillMaxSize())
                             }
                         }
-                    } else {
-                        PdfPagesView(pdfBytes = ready, modifier = Modifier.fillMaxSize())
                     }
                 }
             }

@@ -14,7 +14,7 @@ import com.tamin.taminhamrah.feature.requestPaymentForIllDays.ui.wizard.IllDaysW
 import com.tamin.taminhamrah.feature.requestPaymentForIllDays.ui.wizard.IllDaysWizardViewModel
 import com.tamin.taminhamrah.mapper.common.toCityPresentation
 import com.tamin.taminhamrah.mapper.requestPaymentForIllDays.toPresentation
-import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
+import com.tamin.taminhamrah.useCases.common.GetCitiesPageUseCase
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.CalcIllnessAmountUseCase
 import com.tamin.taminhamrah.useCases.requestPaymentForIllDays.GetCovidResultUseCase
@@ -65,7 +65,7 @@ class IllDaysViewModelRobolectricTest {
 
     private fun buildWizardViewModel(): IllDaysWizardViewModel = IllDaysWizardViewModel(
         getIllDaysInsuredMainInfoUseCase = GetIllDaysInsuredMainInfoUseCase(illDaysRepository),
-        getCitiesUseCase = GetCitiesUseCase(cityRepository),
+        getCitiesPageUseCase = GetCitiesPageUseCase(cityRepository),
         getCovidResultUseCase = GetCovidResultUseCase(illDaysRepository),
         uploadImageUseCase = UploadImageUseCase(contractsRepository),
         sendRequestForIllDayUseCase = SendRequestForIllDayUseCase(illDaysRepository),

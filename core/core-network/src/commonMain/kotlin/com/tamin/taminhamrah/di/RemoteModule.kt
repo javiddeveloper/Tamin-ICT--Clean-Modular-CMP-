@@ -11,7 +11,9 @@ import com.tamin.taminhamrah.apiService.VersionHistoryApiServiceImpl
 import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSource
 import com.tamin.taminhamrah.dataSource.addDependent.AddDependentRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSource
+import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSourceFakeImpl
 import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.agent.AgentRemoteDataSourceSelector
 import com.tamin.taminhamrah.dataSource.paymentSource.FakePaymentGatewayRemoteDataSource
 import com.tamin.taminhamrah.dataSource.paymentSource.PaymentGatewayRemoteDataSource
 import com.tamin.taminhamrah.dataSource.paymentSource.PaymentGatewayRemoteDataSourceImpl
@@ -71,6 +73,8 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
 import com.tamin.taminhamrah.dataSource.fractionContract.FractionContractRemoteDataSource
 import com.tamin.taminhamrah.dataSource.fractionContract.FractionContractRemoteDataSourceImpl
+import com.tamin.taminhamrah.dataSource.funeralAllowance.FuneralAllowanceRemoteDataSource
+import com.tamin.taminhamrah.dataSource.funeralAllowance.FuneralAllowanceRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.constructionInsurance.ConstructionInsuranceRemoteDataSource
 import com.tamin.taminhamrah.dataSource.constructionInsurance.ConstructionInsuranceRemoteDataSourceImpl
 import com.tamin.taminhamrah.dataSource.inquiryEducation.InquiryEducationRemoteDataSource
@@ -241,12 +245,23 @@ val remoteModule = module {
         )
     }
 
+    /**
+     * The live assistant, unless Developer Options → «شبیه‌سازی دستیار هوشمند» puts the
+     * fixture-backed fake in front of it (debug builds only; the mode is read per call).
+     */
     single<AgentRemoteDataSource> {
-        // The live assistant. AgentRemoteDataSourceFakeImpl serves local fixtures for offline work.
-        AgentRemoteDataSourceImpl(
-            agentApiService = get(named("agentApiService")),
-            errorParser = get(),
-            json = get()
+        val developerOptionsRepository = get<DeveloperOptionsRepository>()
+        AgentRemoteDataSourceSelector(
+            real = AgentRemoteDataSourceImpl(
+                agentApiService = get(named("agentApiService")),
+                errorParser = get(),
+                json = get()
+            ),
+            fake = AgentRemoteDataSourceFakeImpl(
+                json = get(),
+                mode = { developerOptionsRepository.getAgentMockMode() }
+            ),
+            developerOptionsRepository = developerOptionsRepository
         )
     }
 
@@ -314,6 +329,13 @@ val remoteModule = module {
     single<InquiryEducationRemoteDataSource> {
         InquiryEducationRemoteDataSourceImpl(
             inquiryEducationApiService = get(),
+            errorParser = get()
+        )
+    }
+
+    single<FuneralAllowanceRemoteDataSource> {
+        FuneralAllowanceRemoteDataSourceImpl(
+            apiService = get(),
             errorParser = get()
         )
     }

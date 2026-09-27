@@ -4,9 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -17,16 +19,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopBannerTone
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopDocumentsPanel
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFieldSlot
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopFormBanner
-import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopPickerField
 import com.tamin.taminhamrah.feature.workshops.ui.components.WorkshopTextField
 import com.tamin.taminhamrah.feature.workshops.ui.model.SettlementSubjectImageTypes
 import com.tamin.taminhamrah.feature.workshops.ui.model.WorkshopAttachment
@@ -34,20 +39,23 @@ import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.model.workshop.AssignerPartyPR
 import com.tamin.taminhamrah.ui.components.InputRestriction
 import com.tamin.taminhamrah.ui.components.NumericText
+import com.tamin.taminhamrah.ui.components.TaminStyledTextField
 import com.tamin.taminhamrah.ui.components.ThousandsSeparatorTransformation
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminOptionSheetItem
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminSearchableListSheet
-import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
+import taminx.core.core_ui.ic_tamin_calendar
+import taminx.core.core_ui.ic_tamin_chevron_down
+import taminx.core.core_ui.workshop_select
 import taminx.core.core_ui.assigner_field_national_id
 import taminx.core.core_ui.settlement_amount_rial
 import taminx.core.core_ui.settlement_assigner_materials_value
@@ -100,6 +108,8 @@ internal fun SettlementTermsStep(
     gross: Long,
     isUploading: Boolean,
     errors: ImmutableMap<SettlementField, StringResource>,
+    /** The form's image previews, shared with the documents step. */
+    previewCache: SnapshotStateMap<String, ByteArray>,
     onIntent: (SettlementRequestIntent) -> Unit,
 ) {
     val subjectLabel = stringResource(Res.string.settlement_subject)
@@ -158,6 +168,7 @@ internal fun SettlementTermsStep(
                 image = terms.image,
                 isUploading = isUploading,
                 isError = SettlementField.SUBJECT_IMAGE in errors,
+                previewCache = previewCache,
                 onIntent = onIntent,
             )
         }
@@ -302,6 +313,7 @@ internal fun SettlementTermsStep(
                 image = terms.image,
                 isUploading = isUploading,
                 isError = SettlementField.SUBJECT_IMAGE in errors,
+                previewCache = previewCache,
                 onIntent = onIntent,
             )
         }
@@ -368,10 +380,18 @@ internal fun SettlementTextField(
         } else {
             VisualTransformation.None
         },
+        textStyle = SettlementFieldValueStyle(),
     )
 }
 
-/** A value chosen from a sheet, with the required-field treatment every picker here gets. */
+/**
+ * A value chosen from a sheet, with the required-field treatment every picker here gets.
+ *
+ * Drawn by the same [TaminStyledTextField] the typed fields use, read-only with a tap overlay, so a
+ * picker paired with a typed field — «تاریخ نامه» beside «شماره نامه» — matches its height, label,
+ * red star and border instead of being the workshop picker's shorter box. Like the typed fields, a
+ * wrong one only turns red; the footer's banner says what.
+ */
 @Composable
 internal fun SettlementChoiceField(
     label: String,
@@ -381,14 +401,19 @@ internal fun SettlementChoiceField(
     modifier: Modifier = Modifier,
     isDate: Boolean = false,
 ) {
-    WorkshopPickerField(
+    TaminStyledTextField(
+        value = value.orEmpty(),
+        onValueChange = {},
         label = label,
-        value = value,
+        placeholder = stringResource(Res.string.workshop_select),
+        leadingIcon = if (isDate) vectorResource(Res.drawable.ic_tamin_calendar) else null,
+        trailingIcon = vectorResource(Res.drawable.ic_tamin_chevron_down),
+        isValid = if (error != null) false else null,
+        readOnly = true,
+        isRequired = true,
         onClick = onClick,
         modifier = modifier,
-        isDate = isDate,
-        isRequired = true,
-        isValid = if (error != null) false else null,
+        textStyle = SettlementFieldValueStyle(),
     )
 }
 
@@ -416,23 +441,32 @@ private fun SettlementValueField(
     numeric: Boolean = true,
 ) {
     val colors = LocalTaminColors.current
-    val shape = remember { RoundedCornerShape(CornerRadius.lg) }
+    val shape = remember { RoundedCornerShape(ValueFieldCorner) }
     val contentColor = if (isCalculated) colors.tealText else colors.textTertiary
-    WorkshopFieldSlot(label = label, modifier = modifier) {
+    // Label and box measured as TaminStyledTextField draws its own, because these sit in the same
+    // rows as typed fields and a shorter box beside a taller one read as misaligned.
+    Column(modifier = modifier) {
+        Text(
+            text = label,
+            fontSize = ValueFieldLabelSize,
+            fontWeight = FontWeight.Bold,
+            color = colors.textTertiary,
+            modifier = Modifier.padding(bottom = ValueFieldLabelGap),
+        )
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .height(ValueFieldHeight)
                 .clip(shape)
                 .background(if (isCalculated) colors.tealBg else colors.bgPage)
                 .border(
-                    Thickness.border,
+                    ValueFieldBorder,
                     if (isCalculated) colors.tealText.copy(alpha = WorkshopDimens.cardButtonOutlineAlpha) else colors.border,
                     shape,
                 )
-                .padding(
-                    horizontal = WorkshopDimens.fieldHorizontalPadding,
-                    vertical = WorkshopDimens.fieldVerticalPadding,
-                ),
+                .padding(horizontal = ValueFieldHorizontalPadding),
+            // The page's own side for a number too, like every field on this form.
+            contentAlignment = Alignment.CenterStart,
         ) {
             if (numeric) {
                 NumericText(text = value, style = MaterialTheme.typography.labelLarge, color = contentColor)
@@ -442,6 +476,21 @@ private fun SettlementValueField(
         }
     }
 }
+
+/**
+ * The value inside a field of this form, a step below the app's default `bodyLarge` — the form packs
+ * two fields to a row, and the larger size crowded them.
+ */
+@Composable
+private fun SettlementFieldValueStyle(): TextStyle = MaterialTheme.typography.bodyMedium
+
+// TaminStyledTextField's own measurements, which it keeps as literals rather than theme tokens.
+private val ValueFieldHeight = 50.dp
+private val ValueFieldCorner = 13.dp
+private val ValueFieldBorder = 1.5.dp
+private val ValueFieldHorizontalPadding = 14.dp
+private val ValueFieldLabelGap = 6.dp
+private val ValueFieldLabelSize = 12.5.sp
 
 /** A short fixed list of answers, offered in the app's option sheet with no search to type into. */
 @Composable
@@ -482,6 +531,7 @@ private fun SettlementSubjectImage(
     image: ImmutableList<WorkshopAttachment>,
     isUploading: Boolean,
     isError: Boolean,
+    previewCache: SnapshotStateMap<String, ByteArray>,
     onIntent: (SettlementRequestIntent) -> Unit,
 ) {
     WorkshopDocumentsPanel(
@@ -493,6 +543,7 @@ private fun SettlementSubjectImage(
         onRemove = { onIntent(SettlementRequestIntent.RemoveSubjectImage) },
         isUploading = isUploading,
         isError = isError,
+        previewCache = previewCache,
     )
 }
 

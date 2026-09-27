@@ -15,6 +15,8 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 private fun Module.contractFlowViewModel(qualifier: String, config: ContractFlowConfig) {
+    // viewModelOf(::ContractFlowViewModel) also resolves the default resolveString
+    // parameter (a suspend function). Nothing registers that type, so creation crashes.
     viewModel(named(qualifier)) { parameters ->
         ContractFlowViewModel(
             config = config,

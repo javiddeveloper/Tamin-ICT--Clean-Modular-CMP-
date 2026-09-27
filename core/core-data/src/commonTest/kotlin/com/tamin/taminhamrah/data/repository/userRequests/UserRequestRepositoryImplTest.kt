@@ -68,7 +68,7 @@ class UserRequestRepositoryImplTest {
             reply = "پاسخ نمونه",
             requestCode = "0018",
             requestDesc = "توضیحات درخواست",
-            isPublic = true,
+            isPublic = "1",
             title = "عنوان راهنما",
             description = "توضیحات تکمیلی"
         )
@@ -79,6 +79,7 @@ class UserRequestRepositoryImplTest {
         assertEquals(1, result.size)
         assertEquals(201L, result.first().id)
         assertEquals("سوال نمونه", result.first().question)
+        assertEquals(true, result.first().isPublic)
     }
 
     @Test

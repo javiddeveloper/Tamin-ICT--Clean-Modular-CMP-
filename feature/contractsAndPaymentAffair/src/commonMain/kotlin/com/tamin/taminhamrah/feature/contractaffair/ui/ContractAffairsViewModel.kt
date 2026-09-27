@@ -65,7 +65,7 @@ class ContractAffairsViewModel(
 
     private val paginator = Paginator(
         baseQuery = defaultQuery(),
-        loadPage = { query -> getContractsPageUseCase(query).first() },
+        loadPages = { query -> getContractsPageUseCase(query) },
     )
 
     init {

@@ -33,6 +33,10 @@ Thumbs.db
 
 ## AI Tools
 .claude/settings.local.json
+.claude/skills/tamin-legacy-feature-port/
+.claude/skills/tamin-ui-theme/
+.claude/skills/tamin-kmp-feature-builder/
+.claude/skills/tamin-review-lessons/
 
 ## Local agent / WIP artifacts (keep on disk, never commit)
 .artifacts/

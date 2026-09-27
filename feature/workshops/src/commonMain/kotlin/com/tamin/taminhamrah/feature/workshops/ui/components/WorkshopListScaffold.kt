@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopConstants
 import com.tamin.taminhamrah.feature.workshops.ui.model.PagedListState
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
@@ -59,13 +60,18 @@ fun <T> WorkshopListScaffold(
     listState: LazyListState = rememberLazyListState(),
     contentPadding: PaddingValues = WorkshopDimens.listContentPadding,
     emptyMessage: String = stringResource(Res.string.workshop_empty_list),
-    emptyContent: (@Composable () -> Unit)? = null,
+    /**
+     * The glyph on the empty state's tile — the screen's own, so an empty list still says which
+     * list it is. The info glyph is only the fallback for a caller that passes none.
+     */
+    emptyIcon: ImageVector = Icons.Outlined.Info,
     key: ((T) -> Any)? = null,
     header: (@Composable () -> Unit)? = null,
     /**
      * What stands in for the list when the service answers with nothing.
      *
-     * Null — the default every existing caller takes — draws [emptyMessage] as a plain title.
+     * Null — the default most callers take — draws [emptyMessage] under [emptyIcon] on the design's
+     * icon tile, the one empty state every کارگاه list shares.
      * ردیف‌های پیمان passes its own, because it has two different reasons to be empty ("no workshop
      * chosen yet" and "this workshop has no rows") and the design words and illustrates them
      * differently.
@@ -133,7 +139,7 @@ fun <T> WorkshopListScaffold(
         ) {
             header?.invoke()
             if (empty != null) empty() else {
-                EmptyStateMessage(icon = Icons.Outlined.Info, title = emptyMessage)
+                EmptyStateMessage(icon = emptyIcon, title = emptyMessage, showIconTile = true)
             }
         }
         return

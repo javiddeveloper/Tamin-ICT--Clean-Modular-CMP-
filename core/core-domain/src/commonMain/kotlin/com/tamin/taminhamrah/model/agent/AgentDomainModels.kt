@@ -78,3 +78,25 @@ data class ChatAllowedDN(
     val errorMessage: String?,
     val canSendVoice: Boolean = false,
 )
+
+/**
+ * Developer Options: stands a fake in for the assistant's backend so every answer shape and every
+ * access outcome can be looked at without a server. Same guard as
+ * [com.tamin.taminhamrah.model.payment.PaymentMockMode] — a release build always reads [DISABLED].
+ */
+enum class AgentMockMode {
+    /** Talk to the real assistant. */
+    DISABLED,
+
+    /** Chat is allowed with voice; a prompt is answered from local fixtures (keywords pick a scenario). */
+    RESPONSES,
+
+    /** As [RESPONSES], but the server says voice prompts are not allowed (microphone hidden). */
+    NO_VOICE,
+
+    /** `chat-allowed` refuses this user, with a reason — the screen shows the refusal. */
+    ACCESS_DENIED,
+
+    /** `chat-allowed` cannot be reached — the screen opens offline on the cached conversation. */
+    OFFLINE,
+}

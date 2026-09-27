@@ -11,6 +11,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
@@ -110,5 +111,22 @@ class ShowcaseAgentServiceTest {
 
         assertIs<ChatBubbleContent.Text>(bubble)
         assertEquals("پیام", bubble.message)
+    }
+
+    @Test
+    fun `an error is retryable unless the payload says otherwise`() = runTest {
+        val retryable = assertIs<ChatBubbleContent.ServiceError>(render("""{"type":"error","text":"x"}"""))
+        assertTrue(retryable.canRetryPrompt)
+        assertEquals(AgentActionKey.SHOWCASE, retryable.actionKey)
+
+        val note = assertIs<ChatBubbleContent.ServiceError>(render("""{"type":"error","text":"x","retryable":false}"""))
+        assertTrue(!note.canRetryPrompt)
+        assertEquals(null, note.actionKey)
+    }
+
+    @Test
+    fun `a throw payload fails like a broken service`() = runTest {
+        // The dispatcher is what turns this into an error bubble; the service itself must throw.
+        assertFailsWith<IllegalStateException> { render("""{"type":"throw","text":"boom"}""") }
     }
 }

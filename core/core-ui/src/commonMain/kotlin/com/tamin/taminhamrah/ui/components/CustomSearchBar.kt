@@ -24,6 +24,9 @@ fun CustomSearchBar(
     placeHolder: String = "",
     modifier: Modifier = Modifier,
     containerColor: Color = MaterialTheme.colorScheme.surfaceVariant,
+    textColor: Color = MaterialTheme.colorScheme.onSurface,
+    placeholderColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    iconTint: Color = LocalTaminColors.current.textMuted,
 ) {
     TextField(
         value = query,
@@ -32,14 +35,14 @@ fun CustomSearchBar(
         placeholder = {
             Text(
                 text = placeHolder,
-                style = MaterialTheme.typography.bodyMedium.copy(MaterialTheme.colorScheme.onSurfaceVariant)
+                style = MaterialTheme.typography.bodyMedium.copy(placeholderColor)
             )
         },
         leadingIcon = {
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = null,
-                tint = LocalTaminColors.current.textMuted
+                tint = iconTint
             )
         },
         singleLine = true,
@@ -49,8 +52,8 @@ fun CustomSearchBar(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             cursorColor = MaterialTheme.colorScheme.primary,
-            focusedTextColor = MaterialTheme.colorScheme.onSurface,
-            unfocusedTextColor = MaterialTheme.colorScheme.onSurface
+            focusedTextColor = textColor,
+            unfocusedTextColor = textColor
         ),
         shape = MaterialTheme.shapes.extraLarge,
         modifier = modifier.fillMaxWidth()

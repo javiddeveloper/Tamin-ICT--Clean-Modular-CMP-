@@ -105,6 +105,8 @@ internal fun PatientCarousel(
     pagerState: PagerState,
     onRetry: () -> Unit = {},
     collapseProgress: () -> Float = { 0f },
+    /** See [InsuranceCardCarousel]'s own parameter: the hub draws the dots with its content. */
+    showIndicator: Boolean = true,
 ) {
     val phase = when {
         isLoading && cards.isEmpty() -> CarouselPhase.Loading
@@ -148,6 +150,7 @@ internal fun PatientCarousel(
                 InsuranceCardCarousel(
                     pageCount = cards.size,
                     pagerState = pagerState,
+                    showIndicator = showIndicator,
                     card = cardLambda,
                 )
             }

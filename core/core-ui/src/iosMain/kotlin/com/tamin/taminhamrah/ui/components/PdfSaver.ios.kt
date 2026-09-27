@@ -54,8 +54,8 @@ private class IosPdfSaver : PdfSaver {
         }
     }
 
-    override suspend fun save(fileName: String, bytes: ByteArray) {
-        if (bytes.isEmpty()) return
+    override suspend fun save(fileName: String, bytes: ByteArray): String? {
+        if (bytes.isEmpty()) return null
         val message = withContext(Dispatchers.Default) {
             val path = filePath(fileName) ?: return@withContext null
             when {
@@ -65,7 +65,8 @@ private class IosPdfSaver : PdfSaver {
                 else -> null
             }
         }
-        notify(fileName, message ?: return)
+        notify(fileName, message ?: return null)
+        return message
     }
 
     /** Where the PDF lives: a TaminICT directory under Downloads, or Documents if there is none. */

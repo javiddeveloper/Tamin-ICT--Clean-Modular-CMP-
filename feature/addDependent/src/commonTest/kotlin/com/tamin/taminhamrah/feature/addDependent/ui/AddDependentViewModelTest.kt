@@ -10,9 +10,10 @@ import com.tamin.taminhamrah.feature.addDependent.ui.contract.STEP_VERIFICATION
 import com.tamin.taminhamrah.feature.addDependent.ui.contract.StepperMode
 import com.tamin.taminhamrah.feature.addDependent.ui.model.FamilyRelationshipPR
 import com.tamin.taminhamrah.model.common.CityDN
-import com.tamin.taminhamrah.model.common.CityListResultDN
 import com.tamin.taminhamrah.model.common.CityPR
 import com.tamin.taminhamrah.model.common.ProvinceDN
+import com.tamin.taminhamrah.model.paging.PageDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.CityProvinceRepository
 import com.tamin.taminhamrah.useCases.addDependent.AddNewDependentUseCase
 import com.tamin.taminhamrah.useCases.addDependent.GetActiveBranchesUseCase
@@ -20,7 +21,7 @@ import com.tamin.taminhamrah.useCases.addDependent.GetFamilyRelationshipsFromPro
 import com.tamin.taminhamrah.useCases.addDependent.InquiryEducationCodeUseCase
 import com.tamin.taminhamrah.useCases.addDependent.InquiryRegistryUseCase
 import com.tamin.taminhamrah.useCases.addDependent.UploadDependentImageUseCase
-import com.tamin.taminhamrah.useCases.common.GetCitiesUseCase
+import com.tamin.taminhamrah.useCases.common.GetCitiesPageUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -53,7 +54,7 @@ class AddDependentViewModelTest {
             inquiryEducationCodeUseCase = InquiryEducationCodeUseCase(repository),
             uploadDependentImageUseCase = UploadDependentImageUseCase(repository),
             addNewDependentUseCase = AddNewDependentUseCase(repository),
-            getCitiesUseCase = GetCitiesUseCase(EmptyCityProvinceRepository)
+            getCitiesPageUseCase = GetCitiesPageUseCase(EmptyCityProvinceRepository)
         )
     }
 
@@ -118,8 +119,8 @@ class AddDependentViewModelTest {
 private object EmptyCityProvinceRepository : CityProvinceRepository {
     override fun getCity(cityId: String): Flow<CityDN> = flowOf()
     override fun getProvince(provinceId: String): Flow<ProvinceDN> = flowOf()
-    override fun getProvinces(): Flow<List<ProvinceDN>> = flowOf(emptyList())
-    override fun getCities(cityName: String?, provinceCode: String?): Flow<List<CityDN>> =
-        flowOf(emptyList())
-    override fun getCitiesByProvince(provinceCode: String): Flow<CityListResultDN> = flowOf(CityListResultDN(emptyList()))
+    override fun getProvincesPage(query: ApiQueryParamDN): Flow<PageDN<ProvinceDN>> = flowOf(PageDN(emptyList()))
+    override fun getCitiesPage(query: ApiQueryParamDN): Flow<PageDN<CityDN>> = flowOf(PageDN(emptyList()))
+    override fun getCitiesByProvincePage(provinceCode: String, query: ApiQueryParamDN): Flow<PageDN<CityDN>> =
+        flowOf(PageDN(emptyList()))
 }

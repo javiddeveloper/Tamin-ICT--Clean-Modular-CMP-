@@ -52,6 +52,7 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.theme.DarkTaminColors
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.model.agent.AgentMockMode
 import com.tamin.taminhamrah.model.payment.PaymentMockMode
 import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -63,9 +64,17 @@ import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.action_cancel
 import taminx.core.core_ui.action_save
+import taminx.core.core_ui.developer_options_agent_mock_access_denied
+import taminx.core.core_ui.developer_options_agent_mock_description
+import taminx.core.core_ui.developer_options_agent_mock_disabled
+import taminx.core.core_ui.developer_options_agent_mock_no_voice
+import taminx.core.core_ui.developer_options_agent_mock_offline
+import taminx.core.core_ui.developer_options_agent_mock_responses
+import taminx.core.core_ui.developer_options_agent_mock_title
 import taminx.core.core_ui.developer_options_custom_url_hint
 import taminx.core.core_ui.developer_options_debug_login_entry
 import taminx.core.core_ui.developer_options_dialog_title
+import taminx.core.core_ui.developer_options_open_agent_entry
 import taminx.core.core_ui.developer_options_payment_mock_description
 import taminx.core.core_ui.developer_options_payment_mock_disabled
 import taminx.core.core_ui.developer_options_payment_mock_failure
@@ -84,7 +93,8 @@ fun DeveloperOptionsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToDebugLogin: () -> Unit,
     onNavigateToTokenManager: () -> Unit,
-    onStartTestPayment: () -> Unit
+    onStartTestPayment: () -> Unit,
+    onOpenAgent: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -99,7 +109,8 @@ fun DeveloperOptionsScreen(
         onNavigateBack = onNavigateBack,
         onNavigateToDebugLogin = onNavigateToDebugLogin,
         onNavigateToTokenManager = onNavigateToTokenManager,
-        onStartTestPayment = onStartTestPayment
+        onStartTestPayment = onStartTestPayment,
+        onOpenAgent = onOpenAgent
     )
 }
 
@@ -123,7 +134,8 @@ private fun DeveloperOptionsContent(
     onNavigateBack: () -> Unit,
     onNavigateToDebugLogin: () -> Unit,
     onNavigateToTokenManager: () -> Unit,
-    onStartTestPayment: () -> Unit
+    onStartTestPayment: () -> Unit,
+    onOpenAgent: () -> Unit
 ) {
     val taminColors = LocalTaminColors.current
     val isDark = taminColors == DarkTaminColors
@@ -188,6 +200,15 @@ private fun DeveloperOptionsContent(
                     selected = state.paymentMockMode,
                     onSelect = { onIntent(DeveloperOptionsIntent.OnPaymentMockModeSelected(it)) },
                     onStartTestPayment = onStartTestPayment,
+                    containerBorder = defaultBorder
+                )
+
+                Spacer(modifier = Modifier.height(Spacing.lg))
+
+                AgentMockSection(
+                    selected = state.agentMockMode,
+                    onSelect = { onIntent(DeveloperOptionsIntent.OnAgentMockModeSelected(it)) },
+                    onOpenAgent = onOpenAgent,
                     containerBorder = defaultBorder
                 )
 
@@ -322,6 +343,95 @@ private fun PaymentMockMode.label(): String = when (this) {
     PaymentMockMode.DISABLED -> stringResource(Res.string.developer_options_payment_mock_disabled)
     PaymentMockMode.SUCCESS -> stringResource(Res.string.developer_options_payment_mock_success)
     PaymentMockMode.FAILURE -> stringResource(Res.string.developer_options_payment_mock_failure)
+}
+
+/**
+ * Puts a stand-in in front of the assistant's backend so every answer shape and every access
+ * outcome can be reviewed without a server.
+ *
+ * The data source reads the mode per call, so selecting one takes effect on the next
+ * chat-allowed check or prompt. The "open" entry below goes straight to the assistant: the
+ * access modes hide its normal entry point (a refused user has no orb), and this is how the
+ * refusal and offline screens are reached.
+ */
+@Composable
+private fun AgentMockSection(
+    selected: AgentMockMode,
+    onSelect: (AgentMockMode) -> Unit,
+    onOpenAgent: () -> Unit,
+    containerBorder: BorderStroke
+) {
+    val taminColors = LocalTaminColors.current
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        TaminText(
+            text = stringResource(Res.string.developer_options_agent_mock_title),
+            style = MaterialTheme.typography.titleSmall,
+            color = taminColors.textPrimary,
+            modifier = Modifier.padding(bottom = Spacing.xs)
+        )
+        TaminText(
+            text = stringResource(Res.string.developer_options_agent_mock_description),
+            style = MaterialTheme.typography.bodySmall,
+            color = taminColors.textSecondary,
+            modifier = Modifier.padding(bottom = Spacing.sm)
+        )
+        ListGroupView(
+            containerBorder = containerBorder,
+            items = persistentListOf(
+                *AgentMockMode.entries.map { mode ->
+                    ListItemData(
+                        title = mode.label(),
+                        leadingIconPainter = rememberVectorPainter(Icons.Rounded.Code),
+                        colors = ListItemColors(
+                            leadingIconTintColor = taminColors.bgIconProfile,
+                            leadingIconBackgroundGradient = taminColors.iconGradientNeutral
+                        ),
+                        showArrow = false,
+                        customTrailingContent = if (mode == selected) {
+                            {
+                                Icon(
+                                    imageVector = Icons.Rounded.Check,
+                                    contentDescription = null,
+                                    tint = taminColors.greenText
+                                )
+                            }
+                        } else {
+                            null
+                        },
+                        onClick = { onSelect(mode) }
+                    )
+                }.toTypedArray()
+            )
+        )
+
+        Spacer(modifier = Modifier.height(Spacing.sm))
+
+        ListGroupView(
+            containerBorder = containerBorder,
+            items = persistentListOf(
+                ListItemData(
+                    title = stringResource(Res.string.developer_options_open_agent_entry),
+                    leadingIconPainter = rememberVectorPainter(Icons.Rounded.Code),
+                    colors = ListItemColors(
+                        leadingIconTintColor = taminColors.bgIconProfile,
+                        leadingIconBackgroundGradient = taminColors.iconGradientNeutral
+                    ),
+                    showArrow = true,
+                    onClick = onOpenAgent
+                )
+            )
+        )
+    }
+}
+
+@Composable
+private fun AgentMockMode.label(): String = when (this) {
+    AgentMockMode.DISABLED -> stringResource(Res.string.developer_options_agent_mock_disabled)
+    AgentMockMode.RESPONSES -> stringResource(Res.string.developer_options_agent_mock_responses)
+    AgentMockMode.NO_VOICE -> stringResource(Res.string.developer_options_agent_mock_no_voice)
+    AgentMockMode.ACCESS_DENIED -> stringResource(Res.string.developer_options_agent_mock_access_denied)
+    AgentMockMode.OFFLINE -> stringResource(Res.string.developer_options_agent_mock_offline)
 }
 
 @Composable

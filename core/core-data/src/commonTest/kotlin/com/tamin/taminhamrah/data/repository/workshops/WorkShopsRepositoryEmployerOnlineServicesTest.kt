@@ -5,11 +5,15 @@ import com.tamin.taminhamrah.dataSource.workshopsSource.WorkShopsRemoteDataSourc
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.utils.ListData
 import com.tamin.taminhamrah.model.workshop.*
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 /**
  * [WorkShopsRepositoryImpl] for the خدمات غیرحضوری کارفرما calls.
@@ -27,7 +31,7 @@ class WorkShopsRepositoryEmployerOnlineServicesTest {
     @BeforeTest
     fun setup() {
         remote = FakeRemote()
-        repository = WorkShopsRepositoryImpl(remote)
+        repository = WorkShopsRepositoryImpl(remote, FakeEmployerServicesPageDao())
     }
 
     @Test
@@ -39,7 +43,7 @@ class WorkShopsRepositoryEmployerOnlineServicesTest {
             ),
         )
 
-        val page = repository.getWorkshopsWithoutContract(page = 0)
+        val page = repository.getWorkshopsWithoutContract(page = 0).first()
 
         assertEquals(42, page.total)
         assertEquals(1, page.items.size)
@@ -56,7 +60,7 @@ class WorkShopsRepositoryEmployerOnlineServicesTest {
             list = listOf(WorkshopContractRowDTO(contractRow = "02100014", firstName = "علی", lastName = "پیمانکار")),
         )
 
-        val page = repository.getWorkshopContractRows(workshopId = "0968210170", branchCode = "0960", page = 0)
+        val page = repository.getWorkshopContractRows(workshopId = "0968210170", branchCode = "0960", page = 0).first()
 
         assertEquals("علی پیمانکار", page.items.first().fullName)
         assertEquals("0968210170" to "0960", remote.lastContractRowsPath)
@@ -103,11 +107,59 @@ class WorkShopsRepositoryEmployerOnlineServicesTest {
     }
 
     @Test
+    fun `workshops-without-contract emits the cached page then the network page`() = runTest {
+        remote.workshopsWithoutContract = ListData(total = 1, list = listOf(WorkshopWithoutContractDTO(workshopId = "old")))
+        repository.getWorkshopsWithoutContract(page = 0).toList()
+        remote.workshopsWithoutContract = ListData(total = 1, list = listOf(WorkshopWithoutContractDTO(workshopId = "new")))
+
+        val emissions = repository.getWorkshopsWithoutContract(page = 0).toList()
+
+        assertEquals(listOf("old"), emissions[0].items.map { it.workshopId })
+        assertTrue(emissions[0].isFromCache)
+        assertEquals(listOf("new"), emissions[1].items.map { it.workshopId })
+        assertFalse(emissions[1].isFromCache)
+    }
+
+    @Test
+    fun `contract rows are served from the cache offline, per workshop`() = runTest {
+        remote.contractRows = ListData(
+            total = 1,
+            list = listOf(WorkshopContractRowDTO(contractRow = "A", firstName = "علی", lastName = "پیمانکار")),
+        )
+        val network = repository.getWorkshopContractRows("w1", "b1", page = 0).first().items.single()
+        remote.contractRows = ListData(total = 1, list = listOf(WorkshopContractRowDTO(contractRow = "B")))
+        repository.getWorkshopContractRows("w2", "b1", page = 0).toList()
+        remote.failure = IllegalStateException("offline")
+
+        val cached = repository.getWorkshopContractRows("w1", "b1", page = 0).toList()
+        assertEquals(1, cached.size)
+        assertTrue(cached.single().isFromCache)
+        assertEquals(network, cached.single().items.single()) // nested workshop block round-trips too
+        assertEquals(listOf("B"), repository.getWorkshopContractRows("w2", "b1", page = 0).first().items.map { it.contractRow })
+        // A workshop never opened online has nothing to fall back to.
+        assertFailsWith<IllegalStateException> { repository.getWorkshopContractRows("w3", "b1", page = 0).first() }
+    }
+
+    @Test
+    fun `workshops-without-contract first page replaces the stale cached list`() = runTest {
+        remote.workshopsWithoutContract = ListData(
+            total = 2,
+            list = listOf(WorkshopWithoutContractDTO(workshopId = "1"), WorkshopWithoutContractDTO(workshopId = "2")),
+        )
+        repository.getWorkshopsWithoutContract(page = 0).toList()
+        remote.workshopsWithoutContract = ListData(total = 1, list = listOf(WorkshopWithoutContractDTO(workshopId = "3")))
+        repository.getWorkshopsWithoutContract(page = 0).toList()
+        remote.failure = IllegalStateException("offline")
+
+        assertEquals(listOf("3"), repository.getWorkshopsWithoutContract(page = 0).first().items.map { it.workshopId })
+    }
+
+    @Test
     fun `a remote failure propagates unchanged`() = runTest {
         remote.failure = IllegalStateException("no connection")
 
         val error = assertFailsWith<IllegalStateException> {
-            repository.getWorkshopsWithoutContract(page = 0)
+            repository.getWorkshopsWithoutContract(page = 0).first()
         }
         assertEquals("no connection", error.message)
     }

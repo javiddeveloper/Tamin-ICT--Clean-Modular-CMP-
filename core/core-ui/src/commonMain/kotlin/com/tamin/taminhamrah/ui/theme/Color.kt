@@ -392,17 +392,14 @@ val TaminOnAccentBorder = TaminOnAccentInk.copy(alpha = 0.18f)
 val CampaignHousewifeStart = TaminNavy700           // #1F4FA3
 val CampaignHousewifeMid = Color(0xFF3B6FE8)
 val CampaignHousewifeEnd = Color(0xFF1FB6D8)
-val CampaignHousewifeShadow = Color(0x47173D7E)     // rgba(23,61,126,.28)
 
 val CampaignFreelanceStart = Color(0xFF0E5F66)
 val CampaignFreelanceMid = Color(0xFF0E7C82)
 val CampaignFreelanceEnd = Color(0xFF5FD8D2)
-val CampaignFreelanceShadow = Color(0x470E5F66)     // rgba(14,95,102,.28)
 
 val CampaignStudentStart = Color(0xFF4B2E86)
 val CampaignStudentMid = Color(0xFF7C5CFF)
 val CampaignStudentEnd = Color(0xFF22B8D6)
-val CampaignStudentShadow = Color(0x474B2E86)       // rgba(75,46,134,.28)
 
 /** The idle page dot under the carousel; the active one is `blueText`. */
 
@@ -510,8 +507,6 @@ val TaminHistoryHeroChipBorder = Color(0x2EFFFFFF)
 val TaminHistoryDurationCardBgStart = Color(0xFFF4F8FF)
 val TaminHistoryDurationCardBgEnd = Color(0xFFFFFFFF)
 val TaminHistoryDurationCardBorder = Color(0xFFDCE7FB)
-val TaminHistoryDurationStripeStart = Color(0xFF1F4FA3)
-val TaminHistoryDurationStripeEnd = Color(0xFF2DBE85)
 val TaminHistoryDurationNavBg = Color(0xFFEFF4FF)
 val TaminHistoryDurationNavBorder = Color(0xFFDCE7FB)
 val TaminHistoryDurationNavIcon = Color(0xFF1F4FA3)

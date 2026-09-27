@@ -6,14 +6,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Icon
@@ -48,7 +46,6 @@ import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.employer_info_branch
 import taminx.core.core_ui.employer_info_branch_needs_city
-import taminx.core.core_ui.employer_info_btn_send_otp
 import taminx.core.core_ui.employer_info_city_label
 import taminx.core.core_ui.employer_info_city_needs_province
 import taminx.core.core_ui.employer_info_email
@@ -75,9 +72,6 @@ fun RealWorkshopFormSection(
     provinceError: String?,
     cityError: String?,
     branchError: String?,
-    isSubmitting: Boolean,
-    canSubmit: Boolean,
-    onSubmit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
@@ -110,14 +104,9 @@ fun RealWorkshopFormSection(
         ) {
             // Code Input
             Column {
-                Text(
+                EmployerInfoFieldLabel(
                     text = stringResource(Res.string.employer_info_real_code_label),
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = colors.textSecondary,
-                        fontSize = 11.sp,
-                    ),
-                    modifier = Modifier.padding(bottom = 5.dp),
+                    isRequired = true,
                 )
                 SegmentedInputField(
                     value = workshopCode,
@@ -148,8 +137,16 @@ fun RealWorkshopFormSection(
                         .border(1.dp, colors.border, RoundedCornerShape(13.dp))
                         .padding(horizontal = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Lock,
+                        contentDescription = null,
+                        tint = colors.textMuted,
+                        modifier = Modifier.size(15.dp),
+                    )
+                    // An address is Latin text: it reads left to right and sits against the left
+                    // edge, however the page around it runs.
                     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                         Text(
                             text = userEmail.ifBlank { "tamin@tamin.ir" },
@@ -157,16 +154,12 @@ fun RealWorkshopFormSection(
                                 fontWeight = FontWeight.SemiBold,
                                 color = colors.textPrimary,
                             ),
+                            textAlign = TextAlign.Left,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f),
                         )
                     }
-                    Icon(
-                        imageVector = Icons.Outlined.Lock,
-                        contentDescription = null,
-                        tint = colors.textMuted,
-                        modifier = Modifier.size(15.dp),
-                    )
                 }
             }
 
@@ -177,14 +170,9 @@ fun RealWorkshopFormSection(
             ) {
                 // Province
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
+                    EmployerInfoFieldLabel(
                         text = stringResource(Res.string.employer_info_province_label),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            color = colors.textSecondary,
-                            fontSize = 11.sp,
-                        ),
-                        modifier = Modifier.padding(bottom = 5.dp),
+                        isRequired = true,
                     )
                     SelectChip(
                         text = selectedProvince?.provinceName ?: stringResource(Res.string.employer_info_sheet_province),
@@ -198,14 +186,9 @@ fun RealWorkshopFormSection(
                 // City (enabled only when province selected)
                 val isCityEnabled = selectedProvince != null
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
+                    EmployerInfoFieldLabel(
                         text = stringResource(Res.string.employer_info_city_label),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            color = colors.textSecondary,
-                            fontSize = 11.sp,
-                        ),
-                        modifier = Modifier.padding(bottom = 5.dp),
+                        isRequired = true,
                     )
                     SelectChip(
                         text = selectedCity?.cityName ?: stringResource(
@@ -223,14 +206,9 @@ fun RealWorkshopFormSection(
             // Branch (enabled only when city selected)
             val isBranchEnabled = selectedCity != null
             Column {
-                Text(
+                EmployerInfoFieldLabel(
                     text = stringResource(Res.string.employer_info_branch),
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = colors.textSecondary,
-                        fontSize = 11.sp,
-                    ),
-                    modifier = Modifier.padding(bottom = 5.dp),
+                    isRequired = true,
                 )
                 SelectChip(
                     text = selectedBranch?.name ?: stringResource(
@@ -256,18 +234,46 @@ fun RealWorkshopFormSection(
             textAlign = TextAlign.Justify,
         )
 
-        Spacer(modifier = Modifier.height(2.dp))
-
-        // Submit Button
-        EmployerInfoSubmitButton(
-            text = stringResource(Res.string.employer_info_btn_send_otp),
-            icon = Icons.Outlined.Email,
-            enabled = canSubmit,
-            isSubmitting = isSubmitting,
-            onSubmit = onSubmit,
-        )
     }
 }
+
+/**
+ * A field's caption, with the «الزامی» pill beside it when the form cannot be sent without it.
+ */
+@Composable
+internal fun EmployerInfoFieldLabel(
+    text: String,
+    isRequired: Boolean = false,
+) {
+    val colors = LocalTaminColors.current
+    Row(
+        modifier = Modifier.padding(bottom = 5.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xxs),
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.SemiBold,
+                color = colors.textSecondary,
+                fontSize = 11.sp,
+            ),
+        )
+        if (isRequired) {
+            Text(
+                text = REQUIRED_MARK,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = colors.dangerText,
+                    fontSize = 11.sp,
+                ),
+            )
+        }
+    }
+}
+
+/** Purely typographic, so it stays out of the translated strings. */
+private const val REQUIRED_MARK = "*"
 
 @Composable
 private fun SelectChip(

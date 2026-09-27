@@ -3,17 +3,19 @@ package com.tamin.taminhamrah.feature.profile.ui.versionHistory
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.feature.profile.ui.versionHistory.components.VersionHistoryHeader
@@ -28,6 +30,10 @@ import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.ShimmerCardList
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toparea.driveTopArea
+import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
+import com.tamin.taminhamrah.ui.toparea.reportTopAreaHeight
+import com.tamin.taminhamrah.ui.toparea.topAreaContentPadding
 import kotlinx.coroutines.flow.Flow
 
 /** What the list stands in with while the release notes load. */
@@ -76,51 +82,73 @@ fun VersionHistoryScreen(
 ) {
     val colors = LocalTaminColors.current
 
+    val topArea = rememberMeasuredTopAreaState { topAreaState ->
+        VersionHistoryHeader(
+            lastUpdatedDate = state.lastUpdatedDate,
+            topAreaState = topAreaState,
+            onBackClicked = {}
+        )
+    }
+    val listState = rememberLazyListState()
+
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(colors.bgPage)
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            VersionHistoryHeader(
-                lastUpdatedDate = state.lastUpdatedDate,
-                onBackClicked = { onIntent(VersionHistoryIntent.OnBackClicked) }
-            )
-
-            if (state.isLoading) {
-                ShimmerCardList(
-                    count = LoadingPlaceholderCards,
-                    cardHeight = LoadingPlaceholderCardHeight,
-                    contentPadding = PaddingValues(
-                        top = Spacing.lg,
-                        start = Spacing.page,
-                        end = Spacing.page
-                    )
+        LazyColumn(
+            state = listState,
+            overscrollEffect = rememberJellyOverscroll(),
+            modifier = Modifier
+                .fillMaxSize()
+                .driveTopArea(topArea, listState)
+                .padding(top = Spacing.lg),
+            contentPadding = topAreaContentPadding(
+                state = topArea,
+                rest = PaddingValues(
+                    bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + Spacing.xxl,
+                    start = Spacing.page,
+                    end = Spacing.page
                 )
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    overscrollEffect = rememberJellyOverscroll(),
-                    contentPadding = PaddingValues(
-                        top = Spacing.lg,
-                        bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + Spacing.xxl,
-                        start = Spacing.page,
-                        end = Spacing.page
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(Spacing.lg)
-                ) {
-                    items(
-                        items = state.items,
-                        key = { it.versionName }
-                    ) { item ->
-                        VersionHistoryItemCard(
-                            item = item,
-                            onToggleExpand = { onIntent(VersionHistoryIntent.ToggleExpand(item.versionName)) }
-                        )
-                    }
+            ),
+            verticalArrangement = Arrangement.spacedBy(Spacing.lg)
+        ) {
+            if (!state.isLoading) {
+                items(
+                    items = state.items,
+                    key = { it.versionName }
+                ) { item ->
+                    VersionHistoryItemCard(
+                        item = item,
+                        onToggleExpand = { onIntent(VersionHistoryIntent.ToggleExpand(item.versionName)) }
+                    )
                 }
             }
         }
+
+        // Drawn before the header so the header still floats over it, inset by the same
+        // top-area padding as the list so the cards land where the placeholders were.
+        if (state.isLoading) {
+            ShimmerCardList(
+                modifier = Modifier.padding(top = Spacing.lg),
+                count = LoadingPlaceholderCards,
+                cardHeight = LoadingPlaceholderCardHeight,
+                contentPadding = topAreaContentPadding(
+                    state = topArea,
+                    rest = PaddingValues(start = Spacing.page, end = Spacing.page)
+                )
+            )
+        }
+
+        // The header floats on top so the list passes underneath it as it scrolls away.
+        VersionHistoryHeader(
+            lastUpdatedDate = state.lastUpdatedDate,
+            topAreaState = topArea,
+            onBackClicked = { onIntent(VersionHistoryIntent.OnBackClicked) },
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .reportTopAreaHeight(topArea)
+        )
     }
 }
 

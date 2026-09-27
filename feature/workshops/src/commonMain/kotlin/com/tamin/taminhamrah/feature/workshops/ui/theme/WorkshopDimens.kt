@@ -76,26 +76,23 @@ object WorkshopDimens {
     const val cardButtonOutlineAlpha = 0.35f
 
     // ------------------------------------------------------------ expand toggle
-    /** `margin-top:10px; padding-top:9px; border-top:1px dashed`, then a 14px chevron. */
+    /** `margin-top:10px; border-top:1px dashed`, then a 14px chevron. */
     val toggleTopMargin = 10.dp
-    val toggleTopPadding = 9.dp
+
+    /**
+     * Above and below the «جزئیات بیشتر» label, inside its tap area.
+     *
+     * The design puts 9px above the label and leaves the card's 12px bottom padding below it, which
+     * sets the label visibly high between the rule and the card's edge. The same 21px, split evenly,
+     * centres it without changing the card's height — and the tap area now reaches the bottom.
+     */
+    val toggleVerticalPadding = 10.5.dp
     val toggleDashOn = 3.dp
     val toggleDashOff = 3.dp
     val toggleChevronSize = 14.dp
 
     /** `transform:rotate(180deg)` once the card is open. */
     const val toggleHalfTurn = 180f
-
-    // ----------------------------------------------------------------- code chip
-    /** `padding:4px 9px; border-radius:11px; border:1.4px dashed`, with a 13px glyph. */
-    val codeChipCorner = 11.dp
-    val codeChipBorderWidth = 1.4.dp
-    val codeChipHorizontalPadding = 9.dp
-    val codeChipVerticalPadding = 4.dp
-    val codeChipGlyphSize = 13.dp
-
-    /** How long the tick stands in for the copy glyph — `setTimeout(…, 1600)` in the design. */
-    const val copiedFeedbackMillis = 1600L
 
     // --------------------------------------------------------------- status pill
     /**

@@ -1,8 +1,11 @@
 package com.tamin.taminhamrah.repository
 
 import com.tamin.taminhamrah.model.common.CityDN
-import com.tamin.taminhamrah.model.common.CityListResultDN
 import com.tamin.taminhamrah.model.common.ProvinceDN
+import com.tamin.taminhamrah.model.paging.PageDN
+import com.tamin.taminhamrah.model.request.ApiFilterDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.request.FilterProperty
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -26,15 +29,16 @@ class FakeCityProvinceRepository : CityProvinceRepository {
         provinceResult?.let { emit(it) }
     }
 
-    override fun getProvinces(): Flow<List<ProvinceDN>> = flow {
+    override fun getProvincesPage(query: ApiQueryParamDN): Flow<PageDN<ProvinceDN>> = flow {
         if (shouldThrowError) throw error
-        emit(provincesResult)
+        emit(PageDN(items = provincesResult, total = provincesResult.size))
     }
 
-    override fun getCities(cityName: String?, provinceCode: String?): Flow<List<CityDN>> = flow {
-        lastCitiesSearch = cityName
-        lastProvinceCode = provinceCode
+    override fun getCitiesPage(query: ApiQueryParamDN): Flow<PageDN<CityDN>> = flow {
+        lastCitiesSearch = query.filters.valueOf(FilterProperty.CITY_NAME)
+        lastProvinceCode = query.filters.valueOf(FilterProperty.PROVINCE_CODE_CITY)
         if (shouldThrowError) throw error
+        val provinceCode = lastProvinceCode
         val cities = if (provinceCode.isNullOrBlank()) {
             citiesResult
         } else {
@@ -43,12 +47,15 @@ class FakeCityProvinceRepository : CityProvinceRepository {
                     city.provinceCode?.trimStart('0') == provinceCode.trimStart('0')
             }
         }
-        emit(cities)
+        emit(PageDN(items = cities, total = cities.size))
     }
 
-    override fun getCitiesByProvince(provinceCode: String): Flow<CityListResultDN> = flow {
+    override fun getCitiesByProvincePage(provinceCode: String, query: ApiQueryParamDN): Flow<PageDN<CityDN>> = flow {
         lastCitiesByProvinceCode = provinceCode
         if (shouldThrowError) throw error
-        emit(CityListResultDN(citiesByProvinceResult))
+        emit(PageDN(items = citiesByProvinceResult, total = citiesByProvinceResult.size))
     }
+
+    private fun List<ApiFilterDN>.valueOf(property: FilterProperty): String? =
+        firstOrNull { it.property == property }?.value
 }

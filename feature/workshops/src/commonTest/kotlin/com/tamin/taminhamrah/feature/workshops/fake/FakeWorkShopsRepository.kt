@@ -51,6 +51,7 @@ import com.tamin.taminhamrah.model.workshop.SettlementRequestDN
 import com.tamin.taminhamrah.model.workshop.SettlementSubjectDN
 import com.tamin.taminhamrah.repository.WorkShopsRepository
 import kotlinx.coroutines.CompletableDeferred
+import com.tamin.taminhamrah.model.paging.PageDN
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -83,6 +84,15 @@ class FakeWorkShopsRepository : WorkShopsRepository {
      */
     val heldMemberPages: MutableMap<Int, CompletableDeferred<Unit>> = mutableMapOf()
     var stackHolders: PagedListDN<WorkshopStackHolderDN> = PagedListDN()
+
+    /** One answer per page, for the paging tests; a page with no entry answers [stackHolders]. */
+    var stackHolderPages: Map<Int, PagedListDN<WorkshopStackHolderDN>> = emptyMap()
+
+    /**
+     * A page put here suspends until the test completes it, so a test can decide which answer
+     * lands first — the only way to reproduce an out-of-order page.
+     */
+    val heldStackHolderPages: MutableMap<Int, CompletableDeferred<Unit>> = mutableMapOf()
     var recentlyAddedMembers: PagedListDN<WorkshopNewMemberDN> = PagedListDN()
     var workshopsWithoutContract: PagedListDN<WorkshopWithoutContractDN> = PagedListDN()
     var workshopContractRows: PagedListDN<WorkshopContractRowDN> = PagedListDN()
@@ -372,9 +382,10 @@ class FakeWorkShopsRepository : WorkShopsRepository {
 
     override suspend fun getWorkshopStackHolders(
         query: WorkshopStackHolderQuery,
-    ): PagedListDN<WorkshopStackHolderDN> = answer {
+    ): PagedListDN<WorkshopStackHolderDN> {
         lastStackHolderQuery = query
-        stackHolders
+        heldStackHolderPages[query.page]?.await()
+        return answer { stackHolderPages[query.page] ?: stackHolders }
     }
 
     override suspend fun getWorkShopObjections(
@@ -399,15 +410,21 @@ class FakeWorkShopsRepository : WorkShopsRepository {
         verificationCode: String,
     ): EmployerContactInfoDN = answer { employerContactInfo }
 
-    override suspend fun getWorkshopsWithoutContract(
+    override fun getWorkshopsWithoutContract(
         page: Int,
-    ): PagedListDN<WorkshopWithoutContractDN> = answer { workshopsWithoutContract }
+    ): Flow<PageDN<WorkshopWithoutContractDN>> = flow {
+        val result = answer { workshopsWithoutContract }
+        emit(PageDN(items = result.items, total = result.total))
+    }
 
-    override suspend fun getWorkshopContractRows(
+    override fun getWorkshopContractRows(
         workshopId: String,
         branchCode: String,
         page: Int,
-    ): PagedListDN<WorkshopContractRowDN> = answer { workshopContractRows }
+    ): Flow<PageDN<WorkshopContractRowDN>> = flow {
+        val result = answer { workshopContractRows }
+        emit(PageDN(items = result.items, total = result.total))
+    }
 
     override suspend fun submitEmployerAgreement(request: EmployerAgreementSubmissionDN): String =
         answer {

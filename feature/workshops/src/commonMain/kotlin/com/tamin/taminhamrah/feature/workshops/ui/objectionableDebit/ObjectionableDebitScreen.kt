@@ -3,6 +3,7 @@ package com.tamin.taminhamrah.feature.workshops.ui.objectionableDebit
 import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.obj_form_done_body
 import taminx.core.core_ui.obj_form_done_title
+import taminx.core.core_ui.objectionable_debt_empty
 import taminx.core.core_ui.ws_dialog_ok
 import org.jetbrains.compose.resources.getString
 import kotlinx.coroutines.flow.Flow
@@ -58,6 +59,7 @@ import taminx.core.core_ui.workshop_debt_from_date
 import taminx.core.core_ui.workshop_debt_notify_date
 import taminx.core.core_ui.workshop_debt_remaining
 import taminx.core.core_ui.workshop_debt_to_date
+import taminx.core.core_ui.ic_tamin_workshop_objection
 
 /**
  * اعتراض به بدهی.
@@ -168,6 +170,7 @@ fun ObjectionableDebitContent(
             iconBackground = colors.greenBg,
             confirmButton = {
                 TaminFilledButton(
+                    background = LocalTaminColors.current.buttonGradient,
                     text = stringResource(Res.string.ws_dialog_ok),
                     onClick = onDismissFiled,
                     modifier = Modifier.fillMaxWidth(),
@@ -186,6 +189,8 @@ fun ObjectionableDebitContent(
             workshopCode = workshopCode,
         ) {
             WorkshopListScaffold(
+                emptyIcon = vectorResource(Res.drawable.ic_tamin_workshop_objection),
+                emptyMessage = stringResource(Res.string.objectionable_debt_empty),
                 state = state.list,
                 onLoadMore = onLoadMore,
                 onRetry = onRetry,

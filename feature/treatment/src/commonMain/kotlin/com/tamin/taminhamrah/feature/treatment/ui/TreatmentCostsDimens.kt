@@ -11,6 +11,13 @@ import androidx.compose.ui.unit.dp
  */
 internal object TreatmentCostsDimens {
 
+    /** Drag it takes to fold the hero bar down to its title row. */
+    val headerCollapseDistance = 120.dp
+
+    /** A soft shadow right under the card, as if lit from directly above. */
+    val cardShadowBlur = 10.dp
+    val cardShadowOffsetY = 2.dp
+
     /** Detail rows carry their own rhythm so a rule sits flush between two of them. */
     val detailRowPadding = 12.dp
 

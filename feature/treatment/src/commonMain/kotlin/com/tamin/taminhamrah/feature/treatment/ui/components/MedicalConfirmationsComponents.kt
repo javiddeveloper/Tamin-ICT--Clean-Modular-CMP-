@@ -964,17 +964,20 @@ internal fun MedicalConfirmationDetailView(
                     )
                     .padding(horizontal = Spacing.md),
             ) {
+                // Rows without an inpatient rest repeat the outpatient period above rather than
+                // showing dashes -- requested; a real inpatient period still takes precedence.
+                val inpatient = item.hasInpatientRest
                 DetailRow(
                     label = stringResource(Res.string.confirmations_start_date_label),
-                    value = item.inpatientRestStartDate.ifBlank { ABSENT_VALUE },
+                    value = if (inpatient) item.inpatientRestStartDate else item.outpatientRestStartDate,
                 )
                 DetailRow(
                     label = stringResource(Res.string.confirmations_end_date_label),
-                    value = item.inpatientRestEndDate.ifBlank { ABSENT_VALUE },
+                    value = if (inpatient) item.inpatientRestEndDate else item.outpatientRestEndDate,
                 )
                 DetailRow(
                     label = stringResource(Res.string.confirmations_inpatient_days_count),
-                    value = if (item.hasInpatientRest) item.numberOfInpatientDays else ABSENT_VALUE,
+                    value = if (inpatient) item.numberOfInpatientDays else item.numberOfOutpatientDays,
                 )
             }
         }

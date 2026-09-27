@@ -228,6 +228,7 @@ fun ContractFlowScreenContent(
     val isRegistrationConfirmed =
         !state.isEditingExistingContract &&
             state.currentStep == ContractStep.STEP_REGISTRATION &&
+            !state.isRegistrationGateLoading &&
             state.genderGateError == null &&
             state.preflightGateError == null &&
             (state.eligibility == null || state.eligibility.isEligible)
@@ -376,6 +377,7 @@ fun ContractFlowScreenContent(
                                             eligibility = state.eligibility,
                                             genderGateError = state.genderGateError,
                                             preflightGateError = state.preflightGateError,
+                                            isLoading = state.isRegistrationGateLoading,
                                             isOptionalInsurance = state.config?.isOptionalInsurance == true,
                                             usesChecklistRegistration = state.config?.usesChecklistRegistration == true,
                                             contractNumber = state.editContractNumber,
@@ -658,6 +660,7 @@ private fun ContractFlowBottomBar(
     val isLast = steps.isLastStep(state.currentStep)
     val nextEnabled = isStepValid(state)
     val isEditMode = state.isEditMode
+    val gateOrGlobalLoading = state.isLoading || state.isRegistrationGateLoading
 
     TaminBottomBar(
         modifier = Modifier
@@ -670,7 +673,7 @@ private fun ContractFlowBottomBar(
                     text = stringResource(Res.string.contract_save_edit),
                     onClick = onNextStep,
                     enabled = nextEnabled,
-                    isLoading = state.isSavingContact || state.isLoading,
+                    isLoading = state.isSavingContact || gateOrGlobalLoading,
                     modifier = Modifier.fillMaxWidth(),
                     icon = vectorResource(Res.drawable.ic_tamin_check),
                     iconPosition = LoadingButtonIconPosition.TRAILING,
@@ -681,7 +684,7 @@ private fun ContractFlowBottomBar(
                     text = stringResource(Res.string.contract_next_step),
                     onClick = onNextStep,
                     enabled = nextEnabled,
-                    isLoading = state.isLoading,
+                    isLoading = gateOrGlobalLoading,
                     modifier = Modifier.fillMaxWidth(),
                     icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
                     iconPosition = LoadingButtonIconPosition.TRAILING,
@@ -705,7 +708,7 @@ private fun ContractFlowBottomBar(
                         },
                         onClick = onNextStep,
                         enabled = nextEnabled,
-                        isLoading = if (isLast) state.isSubmittingContract else state.isLoading,
+                        isLoading = if (isLast) state.isSubmittingContract else gateOrGlobalLoading,
                         modifier = Modifier.weight(1f),
                         icon = if (!isLast) vectorResource(Res.drawable.ic_tamin_chevron_forward) else null,
                         iconPosition = LoadingButtonIconPosition.TRAILING,
@@ -719,7 +722,7 @@ private fun ContractFlowBottomBar(
 }
 
 private fun isStepValid(state: ContractFlowUiState): Boolean {
-    if (state.isLoading) return false
+    if (state.isLoading || state.isRegistrationGateLoading) return false
     return when (state.currentStep) {
         ContractStep.STEP_REGISTRATION -> {
             if (state.isEditingExistingContract) {
@@ -977,6 +980,8 @@ private fun ContractFlowScreenContentStep1RegistrationPreview() {
         ContractFlowScreenContent(
             state = ContractFlowUiState(
                 isLoading = false,
+                hasCompletedTypedContractsRefresh = true,
+                hasCompletedAllContractsRefresh = true,
                 registrationInfo = MockRegistrationInfo,
                 config = MockConfig,
                 currentStep = ContractStep.STEP_REGISTRATION,
@@ -1000,6 +1005,8 @@ private fun ContractFlowScreenContentStep2TermsPreview() {
         ContractFlowScreenContent(
             state = ContractFlowUiState(
                 isLoading = false,
+                hasCompletedTypedContractsRefresh = true,
+                hasCompletedAllContractsRefresh = true,
                 registrationInfo = MockRegistrationInfo,
                 config = MockConfig,
                 currentStep = ContractStep.STEP_CONTRACT_TERMS,
@@ -1019,6 +1026,8 @@ private fun ContractFlowScreenContentStep3UserInfoPreview() {
         ContractFlowScreenContent(
             state = ContractFlowUiState(
                 isLoading = false,
+                hasCompletedTypedContractsRefresh = true,
+                hasCompletedAllContractsRefresh = true,
                 registrationInfo = MockRegistrationInfo,
                 config = MockConfig,
                 currentStep = ContractStep.STEP_USER_INFO,
@@ -1039,6 +1048,8 @@ private fun ContractFlowScreenContentStep4ApplicantPersonalPreview() {
         ContractFlowScreenContent(
             state = ContractFlowUiState(
                 isLoading = false,
+                hasCompletedTypedContractsRefresh = true,
+                hasCompletedAllContractsRefresh = true,
                 registrationInfo = MockRegistrationInfo,
                 config = MockConfig,
                 currentStep = ContractStep.STEP_CONTRACT_APPLICANT,
@@ -1058,6 +1069,8 @@ private fun ContractFlowScreenContentStep4ApplicantGuardianPreview() {
         ContractFlowScreenContent(
             state = ContractFlowUiState(
                 isLoading = false,
+                hasCompletedTypedContractsRefresh = true,
+                hasCompletedAllContractsRefresh = true,
                 registrationInfo = MockRegistrationInfo,
                 config = MockConfig,
                 currentStep = ContractStep.STEP_CONTRACT_APPLICANT,
@@ -1078,6 +1091,8 @@ private fun ContractFlowScreenContentStep5SelectBranchPreview() {
         ContractFlowScreenContent(
             state = ContractFlowUiState(
                 isLoading = false,
+                hasCompletedTypedContractsRefresh = true,
+                hasCompletedAllContractsRefresh = true,
                 registrationInfo = MockRegistrationInfo,
                 config = MockConfig,
                 currentStep = ContractStep.STEP_SELECT_BRANCH,
@@ -1100,6 +1115,8 @@ private fun ContractFlowScreenContentStep6UploadImagePreview() {
         ContractFlowScreenContent(
             state = ContractFlowUiState(
                 isLoading = false,
+                hasCompletedTypedContractsRefresh = true,
+                hasCompletedAllContractsRefresh = true,
                 registrationInfo = MockRegistrationInfo,
                 config = MockConfig,
                 currentStep = ContractStep.STEP_UPLOAD_IMAGE,
@@ -1126,6 +1143,8 @@ private fun ContractFlowScreenContentStep7TreatmentSupportPreview() {
         ContractFlowScreenContent(
             state = ContractFlowUiState(
                 isLoading = false,
+                hasCompletedTypedContractsRefresh = true,
+                hasCompletedAllContractsRefresh = true,
                 registrationInfo = MockRegistrationInfo,
                 config = MockConfig,
                 currentStep = ContractStep.STEP_TREATMENT_SUPPORT,
@@ -1146,6 +1165,8 @@ private fun ContractFlowScreenContentStep8InsurancePremiumPreview() {
         ContractFlowScreenContent(
             state = ContractFlowUiState(
                 isLoading = false,
+                hasCompletedTypedContractsRefresh = true,
+                hasCompletedAllContractsRefresh = true,
                 registrationInfo = MockRegistrationInfo,
                 config = MockConfig,
                 currentStep = ContractStep.STEP_INSURANCE_PREMIUM,
@@ -1169,6 +1190,8 @@ private fun ContractFlowScreenContentStep8InsurancePremiumCalculatedPreview() {
         ContractFlowScreenContent(
             state = ContractFlowUiState(
                 isLoading = false,
+                hasCompletedTypedContractsRefresh = true,
+                hasCompletedAllContractsRefresh = true,
                 registrationInfo = MockRegistrationInfo,
                 config = MockConfig,
                 currentStep = ContractStep.STEP_INSURANCE_PREMIUM,
@@ -1194,6 +1217,8 @@ private fun ContractFlowScreenContentStep8InsurancePremiumShimmerPreview() {
         ContractFlowScreenContent(
             state = ContractFlowUiState(
                 isLoading = false,
+                hasCompletedTypedContractsRefresh = true,
+                hasCompletedAllContractsRefresh = true,
                 registrationInfo = MockRegistrationInfo,
                 config = MockConfig,
                 currentStep = ContractStep.STEP_INSURANCE_PREMIUM,
@@ -1214,6 +1239,8 @@ private fun ContractFlowScreenContentStep9SalaryPreview() {
         ContractFlowScreenContent(
             state = ContractFlowUiState(
                 isLoading = false,
+                hasCompletedTypedContractsRefresh = true,
+                hasCompletedAllContractsRefresh = true,
                 registrationInfo = MockRegistrationInfo,
                 config = MockConfig,
                 currentStep = ContractStep.STEP_SALARY,
@@ -1236,6 +1263,8 @@ private fun ContractFlowScreenContentStep10SubmitContractPreview() {
         ContractFlowScreenContent(
             state = ContractFlowUiState(
                 isLoading = false,
+                hasCompletedTypedContractsRefresh = true,
+                hasCompletedAllContractsRefresh = true,
                 registrationInfo = MockRegistrationInfo,
                 config = MockConfig,
                 currentStep = ContractStep.STEP_SUBMIT_CONTRACT,
@@ -1278,6 +1307,8 @@ private fun ContractFlowScreenContentEditModePreview() {
         ContractFlowScreenContent(
             state = ContractFlowUiState(
                 isLoading = false,
+                hasCompletedTypedContractsRefresh = true,
+                hasCompletedAllContractsRefresh = true,
                 registrationInfo = MockRegistrationInfo,
                 config = MockConfig,
                 currentStep = ContractStep.STEP_USER_INFO,
@@ -1298,6 +1329,8 @@ private fun ContractFlowScreenContentEditingExistingInfoPreview() {
         ContractFlowScreenContent(
             state = ContractFlowUiState(
                 isLoading = false,
+                hasCompletedTypedContractsRefresh = true,
+                hasCompletedAllContractsRefresh = true,
                 registrationInfo = MockRegistrationInfo,
                 config = MockConfig,
                 currentStep = ContractStep.STEP_REGISTRATION,
@@ -1321,6 +1354,8 @@ private fun ContractFlowScreenContentEditingExistingBranchLoadingPreview() {
         ContractFlowScreenContent(
             state = ContractFlowUiState(
                 isLoading = false,
+                hasCompletedTypedContractsRefresh = true,
+                hasCompletedAllContractsRefresh = true,
                 registrationInfo = MockRegistrationInfo,
                 config = MockConfig,
                 currentStep = ContractStep.STEP_REGISTRATION,
