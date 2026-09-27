@@ -74,9 +74,8 @@ and a generation counter makes `refresh()` win over a page that is still in flig
 ## Adding pagination to a screen
 
 1. **Repository** — add `fun getXPage(query: ApiQueryParamDN): Flow<PageDN<XDN>>`. Keep the
-   existing non-paged method if other features use it. If the list is cached, never
-   `replaceAll*` an appended page — it would drop everything before it. Reference data
-   (cities, provinces) is only upserted; see "Offline-first" below.
+   existing non-paged method if other features use it. Network-only by default; to cache it,
+   follow "Offline-first" below (only the first page may `replaceAll*`, later pages upsert).
 2. **Use case** — a thin `GetXPageUseCase(query)`; register it in `DomainModule`.
 3. **ViewModel** — `private val paginator = Paginator(loadPage = { getXPageUseCase(it).first() })`,
    then map `paginator.state` into a single `PagingChanged` partial state, and add
@@ -85,7 +84,8 @@ and a generation counter makes `refresh()` win over a page that is still in flig
 4. **Screen** — `lazyListState.OnLoadMore(enabled = !state.endReached && state.paginationError == null) { ... }`
    and a `PagingFooter` item after the list content.
 
-The worked example is `feature/my-inbox` against `getPersonalInboxItemsPageUseCase`.
+The worked example is `feature/my-inbox` against `getPersonalInboxItemsPageUseCase` — it is
+offline-first, so it uses `loadPages` instead of the step-3 `loadPage { … .first() }` form.
 
 ## Offline-first (optional)
 
@@ -112,6 +112,53 @@ If the cached load runs under `merge(...)` alongside a network-only loader, give
 its own try/catch: offline, the network-only one throws and `merge` cancels its siblings, so the
 cache never reaches the UI (history-objection stepper: insurance types killed the cached provinces).
 
+### Migrating a `getXPage` to offline-first — checklist
+
+Needs a Room table + DAO for the items (read ordered like the server, `@Upsert`, and a
+`replaceAll*` `@Transaction`). If the table is new, see [[Database]] first — a schema version
+bump wipes local data. Then:
+
+1. **Repository** — rewrite the existing method to this shape (the inbox version, verbatim):
+
+   ```kotlin
+   override fun getXPage(query: ApiQueryParamDN): Flow<PageDN<XDN>> = flow {
+       // 1. this page's slice of the cache, same order + filters as the server
+       val cached = xDao.getAll().first().drop(query.start).take(query.limit)
+       if (cached.isNotEmpty()) emit(PageDN(items = cached.map { it.toDomain() }, isFromCache = true))
+
+       // 2. network; offline with a cached slice → stop quietly, nothing cached → throw
+       val response = try {
+           remote.getX(query)
+       } catch (e: CancellationException) {
+           throw e
+       } catch (e: Exception) {
+           if (cached.isEmpty()) throw e
+           return@flow
+       }
+
+       // 3. first page replaces the cache (drops stale/deleted rows); later pages append
+       val entities = response.list.orEmpty().map { it.toEntity() }
+       if (query.start == 0) xDao.replaceAll(entities) else xDao.upsert(entities)
+       emit(PageDN(items = response.list.orEmpty().map { it.toDomain() }, total = response.total))
+   }
+   ```
+
+   `drop/take` loads the whole table; fine for tens–hundreds of rows. For bigger tables add a
+   `LIMIT :limit OFFSET :offset` query (`CityProvinceDao.getCitiesSlice`). If the list has
+   **filters**, the slice and the replace must use the same filter, or one screen's list wipes
+   another's — see the cities example below.
+2. **Every caller** — grep the method/use case and replace `.first()`: pager →
+   `Paginator(loadPages = { query -> getXPageUseCase(query) })`; one-shot → `.last()`; stream →
+   `.collect`. A missed `.first()` compiles and silently never hits the network once cached.
+3. **Use case KDoc** — say "offline-first, collect the whole flow".
+4. **Tests** — cache then network; offline with cache; offline and empty throws; later page
+   appends; first page replaces. Make the fake DAO behave like Room (upsert merges by id, reads
+   sorted) — see `PersonalInboxRepositoryImplTest.FakeDao`.
+
+The simplest worked example is `PersonalInboxRepositoryImpl.getInboxItemsPage` + `MyInboxViewModel`.
+
+### What `Paginator` does with it
+
 `Paginator` collects every emission of one request:
 
 - a cached **first** page shows immediately (`isFromCache`, `isRefreshing`, no full-screen spinner);
@@ -131,6 +178,10 @@ city method, e.g. complete-employer-info uses `getCitiesByProvincePage`):
   read; `replaceAllProvinces`), so stale rows are dropped. Later pages are appended. Scoping
   matters: opening province 07 must not wipe province 08, and a "teh" search must not wipe other
   cities. Trade-off: after a refresh, the cache holds only the pages fetched since.
+  **Known, accepted:** the *unfiltered* city list's scope is every city, so its fresh first page
+  (fraction contract, or the ill-days/add-dependent picker with an empty search) deletes all
+  cached cities, including every province's list, and keeps only that page. A province picker
+  opened offline afterwards may be empty until it is loaded online again.
 - Cities are read with `CityProvinceDao.getCitiesSlice(cityName, provinceCode, limit, offset)`.
   The server filters from `CityListQuery` (`CITY_NAME` LIKE `*term*`, `PROVINCE_CODE_CITY`) are
   translated to that query (province codes compared ignoring leading zeros). Any other filter
@@ -143,8 +194,9 @@ city method, e.g. complete-employer-info uses `getCitiesByProvincePage`):
   employer info provinces and cities (`loadPages`), history-objection and contract flow (`collect`),
   fraction contract (`.last()`).
 
-`feature/my-inbox` is still network-first with a cache fallback on failure (its own
-`getInboxItemsPage`), not this pattern.
+**Worked example — personal inbox** (`getInboxItemsPage`): no filters, so the scope is the whole
+table and the checklist code applies as-is. After a delete, `refresh()` briefly shows the cached
+first page (still holding the deleted item) until the network page replaces it.
 
 ## Mutations reset the pager
 
