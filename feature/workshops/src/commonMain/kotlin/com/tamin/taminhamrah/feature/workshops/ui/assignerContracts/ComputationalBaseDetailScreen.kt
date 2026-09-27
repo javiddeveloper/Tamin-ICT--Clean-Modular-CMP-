@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -144,7 +145,9 @@ fun ComputationalBaseDetailContent(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(WorkshopDimens.listContentPadding),
+                .padding(WorkshopDimens.listContentPadding)
+                // Clears the system navigation bar on an edge-to-edge page.
+                .navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(Spacing.smd),
         ) {
             BaseFiguresCard(

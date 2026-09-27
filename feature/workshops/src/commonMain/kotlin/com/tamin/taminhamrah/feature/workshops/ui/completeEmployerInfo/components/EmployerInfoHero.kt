@@ -25,7 +25,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
@@ -44,8 +43,6 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.taminTopAppBarGradient
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.ui.theme.TaminNavy300
-import com.tamin.taminhamrah.ui.theme.TaminNavy900
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
@@ -72,9 +69,6 @@ fun EmployerInfoHero(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalTaminColors.current
-    // The fill of انعقاد قرارداد جدید on امور قراردادها و پرداخت, so the chosen tab reads as the
-    // same kind of control.
-    val selectedTabBrush = remember { Brush.linearGradient(listOf(TaminNavy900, TaminNavy300)) }
     val barShape = RoundedCornerShape(bottomStart = CornerRadius.x3l, bottomEnd = CornerRadius.x3l)
 
     Column(modifier = modifier.fillMaxWidth()) {
@@ -290,7 +284,7 @@ fun EmployerInfoHero(
                             .height(40.dp)
                             .clip(RoundedCornerShape(12.dp))
                             .then(
-                                if (isLegal) Modifier.background(selectedTabBrush)
+                                if (isLegal) Modifier.background(colors.buttonGradient)
                                 else Modifier.background(Color.Transparent)
                             )
                             .clickable { onSelectTab(CompleteEmployerInfoTab.LEGAL) },
@@ -314,7 +308,7 @@ fun EmployerInfoHero(
                             .height(40.dp)
                             .clip(RoundedCornerShape(12.dp))
                             .then(
-                                if (isReal) Modifier.background(selectedTabBrush)
+                                if (isReal) Modifier.background(colors.buttonGradient)
                                 else Modifier.background(Color.Transparent)
                             )
                             .clickable { onSelectTab(CompleteEmployerInfoTab.REAL) },

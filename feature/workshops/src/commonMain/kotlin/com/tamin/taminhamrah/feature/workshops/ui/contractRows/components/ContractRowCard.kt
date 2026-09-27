@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
 import com.tamin.taminhamrah.model.workshop.ContractRowPR
@@ -207,6 +208,9 @@ internal fun ContractRowTile(
                 color = valueColor.takeOrElse { colors.textPrimary },
                 maxLines = if (singleLine) 1 else Int.MAX_VALUE,
                 overflow = TextOverflow.Ellipsis,
+                // Laid out left-to-right so the digits keep their order, but sat on the right like
+                // the label above it — the page's own side — rather than at the LTR start.
+                textAlign = if (numeric) TextAlign.Right else TextAlign.Unspecified,
                 modifier = if (numeric) Modifier.fillMaxWidth() else Modifier,
             )
         }
