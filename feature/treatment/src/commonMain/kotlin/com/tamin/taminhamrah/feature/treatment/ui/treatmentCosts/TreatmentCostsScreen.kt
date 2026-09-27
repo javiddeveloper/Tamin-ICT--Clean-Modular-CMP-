@@ -20,6 +20,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import com.tamin.taminhamrah.feature.treatment.ui.TreatmentCostsDimens
 import com.tamin.taminhamrah.feature.treatment.ui.components.CertificateList
 import com.tamin.taminhamrah.feature.treatment.ui.contract.CostsEvent
 import com.tamin.taminhamrah.feature.treatment.ui.contract.CostsIntent
@@ -31,6 +33,8 @@ import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
+import com.tamin.taminhamrah.ui.components.collapseHeightAway
+import com.tamin.taminhamrah.ui.components.rememberCollapsingHeaderState
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.taminHeroGradient
@@ -103,6 +107,8 @@ fun TreatmentCostsScreen(
     // it decides for itself whether the file still needs fetching, so the tap only says which one.
     var showingRepId by remember { mutableStateOf<String?>(null) }
 
+    val collapseState = rememberCollapsingHeaderState(TreatmentCostsDimens.headerCollapseDistance)
+
     val certificates = remember(state.treatmentCostList) {
         state.treatmentCostList.toImmutableList()
     }
@@ -117,6 +123,7 @@ fun TreatmentCostsScreen(
                 background = taminHeroGradient(colors.treatmentHubStops),
                 navigationIcon = {
                     TaminTopAppBarButton(
+                        bordered = true,
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                         contentDescription = stringResource(Res.string.action_back),
                         onClick = onBackClicked,
@@ -124,7 +131,11 @@ fun TreatmentCostsScreen(
                 },
                 content = {
                     Column(
-                        modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            // Folds away as the list scrolls, leaving only the title row.
+                            .collapseHeightAway(collapseState.progressProvider)
+                            .padding(top = Spacing.sm),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         AnimatedRingHeaderIcon(
@@ -141,7 +152,12 @@ fun TreatmentCostsScreen(
             )
         },
     ) { padding ->
-        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .nestedScroll(collapseState.nestedScrollConnection),
+        ) {
             CertificateList(
                 certificates = certificates,
                 isLoading = state.isLoading,
@@ -160,6 +176,7 @@ fun TreatmentCostsScreen(
 
     showingRepId?.let { repId ->
         TaminPdfViewer(
+            background = taminHeroGradient(colors.treatmentHubStops),
             // Named after the certificate, so one already downloaded is recognized and re-rendered
             // from the device instead of being fetched and saved twice.
             fileName = "treatment_cost_$repId.pdf",
