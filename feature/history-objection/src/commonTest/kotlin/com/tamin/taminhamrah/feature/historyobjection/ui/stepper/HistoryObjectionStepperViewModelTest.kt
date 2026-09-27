@@ -111,6 +111,33 @@ class HistoryObjectionStepperViewModelTest {
     }
 
     @Test
+    fun citiesFromCache_flagTheListAsStale_networkCitiesDoNot() = runTest(testDispatcher) {
+        val city = CityDN(cityCode = "1158", cityName = "اصفهان", provinceCode = "04")
+        cityProvinceRepository.provincesResult = listOf(
+            ProvinceDN(provinceCode = "04", provinceName = "اصفهان", status = "1", statusStartDate = "1"),
+        )
+        cityProvinceRepository.citiesByProvinceResult = listOf(city)
+        val province = com.tamin.taminhamrah.model.common.ProvincePR("04", "اصفهان")
+
+        viewModel.uiState.test {
+            awaitItem()
+            viewModel.sendIntent(HistoryObjectionStepperIntent.Load(null))
+            awaitUntil { it.provinces.isNotEmpty() }
+
+            // Offline: only the cached page arrives, so the outdated-list warning shows.
+            cityProvinceRepository.citiesFromCacheOnly = true
+            viewModel.sendIntent(HistoryObjectionStepperIntent.OnProvinceSelected(province))
+            assertEquals(true, awaitUntil { it.cities.isNotEmpty() && !it.isCitiesLoading }.isCitiesStale)
+
+            // Online: the network page clears it.
+            cityProvinceRepository.citiesFromCacheOnly = false
+            viewModel.sendIntent(HistoryObjectionStepperIntent.OnProvinceSelected(province))
+            assertEquals(false, awaitUntil { it.cities.isNotEmpty() && !it.isCitiesLoading }.isCitiesStale)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun changingProvince_clearsPreviouslySelectedCityAndBranch() = runTest(testDispatcher) {
         val provinceA = ProvinceDN(provinceCode = "04", provinceName = "اصفهان", status = "1", statusStartDate = "1")
         val provinceB = ProvinceDN(provinceCode = "09", provinceName = "خراسان رضوی", status = "1", statusStartDate = "1")
