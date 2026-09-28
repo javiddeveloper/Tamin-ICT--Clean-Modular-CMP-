@@ -31,13 +31,10 @@ import com.tamin.taminhamrah.useCases.auth.GetSignOutUrlUseCase
 import com.tamin.taminhamrah.useCases.auth.SignOutUseCase
 import com.tamin.taminhamrah.useCases.common.SetThemeUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
-import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
-import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
 import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
-import com.tamin.taminhamrah.useCases.user.VerifyChangeMobileUseCase
 import com.tamin.taminhamrah.util.HeaderConstant
 import com.tamin.taminhamrah.util.Logger
 import kotlinx.coroutines.Dispatchers
@@ -54,6 +51,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertNull
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -88,10 +86,7 @@ class ProfileViewModelTest {
         subdominantUseCase = SubdominantUseCase(userRepository),
         signOutUseCase = SignOutUseCase(authRepository),
         getSignOutUrlUseCase = GetSignOutUrlUseCase(developerOptions),
-        getInsuredActiveBranchUseCase = GetInsuredActiveBranchUseCase(userRepository),
         getRelationTaminAllUseCase = GetRelationTaminAllUseCase(userRepository),
-        changeMobileUseCase = ChangeMobileUseCase(userRepository),
-        verifyChangeMobileUseCase = VerifyChangeMobileUseCase(userRepository),
         setThemeUseCase = SetThemeUseCase(preferences),
         featureManager = featureManager,
     )
@@ -141,11 +136,14 @@ class ProfileViewModelTest {
         userRepository.identityError = RuntimeException("سرویس هویت در دسترس نیست")
         val viewModel = createViewModel()
 
-        viewModel.sendIntent(ProfileIntent.LoadProfile())
+        viewModel.events.test {
+            viewModel.sendIntent(ProfileIntent.LoadProfile())
 
-        val state = viewModel.uiState.value
-        assertFalse(state.isLoading)
-        assertEquals("سرویس هویت در دسترس نیست", state.error)
+            // A failed section toasts once and falls back instead of parking an error in state.
+            assertIs<ProfileEvent.ShowToast>(awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+        assertFalse(viewModel.uiState.value.isLoading)
     }
 
     // --- Logout --------------------------------------------------------------------------------
