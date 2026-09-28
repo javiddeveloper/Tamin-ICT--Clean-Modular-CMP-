@@ -226,6 +226,32 @@ class UserRequestsViewModelTest {
         }
     }
 
+    @Test
+    fun `retry after a failed next page loads the rest and clears the error`() = runTest(testDispatcher) {
+        repository.userRequestsResult = (1L..15L).map { sampleDomain(it) }
+        repository.userRequestsTotal = 15
+
+        viewModel.uiState.test {
+            awaitItem()
+            viewModel.sendIntent(UserRequestsIntent.LoadRequests)
+            var state = awaitItem()
+            while (state.requests.size != 10) state = awaitItem()
+
+            repository.shouldThrowError = true
+            viewModel.sendIntent(UserRequestsIntent.LoadNextPage)
+            while (state.paginationError == null) state = awaitItem()
+            assertEquals(10, state.requests.size)
+
+            repository.shouldThrowError = false
+            viewModel.sendIntent(UserRequestsIntent.RetryNextPage)
+            while (state.requests.size != 15) state = awaitItem()
+
+            assertNull(state.paginationError)
+            assertTrue(state.endReached)
+            assertEquals(10, repository.lastPage?.start)
+        }
+    }
+
     private fun sampleDomain(id: Long) = UserRequestDN(
         id = id,
         refCode = id.toString(),
