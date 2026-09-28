@@ -8,27 +8,82 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.HttpStatusErrorMapper
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
-import com.tamin.taminhamrah.tools.safeCall
+import kotlinx.coroutines.CancellationException
+import io.ktor.serialization.JsonConvertException
+import io.ktor.client.plugins.HttpRequestTimeoutException
+import io.ktor.client.network.sockets.ConnectTimeoutException
+import io.ktor.client.network.sockets.SocketTimeoutException
 
 class InquiryEducationRemoteDataSourceImpl(
     private val inquiryEducationApiService: InquiryEducationApiService,
     private val errorParser: ErrorParser,
 ) : InquiryEducationRemoteDataSource {
 
-    override suspend fun getDataForEducation(): EducationDependentsListDTO? =
-        errorParser.safeCall("getDataForEducation") {
+    override suspend fun getDataForEducation(): EducationDependentsListDTO? {
+        return try {
             inquiryEducationApiService.getDataForEducation().extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
+    }
 
 
     override suspend fun inquiryEducationCertificate(
         code: String,
         educationCode: String,
-    ): String? = errorParser.safeCall("inquiryEducationCertificate"){
+    ): String? {
+        return try {
             inquiryEducationApiService
                 .inquiryEducationCertificate(code = code, educationCode = educationCode)
                 .extractNullableData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
+    }
     }
 
     /**
@@ -37,11 +92,9 @@ class InquiryEducationRemoteDataSourceImpl(
     private fun <T> BaseDTO<T>.extractNullableData(): T? {
         return when {
             hasProblems -> {
-                val firstProblem = problems?.firstOrNull()
                 throw TaminErrorUriException(
                     uri = ErrorUri.SERVER_PROBLEM,
                     serverMessage = problemMessage ?: reason,
-                    errorCode = firstProblem?.errorCode,
                 )
             }
             status in 200..299 -> data

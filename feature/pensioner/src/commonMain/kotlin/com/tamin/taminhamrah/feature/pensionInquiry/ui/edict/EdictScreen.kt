@@ -74,6 +74,8 @@ import taminx.core.core_ui.edict_send_success_desc
 import taminx.core.core_ui.edict_send_success_title
 import taminx.core.core_ui.ic_email
 import taminx.core.core_ui.ic_tamin_download
+import kotlinx.collections.immutable.toImmutableList
+import org.jetbrains.compose.resources.getString
 
 // ─── Entry point ──────────────────────────────────────────────────────────────
 
@@ -114,8 +116,10 @@ fun EdictScreen(
     }
 
     if (state.showPensionerSheet) {
+        val pensioners = state.pensionerIds
+        val pensionerIds = remember(pensioners) { pensioners.map { it.pensionerId }.toImmutableList() }
         EdictPensionerSheet(
-            pensionerIds = state.pensionerIds.map { it.pensionerId },
+            pensionerIds = pensionerIds,
             selectedId = state.selectedPensionerId,
             onSelect = { id ->
                 viewModel.sendIntent(EdictIntent.ChangeSelectedPensionerId(id))
@@ -164,6 +168,7 @@ fun HandleEdictEvents(
     events.collectWithLifecycleAware { event ->
         when (event) {
             is EdictEvent.ShowToast -> onShowToast(event.message)
+            is EdictEvent.ShowToastRes -> onShowToast(getString(event.message))
             is EdictEvent.NavigateBack -> onNavigateBack()
         }
     }

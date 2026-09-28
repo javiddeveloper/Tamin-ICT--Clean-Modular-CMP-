@@ -23,7 +23,6 @@ data class TaminErrorUriException(
     // the `hasError`/`problems` envelope, e.g. BaseDTO.problemMessage.
     // When set, ErrorParser prefers this over the generic per-ErrorUri copy.
     val serverMessage: String? = null,
-    val errorCode: Int? = null,
     val navigateBack: Boolean = false,
 ) : Exception()
 
@@ -34,17 +33,22 @@ fun TaminApiException.toSingleLineMessage(): String {
 }
 
 fun Throwable.toSingleLineMessage() = this.asTaminApiException().toSingleLineMessage()
-fun Throwable.asTaminApiException() = try {
-    this as TaminApiException
-} catch (t: Throwable) {
-    TaminApiException(title = "مشکلی پیش آمده، لطفا بعدا سعی کنید", cause = TaminErrorUriException(
-        ErrorUri.UNKNOWN))
+
+/**
+ * A classified failure that was never parsed — thrown outside a data source's catch, e.g. while a
+ * repository drains a download's [io.ktor.client.statement.HttpStatement] — is parsed here instead
+ * of being discarded as "something went wrong".
+ */
+fun Throwable.asTaminApiException(): TaminApiException = when (this) {
+    is TaminApiException -> this
+    is TaminErrorUriException -> ErrorParserImpl().parseGeneralError(this)
+    else -> TaminApiException(
+        title = "مشکلی پیش آمده، لطفا بعدا سعی کنید",
+        cause = TaminErrorUriException(ErrorUri.UNKNOWN),
+    )
 }
 
-fun Throwable.getTaminApiExceptionTitle() = this.asTaminApiException().title
-fun Throwable.getTaminApiExceptionSubtitle() = this.asTaminApiException().subtitle
 fun Throwable.getTaminErrorUri() = (this.asTaminApiException().cause as TaminErrorUriException).uri
-fun Throwable.getServerErrorCode() = (this.asTaminApiException().cause as? TaminErrorUriException)?.errorCode
 
 /**
  * Which [ErrorUri] this failure was classified as, or null when it carries none.

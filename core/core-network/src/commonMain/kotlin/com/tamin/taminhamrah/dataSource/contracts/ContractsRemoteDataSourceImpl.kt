@@ -1,5 +1,8 @@
 package com.tamin.taminhamrah.dataSource.contracts
 
+import kotlinx.coroutines.CancellationException
+import io.ktor.serialization.JsonConvertException
+import com.tamin.taminhamrah.tools.requireSuccessStatus
 import com.tamin.taminhamrah.apiService.contract.ContractsApiService
 import com.tamin.taminhamrah.model.contracts.BranchDTO
 import com.tamin.taminhamrah.model.contracts.ContractDTO
@@ -32,6 +35,9 @@ import io.ktor.client.request.forms.formData
 import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
+import io.ktor.client.plugins.HttpRequestTimeoutException
+import io.ktor.client.network.sockets.ConnectTimeoutException
+import io.ktor.client.network.sockets.SocketTimeoutException
 
 class ContractsRemoteDataSourceImpl(
     private val contractsApiService: ContractsApiService,
@@ -45,6 +51,24 @@ class ContractsRemoteDataSourceImpl(
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -57,6 +81,24 @@ class ContractsRemoteDataSourceImpl(
             contractsApiService.getRegistrationInfo().extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -70,6 +112,24 @@ class ContractsRemoteDataSourceImpl(
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -82,6 +142,24 @@ class ContractsRemoteDataSourceImpl(
             contractsApiService.getSpcPremiumRates().extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -98,6 +176,24 @@ class ContractsRemoteDataSourceImpl(
             ).extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -110,6 +206,24 @@ class ContractsRemoteDataSourceImpl(
             contractsApiService.getOptionalPremiumRange().extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -122,6 +236,24 @@ class ContractsRemoteDataSourceImpl(
             contractsApiService.checkRedCrossStatus().extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -134,6 +266,24 @@ class ContractsRemoteDataSourceImpl(
             contractsApiService.checkMedicalStudent().extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -150,6 +300,24 @@ class ContractsRemoteDataSourceImpl(
             ).extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -162,6 +330,24 @@ class ContractsRemoteDataSourceImpl(
             contractsApiService.calculateOptionalSalary(premiumRateCode).extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -174,6 +360,24 @@ class ContractsRemoteDataSourceImpl(
             contractsApiService.getFreeJobWages(apiQueryBuilder.buildQuery(query)).extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -192,6 +396,24 @@ class ContractsRemoteDataSourceImpl(
             ).extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -210,6 +432,24 @@ class ContractsRemoteDataSourceImpl(
             ).extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -228,6 +468,24 @@ class ContractsRemoteDataSourceImpl(
             ).extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -246,6 +504,24 @@ class ContractsRemoteDataSourceImpl(
             ).extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -259,13 +535,27 @@ class ContractsRemoteDataSourceImpl(
     ) {
         try {
             val response = contractsApiService.updateFreelanceContract(premium, request)
-            if (response.status !in 200..299) {
-                throw TaminErrorUriException(
-                    ErrorUri.fromString("CLIENT_ERROR: ${response.reason}"),
-                )
-            }
+            response.requireSuccessStatus()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
@@ -279,13 +569,27 @@ class ContractsRemoteDataSourceImpl(
     ) {
         try {
             val response = contractsApiService.updateOptionalContract(premium, request)
-            if (response.status !in 200..299) {
-                throw TaminErrorUriException(
-                    ErrorUri.fromString("CLIENT_ERROR: ${response.reason}"),
-                )
-            }
+            response.requireSuccessStatus()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
@@ -299,13 +603,27 @@ class ContractsRemoteDataSourceImpl(
     ) {
         try {
             val response = contractsApiService.updateFreelanceContractByGuardian(premium, request)
-            if (response.status !in 200..299) {
-                throw TaminErrorUriException(
-                    ErrorUri.fromString("CLIENT_ERROR: ${response.reason}"),
-                )
-            }
+            response.requireSuccessStatus()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
@@ -319,13 +637,27 @@ class ContractsRemoteDataSourceImpl(
     ) {
         try {
             val response = contractsApiService.updateOptionalContractByGuardian(premium, request)
-            if (response.status !in 200..299) {
-                throw TaminErrorUriException(
-                    ErrorUri.fromString("CLIENT_ERROR: ${response.reason}"),
-                )
-            }
+            response.requireSuccessStatus()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
@@ -347,6 +679,24 @@ class ContractsRemoteDataSourceImpl(
             ).extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -359,6 +709,24 @@ class ContractsRemoteDataSourceImpl(
             contractsApiService.checkInsurancePaymentStatus(systemType).data
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -386,6 +754,24 @@ class ContractsRemoteDataSourceImpl(
             contractsApiService.uploadImage(content).guid
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
@@ -395,22 +781,32 @@ class ContractsRemoteDataSourceImpl(
 
     override suspend fun saveContact(request: SaveContactRequestDTO): Any? {
         return try {
-            println("SaveContact: calling save-contact endpoint with $request")
             val response = contractsApiService.saveContact(request)
-            println("SaveContact: response status=${response.status}, family=${response.family}")
-            if (response.status !in 200..299) {
-                throw TaminErrorUriException(
-                    ErrorUri.fromString("CLIENT_ERROR: ${response.reason}"),
-                )
-            }
+            response.requireSuccessStatus()
             response.data as Any?
         } catch (e: TaminErrorUriException) {
-            println("SaveContact: tamin error ${e.message}")
             throw errorParser.parseGeneralError(e)
-        } catch (e: Exception) {
-            println("SaveContact: exception ${e::class.simpleName} ${e.message}")
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
             throw errorParser.parseGeneralError(
-                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR),
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
             )
         }
     }

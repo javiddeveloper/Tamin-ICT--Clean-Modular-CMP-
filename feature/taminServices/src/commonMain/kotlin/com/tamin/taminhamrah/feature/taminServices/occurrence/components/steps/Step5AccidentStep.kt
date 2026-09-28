@@ -66,6 +66,8 @@ import taminx.core.core_ui.occurrence_prev_step
 import taminx.core.core_ui.occurrence_select_outcome_hint
 import taminx.core.core_ui.occurrence_sheet_outcome_title
 import taminx.core.core_ui.occurrence_step5_title
+import androidx.compose.runtime.remember
+import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 internal fun Step5AccidentStep(
@@ -256,11 +258,8 @@ internal fun Step5AccidentStep(
     if (uiState.dialogs.showAccidentOutcomeSheet) {
         OccurrenceSelectionBottomSheet(
             title = stringResource(Res.string.occurrence_sheet_outcome_title),
-            options = outcomeOptions.map { (id, label) ->
-                OccurrenceSheetOption(
-                    id = id,
-                    title = label
-                )
+            options = remember(outcomeOptions) {
+                outcomeOptions.map { (id, label) -> OccurrenceSheetOption(id = id, title = label) }.toImmutableList()
             },
             selectedId = step.accidentOutcomeId,
             onSelect = { option ->

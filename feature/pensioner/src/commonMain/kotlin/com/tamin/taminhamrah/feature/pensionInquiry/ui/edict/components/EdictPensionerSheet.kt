@@ -34,15 +34,20 @@ import com.tamin.taminhamrah.ui.components.TaminText
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
-import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.edict_pensioner_sheet_title
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import com.tamin.taminhamrah.ui.components.TaminEmptyState
+import taminx.core.core_ui.no_items_found
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EdictPensionerSheet(
-    pensionerIds: List<String>,
+    pensionerIds: ImmutableList<String>,
     selectedId: String?,
     onSelect: (String) -> Unit,
     onDismiss: () -> Unit,
@@ -79,35 +84,41 @@ fun EdictPensionerSheet(
                 modifier = Modifier.padding(bottom = Spacing.lg),
             )
 
-            pensionerIds.forEach { id ->
-                val isSelected = id == selectedId
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(CornerRadius.md))
-                        .background(if (isSelected) taminColors.blueBg else Color.Transparent)
-                        .clickable { onSelect(id) }
-                        .padding(horizontal = Spacing.md, vertical = Spacing.md),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    TaminText(
-                        text = id,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = if (isSelected) taminColors.blueText else taminColors.textPrimary,
-                    )
-                    if (isSelected) {
-                        Spacer(Modifier.width(Spacing.sm))
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = null,
-                            tint = taminColors.blueText,
-                            modifier = Modifier.size(20.dp),
-                        )
+            if (pensionerIds.isEmpty()) {
+                TaminEmptyState(message = stringResource(Res.string.no_items_found))
+            } else {
+                LazyColumn {
+                    items(pensionerIds) { id ->
+                        val isSelected = id == selectedId
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(CornerRadius.md))
+                                .background(if (isSelected) taminColors.blueBg else Color.Transparent)
+                                .clickable { onSelect(id) }
+                                .padding(horizontal = Spacing.md, vertical = Spacing.md),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            TaminText(
+                                text = id,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isSelected) taminColors.blueText else taminColors.textPrimary,
+                            )
+                            if (isSelected) {
+                                Spacer(Modifier.width(Spacing.sm))
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    tint = taminColors.blueText,
+                                    modifier = Modifier.size(20.dp),
+                                )
+                            }
+                        }
+                        HorizontalDivider(color = taminColors.divider, thickness = 0.5.dp)
                     }
                 }
-                HorizontalDivider(color = taminColors.divider, thickness = 0.5.dp)
             }
         }
     }
@@ -118,7 +129,7 @@ fun EdictPensionerSheet(
 private fun EdictPensionerSheetPreview() {
     PreviewRtlThemeContent {
         EdictPensionerSheet(
-            pensionerIds = listOf("1003406938", "2003406939"),
+            pensionerIds = persistentListOf("1003406938", "2003406939"),
             selectedId = "1003406938",
             onSelect = {},
             onDismiss = {},

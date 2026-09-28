@@ -115,7 +115,8 @@ fun NavController.navigateToFeature(flag: FeatureFlag, beforeOpen: () -> Unit = 
         FeatureFlag.LIST_OF_INSPECTIONS_PERFORMED -> screen { navigateToInspection() }
         FeatureFlag.REGISTER_AGREEMENT -> screen { navigateToEmployerOnlineServices() }
         FeatureFlag.OBJECTION_NON_EXISTENT_HISTORY -> screen { navigateToHistoryObjection() }
-        FeatureFlag.OBJECTION_INSURANCE_HISTORY -> screen { navigateToObjectionInsurance() }
+        FeatureFlag.OBJECTION_INSURANCE_HISTORY,
+        FeatureFlag.OBJECTION_INSURANCE_HISTORY_LEGACY -> screen { navigateToObjectionInsurance() }
         FeatureFlag.INQUIRY_EDUCATION -> screen { navigateToInquiryEducation() }
         FeatureFlag.FRACTION_CONTRACT -> return false
         FeatureFlag.WEDDING_PRESENT -> screen { navigateToWeddingPresent() }

@@ -31,11 +31,21 @@ class GirlSurvivorModuleTest {
     @AfterTest
     fun tearDown() = Dispatchers.resetMain()
 
+    /**
+     * The screen resolves its ViewModel from this module. `viewModelOf(::GirlSurvivorViewModel)` also
+     * asked Koin for the defaulted `resolveString`, which has no definition — the screen crashed on open.
+     */
     @Test
     fun girlSurvivorModule_resolvesViewModel() {
         val repository = FakePersonalRepository()
         val koin = koinApplication {
             modules(
+                module {
+                    factory { GetPersonalInfoUseCase(repository) }
+                    factory { CheckGirlSurvivorConditionsUseCase(repository) }
+                    factory { GetGirlSurvivorReportUseCase(repository) }
+                    factory { ConfirmGirlSurvivorUseCase(repository) }
+                },
                 girlSurvivorModule,
                 module {
                     single { GetPersonalInfoUseCase(repository) }

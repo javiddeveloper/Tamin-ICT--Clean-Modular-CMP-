@@ -14,7 +14,7 @@ class TaminExceptionTest {
         assertEquals(ErrorUri.NO_CONNECTION_ERROR, parsed.taminErrorUriOrNull())
     }
 
-    /** The unparsed form, which `safeCall` rethrows straight through for a known uri. */
+    /** The unparsed form, as a repository sees it when a download fails outside a data source's catch. */
     @Test
     fun `a bare uri exception reports its own uri`() {
         val bare = TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
@@ -30,6 +30,14 @@ class TaminExceptionTest {
     fun `a throwable that never reached the parser has no uri`() {
         assertNull(RuntimeException("boom").taminErrorUriOrNull())
         assertNull(TaminApiException(title = "خطا").taminErrorUriOrNull())
+    }
+
+    /** Thrown outside a data source (a repository draining a download): parsed, not "مشکلی پیش آمده". */
+    @Test
+    fun `an unparsed classified failure still reads as its own message`() {
+        val bare = TaminErrorUriException(ErrorUri.FORBIDDEN, serverMessage = HttpErrorCopy.FORBIDDEN_VPN)
+
+        assertEquals("خطا, ${HttpErrorCopy.FORBIDDEN_VPN}", bare.toSingleLineMessage())
     }
 
     /** A server message wins the copy, but the classification underneath it still comes through. */

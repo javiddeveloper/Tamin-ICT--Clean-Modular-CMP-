@@ -10,24 +10,78 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.HttpStatusErrorMapper
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
-import com.tamin.taminhamrah.tools.safeCall
+import kotlinx.coroutines.CancellationException
+import io.ktor.serialization.JsonConvertException
+import io.ktor.client.plugins.HttpRequestTimeoutException
+import io.ktor.client.network.sockets.ConnectTimeoutException
+import io.ktor.client.network.sockets.SocketTimeoutException
 
 class FractionContractRemoteDataSourceImpl(
     private val fractionContractApiService: FractionContractApiService,
     private val errorParser: ErrorParser,
 ) : FractionContractRemoteDataSource {
 
-    override suspend fun checkAgeAndHistory(): FractionEligibilityDTO? =
-        errorParser.safeCall("checkFractionAgeAndHistory") {
+    override suspend fun checkAgeAndHistory(): FractionEligibilityDTO? {
+        return try {
             fractionContractApiService.checkAgeAndHistory().extractNullableData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
+    }
 
     override suspend fun makeFractionContract(
         request: MakeFractionContractRequestDTO,
-    ): FractionContractResultDTO =
-        errorParser.safeCall("makeFractionContract") {
+    ): FractionContractResultDTO {
+        return try {
             fractionContractApiService.makeFractionContract(request).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
+    }
 
     /**
      * Like [extractData], but allows null [BaseDTO.data] on 2xx
@@ -36,11 +90,9 @@ class FractionContractRemoteDataSourceImpl(
     private fun <T> BaseDTO<T>.extractNullableData(): T? {
         return when {
             hasProblems -> {
-                val firstProblem = problems?.firstOrNull()
                 throw TaminErrorUriException(
                     uri = ErrorUri.SERVER_PROBLEM,
                     serverMessage = problemMessage ?: reason,
-                    errorCode = firstProblem?.errorCode,
                 )
             }
             status in 200..299 -> data
