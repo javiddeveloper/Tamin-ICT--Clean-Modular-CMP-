@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,7 +27,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -46,10 +44,10 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.TaminColors
 import com.tamin.taminhamrah.ui.theme.TaminIdentityCardShadow
 import com.tamin.taminhamrah.ui.theme.shimmer
 import com.tamin.taminhamrah.util.toPersianDigits
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringArrayResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -58,10 +56,10 @@ import taminx.core.core_ui.action_back
 import taminx.core.core_ui.edict_title
 import taminx.core.core_ui.edict_search_title
 import taminx.core.core_ui.edict_year_filter
-import taminx.core.core_ui.ic_arrow_down
+import taminx.core.core_ui.ic_tamin_chevron_back
+import taminx.core.core_ui.ic_tamin_chevron_down
 import taminx.core.core_ui.ic_tamin_search
 import taminx.core.core_ui.jalali_months
-import taminx.core.core_ui.user_type_pensioner
 
 private val HEADER_OVERLAP = 24.dp
 
@@ -99,9 +97,10 @@ fun EdictHeader(
             bottomPadding = HEADER_OVERLAP,
             navigationIcon = {
                 TaminTopAppBarButton(
-                    icon = Icons.AutoMirrored.Filled.ArrowBack,
+                    icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                     contentDescription = stringResource(Res.string.action_back),
                     onClick = onBack,
+                    bordered = true
                 )
             },
             action = {
@@ -109,6 +108,7 @@ fun EdictHeader(
                     icon = vectorResource(Res.drawable.ic_tamin_search),
                     contentDescription = stringResource(Res.string.edict_search_title),
                     onClick = { onIntent(EdictIntent.ShowSearchSheet) },
+                    bordered = true
                 )
             },
         ) {
@@ -220,7 +220,7 @@ private fun EdictPensionerChip(
                 )
                 Spacer(Modifier.width(Spacing.sm))
                 Icon(
-                    painter = painterResource(Res.drawable.ic_arrow_down),
+                    imageVector = vectorResource(Res.drawable.ic_tamin_chevron_down),
                     contentDescription = null,
                     tint = Color.White,
                     modifier = Modifier.size(16.dp),
