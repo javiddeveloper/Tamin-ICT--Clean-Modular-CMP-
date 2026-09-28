@@ -250,6 +250,7 @@ class BaseDTOTest {
             dto.extractTypedData(Json, String.serializer())
         }
         assertEquals("این شماره موبایل قبلا ثبت شده است", error.serverMessage)
+        assertEquals(ErrorUri.INVALID_REQUEST, error.uri)
 
         val parsed = ErrorParserImpl().parseGeneralError(error)
         assertEquals("این شماره موبایل قبلا ثبت شده است", parsed.subtitle)
@@ -270,5 +271,57 @@ class BaseDTOTest {
             dto.extractTypedData(Json, String.serializer())
         }
         assertEquals("سرویس موقتا در دسترس نیست", error.serverMessage)
+        assertEquals(ErrorUri.SERVER_SERVICE_UNAVAILABLE, error.uri)
+    }
+
+    /** Was `ErrorUri.fromString("SERVER_ERROR: …")` — always UNKNOWN, and no message at all. */
+    @Test
+    fun `extractTypedData without a gateway message falls back to the status copy`() {
+        val dto = BaseDTO<kotlinx.serialization.json.JsonElement?>(
+            status = 500,
+            family = "SERVER_ERROR",
+            reason = "Internal Server Error",
+            data = null,
+        )
+        val error = assertFailsWith<TaminErrorUriException> {
+            dto.extractTypedData(Json, String.serializer())
+        }
+        assertEquals(ErrorUri.INTERNAL_ERROR, error.uri)
+        assertEquals(HttpErrorCopy.GENERIC_SERVER, error.serverMessage)
+    }
+
+    // --- requireSuccessStatus (calls whose reply carries nothing to read, e.g. save-contact) ---
+
+    @Test
+    fun `requireSuccessStatus lets a 2xx through even with no data`() {
+        BaseDTO<Unit>(status = 200, family = "SUCCESSFUL", reason = "OK").requireSuccessStatus()
+    }
+
+    /** `errorText` is what the reply converter recovers from a failed body's `data.message`. */
+    @Test
+    fun `requireSuccessStatus fails a 4xx with the server's own message`() {
+        val dto = BaseDTO<Unit>(
+            status = 400,
+            family = "CLIENT_ERROR",
+            reason = "Bad Request",
+            errorText = "کد پستی نامعتبر است",
+        )
+        val error = assertFailsWith<TaminErrorUriException> { dto.requireSuccessStatus() }
+
+        assertEquals(ErrorUri.INVALID_REQUEST, error.uri)
+        assertEquals("کد پستی نامعتبر است", error.serverMessage)
+    }
+
+    @Test
+    fun `requireSuccessStatus fails a 5xx with the status copy when the server says nothing readable`() {
+        val dto = BaseDTO<Unit>(
+            status = 500,
+            family = "SERVER_ERROR",
+            reason = "Internal Server Error",
+        )
+        val error = assertFailsWith<TaminErrorUriException> { dto.requireSuccessStatus() }
+
+        assertEquals(ErrorUri.INTERNAL_ERROR, error.uri)
+        assertEquals(HttpErrorCopy.GENERIC_SERVER, error.serverMessage)
     }
 }

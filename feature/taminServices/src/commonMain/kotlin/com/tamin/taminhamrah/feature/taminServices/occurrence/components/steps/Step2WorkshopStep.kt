@@ -73,6 +73,8 @@ import taminx.core.core_ui.occurrence_sheet_select_workshop
 import taminx.core.core_ui.occurrence_step2_title
 import taminx.core.core_ui.occurrence_workshop_display_code
 import taminx.core.core_ui.province_city_address_hint
+import androidx.compose.runtime.remember
+import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 internal fun Step2WorkshopStep(
@@ -317,14 +319,18 @@ internal fun Step2WorkshopStep(
     }
 
     if (uiState.dialogs.showWorkshopSheet) {
+        val workshops = step.workshops
+        val workshopTitles = workshops.map { workshop ->
+            stringResource(Res.string.occurrence_workshop_display_code, workshop.workshopCode, workshop.branchCode)
+        }
+        val workshopOptions = remember(workshops, workshopTitles) {
+            workshops.mapIndexed { index, workshop ->
+                OccurrenceSheetOption(id = workshop.id, title = workshopTitles[index])
+            }.toImmutableList()
+        }
         OccurrenceSelectionBottomSheet(
             title = stringResource(Res.string.occurrence_sheet_select_workshop),
-            options = step.workshops.map { workshop ->
-                OccurrenceSheetOption(
-                    id = workshop.id,
-                    title = stringResource(Res.string.occurrence_workshop_display_code, workshop.workshopCode, workshop.branchCode)
-                )
-            },
+            options = workshopOptions,
             selectedId = step.selectedWorkshop?.id,
             onSelect = { option ->
                 val workshop = step.workshops.first { it.id == option.id }

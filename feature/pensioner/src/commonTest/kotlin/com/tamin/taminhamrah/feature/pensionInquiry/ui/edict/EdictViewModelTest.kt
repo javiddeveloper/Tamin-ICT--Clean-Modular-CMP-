@@ -52,6 +52,10 @@ import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
+import com.tamin.taminhamrah.tools.errorHandling.toApiException
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.edict_error_not_found_for_year
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class EdictViewModelTest {
@@ -225,6 +229,21 @@ class EdictViewModelTest {
         viewModel.events.test {
             val event = awaitItem()
             assertIs<EdictEvent.ShowToast>(event)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    /** The old app's rule: a server error on an edict read reads "no edict for this year". */
+    @Test
+    fun whenTheEdictReadIsAServerError_showsTheNoEdictCopy() = runTest(testDispatcher) {
+        repository.pensionIdResult = listOf(PensionIdDN(pensionerId = "123"))
+        repository.edictShouldThrow = true
+        repository.edictError = ErrorUri.INTERNAL_ERROR.toApiException()
+        viewModel = buildViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.events.test {
+            assertEquals(EdictEvent.ShowToastRes(Res.string.edict_error_not_found_for_year), awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
     }

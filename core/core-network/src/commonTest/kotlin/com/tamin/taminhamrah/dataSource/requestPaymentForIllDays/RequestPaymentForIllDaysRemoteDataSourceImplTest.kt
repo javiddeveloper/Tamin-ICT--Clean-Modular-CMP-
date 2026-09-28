@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.dataSource.requestPaymentForIllDays
 
+import com.tamin.taminhamrah.tools.FakeIOException
 import com.tamin.taminhamrah.apiService.requestPaymentForIllDays.RequestPaymentForIllDaysApiService
 import com.tamin.taminhamrah.model.requestPaymentForIllDays.CovidResultListDTO
 import com.tamin.taminhamrah.model.requestPaymentForIllDays.IllDaysInsuredMainInfoDTO
@@ -73,7 +74,7 @@ private class FakeRequestPaymentForIllDaysApiService(
 ) : RequestPaymentForIllDaysApiService {
 
     override suspend fun getLatestInsuranceInfo(): BaseDTO<IllDaysInsuredMainInfoDTO> {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         return success(
             IllDaysInsuredMainInfoDTO(
                 risuid = "1234567890",
@@ -83,7 +84,7 @@ private class FakeRequestPaymentForIllDaysApiService(
     }
 
     override suspend fun getCovidResult(): BaseDTO<CovidResultListDTO> {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         return success(CovidResultListDTO(list = listOf("1700000000", "1700086400")))
     }
 
@@ -92,14 +93,14 @@ private class FakeRequestPaymentForIllDaysApiService(
         endDateTimeStamp: String,
         maritalStatus: String,
     ): BaseDTO<List<String>?> {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         return success(listOf("1000000"))
     }
 
     override suspend fun sendRequestForIllDay(
         request: SaveShortTermIllnessRequestDTO
     ): BaseDTO<SaveShortTermIllnessResponseDTO> {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         return success(
             SaveShortTermIllnessResponseDTO(
                 shorttermRequest = IllDaysShortTermResultDTO(resultMessage = "ok")

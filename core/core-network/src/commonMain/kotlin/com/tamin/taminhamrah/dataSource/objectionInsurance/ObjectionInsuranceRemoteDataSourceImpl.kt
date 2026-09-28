@@ -12,7 +12,11 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.HttpStatusErrorMapper
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
-import com.tamin.taminhamrah.tools.safeCall
+import kotlinx.coroutines.CancellationException
+import io.ktor.serialization.JsonConvertException
+import io.ktor.client.plugins.HttpRequestTimeoutException
+import io.ktor.client.network.sockets.ConnectTimeoutException
+import io.ktor.client.network.sockets.SocketTimeoutException
 
 class ObjectionInsuranceRemoteDataSourceImpl(
     private val objectionInsuranceApiService: ObjectionInsuranceApiService,
@@ -20,32 +24,157 @@ class ObjectionInsuranceRemoteDataSourceImpl(
     private val errorParser: ErrorParser,
 ) : ObjectionInsuranceRemoteDataSource {
 
-    override suspend fun checkStatusConflict(): Boolean =
-        errorParser.safeCall(TAG_CHECK_STATUS) {
+    override suspend fun checkStatusConflict(): Boolean {
+        return try {
             objectionInsuranceApiService.checkStatusConflict().extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
+    }
 
-    override suspend fun getConflictHistories(query: ApiQueryParamDN): ListData<ObjectionInsuranceHistoryDTO> =
-        errorParser.safeCall(TAG_GET_HISTORIES) {
+    override suspend fun getConflictHistories(query: ApiQueryParamDN): ListData<ObjectionInsuranceHistoryDTO> {
+        return try {
             objectionInsuranceApiService.getConflictHistories(apiQueryBuilder.buildQuery(query)).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
+    }
 
-    override suspend fun saveConflict(items: List<ObjectionInsuranceHistoryDTO>): String? =
-        errorParser.safeCall(TAG_SAVE_CONFLICT) {
+    override suspend fun saveConflict(items: List<ObjectionInsuranceHistoryDTO>): String? {
+        return try {
             objectionInsuranceApiService.saveConflict(items).extractNullableData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
+    }
 
-    override suspend fun confirmConflict(description: String?): Boolean =
-        errorParser.safeCall(TAG_CONFIRM) {
+    override suspend fun confirmConflict(description: String?): Boolean {
+        return try {
             objectionInsuranceApiService.confirmConflict(
                 listOf(ConfirmConflictItemDTO(userDesc = description))
             ).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
+    }
 
-    override suspend fun finalConfirmConflict(): String =
-        errorParser.safeCall(TAG_FINAL_CONFIRM) {
+    override suspend fun finalConfirmConflict(): String {
+        return try {
             objectionInsuranceApiService.finalConfirmConflict().extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
+    }
 
     /**
      * Like [extractData], but allows null [BaseDTO.data] on 2xx (legacy null-data success).
@@ -53,11 +182,9 @@ class ObjectionInsuranceRemoteDataSourceImpl(
     private fun <T> BaseDTO<T>.extractNullableData(): T? {
         return when {
             hasProblems -> {
-                val firstProblem = problems?.firstOrNull()
                 throw TaminErrorUriException(
                     uri = ErrorUri.SERVER_PROBLEM,
                     serverMessage = problemMessage ?: reason,
-                    errorCode = firstProblem?.errorCode,
                 )
             }
             status in 200..299 -> data
@@ -74,13 +201,5 @@ class ObjectionInsuranceRemoteDataSourceImpl(
                 )
             }
         }
-    }
-
-    private companion object {
-        const val TAG_CHECK_STATUS = "checkStatusConflict"
-        const val TAG_GET_HISTORIES = "getConflictHistories"
-        const val TAG_SAVE_CONFLICT = "saveConflict"
-        const val TAG_CONFIRM = "confirmConflict"
-        const val TAG_FINAL_CONFIRM = "finalConfirmConflict"
     }
 }

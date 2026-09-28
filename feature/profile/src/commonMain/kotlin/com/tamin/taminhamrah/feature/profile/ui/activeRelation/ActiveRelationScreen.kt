@@ -33,6 +33,7 @@ import com.tamin.taminhamrah.model.activeRelation.ActiveRelationPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
 import com.tamin.taminhamrah.ui.components.rememberStaggeredEntranceState
 import com.tamin.taminhamrah.ui.components.staggeredItemEntrance
@@ -212,6 +213,13 @@ internal fun ActiveRelationScreen(
             onDismiss = { onIntent(ActiveRelationIntent.OnDismissSuccessDialog) }
         )
     }
+
+    // Without it a failed load read as "no active relation" under a zero count.
+    ErrorStateView(
+        message = uiState.error,
+        onDismiss = { onIntent(ActiveRelationIntent.OnBackClicked) },
+        onRetry = { onIntent(ActiveRelationIntent.LoadActiveRelations) },
+    )
 }
 
 @PreviewRtlTheme
@@ -236,6 +244,17 @@ private fun PreviewActiveRelationScreenLoading() {
     PreviewRtlThemeContent {
         ActiveRelationScreen(
             uiState = ActiveRelationUiState(isLoading = true),
+            onIntent = {},
+        )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun PreviewActiveRelationScreenError() {
+    PreviewRtlThemeContent {
+        ActiveRelationScreen(
+            uiState = ActiveRelationUiState(error = "اتصال اینترنت برقرار نیست"),
             onIntent = {},
         )
     }

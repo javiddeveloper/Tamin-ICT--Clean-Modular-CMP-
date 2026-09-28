@@ -29,11 +29,11 @@ import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.repository.pension.PensionRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 
 class FakePensionRepository : PensionRepository {
     var userAgeResult: AgeDN = AgeDN(age = "55,0,0", birthDate = "1345/01/01")
-    var checkRetirementStatusResult: RetirementStatusDN? = null
+    /** No request on file: the live `checkRequests` reply is an object of nulls, never an empty body. */
+    var checkRetirementStatusResult = RetirementStatusDN(requestId = null, requestStatusCode = null)
     var authenticationCodeResult: AuthenticationTicketDN? = AuthenticationTicketDN(mobileNumber = "09123456789")
     var authenticationAndGetPersonalInfoResult: RetirementPersonalDN? = null
     var retirementRequestInfoResult: List<RetirementRequestDN> = emptyList()
@@ -57,7 +57,7 @@ class FakePensionRepository : PensionRepository {
 
     override suspend fun checkRetirementStatus(): Flow<RetirementStatusDN> = flow {
         if (shouldThrowError) throw errorToThrow
-        checkRetirementStatusResult?.let { emit(it) }
+        emit(checkRetirementStatusResult)
     }
 
     override suspend fun getAuthenticationCode(): Flow<AuthenticationTicketDN> = flow {

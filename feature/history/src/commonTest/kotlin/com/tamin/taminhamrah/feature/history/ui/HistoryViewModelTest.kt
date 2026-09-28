@@ -129,9 +129,10 @@ class HistoryViewModelTest {
     /**
      * A failed page must not also complain about the workshops.
      *
-     * `safeCall` converts anything it does not recognize — a canceled sibling call included — into
-     * an ordinary failure, so the ordering inside the load is what keeps the two apart: the years
-     * are awaited first, and a page that never got them never reaches the wage warning.
+     * The data source's catch-all turns anything it does not recognize — a sibling call failing
+     * alongside included — into an ordinary failure, so the ordering inside the load is what keeps
+     * the two apart: the years are awaited first, and a page that never got them never reaches the
+     * wage warning.
      */
     @Test
     fun load_whenTheYearsFail_doesNotAlsoWarnAboutTheWages() = runTest(testDispatcher) {

@@ -33,13 +33,91 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
-import io.ktor.serialization.kotlinx.json.json
+import com.tamin.taminhamrah.tools.BaseDTO
+import com.tamin.taminhamrah.tools.errorHandling.envelopeErrorText
+import com.tamin.taminhamrah.tools.errorHandling.errorFromHttpBody
+import com.tamin.taminhamrah.tools.errorHandling.isFailed
+import com.tamin.taminhamrah.tools.errorHandling.taminEnvelopeOrNull
+import io.ktor.serialization.ContentConverter
+import io.ktor.serialization.JsonConvertException
+import io.ktor.serialization.kotlinx.KotlinxSerializationConverter
+import io.ktor.util.reflect.TypeInfo
+import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.charsets.Charset
+import io.ktor.utils.io.core.readText
+import io.ktor.utils.io.core.toByteArray
+import io.ktor.utils.io.readRemaining
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.bind
 import org.koin.dsl.module
 import co.touchlab.kermit.Logger as KermitLogger
+
+/**
+ * The one Json every API client is built on. Tests use this same instance: the API tests once ran
+ * a laxer copy, so a reply production could not read passed them.
+ */
+internal val taminJson = Json {
+    ignoreUnknownKeys = true
+    isLenient = true
+    prettyPrint = true
+}
+
+/**
+ * Sends requests with [json] exactly as given, and reads replies the way the old app's Gson did: a
+ * field the server leaves out is null. Without that, every nullable DTO field lacking a `= null`
+ * default is required, and one absent field turns a successful reply into an error screen
+ * (EM-2716). Only reading is relaxed — `explicitNulls = false` would also drop nulls from request
+ * bodies, and those stay byte-for-byte what they were.
+ *
+ * A failed reply is read the way the old app's `getErrorResult` read it, whatever type was asked
+ * for: its message reaches [BaseDTO.errorText] even when the typed `data` cannot hold it (or
+ * cannot be decoded at all — a validation array, a bare string), and a type that has no `status`
+ * of its own gets the failure instead of an all-null "success".
+ */
+internal class LenientReplyConverter(json: Json) : ContentConverter by KotlinxSerializationConverter(json) {
+    private val replyJson = Json(json) { explicitNulls = false }
+    private val replies = KotlinxSerializationConverter(replyJson)
+
+    override suspend fun deserialize(charset: Charset, typeInfo: TypeInfo, content: ByteReadChannel): Any? {
+        val text = content.readRemaining().readText(charset)
+        val failed = taminEnvelopeOrNull(text)?.takeIf { it.isFailed }
+        if (failed?.status != null && !modelsEnvelope(typeInfo)) throw errorFromHttpBody(failed.status, text)
+
+        val decoded = try {
+            decode(charset, typeInfo, text)
+        } catch (e: JsonConvertException) {
+            // A failed reply's `data` is never read as the payload, so a `data` the type cannot hold
+            // must not cost the reason: rebuild the envelope without it.
+            if (failed?.status == null || typeInfo.type != BaseDTO::class) throw e
+            BaseDTO<Any?>(
+                status = failed.status,
+                family = failed.family.orEmpty(),
+                reason = failed.reason.orEmpty(),
+                hasError = failed.hasError,
+                problems = failed.problems,
+            )
+        }
+        if (failed == null || decoded !is BaseDTO<*>) return decoded
+        val (message, cause) = envelopeErrorText(text)
+        @Suppress("UNCHECKED_CAST")
+        return (decoded as BaseDTO<Any?>).copy(errorText = message, errorCauseText = cause)
+    }
+
+    private suspend fun decode(charset: Charset, typeInfo: TypeInfo, text: String): Any? =
+        replies.deserialize(charset, typeInfo, ByteReadChannel(text.toByteArray(charset)))
+
+    /** The envelope itself, or a type that declares the envelope's `status`. */
+    private fun modelsEnvelope(typeInfo: TypeInfo): Boolean {
+        if (typeInfo.type == BaseDTO::class) return true
+        val type = typeInfo.kotlinType ?: return true
+        val descriptor = runCatching { replyJson.serializersModule.serializer(type).descriptor }.getOrNull()
+            ?: return true
+        return (0 until descriptor.elementsCount).any { descriptor.getElementName(it) == "status" }
+    }
+}
 
 val networkModule = module {
 
@@ -70,13 +148,7 @@ val networkModule = module {
     singleOf(::AuthRepositoryImpl) bind AuthRepository::class
 
     // JSON Serializer
-    single {
-        Json {
-            ignoreUnknownKeys = true
-            isLenient = true
-            prettyPrint = true
-        }
-    }
+    single { taminJson }
 
 
     // Auth HTTP Client (no Auth plugin, used for token endpoints)
@@ -163,7 +235,7 @@ private fun createHttpClient(
         expectSuccess = false
 
         install(ContentNegotiation) {
-            json(json, contentType = ContentType.Any)
+            register(ContentType.Any, LenientReplyConverter(json))
         }
 
         install(PlainTextErrorResponsePlugin)
@@ -251,7 +323,7 @@ private fun createHealthHttpClient(
         expectSuccess = false
 
         install(ContentNegotiation) {
-            json(json, contentType = ContentType.Any)
+            register(ContentType.Any, LenientReplyConverter(json))
         }
 
         install(HttpTimeout) {
@@ -293,7 +365,7 @@ private fun createAuthHttpClient(
         expectSuccess = false
 
         install(ContentNegotiation) {
-            json(json, contentType = ContentType.Any)
+            register(ContentType.Any, LenientReplyConverter(json))
         }
 
         install(HttpTimeout) {

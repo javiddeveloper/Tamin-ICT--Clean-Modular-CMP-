@@ -90,6 +90,8 @@
     <string name="edict_empty_desc">برای بازه زمانی انتخاب شده حکمی صادر نشده است.</string>
     <string name="edict_empty_show_all">نمایش همه احکام</string>
     <string name="edict_info_note">این خدمت صرفاً برای مشاهده حکم افزایش سالیانهٔ مستمری است و احکام برقراری اولیه از این مسیر قابل مشاهده نیست. مستمری‌بگیرانی که در سال جاری در زمرهٔ مستمری‌بگیران قرار گرفته‌اند، از سال آینده حکم خود را اینجا خواهند دید.</string>
+    <string name="edict_error_not_found_for_year">حکمی برای این سال یافت نشد. لطفاً دوباره تلاش کنید.</string>
+    <string name="edict_error_pdf_download">متأسفانه در دریافت فایل پی‌دی‌اف مشکلی پیش آمد. لطفاً دوباره تلاش کنید.</string>
     <string name="profile_personal_info">اطلاعات شخصی</string>
     <string name="profile_identity_info">اطلاعات هویتی</string>
     <string name="profile_dependents">مشاهده و ثبت افراد تبعی</string>
@@ -1314,6 +1316,7 @@
     <string name="legal_representative_otp_retry_action">تلاش مجدد</string>
     <string name="legal_representative_list_title">نمایندگان کارگاه</string>
     <string name="legal_representative_list_section_label">نمایندگان دارای دسترسی (%1$d)</string>
+    <string name="legal_representative_list_section_title">نمایندگان دارای دسترسی</string>
     <string name="legal_representative_add_action">معرفی نماینده</string>
     <string name="legal_representative_more_details_action">جزئیات بیشتر</string>
     <string name="legal_representative_collapse_action">بستن</string>

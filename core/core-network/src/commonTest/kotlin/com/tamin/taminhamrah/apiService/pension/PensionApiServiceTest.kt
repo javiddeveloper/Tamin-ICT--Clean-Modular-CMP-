@@ -1,13 +1,20 @@
 package com.tamin.taminhamrah.apiService.pension
 
 import com.tamin.taminhamrah.apiService.BaseApiTest
+import com.tamin.taminhamrah.dataSource.pension.PensionRemoteDataSourceImpl
 import com.tamin.taminhamrah.model.pension.sendRetirementDocument.RetirementSaveDocumentRequest
+import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilderImpl
+import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
+import com.tamin.taminhamrah.tools.errorHandling.HttpErrorCopy
+import com.tamin.taminhamrah.tools.errorHandling.TaminApiException
 import com.tamin.taminhamrah.util.ApiTestUtils
 import com.tamin.taminhamrah.util.PensionTestData
-import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.json.jsonPrimitive
+import io.ktor.http.HttpStatusCode
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.jsonPrimitive
 
 class PensionApiServiceTest : BaseApiTest() {
 
@@ -221,5 +228,19 @@ class PensionApiServiceTest : BaseApiTest() {
 
         assertEquals(400, response.status)
         assertEquals("CLIENT_ERROR", response.family)
+    }
+
+    /** The edict report drains the same way: a failed download is a mapped error, not the viewer's input. */
+    @Test
+    fun getEdictReportPDF_whenTheDownloadFails_throwsTheMappedError() = runTest {
+        val apiService = createMockKtorfit(
+            content = """{"status":404,"family":"CLIENT_ERROR","reason":"Not Found","data":null}""",
+            status = HttpStatusCode.NotFound,
+        ).createPensionApiService()
+        val dataSource = PensionRemoteDataSourceImpl(apiService, ApiQueryBuilderImpl(), ErrorParserImpl())
+
+        val error = assertFailsWith<TaminApiException> { dataSource.getEdictReportPDF(emptyList()) }
+
+        assertEquals(HttpErrorCopy.NOT_FOUND, error.subtitle)
     }
 }

@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -35,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.feature.workshops.ui.legalRepresentative.components.LegalRepresentativeContractPickerSheet
@@ -118,7 +121,9 @@ fun AddLegalRepresentativeScreen(
 
     val taminColors = LocalTaminColors.current
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    // imePadding: with edge-to-edge, adjustResize alone doesn't shrink the layout, so without it
+    // the keyboard covers the national-code and OTP fields.
+    Column(modifier = Modifier.fillMaxSize().imePadding()) {
         LegalRepresentativeHeader(onBackClicked = onBackClicked) {
             LegalRepresentativeWorkshopSummaryCard(workshopName = workshopName, subtitle = workshopSubtitle)
         }
@@ -155,13 +160,20 @@ fun AddLegalRepresentativeScreen(
                     },
                     label = stringResource(Res.string.legal_representative_national_code_label),
                     placeholder = stringResource(Res.string.legal_representative_national_code_placeholder),
-                    leadingIcon = if (uiState.isEditMode) Icons.Outlined.Lock else null,
+                    // Trailing = the left edge under the app's hardcoded RTL.
+                    trailingIcon = if (uiState.isEditMode) Icons.Outlined.Lock else null,
                     readOnly = uiState.isEditMode,
+                    isRequired = true,
                     errorText = uiState.nationalCodeError,
                     isValid = uiState.nationalCodeError?.let { false },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     maxLength = 10,
-                    textFieldBg = taminColors.blueBg
+                    textFieldBg = taminColors.blueBg,
+                    textStyle = if (uiState.isEditMode) {
+                        MaterialTheme.typography.bodyLarge.copy(textAlign = TextAlign.Center)
+                    } else {
+                        null
+                    },
                 )
             }
 
@@ -252,6 +264,7 @@ fun AddLegalRepresentativeScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(taminColors.bgPage)
+                .navigationBarsPadding()
                 .padding(Spacing.lg),
         ) {
             LoadingButton(

@@ -282,14 +282,20 @@ class RetirementPensionViewModel(
             // The profile's own identity call is the one that reliably carries a name, national id
             // and birthdate; `personal-info` returns the insurance number but leaves `personal`
             // null for some accounts, which is what left the card reading "—".
-            val identity = runCatching { identityInfoUseCase().first() }.getOrNull()
+            //
+            // The card fills from whatever answered, but a call that failed is still reported:
+            // offline, a silent failure read as "no age problem" and "no request on file".
+            val failures = mutableListOf<Throwable>()
+            val identity = runCatching { identityInfoUseCase().first() }
+                .onFailure(failures::add).getOrNull()
             val personal = runCatching {
                 getPersonalInfoUseCase(refreshRemote = true).firstOrNull()
-            }.getOrNull()
+            }.onFailure(failures::add).getOrNull()
             val branch = runCatching {
                 getInsuredActiveBranchUseCase.invoke().firstOrNull()?.firstOrNull()
-            }.getOrNull()
-            val status = runCatching { checkRetirementStatusUseCase().first() }.getOrNull()
+            }.onFailure(failures::add).getOrNull()
+            val status = runCatching { checkRetirementStatusUseCase().first() }
+                .onFailure(failures::add).getOrNull()
 
             // The endpoint wants the epoch itself; without it the service answers with no age.
             val birthDate = identity?.dateOfBirth
@@ -304,7 +310,10 @@ class RetirementPensionViewModel(
                             ),
                         ),
                     ).first()
-                }.getOrNull()
+                }.onFailure(failures::add).getOrNull()
+            }
+            failures.firstOrNull()?.let {
+                sendEvent(RetirementPensionEvent.ShowError(it.toSingleLineMessage()))
             }
 
             val rawAge = age?.age.orEmpty()

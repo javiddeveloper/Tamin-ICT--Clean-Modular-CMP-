@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.pension.PensionIdPR
 import com.tamin.taminhamrah.model.pension.EdictPensionerPR
 import com.tamin.taminhamrah.model.personal.pdfDownload.PdfDownloadPR
+import org.jetbrains.compose.resources.StringResource
 
 @Immutable
 data class EdictUiState(
@@ -67,5 +68,7 @@ sealed interface EdictIntent {
 
 sealed interface EdictEvent {
     data class ShowToast(val message: String) : EdictEvent
+    /** Copy the screen resolves — the ViewModel cannot call `getString` (it hangs unit tests). */
+    data class ShowToastRes(val message: StringResource) : EdictEvent
     data object NavigateBack : EdictEvent
 }

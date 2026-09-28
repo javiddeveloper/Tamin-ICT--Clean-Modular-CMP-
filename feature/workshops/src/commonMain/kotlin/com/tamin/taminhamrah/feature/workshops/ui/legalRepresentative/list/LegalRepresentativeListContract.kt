@@ -10,7 +10,9 @@ data class LegalRepresentativeListUiState(
     val workshopId: String = "",
     val branchCode: String = "",
     val ticket: String = "",
-    val isLoading: Boolean = false,
+    // Starts true: the first Load only fires on ON_RESUME, which Navigation-Compose reaches after the
+    // enter transition — with false here the empty state showed for that whole transition.
+    val isLoading: Boolean = true,
     val representatives: ImmutableList<LegalRepresentativePR> = persistentListOf(),
     val error: String? = null,
     val expandedStakeId: Long? = null,
