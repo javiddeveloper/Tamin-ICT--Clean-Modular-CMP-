@@ -6,8 +6,6 @@
 */
 package com.tamin.taminhamrah.dataSource.userSource
 
-import kotlinx.coroutines.CancellationException
-import io.ktor.serialization.JsonConvertException
 import com.tamin.core.network.model.user.IdentityInfoDto
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri

@@ -26,6 +26,7 @@ import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
 import com.tamin.taminhamrah.util.HeaderConstant
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -240,19 +241,6 @@ class ProfileViewModel(
             isActiveRelationLoading = false
         )
 
-        is PartialState.ImageRequestLoading -> currentState.copy(
-            isImageRequestLoading = partialState.isLoading,
-            imageRequestError = null
-        )
-
-        is PartialState.ImageRequestResult -> currentState.copy(
-            isImageRequestLoading = false,
-            imageRequestResult = partialState.result
-        )
-        is PartialState.ImageRequestError -> currentState.copy(
-            isImageRequestLoading = false,
-            imageRequestError = partialState.message
-        )
         is PartialState.ScreenStateChanged -> when (partialState) {
             is PartialState.ScreenStateChanged.Loading -> currentState.copy(isLoading = true)
             is PartialState.ScreenStateChanged.Success -> currentState.copy(isLoading = false)

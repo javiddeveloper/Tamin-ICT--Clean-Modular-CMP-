@@ -263,10 +263,13 @@ class EmployerOnlineServicesViewModel(
     private fun retry(source: EmployerOnlineServicesErrorSource): Flow<PartialState> = when (source) {
         EmployerOnlineServicesErrorSource.IDENTITY -> loadIdentity()
         EmployerOnlineServicesErrorSource.AGREEMENTS -> flow<PartialState> { agreementsPaginator.retry() }
+        // Loading brackets the retry so the screen swaps the error for the skeleton while it runs.
         EmployerOnlineServicesErrorSource.CONTRACT_ROWS -> flow<PartialState> {
             contractRowsPaginator.retry()
             emit(contractRowsPagingPartialState())
         }
+            .onStart { emit(PartialState.Loading(true)) }
+            .onCompletion { emit(PartialState.Loading(false)) }
         EmployerOnlineServicesErrorSource.REQUEST_TICKET -> requestTicket()
         EmployerOnlineServicesErrorSource.VERIFY_CODE -> verifyCode()
         EmployerOnlineServicesErrorSource.STEP2_CONTENT -> uiState.value.agreementRequest.let {
