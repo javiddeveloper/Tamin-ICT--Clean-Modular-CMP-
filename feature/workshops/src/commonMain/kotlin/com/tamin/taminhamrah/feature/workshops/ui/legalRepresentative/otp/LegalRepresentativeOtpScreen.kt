@@ -9,9 +9,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.CheckCircle
@@ -71,14 +75,19 @@ fun LegalRepresentativeOtpScreen(
 
     val taminColors = LocalTaminColors.current
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    // imePadding + a scrollable body: with edge-to-edge, adjustResize alone doesn't shrink the
+    // layout, so without these the keyboard covers the OTP field.
+    Column(modifier = Modifier.fillMaxSize().imePadding()) {
         LegalRepresentativeHeader(onBackClicked = onBackClicked) {
             LegalRepresentativeWorkshopSummaryCard(workshopName = workshopName, subtitle = workshopSubtitle)
         }
 
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .navigationBarsPadding()
                 .padding(Spacing.lg),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
