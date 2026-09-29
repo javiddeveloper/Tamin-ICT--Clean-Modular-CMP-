@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.base.BaseViewModel
 import com.tamin.taminhamrah.feature.FeatureManager
 import com.tamin.taminhamrah.mapper.history.toPresentation
 import com.tamin.taminhamrah.model.common.FeatureFlag
+import com.tamin.taminhamrah.model.common.FeatureGate
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.history.toHistorySummary
@@ -87,7 +88,7 @@ class HomeViewModel(
         when (intent) {
             is HomeIntent.LoadHeader -> {
                 emitAll(
-                    merge(homeContentFlow(), agentAvailabilityFlow())
+                    merge(homeContentFlow(), agentAvailabilityFlow(), sectionStatusesFlow())
                 )
             }
             is HomeIntent.LoadHistorySummary -> {
@@ -111,6 +112,21 @@ class HomeViewModel(
             }
             is HomeIntent.OnSupportClick -> {
                 sendEvent(HomeEvent.NavigateToWeb("tel:1420"))
+            }
+            is HomeIntent.OnStoryChannelClick -> {
+                handleGatedSectionClick(FeatureFlag.STORIES_AND_SAVE_EVENTS) {
+                    sendEvent(HomeEvent.NavigateToStory(intent.channelIndex))
+                }
+            }
+            is HomeIntent.OnLastRequestsSeeAllClick -> {
+                handleGatedSectionClick(FeatureFlag.HOME_LAST_REQUESTS) {
+                    sendEvent(HomeEvent.NavigateToUserRequests(null))
+                }
+            }
+            is HomeIntent.OnLastRequestClick -> {
+                handleGatedSectionClick(FeatureFlag.HOME_LAST_REQUESTS) {
+                    sendEvent(HomeEvent.NavigateToUserRequests(intent.refCode))
+                }
             }
             is HomeIntent.RefreshAgentAccess -> {
                 // Like the native dashboard: the answer is cached by the use case and drives the
@@ -157,6 +173,32 @@ class HomeViewModel(
             .map { HomeUiState.HomePartialState.HomeContentLoaded(it) }
             .catch { }
 
+    /**
+     * «تازه‌ها»/«ذخیره رویدادها» and «آخرین درخواست‌ها» have no server menu id, so their state comes
+     * from [FeatureManager.observeFeatureStatuses] alone rather than [homeContentFlow]'s menu-backed
+     * content — same client-only shape [ProfileMenuItem]/`TreatmentFeatureFlags` already use.
+     */
+    private fun sectionStatusesFlow(): Flow<HomeUiState.HomePartialState> =
+        featureManager.observeFeatureStatuses(setOf(FeatureFlag.STORIES_AND_SAVE_EVENTS, FeatureFlag.HOME_LAST_REQUESTS))
+            .map { HomeUiState.HomePartialState.SectionStatusesLoaded(it) }
+
+    /**
+     * Gates a tap this screen does not route through [handleFeatureClick] because it does not open
+     * a service screen — a story channel or a request row opens its own destination, so the caller
+     * supplies [onOpen] instead of a fixed [HomeEvent.NavigateToService].
+     */
+    private suspend fun handleGatedSectionClick(flag: FeatureFlag, onOpen: () -> Unit) {
+        when (val gate = featureManager.getFeatureStatus(flag).first().toGate()) {
+            FeatureGate.Open -> onOpen()
+            is FeatureGate.OpenWithWarning -> {
+                gate.message?.let { sendEvent(HomeEvent.ShowMessage(it)) }
+                onOpen()
+            }
+            is FeatureGate.Blocked -> gate.message?.let { sendEvent(HomeEvent.ShowMessage(it)) }
+            is FeatureGate.OpenWeb -> sendEvent(HomeEvent.NavigateToWeb(gate.url))
+        }
+    }
+
     private fun agentAvailabilityFlow(): Flow<HomeUiState.HomePartialState> =
         featureManager.getFeatureStatus(FeatureFlag.AGENT)
             .map { status ->
@@ -164,7 +206,9 @@ class HomeViewModel(
                     status is FeatureStatus.Enabled || status is FeatureStatus.EnabledWithError
                 )
             }
-            .catch { }
+            // A flag lookup that fails must not leave the bar shimmering forever — it hides instead,
+            // the same as the flag genuinely being off.
+            .catch { emit(HomeUiState.HomePartialState.AgentAvailability(false)) }
 
     private suspend fun handleServiceClick(service: MainServiceDN) {
         val flag = FeatureFlag.fromId(service.id) ?: return
@@ -223,6 +267,9 @@ class HomeViewModel(
         is HomeUiState.HomePartialState.Error -> currentState.copy(
             isLoading = false,
             error = partialState.message
+        )
+        is HomeUiState.HomePartialState.SectionStatusesLoaded -> currentState.copy(
+            sectionStatuses = partialState.statuses
         )
     }
 

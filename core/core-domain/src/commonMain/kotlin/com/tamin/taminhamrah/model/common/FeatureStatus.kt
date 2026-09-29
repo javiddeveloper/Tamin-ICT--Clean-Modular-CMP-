@@ -10,6 +10,37 @@ sealed class FeatureStatus {
     /** True when tapping the service opens something — the only cases that are worth showing. */
     val opensSomething: Boolean
         get() = this is Enabled || this is EnabledWithError || this is WebView
+
+    /** The server's note for this state — the reason a service is off, or the warning on one that is on. */
+    val serverMessage: String?
+        get() = when (this) {
+            is Disabled -> message
+            is TemporaryDisabled -> message
+            is EnabledWithError -> message
+            Enabled, is WebView -> null
+        }
+
+    /** What a tap on a service in this state must do — the one decision every screen shares. */
+    fun toGate(): FeatureGate = when (this) {
+        Enabled -> FeatureGate.Open
+        is EnabledWithError -> FeatureGate.OpenWithWarning(message)
+        is Disabled -> FeatureGate.Blocked(message)
+        is TemporaryDisabled -> FeatureGate.Blocked(message)
+        is WebView -> FeatureGate.OpenWeb(url)
+    }
+}
+
+/** The outcome of asking a [FeatureStatus] whether a tap may go through. */
+sealed interface FeatureGate {
+    data object Open : FeatureGate
+
+    /** Opens, but the server has a warning to show first. */
+    data class OpenWithWarning(val message: String?) : FeatureGate
+
+    /** Does not open; [message] is the server's reason, when it gave one. */
+    data class Blocked(val message: String?) : FeatureGate
+
+    data class OpenWeb(val url: String) : FeatureGate
 }
 
 /**
@@ -137,7 +168,27 @@ enum class FeatureFlag(val id: Int) {
 
     // ─── AI Assistant / Chatbot ──────────────────────────────────────────────
     /** Controls the entry point for the Agent and chatbot access */
-    AGENT(2000);
+    AGENT(2000),
+
+    // ─── Provisional ids — pending real registration on the server ──────────
+    // The screens below don't have a row in the real backend's menu yet. Until they do, each
+    // has a row in `mockMenuData` under the placeholder id here (exactly like every other flag
+    // above — resolved through `FeatureManager`, dimmable/disable-able the same way, visible to
+    // the "Feature flags" dev screen the same way). Once the server registers a real id for one
+    // of these, only the id here and its `mockMenuData` row need to be removed — nothing that
+    // reads the flag does.
+    CHANGE_MOBILE(3001),
+    PERSONAL_INBOX(3002),
+    /** «لیست درخواست‌ها» in profile's کارتابل section. */
+    MY_REQUESTS(3003),
+    /** Shared by «تازه‌ها» (the home story rail) and «ذخیره رویدادها» — one flag gates both. */
+    STORIES_AND_SAVE_EVENTS(3004),
+    HEALTH_PROFILE(3005),
+    CONTRACTED_CENTERS(3006),
+    /** The treatment hub's yearly insured/organization spend card. */
+    CURRENT_YEAR_TREATMENT_COSTS(3007),
+    /** «آخرین درخواست‌ها» on the home dashboard. */
+    HOME_LAST_REQUESTS(3008);
 
     companion object {
         fun fromId(id: Int?) = entries.find { it.id == id }

@@ -233,6 +233,35 @@ fun AgentActionKey.toFeatureFlag(): FeatureFlag? = when (this) {
     AgentActionKey.REGISTER_CONTRACT -> FeatureFlag.CONTRACTS
     AgentActionKey.WORKER_PAYMENT -> FeatureFlag.WORKERS_PAYMENT_INFO
 
+    // Dependents — previously unmapped, so the assistant could read/add/cancel a dependent
+    // even with «افراد تبعی» switched off in profile.
+    AgentActionKey.GET_DEPENDENT,
+    AgentActionKey.ADD_DEPENDENT,
+    AgentActionKey.DEPENDENT_CANCELLATION,
+    AgentActionKey.DEPENDENT_CANCELLATION_GET,
+    AgentActionKey.DEPENDENT_CANCELLATION_CONFIRM,
+    AgentActionKey.DEPENDENT_CANCELLATION_SUBMIT,
+    AgentActionKey.DEPENDENT_CANCELLATION_CANCEL -> FeatureFlag.DEPENDENTS
+
+    // Bank account — same gap as dependents, for «شماره حساب‌ها».
+    AgentActionKey.EDIT_BANK_ACCOUNT_NUMBER,
+    AgentActionKey.EDIT_BANK_ACCOUNT_GET,
+    AgentActionKey.EDIT_BANK_ACCOUNT_SUBMIT,
+    AgentActionKey.EDIT_BANK_ACCOUNT_CANCEL -> FeatureFlag.BANK_ACCOUNT_LIST
+
+    // Change mobile — same gap; CHANGE_MOBILE has no server menu id, only a client flag.
+    AgentActionKey.EDIT_PHONE_NUMBER,
+    AgentActionKey.EDIT_PHONE_NUMBER_GET,
+    AgentActionKey.EDIT_PHONE_NUMBER_SEND_OTP,
+    AgentActionKey.EDIT_PHONE_NUMBER_VERIFY_OTP,
+    AgentActionKey.EDIT_PHONE_NUMBER_CANCEL -> FeatureFlag.CHANGE_MOBILE
+
+    // Profile info — closest existing concept is «اطلاعات هویتی».
+    AgentActionKey.PROFILE_INFO,
+    AgentActionKey.EDIT_PROFILE,
+    AgentActionKey.EDIT_PROFILE_INFO_SUBMIT,
+    AgentActionKey.EDIT_PROFILE_INFO_CANCEL -> FeatureFlag.IDENTITY_INFO
+
     // General messages — no check required
     AgentActionKey.GENERAL_RESPONSE,
     AgentActionKey.MESSAGE,

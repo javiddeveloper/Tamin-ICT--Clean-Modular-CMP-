@@ -56,6 +56,7 @@ import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
 import com.tamin.taminhamrah.feature.profile.ui.model.ProfileMenuItem
+import com.tamin.taminhamrah.mapper.feature.gatedBy
 import com.tamin.taminhamrah.ui.LocalThemeRevealController
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
@@ -74,8 +75,6 @@ import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
 import com.tamin.taminhamrah.ui.components.UserAvatar
 import com.tamin.taminhamrah.ui.components.ValidationStatusCard
 import com.tamin.taminhamrah.ui.components.rememberJellyOverscroll
-import com.tamin.taminhamrah.ui.components.toast.LocalToaster
-import com.tamin.taminhamrah.ui.components.toast.info
 import com.tamin.taminhamrah.ui.motion.ScrollMotionState
 import com.tamin.taminhamrah.ui.motion.motionFade
 import com.tamin.taminhamrah.ui.motion.motionParallax
@@ -171,6 +170,10 @@ fun ProfileScreen(
     onNavigateToSaveEvents: () -> Unit = {},
     onNavigateToEditProfilePhoto: () -> Unit = {},
     onOpenUrl: (String) -> Unit = {},
+    onShowMessage: (String) -> Unit = {},
+    // The photo-editing screen is developed on its own branch; until it is wired in, the flag
+    // gate still runs on tap and this stays a no-op.
+    onNavigateToEditImage: () -> Unit = {},
     onNavigateToSecurity: () -> Unit = {},
     onNavigateToDeveloperOptions: () -> Unit = {},
     onBackClicked: () -> Unit
@@ -207,6 +210,8 @@ fun ProfileScreen(
         onNavigateToSaveEvents = onNavigateToSaveEvents,
         onNavigateToEditProfilePhoto = onNavigateToEditProfilePhoto,
         onOpenUrl = onOpenUrl,
+        onShowMessage = onShowMessage,
+        onNavigateToEditImage = onNavigateToEditImage,
         onBackClicked = onBackClicked
     )
 
@@ -240,11 +245,12 @@ fun HandleProfileEvents(
     onNavigateToSecurity: () -> Unit,
     onNavigateToDeveloperOptions: () -> Unit,
     onOpenUrl: (String) -> Unit,
+    onShowMessage: (String) -> Unit,
+    onNavigateToEditImage: () -> Unit,
     onBackClicked: () -> Unit
 ) {
 
     val launcher = remember { ExternalAppLauncher() }
-    val toaster = LocalToaster.current
 
     events.collectWithLifecycleAware {
         when (it) {
@@ -254,6 +260,10 @@ fun HandleProfileEvents(
 
             ProfileEvent.NavigateToSettings -> {
                 onNavigateToSettings()
+            }
+
+            ProfileEvent.NavigateToEditImage -> {
+                onNavigateToEditImage()
             }
 
             ProfileEvent.NavigateToIdentity -> {
@@ -308,7 +318,7 @@ fun HandleProfileEvents(
             }
 
             is ProfileEvent.ShowToast -> {
-                toaster.info(it.message)
+                onShowMessage(it.message)
             }
 
             ProfileEvent.NavigateToSecurity -> {
@@ -452,6 +462,8 @@ fun ProfileContent(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(Spacing.md)
                             ) {
+                                // Tapping the photo edits it, gated by EDIT_IMAGE like any profile row:
+                                // ignored while the flag is unresolved, a message when it is off.
                                 ProfileAvatarWithCameraBadge(
                                     profileImage = state.profileImage,
                                     isLoading = state.isProfileImageLoading,
@@ -541,7 +553,7 @@ fun ProfileContent(
                                 ),
                                 showArrow = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.IDENTITY_INFO)) }
-                            ),
+                            ).gated(ProfileMenuItem.IDENTITY_INFO, state, taminColors.dangerText),
                             ListItemData(
                                 title = stringResource(Res.string.profile_dependents),
                                 leadingIconPainter = painterResource(Res.drawable.ic_person),
@@ -558,7 +570,7 @@ fun ProfileContent(
                                 },
                                 showArrow = true,
                                 onClick = { onIntent(ProfileIntent.NavigateToDependentsList) }
-                            ),
+                            ).gated(ProfileMenuItem.DEPENDENTS, state, taminColors.dangerText),
                             ListItemData(
                                 title = stringResource(Res.string.profile_active_relation),
                                 leadingIconPainter = painterResource(Res.drawable.ic_communication),
@@ -568,7 +580,7 @@ fun ProfileContent(
                                 ),
                                 showArrow = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.ACTIVE_RELATION)) }
-                            ),
+                            ).gated(ProfileMenuItem.ACTIVE_RELATION, state, taminColors.dangerText),
                             ListItemData(
                                 title = stringResource(Res.string.profile_electronic_file),
                                 leadingIconPainter = painterResource(Res.drawable.ic_request),
@@ -578,7 +590,7 @@ fun ProfileContent(
                                 ),
                                 showArrow = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.ELECTRONIC_FILE)) }
-                            ),
+                            ).gated(ProfileMenuItem.ELECTRONIC_FILE, state, taminColors.dangerText),
                             ListItemData(
                                 title = stringResource(Res.string.profile_bank_account),
                                 leadingIconPainter = painterResource(Res.drawable.ic_number),
@@ -588,7 +600,7 @@ fun ProfileContent(
                                 ),
                                 showArrow = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.BANK_ACCOUNTS)) }
-                            ),
+                            ).gated(ProfileMenuItem.BANK_ACCOUNTS, state, taminColors.dangerText),
                             ListItemData(
                                 title = stringResource(Res.string.profile_change_mobile),
                                 leadingIconPainter = painterResource(Res.drawable.ic_mobile),
@@ -598,7 +610,7 @@ fun ProfileContent(
                                 ),
                                 showArrow = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.CHANGE_MOBILE)) }
-                            )
+                            ).gated(ProfileMenuItem.CHANGE_MOBILE, state, taminColors.dangerText),
                         )
                     )
                 }
@@ -618,7 +630,7 @@ fun ProfileContent(
                                 ),
                                 showArrow = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.REQUESTS)) }
-                            ),
+                            ).gated(ProfileMenuItem.REQUESTS, state, taminColors.dangerText),
                             ListItemData(
                                 title = stringResource(Res.string.profile_personal_inbox),
                                 leadingIconPainter = painterResource(Res.drawable.ic_inbox),
@@ -628,7 +640,7 @@ fun ProfileContent(
                                 ),
                                 showArrow = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.PERSONAL_INBOX)) }
-                            ),
+                            ).gated(ProfileMenuItem.PERSONAL_INBOX, state, taminColors.dangerText),
                             ListItemData(
                                 title = stringResource(Res.string.profile_save_events),
                                 leadingIconPainter = painterResource(Res.drawable.ic_tamin_calendar),
@@ -638,7 +650,7 @@ fun ProfileContent(
                                 ),
                                 showArrow = true,
                                 onClick = { onIntent(ProfileIntent.OnItemClick(ProfileMenuItem.SAVE_EVENTS)) }
-                            )
+                            ).gated(ProfileMenuItem.SAVE_EVENTS, state, taminColors.dangerText),
                         )
                     )
                 }
@@ -771,6 +783,10 @@ fun ProfileContent(
         }
     }
 }
+
+/** This row as its feature flag says it should read: shimmering, dimmed with a reason, or warned. */
+private fun ListItemData.gated(item: ProfileMenuItem, state: ProfileUiState, warningColor: Color): ListItemData =
+    gatedBy(item.flag?.let { state.featureStatuses?.get(it) }, warningColor)
 
 @PreviewRtlTheme
 @Composable

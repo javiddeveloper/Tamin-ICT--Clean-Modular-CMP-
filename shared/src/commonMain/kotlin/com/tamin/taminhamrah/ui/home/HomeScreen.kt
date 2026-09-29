@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -63,6 +64,10 @@ import com.tamin.taminhamrah.ui.components.HomeQuickAccessSection
 import com.tamin.taminhamrah.ui.home.contract.HomeEvent
 import com.tamin.taminhamrah.ui.home.contract.HomeIntent
 import com.tamin.taminhamrah.ui.home.contract.HomeUiState
+import com.tamin.taminhamrah.ui.theme.ButtonDimens
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.ShimmerBlock
+import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.toparea.TopAreaState
 import com.tamin.taminhamrah.ui.toparea.driveTopArea
@@ -144,6 +149,8 @@ fun HomeScreen(
                     event.title,
                     event.referenceId,
                 )
+                is HomeEvent.NavigateToStory -> onOpenStory(event.channelIndex)
+                is HomeEvent.NavigateToUserRequests -> onNavigateToUserRequests(event.refCode)
             }
         }
     }
@@ -152,9 +159,9 @@ fun HomeScreen(
         uiState = uiState,
         onNavigateToAgent = onNavigateToAgent,
         onNavigateToAllServices = onNavigateToAllServices,
-        onNavigateToUserRequests = { onNavigateToUserRequests(null) },
+        onNavigateToUserRequests = { viewModel.sendIntent(HomeIntent.OnLastRequestsSeeAllClick) },
         onRequestClick = { request ->
-            onNavigateToUserRequests(request.refCode)
+            viewModel.sendIntent(HomeIntent.OnLastRequestClick(request.refCode))
         },
         onCampaignClick = { viewModel.sendIntent(HomeIntent.OnCampaignClick(it)) },
         onSectionSelected = { viewModel.sendIntent(HomeIntent.OnSectionSelected(it)) },
@@ -175,12 +182,17 @@ fun HomeScreen(
         storyRail = {
             // «تازه‌ها» sits directly above the campaigns, as on the design, and is full-bleed for
             // the same reason: a row that scrolls has to be able to run a ring off the screen edge.
-            StoryRail(
-                onOpenViewer = onOpenStory,
-                modifier = Modifier
-                    .ignoreHorizontalPadding(HomeContentPadding)
-                    .padding(top = Spacing.xlg),
-            )
+            //
+            // Hidden only once the flag has actually answered off — unresolved (null) still shows
+            // it, the same as every other tap on this screen that is never blocked on ambiguity.
+            if (uiState.sectionStatuses?.get(FeatureFlag.STORIES_AND_SAVE_EVENTS)?.opensSomething != false) {
+                StoryRail(
+                    onOpenViewer = { index -> viewModel.sendIntent(HomeIntent.OnStoryChannelClick(index)) },
+                    modifier = Modifier
+                        .ignoreHorizontalPadding(HomeContentPadding)
+                        .padding(top = Spacing.xlg),
+                )
+            }
         },
     )
 }
@@ -247,7 +259,7 @@ private fun HomeScreenContent(
             // here wouldn't scroll away with the rest of the column.
             Spacer(modifier = Modifier.topAreaContentSpacer(topArea))
 
-            if (uiState.isAgentEnabled) {
+            if (uiState.isAgentEnabled != false) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -255,12 +267,21 @@ private fun HomeScreenContent(
                         .padding(top = Spacing.sm),
                     horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 ) {
-                    listOf(
-                        stringResource(Res.string.home_suggestion_retirement),
-                        stringResource(Res.string.home_suggestion_history),
-                        stringResource(Res.string.home_suggestion_booklet),
-                    ).forEach { suggestion ->
-                        HeaderSuggestionChip(text = suggestion, onClick = onNavigateToAgent)
+                    if (uiState.isAgentEnabled == null) {
+                        repeat(3) {
+                            ShimmerBlock(
+                                cornerRadius = CornerRadius.max,
+                                modifier = Modifier.width(ShimmerSize.chipWidth).height(ShimmerSize.valueHeight),
+                            )
+                        }
+                    } else {
+                        listOf(
+                            stringResource(Res.string.home_suggestion_retirement),
+                            stringResource(Res.string.home_suggestion_history),
+                            stringResource(Res.string.home_suggestion_booklet),
+                        ).forEach { suggestion ->
+                            HeaderSuggestionChip(text = suggestion, onClick = onNavigateToAgent)
+                        }
                     }
                 }
             }
@@ -346,8 +367,11 @@ private fun HomeScreenContent(
                 )
             }
 
+            // Hidden once the flag has actually answered off; unresolved (null) still shows it,
+            // same as the story rail above.
+            val lastRequestsBlocked = uiState.sectionStatuses?.get(FeatureFlag.HOME_LAST_REQUESTS)?.opensSomething == false
             HomeLastRequestsSection(
-                requests = requests,
+                requests = if (lastRequestsBlocked) emptyList() else requests,
                 onSeeAllClick = onNavigateToUserRequests,
                 onRequestClick = onRequestClick,
                 modifier = Modifier.padding(top = Spacing.md),
@@ -414,12 +438,22 @@ private fun HomeTopArea(
                 topAreaState = topAreaState,
                 onSupportClick = onSupportClick,
             )
-            if (uiState.isAgentEnabled) {
+            if (uiState.isAgentEnabled != false) {
                 Spacer(modifier = Modifier.height(HomeAskBarOverlap))
             }
         }
-        if (uiState.isAgentEnabled) {
-            HomeAgentAskBar(
+        when (uiState.isAgentEnabled) {
+            // Not known yet: the bar's own footprint shimmers rather than the header jumping once
+            // the menu answers.
+            null -> ShimmerBlock(
+                cornerRadius = CornerRadius.max,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(horizontal = HomeContentPadding)
+                    .fillMaxWidth()
+                    .height(ButtonDimens.height),
+            )
+            true -> HomeAgentAskBar(
                 hint = stringResource(Res.string.home_ask_agent_hint),
                 contentDescription = stringResource(Res.string.home_ask_agent_cd),
                 onClick = onNavigateToAgent,
@@ -428,6 +462,7 @@ private fun HomeTopArea(
                     .align(Alignment.BottomCenter)
                     .padding(horizontal = HomeContentPadding),
             )
+            false -> Unit
         }
     }
 }

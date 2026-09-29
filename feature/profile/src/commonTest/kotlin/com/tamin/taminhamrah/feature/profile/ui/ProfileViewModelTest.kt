@@ -208,6 +208,7 @@ class ProfileViewModelTest {
             ProfileMenuItem.ELECTRONIC_FILE to ProfileEvent.NavigateToElectronicFile,
             ProfileMenuItem.VERSION_HISTORY to ProfileEvent.NavigateToVersionHistory,
             ProfileMenuItem.ACTIVE_RELATION to ProfileEvent.NavigateToActiveRelation,
+            ProfileMenuItem.DEPENDENTS to ProfileEvent.NavigateToDependentsList,
             ProfileMenuItem.CHANGE_MOBILE to ProfileEvent.NavigateToChangeMobile,
             ProfileMenuItem.BANK_ACCOUNTS to ProfileEvent.NavigateToBankAccount,
             ProfileMenuItem.CONTACT_ME to ProfileEvent.NavigateToContactUs,
@@ -220,6 +221,9 @@ class ProfileViewModelTest {
             ProfileMenuItem.SAVE_EVENTS to ProfileEvent.NavigateToSaveEvents,
         )
         val viewModel = createViewModel()
+        // Every flagged row above is gated; the menu must answer (all Enabled here) before a tap
+        // does anything, same as the real screen shimmering until it does.
+        viewModel.sendIntent(ProfileIntent.LoadProfile())
 
         viewModel.events.test {
             expected.forEach { (item, event) ->
@@ -230,20 +234,24 @@ class ProfileViewModelTest {
         }
     }
 
+    /** The same gate every row goes through: a service switched off explains itself, not opens. */
     @Test
-    fun unmappedMenuItem_showsComingSoon() = runTest(testDispatcher) {
+    fun aGatedMenuItem_disabled_showsTheMessage_insteadOfOpening() = runTest(testDispatcher) {
+        featureManager.status = FeatureStatus.Disabled("سرویس غیرفعال است")
         val viewModel = createViewModel()
+        viewModel.sendIntent(ProfileIntent.LoadProfile())
 
         viewModel.events.test {
             viewModel.sendIntent(ProfileIntent.OnItemClick(ProfileMenuItem.DEPENDENTS))
 
-            assertEquals(ProfileEvent.ShowToast("به زودی: DEPENDENTS"), awaitItem())
+            assertEquals(ProfileEvent.ShowToast("سرویس غیرفعال است"), awaitItem())
         }
     }
 
     @Test
     fun dependentsShortcut_navigatesToTheList() = runTest(testDispatcher) {
         val viewModel = createViewModel()
+        viewModel.sendIntent(ProfileIntent.LoadProfile())
 
         viewModel.events.test {
             viewModel.sendIntent(ProfileIntent.NavigateToDependentsList)

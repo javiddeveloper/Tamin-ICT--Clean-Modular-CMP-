@@ -12,8 +12,10 @@ import com.tamin.taminhamrah.useCases.treatment.GetDependantUnderEighteenUseCase
 import com.tamin.taminhamrah.useCases.treatment.GetDeservedTreatmentUseCase
 import com.tamin.taminhamrah.feature.FeatureManager
 import com.tamin.taminhamrah.model.common.FeatureFlag
+import com.tamin.taminhamrah.model.common.FeatureGate
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
+import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentFeatureFlags
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import kotlinx.collections.immutable.persistentListOf
@@ -22,6 +24,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -42,22 +45,44 @@ class TreatmentViewModel(
             is TreatmentIntent.InitTreatmentFlow -> initTreatmentFlow()
             is TreatmentIntent.SelectPatient -> flow { emit(PartialState.PatientSelected(intent.nationalCode, intent.fullName)) }
             is TreatmentIntent.OpenRecords -> openRecords(intent.tab)
+            is TreatmentIntent.OpenMiscClaims -> openGated(
+                TreatmentFeatureFlags.miscClaims,
+                TreatmentEvent.NavigateToMiscClaims,
+            )
+            is TreatmentIntent.OpenApprovals -> openGated(
+                TreatmentFeatureFlags.approvals,
+                TreatmentEvent.NavigateToApprovals,
+            )
+            is TreatmentIntent.OpenHealthProfile -> openHealthProfile()
+            is TreatmentIntent.OpenContractedCenters -> openGated(
+                TreatmentFeatureFlags.contractedCenters,
+                TreatmentEvent.NavigateToContractedCenters,
+            )
         }
     }
 
+    private fun openHealthProfile(): Flow<PartialState> {
+        val nationalCode = uiState.value.mainUserNationalCode ?: return emptyFlow()
+        return openGated(TreatmentFeatureFlags.healthProfile, TreatmentEvent.NavigateToHealthProfile(nationalCode))
+    }
+
+    private fun openRecords(tab: RecordTab): Flow<PartialState> {
+        val nationalCode = uiState.value.selectedNationalCode
+            ?: // Nothing to open for: the carousel has not resolved a patient yet.
+            return emptyFlow()
+        return openGated(TreatmentFeatureFlags.records, TreatmentEvent.NavigateToRecords(nationalCode, tab))
+    }
+
     /**
-     * Checks the feature's flag before opening the records screen.
+     * Checks the feature's flag before opening [destination].
      *
      * Mirrors how the home services gate: enabled navigates, disabled explains itself, and
      * "enabled with error" does both so a degraded service is still reachable.
      */
-    private fun openRecords(tab: RecordTab): Flow<PartialState> = flow {
-        val nationalCode = uiState.value.selectedNationalCode
-            ?: // Nothing to open for: the carousel has not resolved a patient yet.
-            return@flow
-
-        val status = try {
-            featureManager.getFeatureStatus(FeatureFlag.PRESCRIPTION).first()
+    private fun openGated(flag: FeatureFlag, destination: TreatmentEvent): Flow<PartialState> = flow {
+        // The hub already holds the menu's answer; only a tap that beats it has to ask again.
+        val status = uiState.value.featureStatuses?.get(flag) ?: try {
+            featureManager.getFeatureStatus(flag).first()
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -65,33 +90,29 @@ class TreatmentViewModel(
             FeatureStatus.Enabled
         }
 
-        when (status) {
-            is FeatureStatus.Enabled ->
-                sendEvent(TreatmentEvent.NavigateToRecords(nationalCode, tab))
+        when (val gate = status.toGate()) {
+            FeatureGate.Open -> sendEvent(destination)
 
-            is FeatureStatus.EnabledWithError -> {
-                status.message?.let {
+            is FeatureGate.OpenWithWarning -> {
+                gate.message?.let {
                     sendEvent(TreatmentEvent.ShowMessage(it, TreatmentMessageType.OPERATION_FAILED))
                 }
-                sendEvent(TreatmentEvent.NavigateToRecords(nationalCode, tab))
+                sendEvent(destination)
             }
 
-            is FeatureStatus.Disabled -> sendEvent(
+            is FeatureGate.Blocked -> sendEvent(
                 TreatmentEvent.ShowMessage(
-                    status.message ?: ErrorUri.FEATURE_UNAVAILABLE.toSingleLineMessage(),
-                    TreatmentMessageType.OPERATION_FAILED,
-                ),
-            )
-
-            is FeatureStatus.TemporaryDisabled -> sendEvent(
-                TreatmentEvent.ShowMessage(
-                    status.message ?: ErrorUri.FEATURE_TEMPORARILY_UNAVAILABLE.toSingleLineMessage(),
+                    gate.message ?: if (status is FeatureStatus.TemporaryDisabled) {
+                        ErrorUri.FEATURE_TEMPORARILY_UNAVAILABLE.toSingleLineMessage()
+                    } else {
+                        ErrorUri.FEATURE_UNAVAILABLE.toSingleLineMessage()
+                    },
                     TreatmentMessageType.OPERATION_FAILED,
                 ),
             )
 
             // No in-app screen for a web-hosted service yet; saying so beats opening nothing.
-            is FeatureStatus.WebView -> sendEvent(
+            is FeatureGate.OpenWeb -> sendEvent(
                 TreatmentEvent.ShowMessage(
                     ErrorUri.FEATURE_UNAVAILABLE.toSingleLineMessage(),
                     TreatmentMessageType.OPERATION_FAILED
@@ -100,7 +121,20 @@ class TreatmentViewModel(
         }
     }
 
-    private fun initTreatmentFlow(): Flow<PartialState> = flow {
+    /**
+     * Reads every flag the hub gates on in one go, beside the patient load: the entries shimmer
+     * until this answers and the patient data never waits on the menu.
+     */
+    private fun initTreatmentFlow(): Flow<PartialState> = merge(
+        featureStatusFlow(),
+        loadPatients(),
+    )
+
+    private fun featureStatusFlow(): Flow<PartialState> =
+        featureManager.observeFeatureStatuses(TreatmentFeatureFlags.all)
+            .map { PartialState.FeatureStatusesLoaded(it) }
+
+    private fun loadPatients(): Flow<PartialState> = flow {
         emit(PartialState.Reset)
         emit(PartialState.Loading(true))
 
@@ -152,7 +186,10 @@ class TreatmentViewModel(
         currentState: TreatmentUiState,
         partialState: PartialState
     ): TreatmentUiState = when (partialState) {
-        is PartialState.Reset -> TreatmentUiState()
+        // A reload restarts the patients, not the menu's answer — dropping it would shimmer the
+        // gated entries again while nothing about their flags has changed.
+        is PartialState.Reset -> TreatmentUiState(featureStatuses = currentState.featureStatuses)
+        is PartialState.FeatureStatusesLoaded -> currentState.copy(featureStatuses = partialState.statuses)
         is PartialState.Loading -> currentState.copy(isLoading = partialState.isLoading, error = null)
         is PartialState.Error -> currentState.copy(isLoading = false, error = partialState.message)
         is PartialState.DeservedLoaded -> currentState.copy(isLoading = false, deservedList = partialState.list)

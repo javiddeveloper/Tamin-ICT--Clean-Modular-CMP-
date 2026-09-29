@@ -13,6 +13,7 @@ import com.tamin.taminhamrah.mapper.identity.toPresentation
 import com.tamin.taminhamrah.mapper.relation.toPresentation
 import com.tamin.taminhamrah.model.DarkThemeConfig
 import com.tamin.taminhamrah.model.common.FeatureFlag
+import com.tamin.taminhamrah.model.common.FeatureGate
 import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
@@ -30,6 +31,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 
@@ -106,6 +108,9 @@ class ProfileViewModel(
             }
         }
 
+        val featureStatusFlow = featureManager.observeFeatureStatuses(ProfileMenuItem.gatedFlags)
+            .map { PartialState.FeatureStatusesLoaded(it) }
+
         // Independent sections: an unguarded merge let the first failure cancel the other five —
         // offline, the cached identity never landed and the header shimmered for good. Each one
         // now fails on its own, and the first failure is said once rather than toasted six times.
@@ -126,6 +131,8 @@ class ProfileViewModel(
             dependentsCountFlow.failingAlone(),
             // No fallback: zero relations would claim "no active relation" for a call that failed.
             activeRelationFlow.failingAlone(),
+            // FeatureManager already resolves a failed menu fetch to Enabled, so this never throws.
+            featureStatusFlow,
         ).collect {
             emit(it)
         }
@@ -164,14 +171,40 @@ class ProfileViewModel(
         }
     }
 
+    /**
+     * Every row goes through its feature flag before it opens. A row without a flag is always
+     * open; one whose flag the menu has not answered yet is still shimmering and ignores the tap.
+     */
     private fun handleItemClick(item: ProfileMenuItem): Flow<PartialState> {
+        val gate = item.flag
+            ?.let { flag -> uiState.value.featureStatuses?.get(flag)?.toGate() ?: return emptyFlow() }
+            ?: FeatureGate.Open
+        when (gate) {
+            is FeatureGate.Blocked -> {
+                gate.message?.let { sendEvent(ProfileEvent.ShowToast(it)) }
+                return emptyFlow()
+            }
+            is FeatureGate.OpenWeb -> {
+                sendEvent(ProfileEvent.OpenUrl(gate.url))
+                return emptyFlow()
+            }
+            is FeatureGate.OpenWithWarning -> gate.message?.let { sendEvent(ProfileEvent.ShowToast(it)) }
+            FeatureGate.Open -> Unit
+        }
+        navigateTo(item)
+        return emptyFlow()
+    }
+
+    private fun navigateTo(item: ProfileMenuItem) {
         when (item) {
             ProfileMenuItem.SETTINGS -> sendEvent(ProfileEvent.NavigateToSettings)
             ProfileMenuItem.LOGOUT -> sendIntent(ProfileIntent.Logout)
+            ProfileMenuItem.EDIT_IMAGE -> sendEvent(ProfileEvent.NavigateToEditImage)
             ProfileMenuItem.IDENTITY_INFO -> sendEvent(ProfileEvent.NavigateToIdentity)
             ProfileMenuItem.ELECTRONIC_FILE -> sendEvent(ProfileEvent.NavigateToElectronicFile)
             ProfileMenuItem.VERSION_HISTORY -> sendEvent(ProfileEvent.NavigateToVersionHistory)
             ProfileMenuItem.ACTIVE_RELATION -> sendEvent(ProfileEvent.NavigateToActiveRelation)
+            ProfileMenuItem.DEPENDENTS -> sendEvent(ProfileEvent.NavigateToDependentsList)
             ProfileMenuItem.CHANGE_MOBILE -> sendEvent(ProfileEvent.NavigateToChangeMobile)
             ProfileMenuItem.BANK_ACCOUNTS -> sendEvent(ProfileEvent.NavigateToBankAccount)
             ProfileMenuItem.CONTACT_ME -> sendEvent(ProfileEvent.NavigateToContactUs)
@@ -182,16 +215,13 @@ class ProfileViewModel(
             ProfileMenuItem.SUPPORT -> sendEvent(ProfileEvent.Support("1420"))
             ProfileMenuItem.REQUESTS -> sendEvent(ProfileEvent.NavigateToUserContracts)
             ProfileMenuItem.SAVE_EVENTS -> sendEvent(ProfileEvent.NavigateToSaveEvents)
-            else -> sendEvent(ProfileEvent.ShowToast("به زودی: ${item.name}"))
+            // Every ProfileMenuItem entry has its own branch above; no fallback is reachable, so
+            // none is needed (and none is left to hardcode a Persian string into).
         }
-        return emptyFlow()
     }
 
-    private fun handleNavigateToDependentsList(): Flow<PartialState> {
-        return flow {
-            sendEvent(ProfileEvent.NavigateToDependentsList)
-        }
-    }
+    private fun handleNavigateToDependentsList(): Flow<PartialState> =
+        handleItemClick(ProfileMenuItem.DEPENDENTS)
 
     private fun handleToggleTheme(isDark: Boolean): Flow<PartialState> {
         viewModelScope.launch {
@@ -239,6 +269,10 @@ class ProfileViewModel(
             activeRelationCount = partialState.activeCount,
             inactiveRelationCount = partialState.inactiveCount,
             isActiveRelationLoading = false
+        )
+
+        is PartialState.FeatureStatusesLoaded -> currentState.copy(
+            featureStatuses = partialState.statuses
         )
 
         is PartialState.ScreenStateChanged -> when (partialState) {

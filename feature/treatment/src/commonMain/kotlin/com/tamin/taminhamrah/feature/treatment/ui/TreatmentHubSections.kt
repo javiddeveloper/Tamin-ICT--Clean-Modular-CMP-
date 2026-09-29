@@ -36,6 +36,8 @@ import com.tamin.taminhamrah.feature.treatment.ui.components.PatientCard
 import com.tamin.taminhamrah.feature.treatment.ui.components.quickAccessGradient
 import com.tamin.taminhamrah.feature.treatment.ui.components.raisedShadow
 import com.tamin.taminhamrah.feature.treatment.ui.model.PatientCardItemPR
+import com.tamin.taminhamrah.mapper.feature.gatedBy
+import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.ui.components.ListGroupView
 import com.tamin.taminhamrah.ui.components.ListItemBadge
 import com.tamin.taminhamrah.ui.components.ListItemColors
@@ -52,7 +54,6 @@ import com.tamin.taminhamrah.ui.theme.TaminOnAccentInk
 import com.tamin.taminhamrah.ui.theme.TaminOnAccentInkMuted
 import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.ui.toPriceFormat
-import com.tamin.taminhamrah.ui.util.ExternalAppLauncher
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.toPersianDigits
 import kotlinx.collections.immutable.ImmutableList
@@ -103,12 +104,15 @@ internal fun PatientCarousel(
     isLoading: Boolean,
     error: String?,
     pagerState: PagerState,
+    /** Why the card cannot be shown because its feature is switched off; not a failure, so no retry. */
+    unavailableMessage: String? = null,
     onRetry: () -> Unit = {},
     collapseProgress: () -> Float = { 0f },
     /** See [InsuranceCardCarousel]'s own parameter: the hub draws the dots with its content. */
     showIndicator: Boolean = true,
 ) {
     val phase = when {
+        unavailableMessage != null -> CarouselPhase.Placeholder
         isLoading && cards.isEmpty() -> CarouselPhase.Loading
         cards.isEmpty() -> CarouselPhase.Placeholder
         else -> CarouselPhase.Cards
@@ -129,8 +133,8 @@ internal fun PatientCarousel(
             // A failure or an empty result still renders a card, so the carousel slot never
             // collapses into a bare line of text.
             CarouselPhase.Placeholder -> PatientPlaceholderCard(
-                message = error ?: stringResource(Res.string.hub_empty_patients),
-                isError = error != null,
+                message = unavailableMessage ?: error ?: stringResource(Res.string.hub_empty_patients),
+                isError = unavailableMessage == null && error != null,
                 onRetry = onRetry,
             )
 
@@ -223,15 +227,15 @@ private fun PatientPlaceholderCard(
 @Composable
 internal fun TreatmentQuickAccess(
     healthProfileCompleted: Boolean?,
+    /** The flag state of each tile; `null` while the menu has not answered yet. */
+    recordsStatus: FeatureStatus?,
+    healthProfileStatus: FeatureStatus?,
+    centersStatus: FeatureStatus?,
     onOpenMedicalRecords: () -> Unit,
     onOpenHealthProfile: () -> Unit,
+    onOpenCenters: () -> Unit,
 ) {
     val colors = LocalTaminColors.current
-    // The contracted-centers directory is a web page the organization maintains, not a screen of
-    // ours, so it opens in the browser on both platforms. Remembered so the item's onClick stays
-    // the same instance across recompositions and the list item keeps skipping.
-    val launcher = remember { ExternalAppLauncher() }
-    val openCenters = remember(launcher) { { launcher.openUrl(CONTRACTED_CENTERS_URL) } }
     Column(
         modifier = Modifier.padding(horizontal = Spacing.page),
         verticalArrangement = Arrangement.spacedBy(Spacing.cardGap),
@@ -259,7 +263,7 @@ internal fun TreatmentQuickAccess(
                         leadingIconTintColor = TaminOnAccentInk,
                     ),
                     onClick = onOpenMedicalRecords,
-                ),
+                ).gatedBy(recordsStatus, warningColor = TaminOnAccentInk),
             ),
         )
 
@@ -290,7 +294,7 @@ internal fun TreatmentQuickAccess(
                         )
                     },
                     onClick = onOpenHealthProfile,
-                ),
+                ).gatedBy(healthProfileStatus, warningColor = colors.orangeText),
             ),
         )
 
@@ -306,8 +310,8 @@ internal fun TreatmentQuickAccess(
                         leadingIconBackgroundColor = colors.greenBg,
                         leadingIconTintColor = colors.teal,
                     ),
-                    onClick = openCenters,
-                ),
+                    onClick = onOpenCenters,
+                ).gatedBy(centersStatus, warningColor = colors.orangeText),
             ),
         )
     }
@@ -316,6 +320,10 @@ internal fun TreatmentQuickAccess(
 /** The three-up grid of treatment services. */
 @Composable
 internal fun TreatmentCategories(
+    /** Each tile's flag state; `null` while the menu has not answered, which shimmers the tile. */
+    prescriptionsStatus: FeatureStatus?,
+    approvalsStatus: FeatureStatus?,
+    miscClaimsStatus: FeatureStatus?,
     onOpenPrescriptions: () -> Unit,
     onOpenMiscClaims: () -> Unit,
     onOpenApprovals: () -> Unit = {},
@@ -331,6 +339,8 @@ internal fun TreatmentCategories(
             iconTint = colors.blueText,
             iconBackground = Brush.linearGradient(listOf(colors.blueBg, colors.blueBg)),
             onClick = onOpenPrescriptions,
+            isLoading = prescriptionsStatus == null,
+            dimmed = prescriptionsStatus?.opensSomething == false,
             modifier = Modifier.weight(1f),
         )
         CategoryTile(
@@ -339,6 +349,8 @@ internal fun TreatmentCategories(
             iconTint = colors.teal,
             iconBackground = Brush.linearGradient(listOf(colors.greenBg, colors.greenBg)),
             onClick = onOpenApprovals,
+            isLoading = approvalsStatus == null,
+            dimmed = approvalsStatus?.opensSomething == false,
             modifier = Modifier.weight(1f),
         )
         CategoryTile(
@@ -347,6 +359,8 @@ internal fun TreatmentCategories(
             iconTint = colors.orangeText,
             iconBackground = Brush.linearGradient(listOf(colors.orangeBg, colors.orangeBg)),
             onClick = onOpenMiscClaims,
+            isLoading = miscClaimsStatus == null,
+            dimmed = miscClaimsStatus?.opensSomething == false,
             modifier = Modifier.weight(1f),
         )
     }
@@ -381,10 +395,3 @@ internal fun TreatmentCostSummary(
     )
 }
 
-/**
- * The organization's directory of contracted treatment centres.
- *
- * A page on tamin.ir rather than an endpoint: there is no centers API, and the published list is
- * what the branches actually keep current.
- */
-private const val CONTRACTED_CENTERS_URL = "https://tamin.ir/html/item/4474"

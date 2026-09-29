@@ -1,6 +1,8 @@
 package com.tamin.taminhamrah.feature.treatment.ui.contract
 
 import androidx.compose.runtime.Immutable
+import com.tamin.taminhamrah.model.common.FeatureFlag
+import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.treatment.*
 import com.tamin.taminhamrah.feature.treatment.ui.model.RecordTab
 import com.tamin.taminhamrah.feature.treatment.ui.model.TreatmentMessageType
@@ -30,7 +32,11 @@ data class TreatmentUiState(
 
     // Whether the health self-declaration is filled in. Null means the status has not
     // been fetched, so the card shows no pill rather than guessing either way.
-    val healthProfileCompleted: Boolean? = null
+    val healthProfileCompleted: Boolean? = null,
+
+    // The menu's answer for each flag the hub reads. Null means the menu has not answered yet, so
+    // the gated entries shimmer instead of guessing either way.
+    val featureStatuses: Map<FeatureFlag, FeatureStatus>? = null
 ) {
     sealed class PartialState {
         data class Loading(val isLoading: Boolean) : PartialState()
@@ -42,6 +48,7 @@ data class TreatmentUiState(
         data class MainUserNationalCodeLoaded(val nationalCode: String) : PartialState()
         data class PatientSelected(val nationalCode: String, val fullName: String) : PartialState()
         data class HealthProfileStatusLoaded(val isCompleted: Boolean) : PartialState()
+        data class FeatureStatusesLoaded(val statuses: Map<FeatureFlag, FeatureStatus>) : PartialState()
     }
 }
 
@@ -54,6 +61,18 @@ sealed class TreatmentIntent {
      * navigates, or explains why it cannot, the same way the home services do.
      */
     data class OpenRecords(val tab: RecordTab) : TreatmentIntent()
+
+    /** «هزینه‌های متفرقه» was tapped; gated by its flag like [OpenRecords]. */
+    data object OpenMiscClaims : TreatmentIntent()
+
+    /** «تاییدیه‌ها» was tapped; gated by its flag like [OpenRecords]. */
+    data object OpenApprovals : TreatmentIntent()
+
+    /** «پرونده سلامت من» was tapped; gated by its flag like [OpenRecords]. */
+    data object OpenHealthProfile : TreatmentIntent()
+
+    /** «مراکز درمانی طرف قرارداد» was tapped; gated by its flag like [OpenRecords]. */
+    data object OpenContractedCenters : TreatmentIntent()
 }
 
 sealed class TreatmentEvent {
@@ -61,4 +80,12 @@ sealed class TreatmentEvent {
 
     /** The flag allowed it, so the records screen may open for this patient and category. */
     data class NavigateToRecords(val nationalCode: String, val tab: RecordTab) : TreatmentEvent()
+
+    data object NavigateToMiscClaims : TreatmentEvent()
+
+    data object NavigateToApprovals : TreatmentEvent()
+
+    data class NavigateToHealthProfile(val nationalCode: String) : TreatmentEvent()
+
+    data object NavigateToContractedCenters : TreatmentEvent()
 }

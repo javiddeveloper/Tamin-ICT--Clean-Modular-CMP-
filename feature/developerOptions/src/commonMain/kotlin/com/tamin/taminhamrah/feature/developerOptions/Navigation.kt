@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.developerOptions
 
 import androidx.navigation.NavGraphBuilder
 import com.tamin.taminhamrah.feature.developerOptions.debugLogin.DebugLoginScreen
+import com.tamin.taminhamrah.feature.developerOptions.featureFlags.FeatureFlagsScreen
 import com.tamin.taminhamrah.feature.developerOptions.tokens.TokenManagerScreen
 import com.tamin.taminhamrah.feature.developerOptions.ui.DeveloperOptionsScreen
 import com.tamin.taminhamrah.ui.composableWithFadeTransitions
@@ -16,10 +17,14 @@ object DebugLoginRoute
 @Serializable
 object TokenManagerRoute
 
+@Serializable
+object FeatureFlagsRoute
+
 fun NavGraphBuilder.developerOptionsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToDebugLogin: () -> Unit,
     onNavigateToTokenManager: () -> Unit,
+    onNavigateToFeatureFlags: () -> Unit,
     /**
      * Starts the shared payment flow on a throwaway ticket.
      *
@@ -39,6 +44,7 @@ fun NavGraphBuilder.developerOptionsScreen(
             onNavigateBack = onNavigateBack,
             onNavigateToDebugLogin = onNavigateToDebugLogin,
             onNavigateToTokenManager = onNavigateToTokenManager,
+            onNavigateToFeatureFlags = onNavigateToFeatureFlags,
             onStartTestPayment = onStartTestPayment,
             onOpenAgent = onOpenAgent
         )
@@ -60,6 +66,16 @@ fun NavGraphBuilder.tokenManagerScreen(
 ) {
     composableWithFadeTransitions<TokenManagerRoute> {
         TokenManagerScreen(
+            onNavigateBack = onNavigateBack
+        )
+    }
+}
+
+fun NavGraphBuilder.featureFlagsScreen(
+    onNavigateBack: () -> Unit
+) {
+    composableWithFadeTransitions<FeatureFlagsRoute> {
+        FeatureFlagsScreen(
             onNavigateBack = onNavigateBack
         )
     }

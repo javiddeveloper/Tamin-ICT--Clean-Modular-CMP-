@@ -74,6 +74,7 @@ import taminx.core.core_ui.developer_options_agent_mock_title
 import taminx.core.core_ui.developer_options_custom_url_hint
 import taminx.core.core_ui.developer_options_debug_login_entry
 import taminx.core.core_ui.developer_options_dialog_title
+import taminx.core.core_ui.developer_options_feature_flags_entry
 import taminx.core.core_ui.developer_options_open_agent_entry
 import taminx.core.core_ui.developer_options_payment_mock_description
 import taminx.core.core_ui.developer_options_payment_mock_disabled
@@ -93,6 +94,7 @@ fun DeveloperOptionsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToDebugLogin: () -> Unit,
     onNavigateToTokenManager: () -> Unit,
+    onNavigateToFeatureFlags: () -> Unit,
     onStartTestPayment: () -> Unit,
     onOpenAgent: () -> Unit
 ) {
@@ -109,6 +111,7 @@ fun DeveloperOptionsScreen(
         onNavigateBack = onNavigateBack,
         onNavigateToDebugLogin = onNavigateToDebugLogin,
         onNavigateToTokenManager = onNavigateToTokenManager,
+        onNavigateToFeatureFlags = onNavigateToFeatureFlags,
         onStartTestPayment = onStartTestPayment,
         onOpenAgent = onOpenAgent
     )
@@ -134,6 +137,7 @@ private fun DeveloperOptionsContent(
     onNavigateBack: () -> Unit,
     onNavigateToDebugLogin: () -> Unit,
     onNavigateToTokenManager: () -> Unit,
+    onNavigateToFeatureFlags: () -> Unit,
     onStartTestPayment: () -> Unit,
     onOpenAgent: () -> Unit
 ) {
@@ -236,6 +240,16 @@ private fun DeveloperOptionsContent(
                             ),
                             showArrow = true,
                             onClick = onNavigateToTokenManager
+                        ),
+                        ListItemData(
+                            title = stringResource(Res.string.developer_options_feature_flags_entry),
+                            leadingIconPainter = rememberVectorPainter(Icons.Rounded.Code),
+                            colors = ListItemColors(
+                                leadingIconTintColor = taminColors.bgIconProfile,
+                                leadingIconBackgroundGradient = taminColors.iconGradientNeutral
+                            ),
+                            showArrow = true,
+                            onClick = onNavigateToFeatureFlags
                         )
                     )
                 )

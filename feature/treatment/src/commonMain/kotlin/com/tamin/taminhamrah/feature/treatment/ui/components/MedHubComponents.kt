@@ -5,12 +5,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -22,6 +25,8 @@ import com.tamin.taminhamrah.ui.components.StatTile
 import com.tamin.taminhamrah.ui.components.startToEndGradient
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.ShimmerBlock
+import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.TaminTeal500
 import com.tamin.taminhamrah.ui.theme.TaminTeal900
@@ -41,6 +46,10 @@ fun quickAccessGradient(): Brush = startToEndGradient(listOf(TaminTeal900, Tamin
 /**
  * One square tile in the hub's three-up service grid — electronic prescriptions,
  * medical confirmations, miscellaneous claims.
+ *
+ * [isLoading] means the feature's state is not known yet: the label shimmers and the tile does
+ * not react. [dimmed] is a feature that is switched off — it stays tappable on purpose, so the tap
+ * can say why it will not open.
  */
 @Composable
 fun CategoryTile(
@@ -50,12 +59,15 @@ fun CategoryTile(
     iconBackground: Brush,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
+    dimmed: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
     Column(
         modifier = modifier
+            .alpha(if (dimmed) colors.disabledAlpha else 1f)
             .raisedCard(CornerRadius.cardCompact)
-            .clickable(onClick = onClick)
+            .clickable(enabled = !isLoading, onClick = onClick)
             .padding(horizontal = Spacing.sm, vertical = Spacing.lg),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(Spacing.sm),
@@ -67,17 +79,25 @@ fun CategoryTile(
             size = TreatmentDimens.categoryTileIconSize,
             cornerRadius = CornerRadius.lg,
         )
-        AutoResizeText(
-            text = label,
-            style = MaterialTheme.typography.labelMedium.copy(
-                color = colors.textPrimary,
-                textAlign = TextAlign.Center,
-            ),
-            maxLines = 1,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = Spacing.xxs),
-        )
+        if (isLoading) {
+            ShimmerBlock(
+                modifier = Modifier
+                    .width(ShimmerSize.chipWidth)
+                    .height(ShimmerSize.valueHeight),
+            )
+        } else {
+            AutoResizeText(
+                text = label,
+                style = MaterialTheme.typography.labelMedium.copy(
+                    color = colors.textPrimary,
+                    textAlign = TextAlign.Center,
+                ),
+                maxLines = 1,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = Spacing.xxs),
+            )
+        }
     }
 }
 

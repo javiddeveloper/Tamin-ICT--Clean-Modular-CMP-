@@ -7,8 +7,9 @@ import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.feature.taminServices.model.toPR
 import com.tamin.taminhamrah.feature.taminServices.ui.contract.*
-import com.tamin.taminhamrah.useCases.common.GetMainMenuUseCase
 import com.tamin.taminhamrah.useCases.common.GetRolesUseCase
+import com.tamin.taminhamrah.useCases.common.GetVisibleServicesUseCase
+import com.tamin.taminhamrah.useCases.common.ServiceCatalogAudience
 import com.tamin.taminhamrah.util.AppConfig
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
@@ -18,7 +19,7 @@ import kotlinx.coroutines.flow.map
 
 class TamminServicesViewModel(
     private val getRolesUseCase: GetRolesUseCase,
-    private val getMainMenuUseCase: GetMainMenuUseCase,
+    private val getVisibleServicesUseCase: GetVisibleServicesUseCase,
     private val featureManager: FeatureManager
 ) : BaseViewModel<TaminServicesUiState, TaminServicesUiState.TaminServicesPartialState, TaminSericesEvent, TaminServicesIntent>(
     initialState = TaminServicesUiState(isLoading = true)
@@ -38,7 +39,11 @@ class TamminServicesViewModel(
                             val tabs = roles.map { it.toPR() }
                             TaminServicesUiState.TaminServicesPartialState.RolesLoaded(tabs)
                         },
-                        getMainMenuUseCase(AppConfig.versionName, false).map {
+                        getVisibleServicesUseCase(
+                            ServiceCatalogAudience.TAMIN_SERVICES_TAB,
+                            AppConfig.versionName,
+                            false,
+                        ).map {
                             TaminServicesUiState.TaminServicesPartialState.MenuLoaded(it)
                         }
                     )

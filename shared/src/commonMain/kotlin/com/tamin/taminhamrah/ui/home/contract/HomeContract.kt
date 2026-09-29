@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.ui.home.contract
 
 import androidx.compose.runtime.Immutable
 import com.tamin.taminhamrah.model.common.FeatureFlag
+import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.model.common.MainServiceDN
 import com.tamin.taminhamrah.model.history.HistorySummaryPR
 import com.tamin.taminhamrah.model.home.HomeContentDN
@@ -20,8 +21,11 @@ data class HomeUiState(
     /** Unified offline-first data model containing UserInfo, Requests, Stories, Campaigns,
      *  QuickAccess and SpecialServices — the sole source for everything below the header. */
     val homeContent: HomeContentDN? = null,
-    /** Whether `FeatureFlag.AGENT` is on — gates the ask-bar and suggestion chips in the header. */
-    val isAgentEnabled: Boolean = false,
+    /**
+     * Whether `FeatureFlag.AGENT` is on — gates the ask-bar and suggestion chips in the header.
+     * Null until the menu answers, which shimmers the bar instead of skipping straight to hidden.
+     */
+    val isAgentEnabled: Boolean? = null,
     /**
      * خلاصهٔ سابقه for the newest year on record, or null when there is none to summarize — a
      * person with no insured year, or one the service refuses to answer for at all (a کارفرما and a
@@ -44,13 +48,20 @@ data class HomeUiState(
      * again cannot change it, and a retry row that never goes away would claim otherwise.
      */
     val historySummaryFailed: Boolean = false,
+    /**
+     * The state of «تازه‌ها»/«ذخیره رویدادها» (shared) and «آخرین درخواست‌ها» — neither has a server
+     * menu id, so this is the client-only flags `STORIES_AND_SAVE_EVENTS` and `HOME_LAST_REQUESTS`.
+     * Null until the first answer arrives; a section stays visible while unresolved, the same way an
+     * unresolved click is never blocked elsewhere on this screen.
+     */
+    val sectionStatuses: Map<FeatureFlag, FeatureStatus>? = null,
     val error: String? = null,
 ) {
     sealed interface HomePartialState {
         data class Loading(val isLoading: Boolean) : HomePartialState
         data class SectionSelected(val section: HomeServiceSection) : HomePartialState
         data class HomeContentLoaded(val content: HomeContentDN?) : HomePartialState
-        data class AgentAvailability(val enabled: Boolean) : HomePartialState
+        data class AgentAvailability(val enabled: Boolean?) : HomePartialState
         /** The summary is being fetched — on first load, and again on every retry. */
         data object HistorySummaryLoading : HomePartialState
         /**
@@ -64,6 +75,7 @@ data class HomeUiState(
             val failed: Boolean = false,
         ) : HomePartialState
         data class Error(val message: String?) : HomePartialState
+        data class SectionStatusesLoaded(val statuses: Map<FeatureFlag, FeatureStatus>) : HomePartialState
     }
 }
 
@@ -80,6 +92,12 @@ sealed interface HomeIntent {
     data class OnSectionSelected(val section: HomeServiceSection) : HomeIntent
     /** Anywhere on خلاصهٔ سابقه — the card, its year pill and «جزئیات ماه‌به‌ماه» all open سوابق. */
     object OnHistorySummaryClick : HomeIntent
+    /** A channel on the «تازه‌ها» rail was tapped; gated by `STORIES_AND_SAVE_EVENTS`. */
+    data class OnStoryChannelClick(val channelIndex: Int) : HomeIntent
+    /** «مشاهده همه» on «آخرین درخواست‌ها»؛ gated by `HOME_LAST_REQUESTS`. */
+    object OnLastRequestsSeeAllClick : HomeIntent
+    /** One row of «آخرین درخواست‌ها»؛ gated by `HOME_LAST_REQUESTS`. */
+    data class OnLastRequestClick(val refCode: String) : HomeIntent
     /** The header's support icon — dials 1420, same as پروفایل › پشتیبانی. */
     object OnSupportClick : HomeIntent
 }
@@ -95,4 +113,7 @@ sealed interface HomeEvent {
         val title: String,
         val referenceId: String = "",
     ) : HomeEvent
+    data class NavigateToStory(val channelIndex: Int) : HomeEvent
+    /** `null` opens the unfiltered list — «مشاهده همه»; a value filters it to that one request. */
+    data class NavigateToUserRequests(val refCode: String?) : HomeEvent
 }

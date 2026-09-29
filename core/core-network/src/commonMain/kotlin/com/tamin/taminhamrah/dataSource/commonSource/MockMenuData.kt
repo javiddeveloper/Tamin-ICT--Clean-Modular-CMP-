@@ -99,5 +99,17 @@ val mockMenuData = listOf(
     MainServiceDto(id = 1009, sorting = 57, name = "مدیریت بدهی", showRole = listOf(3), icon = "student_inquiry", status = MenuServiceStatus.DISABLED),
 
     // ─── All audiences ───────────────────────────────────────────────────────
-    MainServiceDto(id = 2000, sorting = 58, name = "دستیار هوشمند (آزمایشی)", showRole = listOf(1, 2, 3), icon = "bot", status = MenuServiceStatus.ACTIVE)
+    MainServiceDto(id = 2000, sorting = 58, name = "دستیار هوشمند (آزمایشی)", showRole = listOf(1, 2, 3), icon = "bot", status = MenuServiceStatus.ACTIVE),
+
+    // ─── Provisional — pending real registration on the server ──────────────
+    // Mirrors FeatureFlag.kt's own "Provisional ids" block one for one. Remove a row here the
+    // same day its FeatureFlag id is replaced with the server's real one.
+    MainServiceDto(id = 3001, sorting = 59, name = "تغییر شماره موبایل", showRole = listOf(1, 2), icon = "mobile", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 3002, sorting = 60, name = "صندوق شخصی", showRole = listOf(1, 2, 3), icon = "inbox", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 3003, sorting = 61, name = "لیست درخواست‌ها", showRole = listOf(1, 2, 3), icon = "list", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 3004, sorting = 62, name = "تازه‌ها و ذخیره رویدادها", showRole = listOf(1, 2, 3), icon = "calendar", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 3005, sorting = 63, name = "پرونده سلامت من", showRole = listOf(1, 2), icon = "first-aid-kit", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 3006, sorting = 64, name = "مراکز درمانی طرف قرارداد", showRole = listOf(1, 2), icon = "medical", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 3007, sorting = 65, name = "هزینه‌های سال جاری", showRole = listOf(1, 2), icon = "budget", status = MenuServiceStatus.ACTIVE),
+    MainServiceDto(id = 3008, sorting = 66, name = "آخرین درخواست‌ها", showRole = listOf(1, 2, 3), icon = "list", status = MenuServiceStatus.ACTIVE),
 )

@@ -91,6 +91,21 @@ sealed interface TreatmentRoute {
     ) : TreatmentRoute
 }
 
+/** The درمان tab's own hub — the insurance card, «خسارت متفرقه» and «تاییدیه‌ها» tiles. */
+fun NavController.navigateToTreatment() {
+    navigate(TreatmentRoute.Main)
+}
+
+/** «خسارت متفرقه» — the miscellaneous-claim certificates, e.g. from an assistant link. */
+fun NavController.navigateToTreatmentCosts() {
+    navigate(TreatmentRoute.TreatmentCosts)
+}
+
+/** «تاییدیه‌های پزشکی» — the confirmations list, e.g. from an assistant link. */
+fun NavController.navigateToMedicalConfirmations() {
+    navigate(TreatmentRoute.MedicalConfirmations)
+}
+
 /** «نسخه‌های الکترونیک»: the records screen on its medicine tab, for the selected patient. */
 fun NavController.navigateToPrescriptions() {
     navigate(TreatmentRoute.MedicalRecords(tab = RecordTab.MEDICINE))
