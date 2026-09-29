@@ -35,6 +35,9 @@ data class UserRequestsUiState(
     val isLoadingErrors: Boolean = false,
     val isLoadingSmartGuide: Boolean = false,
     val requests: List<UserRequestPR> = emptyList(),
+    val isLoadingNextPage: Boolean = false,
+    val endReached: Boolean = false,
+    val paginationError: String? = null,
     val requestTypes: List<UserRequestTypePR> = emptyList(),
     val selectedTab: RequestStatusTab = RequestStatusTab.ALL,
     val refCode: String = "",
@@ -61,7 +64,13 @@ data class UserRequestsUiState(
         data class LoadingTypes(val isLoading: Boolean) : PartialState()
         data class LoadingErrors(val isLoading: Boolean) : PartialState()
         data class LoadingSmartGuide(val isLoading: Boolean) : PartialState()
-        data class RequestsLoaded(val requests: List<UserRequestPR>) : PartialState()
+        data class PagingChanged(
+            val requests: List<UserRequestPR>,
+            val isLoadingFirstPage: Boolean,
+            val isLoadingNextPage: Boolean,
+            val endReached: Boolean,
+            val error: String?,
+        ) : PartialState()
         data class RequestTypesLoaded(val types: List<UserRequestTypePR>) : PartialState()
         data class SmartGuideLoaded(val items: List<SmartGuidePR>, val title: String) : PartialState()
         data class ErrorsLoaded(val items: List<RequestErrorPR>, val title: String) : PartialState()
@@ -79,6 +88,8 @@ data class UserRequestsUiState(
 sealed interface UserRequestsIntent {
     data class InitFilters(val refCode: String?, val requestTypeId: String?) : UserRequestsIntent
     data object LoadRequests : UserRequestsIntent
+    data object LoadNextPage : UserRequestsIntent
+    data object RetryNextPage : UserRequestsIntent
     data object LoadRequestTypes : UserRequestsIntent
     data class SelectTab(val tab: RequestStatusTab) : UserRequestsIntent
     data class UpdateRefCode(val refCode: String) : UserRequestsIntent

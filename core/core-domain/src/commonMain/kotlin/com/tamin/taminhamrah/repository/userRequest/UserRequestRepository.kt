@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.model.userRequest.RequestErrorDN
 import com.tamin.taminhamrah.model.userRequest.SmartGuideDN
 import com.tamin.taminhamrah.model.userRequest.SmartGuideSearchParams
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.paging.PageDN
 import kotlinx.coroutines.flow.Flow
 
 interface UserRequestRepository {
@@ -19,6 +20,12 @@ interface UserRequestRepository {
      * cache, so [getUserRequests] observers see the update too.
      */
     suspend fun refreshUserRequests(search: UserRequestSearchParams = UserRequestSearchParams()): List<UserRequestDN>
+
+    /**
+     * One page for [com.tamin.taminhamrah.paging.Paginator]; [page] supplies only page/start/limit.
+     * Offline-first: emits the cached slice, then the network page — collect the whole flow.
+     */
+    fun getUserRequestsPage(search: UserRequestSearchParams, page: ApiQueryParamDN): Flow<PageDN<UserRequestDN>>
 
     suspend fun getRequestTypes(query: ApiQueryParamDN? = null): List<UserRequestTypeDN>
 

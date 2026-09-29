@@ -826,6 +826,11 @@ class AssignerContractsViewModelTest {
         override suspend fun refreshUserRequests(search: UserRequestSearchParams): List<UserRequestDN> =
             emptyList()
 
+        override fun getUserRequestsPage(
+            search: UserRequestSearchParams,
+            page: ApiQueryParamDN,
+        ): Flow<com.tamin.taminhamrah.model.paging.PageDN<UserRequestDN>> = notUsed()
+
         override suspend fun getRequestTypes(query: ApiQueryParamDN?): List<UserRequestTypeDN> = notUsed()
         override suspend fun getRequestErrors(requestId: Long): List<RequestErrorDN> = notUsed()
         override suspend fun getSmartGuideList(params: SmartGuideSearchParams): List<SmartGuideDN> = notUsed()

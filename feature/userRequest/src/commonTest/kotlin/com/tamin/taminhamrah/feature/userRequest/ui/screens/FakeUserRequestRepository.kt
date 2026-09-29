@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.userRequest.ui.screens
 
+import com.tamin.taminhamrah.model.paging.PageDN
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.model.userRequest.RequestErrorDN
 import com.tamin.taminhamrah.model.userRequest.SmartGuideDN
@@ -34,6 +35,19 @@ class FakeUserRequestRepository : UserRequestRepository {
         emit(userRequestsResult)
         // The real repository keeps observing the Room cache after its first emissions.
         if (keepRequestsFlowOpen) awaitCancellation()
+    }
+
+    var lastPage: ApiQueryParamDN? = null
+    var userRequestsTotal: Int? = null
+
+    override fun getUserRequestsPage(
+        search: UserRequestSearchParams,
+        page: ApiQueryParamDN,
+    ): Flow<PageDN<UserRequestDN>> = flow {
+        lastSearch = search
+        lastPage = page
+        if (shouldThrowError) throw error
+        emit(PageDN(items = userRequestsResult.drop(page.start).take(page.limit), total = userRequestsTotal))
     }
 
     override suspend fun refreshUserRequests(search: UserRequestSearchParams): List<UserRequestDN> {

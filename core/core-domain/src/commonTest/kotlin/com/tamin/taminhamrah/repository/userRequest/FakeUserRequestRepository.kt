@@ -8,6 +8,7 @@ import com.tamin.taminhamrah.model.userRequest.RequestErrorDN
 import com.tamin.taminhamrah.model.userRequest.SmartGuideDN
 import com.tamin.taminhamrah.model.userRequest.SmartGuideSearchParams
 import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.model.paging.PageDN
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -27,6 +28,18 @@ class FakeUserRequestRepository : UserRequestRepository {
         lastSearch = search
         if (shouldThrowError) throw error
         emit(userRequestsResult)
+    }
+
+    var lastPage: ApiQueryParamDN? = null
+
+    override fun getUserRequestsPage(
+        search: UserRequestSearchParams,
+        page: ApiQueryParamDN,
+    ): Flow<PageDN<UserRequestDN>> = flow {
+        lastSearch = search
+        lastPage = page
+        if (shouldThrowError) throw error
+        emit(PageDN(items = userRequestsResult))
     }
 
     override suspend fun refreshUserRequests(search: UserRequestSearchParams): List<UserRequestDN> {

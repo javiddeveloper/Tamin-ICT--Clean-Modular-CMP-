@@ -167,6 +167,7 @@ private class FakeUserRequestRepository : UserRequestRepository {
     }
 
     override fun getUserRequests(search: UserRequestSearchParams): Flow<List<UserRequestDN>> = notUsed()
+    override fun getUserRequestsPage(search: UserRequestSearchParams, page: ApiQueryParamDN): Flow<PageDN<UserRequestDN>> = notUsed()
     override suspend fun getRequestTypes(query: ApiQueryParamDN?): List<UserRequestTypeDN> = throw NotImplementedError()
     override suspend fun getRequestErrors(requestId: Long): List<RequestErrorDN> = throw NotImplementedError()
     override suspend fun getSmartGuideList(params: SmartGuideSearchParams): List<SmartGuideDN> = throw NotImplementedError()
