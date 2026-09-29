@@ -19,6 +19,7 @@ import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.action_copied
 import taminx.core.core_ui.action_copy
+import taminx.core.core_ui.ic_tamin_check
 import taminx.core.core_ui.ic_tamin_copy
 
 /**
@@ -44,18 +45,27 @@ fun CopyIconButton(
      * already carries the action for a screen reader.
      */
     interactive: Boolean = true,
+    /**
+     * The glyph turns into a green tick for a beat once copied — as [CopyCodeChip] does — and the
+     * tick is the confirmation, not a toast. Hoist it when an enclosing row copies [value], and
+     * build that row's action with `rememberCopyAction(value, copiedState = …)` so its tap ticks
+     * the glyph too.
+     */
+    copiedState: CopyCodeChipState = rememberCopyCodeChipState(),
 ) {
-    val copy = rememberCopyAction(value)
+    val copy = rememberCopyAction(value, copiedState = copiedState)
     val copyAction = stringResource(Res.string.action_copy)
+    val isCopied = copiedState.isCopied
+    ClearCopiedAfterFeedback(copiedState)
 
     Icon(
-        imageVector = vectorResource(Res.drawable.ic_tamin_copy),
+        imageVector = vectorResource(if (isCopied) Res.drawable.ic_tamin_check else Res.drawable.ic_tamin_copy),
         contentDescription = if (interactive) {
             label?.let { "$copyAction $it" } ?: copyAction
         } else {
             null
         },
-        tint = tint,
+        tint = if (isCopied) LocalTaminColors.current.greenText else tint,
         modifier = modifier
             .size(IconSize.small)
             .then(if (interactive) Modifier.clickable(onClick = copy) else Modifier),
@@ -75,15 +85,22 @@ fun CopyIconButton(
  * @param announce false for a caller that confirms the copy itself — a chip that swaps its glyph
  * for a tick, say. It also keeps that caller off [LocalToaster], which has no default value on
  * purpose, so the component still composes in a preview with no `AppToastHost` above it.
+ * @param copiedState the tick to show instead of a toast — the one handed to the [CopyIconButton]
+ * or [CopyCodeChip] beside the row, so a tap anywhere on the row ticks that glyph.
  */
 @Composable
-fun rememberCopyAction(value: String, announce: Boolean = true): () -> Unit {
+fun rememberCopyAction(
+    value: String,
+    announce: Boolean = true,
+    copiedState: CopyCodeChipState? = null,
+): () -> Unit {
     val clipboard = LocalClipboard.current
-    val toaster = if (announce) LocalToaster.current else null
+    val toaster = if (announce && copiedState == null) LocalToaster.current else null
     val copiedMessage = stringResource(Res.string.action_copied)
     val scope = rememberCoroutineScope()
-    return remember(value, clipboard, toaster, copiedMessage, scope) {
+    return remember(value, clipboard, toaster, copiedMessage, scope, copiedState) {
         {
+            copiedState?.isCopied = true
             scope.launch {
                 clipboard.setClipEntry(plainTextClipEntry(value))
                 toaster?.success(copiedMessage)

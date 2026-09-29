@@ -513,15 +513,15 @@ fun DetailRow(
      */
     copyAsChip: Boolean = false,
 ) {
-    val chip = if (copyAsChip && copyValue != null) rememberCopyCodeChipState() else null
-    // The chip's tick is the confirmation, so it gets no toast on top.
-    val copy = copyValue?.let { rememberCopyAction(it, announce = chip == null) }
+    // One tick for the whole row: a tap anywhere on it ticks the chip or the glyph beside the value.
+    val copied = if (copyValue != null) rememberCopyCodeChipState() else null
+    val copy = copyValue?.let { rememberCopyAction(it, copiedState = copied) }
     val colors = LocalTaminColors.current
     val boxShape = RoundedCornerShape(CornerRadius.md)
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .then(if (copy != null) Modifier.clickable { copy(); chip?.isCopied = true } else Modifier)
+            .then(if (copy != null) Modifier.clickable(onClick = copy) else Modifier)
             .padding(vertical = verticalPadding),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -538,12 +538,12 @@ fun DetailRow(
         ) {
             // First child, so under the app's right-to-left layout the glyph sits to the *right*
             // of the value it copies rather than drifting off to the far edge.
-            if (chip != null && copy != null) {
-                CopyCodeChip(text = value, onCopy = copy, contentDescription = label, state = chip)
+            if (copyAsChip && copied != null && copy != null) {
+                CopyCodeChip(text = value, onCopy = copy, contentDescription = label, state = copied)
                 return@Row
             }
-            if (copyValue != null) {
-                CopyIconButton(value = copyValue, label = label, interactive = false)
+            if (copyValue != null && copied != null) {
+                CopyIconButton(value = copyValue, label = label, interactive = false, copiedState = copied)
             }
             val valueModifier = if (valueBoxed) {
                 Modifier

@@ -29,6 +29,7 @@ import com.tamin.taminhamrah.ui.components.TaminConfirmationDialog
 import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.dashedOutline
 import com.tamin.taminhamrah.ui.components.rememberCopyAction
+import com.tamin.taminhamrah.ui.components.rememberCopyCodeChipState
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
@@ -95,7 +96,8 @@ fun DisabilityPensionSubmitSuccessDialog(
         iconTint = colors.greenText,
         iconBackground = colors.greenBg,
         content = {
-            val copyAction = rememberCopyAction(trackingCode)
+            val copied = rememberCopyCodeChipState()
+            val copyAction = rememberCopyAction(trackingCode, copiedState = copied)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -121,7 +123,7 @@ fun DisabilityPensionSubmitSuccessDialog(
                         style = MaterialTheme.typography.labelSmall,
                         color = colors.textMuted,
                     )
-                    CopyIconButton(value = trackingCode, tint = colors.textMuted, interactive = false)
+                    CopyIconButton(value = trackingCode, tint = colors.textMuted, interactive = false, copiedState = copied)
                 }
             }
         },
