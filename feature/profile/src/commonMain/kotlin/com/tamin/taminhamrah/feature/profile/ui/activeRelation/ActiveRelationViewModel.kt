@@ -11,6 +11,7 @@ import com.tamin.taminhamrah.model.activeRelation.ActiveRelationPR
 import com.tamin.taminhamrah.model.request.ApiFilterDN
 import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
+import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.user.GetRecipientsUseCase
 import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
 import com.tamin.taminhamrah.useCases.user.GetStatusCertificateReportUseCase
@@ -84,7 +85,8 @@ class ActiveRelationViewModel(
             ApiFilterDN(FilterProperty.INSURANCE_NUMBER, item.insuranceId.toApiDateFormat(), FilterOperator.EQUAL),
             ApiFilterDN(FilterProperty.END_DATE, item.endDate?.toApiDateFormat() ?: "", FilterOperator.EQUAL),
             ApiFilterDN(FilterProperty.RECIPIENT, recipient?.code?:"", FilterOperator.EQUAL),
-            ApiFilterDN(FilterProperty.BRANCH_NAME, if (state.branchName.isBlank()) item.organizationName else state.branchName, FilterOperator.EQUAL),
+            ApiFilterDN(FilterProperty.BRANCH_NAME,
+                state.branchName.ifBlank { item.organizationName }, FilterOperator.EQUAL),
             ApiFilterDN(FilterProperty.TARGET, "", FilterOperator.EQUAL),
             ApiFilterDN(FilterProperty.STATUS_CODE, "01", FilterOperator.EQUAL)
         )
@@ -116,7 +118,7 @@ class ActiveRelationViewModel(
                     lastCheckTime = currentTime()
                 )
             }
-            .catch { emit(PartialState.SetError(it.message ?: "خطای نامشخص")) }
+            .catch { emit(PartialState.SetError(it.toSingleLineMessage())) }
             .collect {
                 emit(it)
                 emit(PartialState.SetLoading(false))
@@ -127,7 +129,11 @@ class ActiveRelationViewModel(
         currentState: ActiveRelationUiState,
         partialState: PartialState
     ): ActiveRelationUiState = when (partialState) {
-        is PartialState.SetLoading -> currentState.copy(isLoading = partialState.isLoading)
+        // A load that begins takes the last failure down, so a retry closes the error dialog.
+        is PartialState.SetLoading -> currentState.copy(
+            isLoading = partialState.isLoading,
+            error = currentState.error.takeUnless { partialState.isLoading },
+        )
         is PartialState.SetData -> currentState.copy(
             isLoading = false,
             items = partialState.items,

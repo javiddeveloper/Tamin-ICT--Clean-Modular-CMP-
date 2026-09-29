@@ -21,8 +21,8 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.headersOf
-import io.ktor.serialization.kotlinx.json.json
-import kotlinx.serialization.json.Json
+import com.tamin.taminhamrah.di.LenientReplyConverter
+import com.tamin.taminhamrah.di.taminJson
 
 class HealthApiServiceTest : BaseApiTest() {
 
@@ -41,11 +41,7 @@ class HealthApiServiceTest : BaseApiTest() {
 
         val httpClient = HttpClient(mockEngine) {
             install(ContentNegotiation) {
-                json(Json {
-                    ignoreUnknownKeys = true
-                    isLenient = true
-                    explicitNulls = false
-                })
+                register(ContentType.Application.Json, LenientReplyConverter(taminJson))
             }
             defaultRequest {
                 contentType(ContentType.Application.Json)

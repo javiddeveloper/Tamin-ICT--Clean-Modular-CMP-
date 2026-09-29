@@ -28,7 +28,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.outlined.Badge
 import androidx.compose.material.icons.outlined.Ballot
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -69,6 +68,8 @@ import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminTextField
 import com.tamin.taminhamrah.ui.components.rememberCopyAction
 import com.tamin.taminhamrah.ui.components.taminSurface
+import com.tamin.taminhamrah.ui.components.toast.LocalToaster
+import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.theme.ButtonDimens
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
@@ -110,6 +111,8 @@ import taminx.core.core_ui.issuance_certificate_submit_and_send
 import taminx.core.core_ui.issuance_certificate_success_confirm
 import taminx.core.core_ui.issuance_certificate_success_desc
 import taminx.core.core_ui.issuance_certificate_success_title
+import kotlinx.collections.immutable.toImmutableList
+import kotlin.time.Duration.Companion.milliseconds
 
 /** How long the copy button shows the green check before reverting to the copy icon. */
 private const val COPY_FEEDBACK_DURATION_MS = 2000L
@@ -121,9 +124,11 @@ fun IssuanceCertificateScreen(
     viewModel: IssuanceCertificateViewModel = koinViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
+    val toaster = LocalToaster.current
 
     HandleIssuanceCertificateEvents(
         events = viewModel.events,
+        onShowToast = { toaster.error(it) },
         onNavigateHome = onGoHome,
     )
 
@@ -134,8 +139,10 @@ fun IssuanceCertificateScreen(
     )
 
     if (state.showPensionerSheet) {
+        val pensioners = state.pensionerIds
+        val pensionerIds = remember(pensioners) { pensioners.map { it.pensionerId }.toImmutableList() }
         EdictPensionerSheet(
-            pensionerIds = state.pensionerIds.map { it.pensionerId },
+            pensionerIds = pensionerIds,
             selectedId = state.selectedPensionerId,
             onSelect = { id -> viewModel.sendIntent(IssuanceCertificateIntent.SelectPensionerId(id)) },
             onDismiss = { viewModel.sendIntent(IssuanceCertificateIntent.DismissPensionerSheet) },
@@ -177,12 +184,13 @@ fun IssuanceCertificateScreen(
 @Composable
 private fun HandleIssuanceCertificateEvents(
     events: Flow<IssuanceCertificateEvent>,
+    onShowToast: (String) -> Unit,
     onNavigateHome: () -> Unit,
 ) {
     events.collectWithLifecycleAware { event ->
         when (event) {
             is IssuanceCertificateEvent.NavigateHome -> onNavigateHome()
-            is IssuanceCertificateEvent.ShowToast -> Unit
+            is IssuanceCertificateEvent.ShowToast -> onShowToast(event.message)
         }
     }
 }
@@ -389,7 +397,7 @@ private fun PensionerNumberCard(
 
     LaunchedEffect(isCopied) {
         if (isCopied) {
-            delay(COPY_FEEDBACK_DURATION_MS)
+            delay(COPY_FEEDBACK_DURATION_MS.milliseconds)
             isCopied = false
         }
     }
@@ -474,7 +482,6 @@ private fun PensionerNumberCard(
 
 @Composable
 private fun PensionerNumberCardSkeleton() {
-    val colors = LocalTaminColors.current
 
     Row(
         modifier = Modifier

@@ -125,4 +125,18 @@ class UserApiServiceTest : BaseApiTest() {
         assertNull(response.data)
     }
 
+    @Test
+    fun `sendImageRequest decodes a null data reply`() = runTest {
+        val jsonResponse = """{"status":200,"family":"SUCCESSFUL","reason":"OK","traceId":"c1d7d47b-d5ec-41b4-b48e-4cb48b71ee58","data":null}"""
+
+        val ktorfit = createMockKtorfit(jsonResponse)
+        val apiService = ktorfit.createUserApiService()
+
+        val response = apiService.sendImageRequest("0010", """[{"property":"serialId","value":"1G50497996","operator":"EQ"}]""")
+
+        assertEquals(200, response.status)
+        assertEquals("SUCCESSFUL", response.family)
+        assertNull(response.data)
+        assertEquals("OK", response.reason)
+    }
 }

@@ -58,6 +58,7 @@ internal fun EmployerContractRowsHeader(
                     icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                     contentDescription = null,
                     onClick = onBackClicked,
+                    bordered = true
                 )
             },
         ) {

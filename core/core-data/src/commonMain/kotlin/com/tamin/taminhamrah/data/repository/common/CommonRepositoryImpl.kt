@@ -24,7 +24,7 @@ import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.repository.common.CommonRepository
-import io.ktor.client.statement.readRawBytes
+import com.tamin.taminhamrah.tools.readBytesOrThrow
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -67,7 +67,9 @@ class CommonRepositoryImpl(
     override fun getRegistrationDeclarationForm(): Flow<ByteArray> = flow {
         try {
             val statement = commonRemoteDataSource.getRegistrationDeclarationForm()
-            val bytes = statement.execute { response -> response.readRawBytes() }
+            // Status-checked drain: a failed download is its mapped error, never the error body
+            // handed to the saver as if it were the form.
+            val bytes = statement.readBytesOrThrow()
             emit(bytes)
         } catch (e: Exception) {
             throw e

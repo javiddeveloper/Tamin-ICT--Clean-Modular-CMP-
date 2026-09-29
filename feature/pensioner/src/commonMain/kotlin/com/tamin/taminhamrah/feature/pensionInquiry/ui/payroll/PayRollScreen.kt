@@ -65,6 +65,7 @@ import taminx.core.core_ui.Res
 import taminx.core.core_ui.btn_send_to_inbox
 import taminx.core.core_ui.ic_email
 import taminx.core.core_ui.ic_tamin_download
+import kotlinx.collections.immutable.toImmutableList
 
 
 @Composable
@@ -104,8 +105,10 @@ fun PayRollScreen(
     }
 
     if (state.showPensionerSheet) {
+        val pensioners = state.pensionerIds
+        val pensionerIds = remember(pensioners) { pensioners.map { it.pensionerId }.toImmutableList() }
         PayRollPensionerSheet(
-            pensionerIds = state.pensionerIds.map { it.pensionerId },
+            pensionerIds = pensionerIds,
             selectedId = state.selectedPensionerId,
             onSelect = { id ->
                 viewModel.sendIntent(PayRollIntent.ChangeSelectedPensionerId(id))

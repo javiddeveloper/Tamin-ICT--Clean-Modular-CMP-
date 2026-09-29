@@ -1,9 +1,7 @@
 package com.tamin.taminhamrah.feature.workshops.ui.contractRows.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -11,8 +9,6 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -84,11 +80,13 @@ fun ContractRowPickerSheet(
 ) {
     val colors = LocalTaminColors.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    // Laid out as پیگیری وضعیت اعتراض's search sheet is — its corner radius and drag handle — but
+    // with the colours swapped: the sheet on the surface colour, its fields on the page colour.
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        dragHandle = null,
         containerColor = colors.bgSurface,
+        shape = RoundedCornerShape(topStart = CornerRadius.sheet, topEnd = CornerRadius.sheet),
     ) {
         ContractRowPickerContent(
             workshopId = workshopId,
@@ -137,36 +135,27 @@ fun ContractRowPickerContent(
             .fillMaxWidth()
             .padding(horizontal = Spacing.page)
             .padding(
-                top = Spacing.smd,
                 bottom = WindowInsets.navigationBars.asPaddingValues()
                     .calculateBottomPadding() + Spacing.lg,
             ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // The sheet's own handle is switched off above, so the design's grabber is drawn here.
-        Box(
-            modifier = Modifier
-                .padding(bottom = Spacing.smd)
-                .size(
-                    width = WorkshopDimens.contractRowGrabberWidth,
-                    height = WorkshopDimens.contractRowGrabberHeight,
-                )
-                .background(colors.border, RoundedCornerShape(CornerRadius.full)),
-        )
-
         Text(
             text = stringResource(Res.string.contract_rows_pick_workshop),
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold,
             color = colors.textPrimary,
             textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
         )
         Text(
             text = stringResource(Res.string.contract_rows_pick_workshop_hint),
             style = MaterialTheme.typography.labelSmall,
             color = colors.textMuted,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = Spacing.xs, bottom = Spacing.smd),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = Spacing.xs, bottom = Spacing.md),
         )
 
         Row(
@@ -186,6 +175,7 @@ fun ContractRowPickerContent(
                 isValid = if (showWorkshopIdError) false else null,
                 errorText = stringResource(Res.string.contract_rows_workshop_code_required)
                     .takeIf { showWorkshopIdError },
+                containerColor = colors.bgPage,
                 modifier = Modifier.weight(WorkshopDimens.contractRowWorkshopFieldWeight),
             )
             WorkshopTextField(
@@ -200,6 +190,7 @@ fun ContractRowPickerContent(
                 isValid = if (showBranchCodeError) false else null,
                 errorText = stringResource(Res.string.contract_rows_branch_code_required_hint)
                     .takeIf { showBranchCodeError },
+                containerColor = colors.bgPage,
                 modifier = Modifier.weight(WorkshopDimens.contractRowBranchFieldWeight),
             )
         }
@@ -210,14 +201,27 @@ fun ContractRowPickerContent(
             selectedBranchCode = branchCode,
             onPick = onQuickPick,
             onLoadMore = onLoadMoreWorkshops,
+            outlineUnselected = true,
         )
 
+        // The objection search sheet's button row: the secondary action first — so rightmost on the
+        // RTL page — on the narrower share, the gradient apply button on the rest.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = Spacing.smd),
+                .padding(top = Spacing.md),
             horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
+            if (canReset) {
+                TaminOutlinedButton(
+                    text = stringResource(Res.string.contract_rows_reset),
+                    onClick = onReset,
+                    shape = RoundedCornerShape(CornerRadius.xl),
+                    modifier = Modifier
+                        .weight(RESET_BUTTON_WEIGHT)
+                        .background(colors.bgPage),
+                )
+            }
             TaminPrimaryButton(
                 text = stringResource(Res.string.contract_rows_apply),
                 onClick = onApply,
@@ -225,25 +229,16 @@ fun ContractRowPickerContent(
                 // the button is that same guard made visible, so the tap does not read as dead.
                 enabled = !isApplying,
                 background = colors.buttonGradient,
-                height = WorkshopDimens.panelButtonHeight,
-                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(CornerRadius.xl),
+                modifier = Modifier.weight(APPLY_BUTTON_WEIGHT),
             )
-            if (canReset) {
-                TaminOutlinedButton(
-                    text = stringResource(Res.string.contract_rows_reset),
-                    onClick = onReset,
-                    height = WorkshopDimens.panelButtonHeight,
-                    borderWidth = WorkshopDimens.panelButtonBorderWidth,
-                    borderColor = colors.border,
-                    containerColor = colors.bgSurface,
-                    contentColor = colors.textSecondary,
-                    textStyle = MaterialTheme.typography.labelMedium,
-                    modifier = Modifier.width(WorkshopDimens.contractRowResetButtonWidth),
-                )
-            }
         }
     }
 }
+
+/** The objection search sheet's split: the secondary button narrow, the primary taking the rest. */
+private const val RESET_BUTTON_WEIGHT = 0.3f
+private const val APPLY_BUTTON_WEIGHT = 0.7f
 
 private val PreviewWorkshops = persistentListOf(
     WorkshopPR(

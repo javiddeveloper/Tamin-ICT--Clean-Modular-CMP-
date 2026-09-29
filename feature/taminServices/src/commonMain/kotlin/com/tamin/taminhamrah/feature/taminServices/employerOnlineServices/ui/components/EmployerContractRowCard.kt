@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +25,7 @@ import com.tamin.taminhamrah.ui.components.coloredShadow
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
+import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.Spacing
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
@@ -117,6 +119,68 @@ internal fun EmployerContractRowCard(
     }
 }
 
+/** Readings under the pill row of [EmployerContractRowCard] — the skeleton draws the same number. */
+private const val DETAIL_ROW_COUNT = 5
+private const val PLACEHOLDER_CARDS = 3
+
+/** First-load (and retry) placeholder for the contract-rows list, card-for-card with the real one. */
+@Composable
+internal fun EmployerContractRowsSkeleton(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(Spacing.lg),
+    ) {
+        repeat(PLACEHOLDER_CARDS) {
+            EmployerContractRowCardSkeleton(modifier = Modifier.padding(horizontal = Spacing.lg))
+        }
+    }
+}
+
+/** [EmployerContractRowCard]'s shape with shimmer blocks in place of the pill, name and readings. */
+@Composable
+internal fun EmployerContractRowCardSkeleton(modifier: Modifier = Modifier) {
+    val colors = LocalTaminColors.current
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .coloredShadow(
+                color = colors.shadowSubtle,
+                borderRadius = CornerRadius.card,
+                blurRadius = 26.dp,
+                offsetY = 10.dp,
+            )
+            .taminSurface()
+            .padding(horizontal = Spacing.xlg)
+            .padding(top = Spacing.lg, bottom = Spacing.lg),
+        verticalArrangement = Arrangement.spacedBy(Spacing.xs),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = Spacing.xs),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            ShimmerBlock(modifier = Modifier.width(72.dp).height(24.dp), cornerRadius = CornerRadius.chip)
+            Spacer(Modifier.width(Spacing.sm))
+            ShimmerBlock(modifier = Modifier.width(140.dp).height(18.dp))
+        }
+
+        repeat(DETAIL_ROW_COUNT) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = Spacing.xs),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                ShimmerBlock(modifier = Modifier.width(64.dp).height(14.dp))
+                Spacer(Modifier.weight(1f))
+                ShimmerBlock(modifier = Modifier.width(112.dp).height(14.dp))
+            }
+        }
+    }
+}
+
 private val PreviewRow = WorkshopContractRowPR(
     contractRow = "۰۰۱",
     fullName = "حسین توکلی کرمانی",
@@ -147,5 +211,21 @@ private fun EmployerContractRowCardPreviewDark() {
             item = PreviewRow.copy(contractRow = "۰۰۲", fullName = "مریم توکلی", email = "-"),
             modifier = Modifier.padding(Spacing.lg),
         )
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun EmployerContractRowsSkeletonPreviewLight() {
+    PreviewRtlThemeContent {
+        EmployerContractRowsSkeleton(modifier = Modifier.padding(vertical = Spacing.lg))
+    }
+}
+
+@PreviewRtlTheme
+@Composable
+private fun EmployerContractRowsSkeletonPreviewDark() {
+    PreviewRtlThemeContent(darkTheme = true) {
+        EmployerContractRowsSkeleton(modifier = Modifier.padding(vertical = Spacing.lg))
     }
 }

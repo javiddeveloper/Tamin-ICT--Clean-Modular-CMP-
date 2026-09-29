@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.dataSource.contractAffair
 
+import com.tamin.taminhamrah.tools.FakeIOException
 import com.tamin.taminhamrah.apiService.contractAffair.ContractAffairApiService
 import com.tamin.taminhamrah.model.contractAffair.CancelContractRequestDTO
 import com.tamin.taminhamrah.model.contractAffair.ContractDTO
@@ -251,14 +252,14 @@ private class FakeApi(
     override suspend fun getContractList(
         parameters: Map<String, String>,
     ): BaseDTO<ListData<ContractDTO>> {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         return ok(contracts)
     }
 
     override suspend fun getContractStates(
         parameters: Map<String, String>,
     ): BaseDTO<ListData<ContractStateDTO>> {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         return ok(states)
     }
 
@@ -266,7 +267,7 @@ private class FakeApi(
         stateCode: Int,
         request: CancelContractRequestDTO,
     ): BaseDTO<JsonElement> {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         cancelVariant = "optional"
         cancelStateCode = stateCode
         cancelRequest = request
@@ -277,7 +278,7 @@ private class FakeApi(
         stateCode: Int,
         request: CancelContractRequestDTO,
     ): BaseDTO<JsonElement> {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         cancelVariant = "freelance"
         cancelStateCode = stateCode
         cancelRequest = request
@@ -287,46 +288,46 @@ private class FakeApi(
     override suspend fun getContractPaymentHistory(
         contractNumber: String,
     ): BaseDTO<ListData<JsonArray>> {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         return ok(paymentHistory)
     }
 
     override suspend fun getOptionalContractReport(timestamp: Long): HttpStatement {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         error("HttpStatement is not built in this test")
     }
 
     override suspend fun getFreelanceContractReport(timestamp: Long): HttpStatement {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         error("HttpStatement is not built in this test")
     }
 
     override suspend fun getFractionContractReport(timestamp: Long): HttpStatement {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         error("HttpStatement is not built in this test")
     }
 
     override suspend fun getFreelanceContractDebit(month: Int): BaseDTO<ContractDebitDTO> {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         debitVariant = "freelance"
         debitMonth = month
         return ok(debit)
     }
 
     override suspend fun getOptionalContractDebit(month: Int): BaseDTO<ContractDebitDTO> {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         debitVariant = "optional"
         debitMonth = month
         return ok(debit)
     }
 
     override suspend fun getFreelanceLastPayment(): BaseDTO<FreelanceLastPaymentDTO> {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         return ok(freelanceLastPayment)
     }
 
     override suspend fun getOptionalLastPayment(): BaseDTO<Long> {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         return ok(optionalLastPayment ?: 0L)
     }
 
@@ -339,7 +340,7 @@ private class FakeApi(
         filter: String,
         sort: String,
     ): BaseDTO<ListData<JsonArray>> {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         paymentDetailsVariant = "freelance"
         paymentDetailsStart = startDate
         paymentDetailsEnd = endDate
@@ -355,7 +356,7 @@ private class FakeApi(
         filter: String,
         sort: String,
     ): BaseDTO<ListData<JsonArray>> {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         paymentDetailsVariant = "optional"
         paymentDetailsStart = startDate
         paymentDetailsEnd = endDate

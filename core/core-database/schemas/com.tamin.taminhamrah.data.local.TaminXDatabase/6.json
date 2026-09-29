@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 5,
-    "identityHash": "f5fca04522d0a224fd88a5556403a8ae",
+    "version": 6,
+    "identityHash": "e8be6fdf0c633343011c26a0796c0f1d",
     "entities": [
       {
         "tableName": "test_table",
@@ -3080,6 +3080,1349 @@
         }
       },
       {
+        "tableName": "construction_file_pages",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`listKey` TEXT NOT NULL, `position` INTEGER NOT NULL, `fileNumber` INTEGER NOT NULL, `requestNumber` INTEGER, `requestDate` TEXT, `workshopId` TEXT, `workshopRegisterDate` TEXT, `brhCode` TEXT, `postalCode` TEXT, `address` TEXT, `mainPlaque` INTEGER, `subPlaque` INTEGER, `block` INTEGER, `propertyConstruction` INTEGER, `apartment` INTEGER, `trade` INTEGER, `partPlaque` INTEGER, `sumOfComplications` INTEGER, `debitNumber` TEXT, `totalPayment` INTEGER, `meterage` INTEGER, `debitStatusCode` TEXT, `protrusion` INTEGER, `applicationFees` INTEGER, `residentialServiceInfrastructureFees` INTEGER, `excessDensitySurchargeFees` INTEGER, `increasePropertyValue` INTEGER, `issuanceFencingWallConstructionFees` INTEGER, `coveredClause3Fees` INTEGER, `article100` INTEGER, `paymentDeadLine` TEXT, PRIMARY KEY(`listKey`, `position`))",
+        "fields": [
+          {
+            "fieldPath": "listKey",
+            "columnName": "listKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "file.fileNumber",
+            "columnName": "fileNumber",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "file.requestNumber",
+            "columnName": "requestNumber",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "file.requestDate",
+            "columnName": "requestDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "file.workshopId",
+            "columnName": "workshopId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "file.workshopRegisterDate",
+            "columnName": "workshopRegisterDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "file.brhCode",
+            "columnName": "brhCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "file.postalCode",
+            "columnName": "postalCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "file.address",
+            "columnName": "address",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "file.mainPlaque",
+            "columnName": "mainPlaque",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "file.subPlaque",
+            "columnName": "subPlaque",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "file.block",
+            "columnName": "block",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "file.propertyConstruction",
+            "columnName": "propertyConstruction",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "file.apartment",
+            "columnName": "apartment",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "file.trade",
+            "columnName": "trade",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "file.partPlaque",
+            "columnName": "partPlaque",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "file.sumOfComplications",
+            "columnName": "sumOfComplications",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "file.debitNumber",
+            "columnName": "debitNumber",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "file.totalPayment",
+            "columnName": "totalPayment",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "file.meterage",
+            "columnName": "meterage",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "file.debitStatusCode",
+            "columnName": "debitStatusCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "file.protrusion",
+            "columnName": "protrusion",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "file.applicationFees",
+            "columnName": "applicationFees",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "file.residentialServiceInfrastructureFees",
+            "columnName": "residentialServiceInfrastructureFees",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "file.excessDensitySurchargeFees",
+            "columnName": "excessDensitySurchargeFees",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "file.increasePropertyValue",
+            "columnName": "increasePropertyValue",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "file.issuanceFencingWallConstructionFees",
+            "columnName": "issuanceFencingWallConstructionFees",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "file.coveredClause3Fees",
+            "columnName": "coveredClause3Fees",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "file.article100",
+            "columnName": "article100",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "file.paymentDeadLine",
+            "columnName": "paymentDeadLine",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "listKey",
+            "position"
+          ]
+        }
+      },
+      {
+        "tableName": "contract_affair_pages",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`listKey` TEXT NOT NULL, `position` INTEGER NOT NULL, `contractNumber` INTEGER NOT NULL, `adultLetterDate` TEXT, `adultLetterNumber` TEXT, `age` TEXT, `branchCode` TEXT, `brchCodeNew` TEXT, `cancelDate` INTEGER, `cancelUID` TEXT, `canceldesc` TEXT, `cityCode` TEXT, `cntDrmn` TEXT, `cntFreeJobCode` TEXT, `cntIncPayDate3t4` TEXT, `cntMedicalFlag` TEXT, `comment` TEXT, `commissionStatus` TEXT, `confirmDate` INTEGER, `confirmUID` TEXT, `contractDate` INTEGER, `contractStatus` TEXT, `contractStatusDesc` TEXT, `contractStatusCode` INTEGER, `creatDate` INTEGER, `createDate` INTEGER, `createUID` TEXT, `eligibilityStatus` TEXT, `freeJobDescription` TEXT, `freeJobEndDate` TEXT, `freeJobFixRank` TEXT, `freeJobId` INTEGER, `freeJobIscoCode` TEXT, `freeJobCode` TEXT, `freeJobStartDate` TEXT, `freeJobStatus` TEXT, `guid` TEXT, `guidName` TEXT, `history` TEXT, `insuranceId` TEXT, `isStudent` TEXT, `medicalExemptionStatus` TEXT, `militaryServiceLicense` TEXT, `mobileNumber` TEXT, `natinoalCode` TEXT, `physicalStatus` TEXT, `premiumRateGovermentPercent` TEXT, `premiumRateInsurDpercent` TEXT, `premiumRatePayrespitelOne` TEXT, `premiumRatePayrespitelTwo` TEXT, `premiumRateSelfIsuTypeCode` TEXT, `premiumRateSpcLowDayWage` TEXT, `premiumRateSpcrateCode` TEXT, `premiumRateSpcrateDescription` TEXT, `premiumRateStatus` TEXT, `premiumRateStatusStDate` TEXT, `premiumRateTreatmentPercap` TEXT, `premiumRateCode` TEXT, `premiumTypeInsuranceDescription` TEXT, `premiumTypeInsuranceKind` TEXT, `premiumTypeInsuranceTypeCode` TEXT, `premiumTypeStatus` TEXT, `premiumTypeStatusDate` INTEGER, `premiumTypeCode` TEXT, `provinceCode` TEXT, `provinceName` TEXT, `refCode` TEXT, `salary` INTEGER, `startDate` INTEGER, `statusDate` INTEGER, `wage` INTEGER, PRIMARY KEY(`listKey`, `position`))",
+        "fields": [
+          {
+            "fieldPath": "listKey",
+            "columnName": "listKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contract.contractNumber",
+            "columnName": "contractNumber",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contract.adultLetterDate",
+            "columnName": "adultLetterDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.adultLetterNumber",
+            "columnName": "adultLetterNumber",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.age",
+            "columnName": "age",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.branchCode",
+            "columnName": "branchCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.brchCodeNew",
+            "columnName": "brchCodeNew",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.cancelDate",
+            "columnName": "cancelDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "contract.cancelUID",
+            "columnName": "cancelUID",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.canceldesc",
+            "columnName": "canceldesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.cityCode",
+            "columnName": "cityCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.cntDrmn",
+            "columnName": "cntDrmn",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.cntFreeJobCode",
+            "columnName": "cntFreeJobCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.cntIncPayDate3t4",
+            "columnName": "cntIncPayDate3t4",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.cntMedicalFlag",
+            "columnName": "cntMedicalFlag",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.comment",
+            "columnName": "comment",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.commissionStatus",
+            "columnName": "commissionStatus",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.confirmDate",
+            "columnName": "confirmDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "contract.confirmUID",
+            "columnName": "confirmUID",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.contractDate",
+            "columnName": "contractDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "contract.contractStatus",
+            "columnName": "contractStatus",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.contractStatusDesc",
+            "columnName": "contractStatusDesc",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.contractStatusCode",
+            "columnName": "contractStatusCode",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "contract.creatDate",
+            "columnName": "creatDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "contract.createDate",
+            "columnName": "createDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "contract.createUID",
+            "columnName": "createUID",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.eligibilityStatus",
+            "columnName": "eligibilityStatus",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.freeJobDescription",
+            "columnName": "freeJobDescription",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.freeJobEndDate",
+            "columnName": "freeJobEndDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.freeJobFixRank",
+            "columnName": "freeJobFixRank",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.freeJobId",
+            "columnName": "freeJobId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "contract.freeJobIscoCode",
+            "columnName": "freeJobIscoCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.freeJobCode",
+            "columnName": "freeJobCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.freeJobStartDate",
+            "columnName": "freeJobStartDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.freeJobStatus",
+            "columnName": "freeJobStatus",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.guid",
+            "columnName": "guid",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.guidName",
+            "columnName": "guidName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.history",
+            "columnName": "history",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.insuranceId",
+            "columnName": "insuranceId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.isStudent",
+            "columnName": "isStudent",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.medicalExemptionStatus",
+            "columnName": "medicalExemptionStatus",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.militaryServiceLicense",
+            "columnName": "militaryServiceLicense",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.mobileNumber",
+            "columnName": "mobileNumber",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.natinoalCode",
+            "columnName": "natinoalCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.physicalStatus",
+            "columnName": "physicalStatus",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.premiumRateGovermentPercent",
+            "columnName": "premiumRateGovermentPercent",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.premiumRateInsurDpercent",
+            "columnName": "premiumRateInsurDpercent",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.premiumRatePayrespitelOne",
+            "columnName": "premiumRatePayrespitelOne",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.premiumRatePayrespitelTwo",
+            "columnName": "premiumRatePayrespitelTwo",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.premiumRateSelfIsuTypeCode",
+            "columnName": "premiumRateSelfIsuTypeCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.premiumRateSpcLowDayWage",
+            "columnName": "premiumRateSpcLowDayWage",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.premiumRateSpcrateCode",
+            "columnName": "premiumRateSpcrateCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.premiumRateSpcrateDescription",
+            "columnName": "premiumRateSpcrateDescription",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.premiumRateStatus",
+            "columnName": "premiumRateStatus",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.premiumRateStatusStDate",
+            "columnName": "premiumRateStatusStDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.premiumRateTreatmentPercap",
+            "columnName": "premiumRateTreatmentPercap",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.premiumRateCode",
+            "columnName": "premiumRateCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.premiumTypeInsuranceDescription",
+            "columnName": "premiumTypeInsuranceDescription",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.premiumTypeInsuranceKind",
+            "columnName": "premiumTypeInsuranceKind",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.premiumTypeInsuranceTypeCode",
+            "columnName": "premiumTypeInsuranceTypeCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.premiumTypeStatus",
+            "columnName": "premiumTypeStatus",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.premiumTypeStatusDate",
+            "columnName": "premiumTypeStatusDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "contract.premiumTypeCode",
+            "columnName": "premiumTypeCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.provinceCode",
+            "columnName": "provinceCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.provinceName",
+            "columnName": "provinceName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.refCode",
+            "columnName": "refCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "contract.salary",
+            "columnName": "salary",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "contract.startDate",
+            "columnName": "startDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "contract.statusDate",
+            "columnName": "statusDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "contract.wage",
+            "columnName": "wage",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "listKey",
+            "position"
+          ]
+        }
+      },
+      {
+        "tableName": "inspection_performed_pages",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`listKey` TEXT NOT NULL, `position` INTEGER NOT NULL, `activityDesc` TEXT NOT NULL, `branchCode` TEXT NOT NULL, `branchdesc` TEXT NOT NULL, `inspectionDate` INTEGER NOT NULL, `inspectionNo` TEXT NOT NULL, `insuranceNo` TEXT NOT NULL, `objectable` TEXT NOT NULL, `relationType` TEXT NOT NULL, `workshopName` TEXT NOT NULL, `workshopNo` TEXT NOT NULL, `nationalCode` TEXT NOT NULL, PRIMARY KEY(`listKey`, `position`))",
+        "fields": [
+          {
+            "fieldPath": "listKey",
+            "columnName": "listKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "activityDesc",
+            "columnName": "activityDesc",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "branchCode",
+            "columnName": "branchCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "branchdesc",
+            "columnName": "branchdesc",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "inspectionDate",
+            "columnName": "inspectionDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "inspectionNo",
+            "columnName": "inspectionNo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "insuranceNo",
+            "columnName": "insuranceNo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "objectable",
+            "columnName": "objectable",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "relationType",
+            "columnName": "relationType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workshopName",
+            "columnName": "workshopName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workshopNo",
+            "columnName": "workshopNo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nationalCode",
+            "columnName": "nationalCode",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "listKey",
+            "position"
+          ]
+        }
+      },
+      {
+        "tableName": "inspection_branch_pages",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`listKey` TEXT NOT NULL, `position` INTEGER NOT NULL, `operation` TEXT NOT NULL, `code` TEXT NOT NULL, `name` TEXT NOT NULL, `minCode` TEXT NOT NULL, `maxCode` TEXT NOT NULL, `type` TEXT NOT NULL, `branchAddress` TEXT NOT NULL, `cityCode` TEXT NOT NULL, `status` TEXT NOT NULL, PRIMARY KEY(`listKey`, `position`))",
+        "fields": [
+          {
+            "fieldPath": "listKey",
+            "columnName": "listKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "operation",
+            "columnName": "operation",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "minCode",
+            "columnName": "minCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "maxCode",
+            "columnName": "maxCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "branchAddress",
+            "columnName": "branchAddress",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cityCode",
+            "columnName": "cityCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "listKey",
+            "position"
+          ]
+        }
+      },
+      {
+        "tableName": "inspection_job_pages",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`listKey` TEXT NOT NULL, `position` INTEGER NOT NULL, `operation` TEXT NOT NULL, `jobCode` TEXT NOT NULL, `jobDescription` TEXT NOT NULL, `status` TEXT NOT NULL, `statusDate` TEXT NOT NULL, PRIMARY KEY(`listKey`, `position`))",
+        "fields": [
+          {
+            "fieldPath": "listKey",
+            "columnName": "listKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "operation",
+            "columnName": "operation",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "jobCode",
+            "columnName": "jobCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "jobDescription",
+            "columnName": "jobDescription",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "statusDate",
+            "columnName": "statusDate",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "listKey",
+            "position"
+          ]
+        }
+      },
+      {
+        "tableName": "construction_beneficiary_pages",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`listKey` TEXT NOT NULL, `position` INTEGER NOT NULL, `nationalCode` TEXT, `ownerType` TEXT, `requestNumber` INTEGER, `fileNumber` INTEGER, `requestDate` TEXT, `name` TEXT, `lastName` TEXT, `mobile` TEXT, PRIMARY KEY(`listKey`, `position`))",
+        "fields": [
+          {
+            "fieldPath": "listKey",
+            "columnName": "listKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nationalCode",
+            "columnName": "nationalCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ownerType",
+            "columnName": "ownerType",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "requestNumber",
+            "columnName": "requestNumber",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "fileNumber",
+            "columnName": "fileNumber",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "requestDate",
+            "columnName": "requestDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastName",
+            "columnName": "lastName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "mobile",
+            "columnName": "mobile",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "listKey",
+            "position"
+          ]
+        }
+      },
+      {
+        "tableName": "installment_letter_pages",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`listKey` TEXT NOT NULL, `position` INTEGER NOT NULL, `workshopId` TEXT, `debitNumber` TEXT, `debitStepDescription` TEXT, `debitStatusDescription` TEXT, `debitStartDate` TEXT, `debitEndDate` TEXT, `remainingAmount` INTEGER, `debitNumberOld` TEXT, PRIMARY KEY(`listKey`, `position`))",
+        "fields": [
+          {
+            "fieldPath": "listKey",
+            "columnName": "listKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workshopId",
+            "columnName": "workshopId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "debitNumber",
+            "columnName": "debitNumber",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "debitStepDescription",
+            "columnName": "debitStepDescription",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "debitStatusDescription",
+            "columnName": "debitStatusDescription",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "debitStartDate",
+            "columnName": "debitStartDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "debitEndDate",
+            "columnName": "debitEndDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "remainingAmount",
+            "columnName": "remainingAmount",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "debitNumberOld",
+            "columnName": "debitNumberOld",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "listKey",
+            "position"
+          ]
+        }
+      },
+      {
+        "tableName": "installment_debit_pages",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`listKey` TEXT NOT NULL, `position` INTEGER NOT NULL, `workshopId` TEXT, `debitNumber` TEXT, `debitStepDescription` TEXT, `debitStatusDescription` TEXT, `debitStartDate` TEXT, `debitEndDate` TEXT, `remainingAmount` INTEGER, PRIMARY KEY(`listKey`, `position`))",
+        "fields": [
+          {
+            "fieldPath": "listKey",
+            "columnName": "listKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workshopId",
+            "columnName": "workshopId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "debitNumber",
+            "columnName": "debitNumber",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "debitStepDescription",
+            "columnName": "debitStepDescription",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "debitStatusDescription",
+            "columnName": "debitStatusDescription",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "debitStartDate",
+            "columnName": "debitStartDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "debitEndDate",
+            "columnName": "debitEndDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "remainingAmount",
+            "columnName": "remainingAmount",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "listKey",
+            "position"
+          ]
+        }
+      },
+      {
+        "tableName": "installment_construction_pages",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`listKey` TEXT NOT NULL, `position` INTEGER NOT NULL, `workshopId` TEXT, `debitNumber` TEXT, `debitSubCode` TEXT, `dtnAmount` INTEGER, `lastPaymentSheetAmount` INTEGER, `dtnExpireDate` TEXT, `lastPaymentSheetDescription` TEXT, `paymentDate` TEXT, PRIMARY KEY(`listKey`, `position`))",
+        "fields": [
+          {
+            "fieldPath": "listKey",
+            "columnName": "listKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workshopId",
+            "columnName": "workshopId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "debitNumber",
+            "columnName": "debitNumber",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "debitSubCode",
+            "columnName": "debitSubCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "dtnAmount",
+            "columnName": "dtnAmount",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "lastPaymentSheetAmount",
+            "columnName": "lastPaymentSheetAmount",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "dtnExpireDate",
+            "columnName": "dtnExpireDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastPaymentSheetDescription",
+            "columnName": "lastPaymentSheetDescription",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "paymentDate",
+            "columnName": "paymentDate",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "listKey",
+            "position"
+          ]
+        }
+      },
+      {
+        "tableName": "workshop_without_contract_pages",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`listKey` TEXT NOT NULL, `position` INTEGER NOT NULL, `workshopId` TEXT NOT NULL, `branchCode` TEXT NOT NULL, `name` TEXT NOT NULL, `nationalId` TEXT NOT NULL, `postalCode` TEXT NOT NULL, `tel` TEXT NOT NULL, `address` TEXT NOT NULL, `branchOfficeName` TEXT NOT NULL, `branchOfficeCode` TEXT NOT NULL, PRIMARY KEY(`listKey`, `position`))",
+        "fields": [
+          {
+            "fieldPath": "listKey",
+            "columnName": "listKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workshopId",
+            "columnName": "workshopId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "branchCode",
+            "columnName": "branchCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nationalId",
+            "columnName": "nationalId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "postalCode",
+            "columnName": "postalCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tel",
+            "columnName": "tel",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "address",
+            "columnName": "address",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "branchOfficeName",
+            "columnName": "branchOfficeName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "branchOfficeCode",
+            "columnName": "branchOfficeCode",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "listKey",
+            "position"
+          ]
+        }
+      },
+      {
+        "tableName": "workshop_contract_row_pages",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`listKey` TEXT NOT NULL, `position` INTEGER NOT NULL, `contractRow` TEXT NOT NULL, `startDate` TEXT NOT NULL, `endDate` TEXT NOT NULL, `firstName` TEXT NOT NULL, `lastName` TEXT NOT NULL, `mobile` TEXT NOT NULL, `email` TEXT NOT NULL, `nationalCode` TEXT NOT NULL, `tel` TEXT NOT NULL, `postalCode` TEXT NOT NULL, `workshop_workshopId` TEXT NOT NULL, `workshop_branchCode` TEXT NOT NULL, `workshop_name` TEXT NOT NULL, `workshop_employerName` TEXT NOT NULL, `workshop_activityName` TEXT NOT NULL, `workshop_address` TEXT NOT NULL, `workshop_registerDate` TEXT NOT NULL, `workshop_approveDate` TEXT NOT NULL, `workshop_contractRow` TEXT NOT NULL, `workshop_branchOfficeCode` TEXT NOT NULL, `workshop_branchTitle` TEXT NOT NULL, `workshop_branchOfficeName` TEXT NOT NULL, `workshop_characterCode` TEXT NOT NULL, `workshop_legalNationalId` TEXT NOT NULL, `workshop_characterDescription` TEXT NOT NULL, `workshop_workshopTypeDescription` TEXT NOT NULL, `workshop_statusCode` TEXT NOT NULL, `workshop_statusDescription` TEXT NOT NULL, PRIMARY KEY(`listKey`, `position`))",
+        "fields": [
+          {
+            "fieldPath": "listKey",
+            "columnName": "listKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contractRow",
+            "columnName": "contractRow",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startDate",
+            "columnName": "startDate",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endDate",
+            "columnName": "endDate",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "firstName",
+            "columnName": "firstName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastName",
+            "columnName": "lastName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mobile",
+            "columnName": "mobile",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "email",
+            "columnName": "email",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nationalCode",
+            "columnName": "nationalCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tel",
+            "columnName": "tel",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "postalCode",
+            "columnName": "postalCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workshop.workshopId",
+            "columnName": "workshop_workshopId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workshop.branchCode",
+            "columnName": "workshop_branchCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workshop.name",
+            "columnName": "workshop_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workshop.employerName",
+            "columnName": "workshop_employerName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workshop.activityName",
+            "columnName": "workshop_activityName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workshop.address",
+            "columnName": "workshop_address",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workshop.registerDate",
+            "columnName": "workshop_registerDate",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workshop.approveDate",
+            "columnName": "workshop_approveDate",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workshop.contractRow",
+            "columnName": "workshop_contractRow",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workshop.branchOfficeCode",
+            "columnName": "workshop_branchOfficeCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workshop.branchTitle",
+            "columnName": "workshop_branchTitle",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workshop.branchOfficeName",
+            "columnName": "workshop_branchOfficeName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workshop.characterCode",
+            "columnName": "workshop_characterCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workshop.legalNationalId",
+            "columnName": "workshop_legalNationalId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workshop.characterDescription",
+            "columnName": "workshop_characterDescription",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workshop.workshopTypeDescription",
+            "columnName": "workshop_workshopTypeDescription",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workshop.statusCode",
+            "columnName": "workshop_statusCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "workshop.statusDescription",
+            "columnName": "workshop_statusDescription",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "listKey",
+            "position"
+          ]
+        }
+      },
+      {
+        "tableName": "job_title_pages",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`listKey` TEXT NOT NULL, `position` INTEGER NOT NULL, `jobCode` TEXT NOT NULL, `jobDescription` TEXT NOT NULL, `status` TEXT NOT NULL, `statusDate` TEXT NOT NULL, PRIMARY KEY(`listKey`, `position`))",
+        "fields": [
+          {
+            "fieldPath": "listKey",
+            "columnName": "listKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "jobCode",
+            "columnName": "jobCode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "jobDescription",
+            "columnName": "jobDescription",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "statusDate",
+            "columnName": "statusDate",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "listKey",
+            "position"
+          ]
+        }
+      },
+      {
         "tableName": "home_content",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `userInfo` TEXT, `stories` TEXT, `campaigns` TEXT, `quickAccess` TEXT, `specialServices` TEXT, `requests` TEXT, PRIMARY KEY(`id`))",
         "fields": [
@@ -3130,7 +4473,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f5fca04522d0a224fd88a5556403a8ae')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e8be6fdf0c633343011c26a0796c0f1d')"
     ]
   }
 }

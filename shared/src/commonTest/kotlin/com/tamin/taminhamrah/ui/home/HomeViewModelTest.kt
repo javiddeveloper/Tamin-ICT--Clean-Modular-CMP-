@@ -375,6 +375,21 @@ class HomeViewModelTest {
         assertEquals(listOf<HomeEvent>(HomeEvent.ShowMessage("سرویس غیرفعال است")), events)
     }
 
+    /** Same number پروفایل › پشتیبانی dials. */
+    @Test
+    fun `tapping the header support icon dials 1420`() = runTest(testDispatcher) {
+        val viewModel = createViewModel()
+        advanceUntilIdle()
+
+        val events = mutableListOf<HomeEvent>()
+        val collector = launch { viewModel.events.toList(events) }
+        viewModel.sendIntent(HomeIntent.OnSupportClick)
+        advanceUntilIdle()
+        collector.cancel()
+
+        assertEquals(listOf<HomeEvent>(HomeEvent.NavigateToWeb("tel:1420")), events)
+    }
+
     private fun talfighInfo(year: String, months: List<String>) = TalfighInfoDN(
         list = listOf(
             TalfighInfoItemDN(

@@ -141,10 +141,20 @@ private fun LegalRepresentativeWorkshopsContent(
                 modifier = Modifier.align(Alignment.Center),
             )
 
+            // Padded by the overlaid top area's height so it centers in the space below the
+            // header rather than behind it.
             uiState.workshops.isEmpty() -> EmptyStateMessage(
                 icon = Icons.Filled.Groups,
                 title = stringResource(Res.string.legal_representative_empty_title),
-                modifier = Modifier.align(Alignment.Center),
+                showIconTile = true,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(
+                        topAreaContentPadding(
+                            state = topArea,
+                            rest = PaddingValues(horizontal = Spacing.lg),
+                        )
+                    ),
             )
 
             else -> LazyColumn(

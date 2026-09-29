@@ -173,7 +173,11 @@ fun WorkshopContractRowDTO.toDomain(): WorkshopContractRowDN = WorkshopContractR
     nationalCode = nationalCode.orEmpty(),
     tel = tel.orEmpty(),
     postalCode = postalCode.orEmpty(),
-    workshop = workshop?.toDomain() ?: WorkshopSummaryDN(),
+    workshop = WorkshopSummaryDN(
+        workshopId = workshop?.workshopId.orEmpty(),
+        branchCode = workshop?.branchCode.orEmpty(),
+        name = workshop?.workshopName.orEmpty(),
+    ),
 )
 
 fun EmployerAgreementByWorkshopDTO.toDomain(): EmployerAgreementByWorkshopDN = EmployerAgreementByWorkshopDN(

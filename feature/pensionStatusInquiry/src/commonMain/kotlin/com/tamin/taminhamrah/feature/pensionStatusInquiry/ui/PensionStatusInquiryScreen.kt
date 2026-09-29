@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import com.tamin.taminhamrah.feature.pensionStatusInquiry.ui.components.CertificateToInboxSheet
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.ui.components.PensionStatusCard
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.ui.components.PensionStatusListSkeleton
 import com.tamin.taminhamrah.feature.pensionStatusInquiry.ui.contract.PensionStatusInquiryEvent
@@ -208,7 +209,7 @@ fun PensionStatusInquiryContent(
                                 item = item,
                                 isSendingCertificate = state.isSendingCertificate,
                                 onSendCertificateClicked = {
-                                    onIntent(PensionStatusInquiryIntent.OnSendCertificateClicked(item))
+                                    onIntent(PensionStatusInquiryIntent.OnSendCertificateClicked)
                                 },
                             )
                         }
@@ -216,6 +217,10 @@ fun PensionStatusInquiryContent(
                 }
             }
         }
+    }
+
+    if (state.showCertificateSheet) {
+        CertificateToInboxSheet(state = state, onIntent = onIntent)
     }
 
     state.successMessage?.let {

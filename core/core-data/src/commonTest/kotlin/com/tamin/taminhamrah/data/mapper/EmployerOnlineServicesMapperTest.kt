@@ -5,6 +5,7 @@ import com.tamin.taminhamrah.model.workshop.EmployerAgreementSubmissionDN
 import com.tamin.taminhamrah.model.workshop.EmployerCommitmentInfoDTO
 import com.tamin.taminhamrah.model.workshop.EmployerWorkshopDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopContractRowDTO
+import com.tamin.taminhamrah.model.workshop.WorkshopContractInfoDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopOrganizationDTO
 import com.tamin.taminhamrah.model.workshop.WorkshopWithoutContractDTO
 import kotlin.test.Test
@@ -108,7 +109,7 @@ class EmployerOnlineServicesMapperTest {
             nationalCode = "0021234567",
             tel = "02133334444",
             postalCode = "1111111111",
-            workshop = EmployerWorkshopDTO(workshopId = "1071410004", workshopName = "کارگاه الف"),
+            workshop = WorkshopContractInfoDTO(workshopId = "1071410004", workshopName = "کارگاه الف"),
         )
 
         val dn = dto.toDomain()

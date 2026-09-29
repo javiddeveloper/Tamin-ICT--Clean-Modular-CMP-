@@ -324,6 +324,18 @@ fun String.digitsOnly(): String = buildString(length) {
     }
 }
 
+/** A smart-card serial as printed: ASCII digits and uppercase Latin letters, nothing else. */
+fun String.alphanumericOnly(): String = buildString(length) {
+    for (char in this@alphanumericOnly) {
+        when (char) {
+            in '0'..'9', in 'A'..'Z' -> append(char)
+            in '۰'..'۹' -> append('0' + (char - '۰'))
+            in '٠'..'٩' -> append('0' + (char - '٠'))
+            in 'a'..'z' -> append(char.uppercaseChar())
+        }
+    }
+}
+
 /**
  * Groups from the right in [size]s, folding a short leading group into the first one — the way an
  * account number is printed: 13 digits read 4-3-3-3, 10 read 4-3-3, 9 read 3-3-3.

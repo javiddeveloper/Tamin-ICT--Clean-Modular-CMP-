@@ -198,7 +198,8 @@ internal fun ContractRowTile(
         val valueStyle = if (latinDigits) base.copy(fontFeatureSettings = "tnum") else base
         // Same job as `NumericText` — force left-to-right so a code does not read back to front —
         // but inline, because this cell also needs a line limit and widening the shared component
-        // would touch every one of its callers for one screen's sake.
+        // would touch every one of its callers for one screen's sake. Laid out LTR, yet pinned to
+        // the right edge, under its caption: LTR alone would start the value at the far side.
         val direction = if (numeric) LayoutDirection.Ltr else LocalLayoutDirection.current
         CompositionLocalProvider(LocalLayoutDirection provides direction) {
             Text(

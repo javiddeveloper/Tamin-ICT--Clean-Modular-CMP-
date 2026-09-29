@@ -1,23 +1,21 @@
 package com.tamin.taminhamrah.apiService
 
+
+import com.tamin.taminhamrah.di.LenientReplyConverter
+import com.tamin.taminhamrah.di.taminJson
+import com.tamin.taminhamrah.tools.errorHandling.PlainTextErrorResponsePlugin
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
+import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
-import io.ktor.serialization.kotlinx.json.json
-import com.tamin.taminhamrah.tools.errorHandling.PlainTextErrorResponsePlugin
-import io.ktor.client.plugins.DefaultRequest
-import io.ktor.http.contentType
-import kotlinx.serialization.json.Json
-
-
-import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.request.header
 
 
 abstract class BaseApiTest {
@@ -47,11 +45,7 @@ abstract class BaseApiTest {
 
         val httpClient = HttpClient(mockEngine) {
             install(ContentNegotiation) {
-                json(Json {
-                    ignoreUnknownKeys = true
-                    isLenient = true
-                    explicitNulls = false
-                })
+                register(ContentType.Application.Json, LenientReplyConverter(taminJson))
             }
             install(PlainTextErrorResponsePlugin)
             defaultRequest {

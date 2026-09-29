@@ -14,14 +14,21 @@ import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.extractData
 import com.tamin.taminhamrah.tools.extractMessage
-import com.tamin.taminhamrah.tools.safeCall
+import com.tamin.taminhamrah.tools.readPdfChannel
+import kotlinx.coroutines.CancellationException
+import io.ktor.serialization.JsonConvertException
+import io.ktor.client.plugins.HttpRequestTimeoutException
+import io.ktor.client.network.sockets.ConnectTimeoutException
+import io.ktor.client.network.sockets.SocketTimeoutException
+import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
+import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 
 /**
  * The «سوابق» endpoints.
  *
- * Each goes through the shared [safeCall], the same wrapper the other data sources use: the
- * envelope's own status is already classified by `BaseDTO.extractData` through
- * `HttpStatusErrorMapper`, and anything that never reached that point is a failed call.
+ * Each uses the same try/catch template as the other data sources: the envelope's own status is
+ * already classified by `BaseDTO.extractData` through `HttpStatusErrorMapper`, and anything that
+ * never reached that point is a failed call.
  */
 internal class HistoryRemoteDataSourceImpl(
     private val apiServices: HistoryApiServices,
@@ -29,73 +36,261 @@ internal class HistoryRemoteDataSourceImpl(
     private val errorParser: ErrorParser
 ) : HistoryRemoteDataSource {
 
-    override suspend fun getTalfighInfos(query: ApiQueryParamDN): TalfighInfoDTO =
-        errorParser.safeCall(TAG_TALFIGH) {
+    override suspend fun getTalfighInfos(query: ApiQueryParamDN): TalfighInfoDTO {
+        return try {
             apiServices.getTalfighInfos(queryBuilder.buildQuery(query)).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
+    }
 
-    override suspend fun getDastmozdInfos(query: ApiQueryParamDN): DastmozdInfoDTO =
-        errorParser.safeCall(TAG_DASTMOZD) {
+    override suspend fun getDastmozdInfos(query: ApiQueryParamDN): DastmozdInfoDTO {
+        return try {
             apiServices.getDastmozdInfos(queryBuilder.buildQuery(query)).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
+    }
 
-    override suspend fun getHistoryJobInfos(query: ApiQueryParamDN): HistoryJobInfoDTO =
-        errorParser.safeCall(TAG_JOB_INFO) {
+    override suspend fun getHistoryJobInfos(query: ApiQueryParamDN): HistoryJobInfoDTO {
+        return try {
             apiServices.getHistoryJobInfos(queryBuilder.buildQuery(query)).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
+    }
 
     /** Who the signed-in person is, which is what decides whether this service has anything to show. */
-    override suspend fun getUserInfos(): UserInfoDTO =
-        errorParser.safeCall(TAG_USER_INFO) {
+    override suspend fun getUserInfos(): UserInfoDTO {
+        return try {
             apiServices.getUserInfos().extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
+    }
 
-    override suspend fun getLoginInfo(): ListData<String> =
-        errorParser.safeCall(TAG_LOGIN_INFO) {
+    override suspend fun getLoginInfo(): ListData<String> {
+        return try {
             apiServices.getLoginInfo().extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
+    }
 
-    override suspend fun sendHistoryNotice(): String? =
-        errorParser.safeCall(TAG_SEND_NOTICE) {
+    override suspend fun sendHistoryNotice(): String? {
+        return try {
             apiServices.sendHistoryNotice().extractData().text
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
+    }
 
     /**
      * The path is chosen here rather than in the repository so the three report URLs stay in one
      * table beside the interface that declares them.
      */
-    override suspend fun downloadHistoryReport(type: HistoryCertificateType): PdfDownloadDTO =
-        errorParser.safeCall(TAG_DOWNLOAD_REPORT) {
+    override suspend fun downloadHistoryReport(type: HistoryCertificateType): PdfDownloadDTO {
+        return try {
             val statement = when (type) {
                 HistoryCertificateType.ALL -> apiServices.downloadAllHistoryReport()
                 HistoryCertificateType.WAGES -> apiServices.downloadWageHistoryReport()
                 HistoryCertificateType.COMBINED -> apiServices.downloadCombinedHistoryReport()
             }
-            PdfDownloadDTO(pdf = InputStreamDTO(pdf = statement.body()))
+            PdfDownloadDTO(pdf = InputStreamDTO(pdf = statement.readPdfChannel()))
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
+    }
 
     override suspend fun sendToInstitution(
         allHistorySelected: Boolean,
         historyAndWageSelected: Boolean,
         combineHistorySelected: Boolean
     ) {
-        errorParser.safeCall(TAG_SEND_TO_INSTITUTION) {
+        try {
             apiServices.sendToInstitution(
                 allHistorySelected,
                 historyAndWageSelected,
                 combineHistorySelected
             ).extractMessage()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
-    }
-
-    private companion object {
-        const val TAG_TALFIGH = "getTalfighInfos"
-        const val TAG_DASTMOZD = "getDastmozdInfos"
-        const val TAG_JOB_INFO = "getHistoryJobInfos"
-        const val TAG_USER_INFO = "getUserInfos"
-        const val TAG_LOGIN_INFO = "getLoginInfo"
-        const val TAG_SEND_TO_INSTITUTION = "sendToInstitution"
-        const val TAG_DOWNLOAD_REPORT = "downloadHistoryReport"
-        const val TAG_SEND_NOTICE = "sendHistoryNotice"
     }
 }

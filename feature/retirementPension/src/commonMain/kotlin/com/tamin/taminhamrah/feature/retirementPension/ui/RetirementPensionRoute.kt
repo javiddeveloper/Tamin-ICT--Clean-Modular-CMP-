@@ -252,7 +252,7 @@ internal fun RetirementPensionScreen(
                 RetirementScreen.Intro -> RetirementIntroContent(
                     insured = state.insured,
                     isLoading = state.isIntroLoading,
-                    isAgeEligible = state.isAgeEligible,
+                    isAgeConfirmed = state.isAgeConfirmed,
                     hasExistingRequest = state.hasExistingRequest,
                     onOpenTrack = { onIntent(RetirementPensionIntent.OpenTrack) },
                 )

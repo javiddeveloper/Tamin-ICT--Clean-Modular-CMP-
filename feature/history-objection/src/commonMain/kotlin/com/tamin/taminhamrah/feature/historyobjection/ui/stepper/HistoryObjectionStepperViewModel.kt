@@ -260,7 +260,8 @@ class HistoryObjectionStepperViewModel(
         try {
             val query = ApiQueryParamDN(filters = CityByProvinceQuery.filters(province.provinceCode), limit = ALL_CITIES_PAGE_SIZE)
             getCitiesByProvinceUseCase(province.provinceCode, query).collect { page ->
-                emit(PartialState.CitiesLoaded(page.items.toCityPresentation().toPersistentList(), isStale = false))
+                // A cached page flags the list as possibly outdated; the network page that follows clears it.
+                emit(PartialState.CitiesLoaded(page.items.toCityPresentation().toPersistentList(), isStale = page.isFromCache))
             }
         } catch (e: CancellationException) {
             throw e
@@ -417,7 +418,8 @@ class HistoryObjectionStepperViewModel(
             try {
                 val query = ApiQueryParamDN(filters = CityByProvinceQuery.filters(provinceCode), limit = ALL_CITIES_PAGE_SIZE)
                 getCitiesByProvinceUseCase(provinceCode, query).collect { page ->
-                    emit(PartialState.CitiesLoaded(page.items.toCityPresentation().toPersistentList(), isStale = false))
+                    // A cached page flags the list as possibly outdated; the network page that follows clears it.
+                    emit(PartialState.CitiesLoaded(page.items.toCityPresentation().toPersistentList(), isStale = page.isFromCache))
                 }
             } catch (e: CancellationException) {
                 throw e

@@ -2,6 +2,7 @@ package com.tamin.taminhamrah.feature.profile.ui
 
 import androidx.lifecycle.viewModelScope
 import com.tamin.taminhamrah.base.BaseViewModel
+import com.tamin.taminhamrah.feature.FeatureManager
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileEvent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileIntent
 import com.tamin.taminhamrah.feature.profile.ui.contract.ProfileUiState
@@ -11,23 +12,23 @@ import com.tamin.taminhamrah.mapper.activeRelation.toUiModelList
 import com.tamin.taminhamrah.mapper.identity.toPresentation
 import com.tamin.taminhamrah.mapper.relation.toPresentation
 import com.tamin.taminhamrah.model.DarkThemeConfig
+import com.tamin.taminhamrah.model.common.FeatureFlag
+import com.tamin.taminhamrah.model.common.FeatureStatus
 import com.tamin.taminhamrah.repository.TokenStoreManager
+import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.auth.GetSignOutUrlUseCase
 import com.tamin.taminhamrah.useCases.auth.SignOutUseCase
 import com.tamin.taminhamrah.useCases.common.SetThemeUseCase
 import com.tamin.taminhamrah.useCases.identity.IdentityInfoUseCase
-import com.tamin.taminhamrah.useCases.user.ChangeMobileUseCase
-import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
 import com.tamin.taminhamrah.useCases.user.GetRelationTaminAllUseCase
-import com.tamin.taminhamrah.useCases.user.SendImageRequestUseCase
 import com.tamin.taminhamrah.useCases.user.SubdominantUseCase
 import com.tamin.taminhamrah.useCases.user.TaminRelationUseCase
 import com.tamin.taminhamrah.useCases.user.UserProfileImageUseCase
-import com.tamin.taminhamrah.useCases.user.VerifyChangeMobileUseCase
 import com.tamin.taminhamrah.util.HeaderConstant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
@@ -37,15 +38,12 @@ class ProfileViewModel(
     private val identityInfoUseCase: IdentityInfoUseCase,
     private val getUserProfileImageUseCase: UserProfileImageUseCase,
     private val taminRelationUseCase: TaminRelationUseCase,
-    private val sendImageRequestUseCase: SendImageRequestUseCase,
     private val subdominantUseCase: SubdominantUseCase,
     private val signOutUseCase: SignOutUseCase,
     private val getSignOutUrlUseCase: GetSignOutUrlUseCase,
-    private val getInsuredActiveBranchUseCase: GetInsuredActiveBranchUseCase,
     private val getRelationTaminAllUseCase: GetRelationTaminAllUseCase,
-    private val changeMobileUseCase: ChangeMobileUseCase,
-    private val verifyChangeMobileUseCase: VerifyChangeMobileUseCase,
-    private val setThemeUseCase: SetThemeUseCase
+    private val setThemeUseCase: SetThemeUseCase,
+    private val featureManager: FeatureManager,
 ) : BaseViewModel<ProfileUiState, PartialState, ProfileEvent, ProfileIntent>(
     initialState = ProfileUiState()
 ) {
@@ -55,10 +53,7 @@ class ProfileViewModel(
             is ProfileIntent.LoadProfile -> handleLoadProfile(intent.userId)
             is ProfileIntent.Logout -> handleLogout()
             is ProfileIntent.OnItemClick -> handleItemClick(intent.item)
-            is ProfileIntent.SendImageRequest -> handleSendImageRequest(
-                intent.branchCode,
-                intent.filter
-            )
+            is ProfileIntent.EditPhotoClicked -> handleEditPhotoClick()
             is ProfileIntent.NavigateToDependentsList -> handleNavigateToDependentsList()
             is ProfileIntent.ToggleTheme -> handleToggleTheme(intent.isDark)
         }
@@ -111,7 +106,27 @@ class ProfileViewModel(
             }
         }
 
-        merge(userIdFlow, imageFlow, identityFlow, taminRelationFlow, dependentsCountFlow, activeRelationFlow).collect {
+        // Independent sections: an unguarded merge let the first failure cancel the other five —
+        // offline, the cached identity never landed and the header shimmered for good. Each one
+        // now fails on its own, and the first failure is said once rather than toasted six times.
+        var isFailureShown = false
+        fun Flow<PartialState>.failingAlone(fallback: PartialState? = null) = catch { error ->
+            if (!isFailureShown) {
+                isFailureShown = true
+                sendEvent(ProfileEvent.ShowToast(error.toSingleLineMessage()))
+            }
+            fallback?.let { emit(it) }
+        }
+
+        merge(
+            userIdFlow.failingAlone(),
+            imageFlow.failingAlone(fallback = PartialState.ProfileImageLoaded(null)),
+            identityFlow.failingAlone(fallback = PartialState.Loading(false)),
+            taminRelationFlow.failingAlone(),
+            dependentsCountFlow.failingAlone(),
+            // No fallback: zero relations would claim "no active relation" for a call that failed.
+            activeRelationFlow.failingAlone(),
+        ).collect {
             emit(it)
         }
     }
@@ -133,6 +148,20 @@ class ProfileViewModel(
         val signOutUrl = getSignOutUrlUseCase()
         sendEvent(ProfileEvent.OpenUrl(signOutUrl))
         sendEvent(ProfileEvent.NavigateBack)
+    }
+
+    /** The camera badge opens the «ویرایش تصویر» service, so it obeys that menu row's status. */
+    private fun handleEditPhotoClick(): Flow<PartialState> = flow {
+        when (val status = featureManager.getFeatureStatus(FeatureFlag.EDIT_IMAGE).first()) {
+            is FeatureStatus.Enabled -> sendEvent(ProfileEvent.NavigateToEditProfilePhoto)
+            is FeatureStatus.Disabled -> status.message?.let { sendEvent(ProfileEvent.ShowToast(it)) }
+            is FeatureStatus.TemporaryDisabled -> status.message?.let { sendEvent(ProfileEvent.ShowToast(it)) }
+            is FeatureStatus.EnabledWithError -> {
+                status.message?.let { sendEvent(ProfileEvent.ShowToast(it)) }
+                sendEvent(ProfileEvent.NavigateToEditProfilePhoto)
+            }
+            is FeatureStatus.WebView -> sendEvent(ProfileEvent.OpenUrl(status.url))
+        }
     }
 
     private fun handleItemClick(item: ProfileMenuItem): Flow<PartialState> {
@@ -158,36 +187,9 @@ class ProfileViewModel(
         return emptyFlow()
     }
 
-    private fun handleSendImageRequest(branchCode: String, filter: String): Flow<PartialState> = flow {
-        emit(PartialState.ImageRequestLoading(true))
-        sendImageRequestUseCase(branchCode, filter)
-            .collect { result ->
-                emit(PartialState.ImageRequestResult(result))
-            }
-    }
-
-
     private fun handleNavigateToDependentsList(): Flow<PartialState> {
         return flow {
             sendEvent(ProfileEvent.NavigateToDependentsList)
-        }
-    }
-
-    private fun handleGetInsuranceActiveBranch(): Flow<PartialState> {
-        return flow {
-            emit(PartialState.ScreenStateChanged.Loading)
-            getInsuredActiveBranchUseCase.invoke().collect {
-                emit(PartialState.ScreenStateChanged.Success)
-            }
-        }
-    }
-
-    private fun handleGetRelationTaminAll(): Flow<PartialState> {
-        return flow {
-            emit(PartialState.ScreenStateChanged.Loading)
-            getRelationTaminAllUseCase.invoke().collect {
-                emit(PartialState.ScreenStateChanged.Success)
-            }
         }
     }
 
@@ -237,20 +239,6 @@ class ProfileViewModel(
             activeRelationCount = partialState.activeCount,
             inactiveRelationCount = partialState.inactiveCount,
             isActiveRelationLoading = false
-        )
-
-        is PartialState.ImageRequestLoading -> currentState.copy(
-            isImageRequestLoading = partialState.isLoading,
-            imageRequestError = null
-        )
-
-        is PartialState.ImageRequestResult -> currentState.copy(
-            isImageRequestLoading = false,
-            imageRequestResult = partialState.result
-        )
-        is PartialState.ImageRequestError -> currentState.copy(
-            isImageRequestLoading = false,
-            imageRequestError = partialState.message
         )
 
         is PartialState.ScreenStateChanged -> when (partialState) {

@@ -1,14 +1,25 @@
 package com.tamin.taminhamrah.apiService.inspection
 
 import com.tamin.taminhamrah.apiService.BaseApiTest
+import com.tamin.taminhamrah.dataSource.inspection.InspectionRemoteDataSourceImpl
 import com.tamin.taminhamrah.model.inspection.SubmitInspectionRequestDTO
+import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilderImpl
+import com.tamin.taminhamrah.tools.errorHandling.ErrorParserImpl
+import com.tamin.taminhamrah.tools.errorHandling.HttpErrorCopy
+import com.tamin.taminhamrah.tools.errorHandling.TaminApiException
 import com.tamin.taminhamrah.util.ApiTestUtils
 import com.tamin.taminhamrah.util.InspectionTestData
 import de.jensklingenberg.ktorfit.Ktorfit
-import kotlinx.coroutines.test.runTest
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.utils.io.readRemaining
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
+import kotlinx.coroutines.test.runTest
+import kotlinx.io.readByteArray
 
 class InspectionApiServiceTest : BaseApiTest() {
 
@@ -105,5 +116,35 @@ class InspectionApiServiceTest : BaseApiTest() {
 
         assertEquals(200, response.execute().status.value)
     }
-}
 
+    /** The report is drained status-checked: a failed download is a mapped error, never bytes for the viewer. */
+    @Test
+    fun getInspectionReportPDF_whenTheDownloadFails_throwsTheMappedError() = runTest {
+        val apiService = createMockKtorfit(
+            content = REPORT_NOT_FOUND,
+            status = HttpStatusCode.NotFound,
+        ).createInspectionApiService()
+        val dataSource = InspectionRemoteDataSourceImpl(apiService, ApiQueryBuilderImpl(), ErrorParserImpl())
+
+        val error = assertFailsWith<TaminApiException> { dataSource.getInspectionReportPDF("0130980012641") }
+
+        assertEquals(HttpErrorCopy.NOT_FOUND, error.subtitle)
+    }
+
+    @Test
+    fun getInspectionReportPDF_whenTheDownloadSucceeds_returnsTheFileBytes() = runTest {
+        val pdf = byteArrayOf(0x25, 0x50, 0x44, 0x46)
+        val apiService = createMockKtorfit(content = pdf, contentType = ContentType.Application.Pdf)
+            .createInspectionApiService()
+        val dataSource = InspectionRemoteDataSourceImpl(apiService, ApiQueryBuilderImpl(), ErrorParserImpl())
+
+        val channel = assertNotNull(dataSource.getInspectionReportPDF("0130980012641").pdf?.pdf)
+
+        assertContentEquals(pdf, channel.readRemaining().readByteArray())
+    }
+
+    private companion object {
+        const val REPORT_NOT_FOUND =
+            """{"status":404,"family":"CLIENT_ERROR","reason":"Not Found","data":null}"""
+    }
+}

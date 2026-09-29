@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.dataSource.occurrence
 
 import com.tamin.taminhamrah.apiService.occurrence.OccurrenceApiService
+import com.tamin.taminhamrah.tools.FakeIOException
 import com.tamin.taminhamrah.model.occurrence.InsuredRelationDTO
 import com.tamin.taminhamrah.model.occurrence.OccurrenceDocTypeDTO
 import com.tamin.taminhamrah.model.occurrence.OccurrencePersonalInfoDTO
@@ -207,8 +208,8 @@ class OccurrenceRemoteDataSourceImplTest {
     }
 
     @Test
-    fun getDocumentTypes_onGenericError_throwsParsedNoConnectionException() = runTest {
-        fakeApiService.shouldThrowException = RuntimeException("boom")
+    fun getDocumentTypes_onTransportFailure_throwsParsedNoConnectionException() = runTest {
+        fakeApiService.shouldThrowException = FakeIOException()
 
         val exception = assertFailsWith<TaminApiException> { dataSource.getDocumentTypes() }
 
