@@ -39,6 +39,8 @@ class FeatureManagerImpl(
     override suspend fun isFeatureEnabled(flag: FeatureFlag): Boolean {
         return try {
             getFeatureStatus(flag).first() is FeatureStatus.Enabled
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             false
         }
@@ -47,6 +49,8 @@ class FeatureManagerImpl(
     override suspend fun getDisabledMessage(flag: FeatureFlag): String? {
         return try {
             getFeatureStatus(flag).first().serverMessage
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             null
         }
@@ -56,6 +60,8 @@ class FeatureManagerImpl(
         return try {
             val menu = commonRepository.getMainMenu("", false).first()
             menu.find { it.id == flag.id }?.name?.takeIf { it.isNotBlank() }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             null
         }

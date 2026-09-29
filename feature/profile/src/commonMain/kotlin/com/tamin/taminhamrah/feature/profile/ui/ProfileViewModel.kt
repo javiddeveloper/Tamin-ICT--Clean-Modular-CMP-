@@ -215,7 +215,8 @@ class ProfileViewModel(
             ProfileMenuItem.SUPPORT -> sendEvent(ProfileEvent.Support("1420"))
             ProfileMenuItem.REQUESTS -> sendEvent(ProfileEvent.NavigateToUserContracts)
             ProfileMenuItem.SAVE_EVENTS -> sendEvent(ProfileEvent.NavigateToSaveEvents)
-            else -> sendEvent(ProfileEvent.ShowToast("به زودی: ${item.name}"))
+            // Every ProfileMenuItem entry has its own branch above; no fallback is reachable, so
+            // none is needed (and none is left to hardcode a Persian string into).
         }
     }
 
