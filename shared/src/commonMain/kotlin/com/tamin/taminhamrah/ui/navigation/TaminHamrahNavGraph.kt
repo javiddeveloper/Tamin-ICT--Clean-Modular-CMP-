@@ -7,6 +7,9 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.tappableElement
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -85,6 +88,11 @@ import com.tamin.taminhamrah.feature.history.historyScreen
 import com.tamin.taminhamrah.feature.historyobjection.historyObjectionScreen
 import com.tamin.taminhamrah.feature.historyobjection.historyObjectionStepperScreen
 import com.tamin.taminhamrah.feature.inquiryEducation.inquiryEducationScreen
+import com.tamin.taminhamrah.feature.objectionInsurance.objectionInsuranceScreen
+import com.tamin.taminhamrah.feature.weddingPresent.navigateToWeddingPresentCalculate
+import com.tamin.taminhamrah.feature.weddingPresent.weddingPresentCalculateScreen
+import com.tamin.taminhamrah.feature.weddingPresent.weddingPresentScreen
+import com.tamin.taminhamrah.feature.calculateWagePension.calculateWagePensionScreen
 import com.tamin.taminhamrah.feature.myinbox.MyInboxRoute
 import com.tamin.taminhamrah.feature.myinbox.myInboxScreen
 import com.tamin.taminhamrah.feature.orotezprotez.orotezProtezScreen
@@ -120,7 +128,23 @@ import com.tamin.taminhamrah.feature.taminServices.employerOnlineServicesScreen
 import com.tamin.taminhamrah.feature.taminServices.inspectionScreen
 import com.tamin.taminhamrah.feature.taminServices.workshopInspectionScreen
 import com.tamin.taminhamrah.feature.taminServices.occurrenceScreen
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServicesScreen
+import com.tamin.taminhamrah.feature.taminServices.constructionInsuranceScreen
+import com.tamin.taminhamrah.feature.taminServices.viewDetailRequestScreen
+import com.tamin.taminhamrah.feature.taminServices.paymentSheetScreen
+import com.tamin.taminhamrah.feature.taminServices.installmentLetterScreen
+import com.tamin.taminhamrah.feature.taminServices.installmentManagementScreen
+import com.tamin.taminhamrah.feature.taminServices.installmentDebitListScreen
+import com.tamin.taminhamrah.feature.taminServices.beneficiariesScreen
+import com.tamin.taminhamrah.feature.taminServices.navigateToViewDetailRequest
+import com.tamin.taminhamrah.feature.taminServices.navigateToPaymentSheet
+import com.tamin.taminhamrah.feature.taminServices.navigateToInstallmentLetter
+import com.tamin.taminhamrah.feature.taminServices.navigateToInstallmentManagement
+import com.tamin.taminhamrah.feature.taminServices.navigateToInstallmentDebitList
+import com.tamin.taminhamrah.feature.taminServices.navigateToBeneficiaries
 import com.tamin.taminhamrah.feature.taminServices.sendInsuranceHistoryToInstitutionsScreen
+import com.tamin.taminhamrah.feature.taminServices.FuneralAllowanceRoute
+import com.tamin.taminhamrah.feature.taminServices.funeralAllowanceScreen
 import com.tamin.taminhamrah.feature.taminServices.taminServicesScreen
 import com.tamin.taminhamrah.feature.taminServices.workersPaymentInfoScreen
 import com.tamin.taminhamrah.feature.treatment.TreatmentRoute
@@ -138,6 +162,7 @@ import com.tamin.taminhamrah.feature.workshops.workshopsScreen
 import com.tamin.taminhamrah.model.common.FeatureFlag
 import com.tamin.taminhamrah.openUrl
 import com.tamin.taminhamrah.ui.blur.AppBarScrim
+import com.tamin.taminhamrah.ui.components.AgentOrb
 import com.tamin.taminhamrah.ui.blur.FloatingGlassNavigationBar
 import com.tamin.taminhamrah.ui.blur.NavigationBarItemContent
 import com.tamin.taminhamrah.ui.blur.TopBarScrim
@@ -319,10 +344,16 @@ internal fun TaminHamrahNavGraph(
                     animationSpec = tween(durationMillis = 300),
                 ),
             ) {
+                // tappableElement bottom is 0 under gesture nav, >0 when OS nav buttons are shown.
+                val hasOsNavButtons = WindowInsets.tappableElement
+                    .asPaddingValues().calculateBottomPadding() > 0.dp
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(brush = AppBarScrim.bottomGradient)
+                        .background(
+                            brush = if (hasOsNavButtons) AppBarScrim.bottomGradientStrong
+                            else AppBarScrim.bottomGradient
+                        )
                 ) {
                     val selectedIndex = remember(currentTab) {
                         navigationItems.indexOfFirst { it.isSelected }.coerceAtLeast(0)
@@ -334,8 +365,10 @@ internal fun TaminHamrahNavGraph(
                         isBlurEnabled = isBottomBarVisible,
                         trailingButton = if (isAgentEnabled) {
                             {
-                                AgentOrbButton(
-                                    onClick = { deepLinkHandler.open(AGENT_DEEP_LINK, DeepLinkSource.APP_CONTENT) },
+                                AgentOrb(
+                                    onClick = {
+                                        deepLinkHandler.open(AGENT_DEEP_LINK, DeepLinkSource.APP_CONTENT)
+                                    },
                                     contentDescription = agentLabel,
                                 )
                             }
@@ -525,6 +558,60 @@ internal fun TaminHamrahNavGraph(
                     onBack = { navController.popBackStack() }
                 )
 
+                constructionInsuranceScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToViewDetail = { fileNumber, requestNumber ->
+                        navController.navigateToViewDetailRequest(fileNumber, requestNumber)
+                    },
+                    onNavigateToPaymentSheet = { debitNumber, branchCode ->
+                        navController.navigateToPaymentSheet(debitNumber, branchCode)
+                    },
+                    onNavigateToInstallmentLetter = { fileNumber, workshopId, branchId ->
+                        navController.navigateToInstallmentLetter(fileNumber, workshopId, branchId)
+                    },
+                    onNavigateToBeneficiaries = { requestNumber, fileNumber, requestDate, workshopId, branchCode ->
+                        navController.navigateToBeneficiaries(
+                            requestNumber,
+                            fileNumber,
+                            requestDate,
+                            workshopId,
+                            branchCode,
+                        )
+                    },
+                )
+
+                viewDetailRequestScreen(
+                    onBack = { navController.popBackStack() }
+                )
+
+                paymentSheetScreen(
+                    onBack = { navController.popBackStack() }
+                )
+
+                installmentLetterScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToInstallmentManagement = { fileNumber, workshopId, branchId, debitNumber, debitStepDescription ->
+                        navController.navigateToInstallmentManagement(
+                            fileNumber, workshopId, branchId, debitNumber, debitStepDescription,
+                        )
+                    },
+                    onNavigateToInstallmentDebitList = { fileNumber, workshopId, branchId, debitNumber ->
+                        navController.navigateToInstallmentDebitList(fileNumber, workshopId, branchId, debitNumber)
+                    },
+                )
+
+                installmentManagementScreen(
+                    onBack = { navController.popBackStack() }
+                )
+
+                installmentDebitListScreen(
+                    onBack = { navController.popBackStack() }
+                )
+
+                beneficiariesScreen(
+                    onBack = { navController.popBackStack() }
+                )
+
                 pensionStatusInquiryGraph(
                     onBack = { navController.popBackStack() }
                 )
@@ -541,6 +628,15 @@ internal fun TaminHamrahNavGraph(
                 )
 
                 calculateWagePensionScreen(onBack = { navController.popBackStack() })
+                funeralAllowanceScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToBankAccount = {
+                        navController.navigate(ProfileRoute.BankAccount) {
+                            popUpTo(FuneralAllowanceRoute) { inclusive = true }
+                        }
+                    },
+                )
+
                 retirementPensionScreen(onBack = { navController.popBackStack() })
                 prescriptionScreen(onBack = { navController.popBackStack() })
                 deservedTreatmentScreen(onBack = { navController.popBackStack() })
@@ -560,6 +656,7 @@ internal fun TaminHamrahNavGraph(
                 deferredInstallmentScreen(onBack = { navController.popBackStack() })
                 girlSurvivorScreen(onBack = { navController.popBackStack() })
                 inquiryEducationScreen(onBack = { navController.popBackStack() })
+                objectionInsuranceScreen(onBack = { navController.popBackStack() })
                 fractionContractScreen(
                     onBack = { navController.popBackStack() },
                     onNavigateToPremiumPayment = { contractNumber, premiumTypeCode, insuranceType ->
@@ -688,7 +785,8 @@ internal fun TaminHamrahNavGraph(
                         onNavigateToDebugLogin = { navController.navigate(DebugLoginRoute) },
                         onNavigateToTokenManager = { navController.navigate(TokenManagerRoute) },
                         onNavigateToFeatureFlags = { navController.navigate(FeatureFlagsRoute) },
-                        onStartTestPayment = { navController.navigate(PaymentRoute.Sandbox) }
+                        onStartTestPayment = { navController.navigate(PaymentRoute.Sandbox) },
+                        onOpenAgent = { navController.navigateToAgent() }
                     )
                     paymentSandboxScreen(
                         navController = navController,

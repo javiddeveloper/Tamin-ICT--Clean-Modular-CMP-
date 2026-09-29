@@ -90,6 +90,8 @@
     <string name="edict_empty_desc">برای بازه زمانی انتخاب شده حکمی صادر نشده است.</string>
     <string name="edict_empty_show_all">نمایش همه احکام</string>
     <string name="edict_info_note">این خدمت صرفاً برای مشاهده حکم افزایش سالیانهٔ مستمری است و احکام برقراری اولیه از این مسیر قابل مشاهده نیست. مستمری‌بگیرانی که در سال جاری در زمرهٔ مستمری‌بگیران قرار گرفته‌اند، از سال آینده حکم خود را اینجا خواهند دید.</string>
+    <string name="edict_error_not_found_for_year">حکمی برای این سال یافت نشد. لطفاً دوباره تلاش کنید.</string>
+    <string name="edict_error_pdf_download">متأسفانه در دریافت فایل پی‌دی‌اف مشکلی پیش آمد. لطفاً دوباره تلاش کنید.</string>
     <string name="profile_personal_info">اطلاعات شخصی</string>
     <string name="profile_identity_info">اطلاعات هویتی</string>
     <string name="profile_dependents">مشاهده و ثبت افراد تبعی</string>
@@ -107,6 +109,8 @@
     <string name="profile_verify_otp_code">تأیید کد یکبار مصرف</string>
     <string name="profile_otp_sent_to">کد تأیید به شمارهٔ %1$s ارسال شد.</string>
     <string name="profile_change_mobile_success">شماره همراه شما با موفقیت تغییر یافت.</string>
+    <string name="profile_change_mobile_confirm_and_continue">تأیید و ادامه</string>
+    <string name="profile_change_mobile_back_to_account">بازگشت به حساب کاربری</string>
     <string name="profile_back_to_profile">بازگشت به پروفایل</string>
     <string name="profile_cartable">کارتابل</string>
     <string name="profile_requests">درخواست ها</string>
@@ -152,6 +156,7 @@
     <string name="profile_share">اشتراک‌گذاری برنامه</string>
     <string name="profile_version_history">تاریخچهٔ نسخه</string>
     <string name="profile_logout">خروج از حساب کاربری</string>
+    <string name="profile_logout_confirm_description">آیا مطمئن هستید که می‌خواهید از حساب کاربری خود خارج شوید؟</string>
     <string name="profile_title">حساب کاربری</string>
     <string name="profile_developer_options">گزینه‌های توسعه‌دهنده</string>
     <string name="developer_options_title">گزینه‌های توسعه‌دهنده</string>
@@ -915,7 +920,7 @@
 
     <!-- Version History -->
     <string name="profile_version_history_last_updated">آخرین به‌روزرسانی: %1$s</string>
-    <string name="profile_version_history_version_prefix">نسخه %1$s</string>
+    <string name="profile_version_history_version_prefix">نسخهٔ %1$s</string>
     <string name="profile_version_history_release_date">تاریخ انتشار: %1$s</string>
     <string name="profile_version_history_new_features">ویژگی‌های جدید</string>
     <string name="profile_version_history_bug_fixes_and_improvements">رفع اشکال و بهینه‌سازی</string>
@@ -1328,6 +1333,7 @@
     <string name="legal_representative_otp_retry_action">تلاش مجدد</string>
     <string name="legal_representative_list_title">نمایندگان کارگاه</string>
     <string name="legal_representative_list_section_label">نمایندگان دارای دسترسی (%1$d)</string>
+    <string name="legal_representative_list_section_title">نمایندگان دارای دسترسی</string>
     <string name="legal_representative_add_action">معرفی نماینده</string>
     <string name="legal_representative_more_details_action">جزئیات بیشتر</string>
     <string name="legal_representative_collapse_action">بستن</string>
@@ -1864,6 +1870,16 @@
     <string name="workshop_debt_remaining">ماندهٔ بدهی (ریال)</string>
     <string name="workshop_debt_from_date">از تاریخ</string>
     <string name="workshop_debt_to_date">تا تاریخ</string>
+    <string name="workshop_debt_empty">بدهی‌ای برای این کارگاه ثبت نشده است.</string>
+    <!-- Each list's own empty line, for when no search or filter narrowed it; a narrowed list that
+         comes back empty keeps workshop_empty_list. -->
+    <string name="workshops_empty">کارگاهی به نام شما ثبت نشده است.</string>
+    <string name="workshop_demand_docs_empty">سند مطالبه‌ای برای این بدهی ثبت نشده است.</string>
+    <string name="article_sixteen_empty">بدهی قابل رسیدگی ماده ۱۶ برای این کارگاه ثبت نشده است.</string>
+    <string name="objectionable_debt_empty">بدهی قابل اعتراضی برای این کارگاه ثبت نشده است.</string>
+    <string name="payment_sheets_empty">برگ پرداختی برای این کارگاه ثبت نشده است.</string>
+    <string name="workshop_members_empty">بیمه‌شدهٔ شاغلی برای این کارگاه ثبت نشده است.</string>
+    <string name="new_member_requests_empty">درخواست نام‌نویسی برای این کارگاه ثبت نشده است.</string>
     <string name="workshop_debt_primary_vote_number">شماره رای هیات بدوی</string>
     <string name="workshop_debt_primary_vote_date">تاریخ رای هیات بدوی</string>
     <string name="workshop_debt_documents">مشاهده اسناد مطالبه</string>
@@ -1951,6 +1967,10 @@
     <string name="member_leaving_date">تاریخ ترک کار</string>
     <string name="stackholder_type">نوع ذینفع</string>
     <string name="stackholder_birth_date">تاریخ تولد</string>
+    <string name="stackholder_role_board_member">اعضای هیئت مدیره</string>
+    <string name="stackholder_role_signatory">صاحبان امضا</string>
+    <string name="stackholder_role_ceo">مدیرعامل</string>
+    <string name="stackholder_role_representative">نماینده</string>
 
     <!-- ===================== فرم‌های کارگاه (shared form vocabulary) ===================== -->
     <string name="ws_form_prev">مرحلهٔ قبل</string>
@@ -2400,7 +2420,7 @@
     <string name="ill_days_doctor_name_label">نام پزشک معالج *</string>
     <string name="ill_days_doctor_name_placeholder">نام و نام خانوادگی پزشک</string>
     <string name="ill_days_doctor_code_label">کد نظام پزشکی پزشک معالج *</string>
-    <string name="ill_days_doctor_code_placeholder">تا ۸ رقم …</string>
+    <string name="ill_days_doctor_code_placeholder">تا 10 رقم …</string>
     <string name="ill_days_medical_record_toggle_label">این استراحت پرونده پزشکی مرتبط دارد</string>
     <string name="ill_days_medical_record_toggle_caption">اگر برای این بازه استراحت، سابقه بستری یا مدارک درمانی در مراکز طرف قرارداد دارید، این گزینه را فعال کنید.</string>
     <string name="ill_days_wizard_step4_title">مدارک و ثبت درخواست</string>
@@ -3039,6 +3059,16 @@
     <string name="developer_options_payment_mock_failure">پاسخ ناموفق</string>
     <string name="developer_options_test_payment_entry">سناریوهای پرداخت آزمایشی</string>
 
+    <!-- Developer options: AI assistant mock -->
+    <string name="developer_options_agent_mock_title">شبیه‌سازی دستیار هوشمند</string>
+    <string name="developer_options_agent_mock_description">پاسخ دستیار از داده‌ی ساختگی می‌آید: هر پرامپت همه‌ی انواع حباب را برمی‌گرداند و با کلیدواژه (مثل «خطا»، «لغو»، «تایم‌اوت»، «توکن») حالت‌های دیگر ساخته می‌شوند. «راهنما» بفرستید تا فهرست را ببینید. حالت‌های دسترسی با باز کردن دوباره‌ی صفحه اعمال می‌شوند.</string>
+    <string name="developer_options_agent_mock_disabled">غیرفعال (سرور واقعی)</string>
+    <string name="developer_options_agent_mock_responses">پاسخ‌های ساختگی</string>
+    <string name="developer_options_agent_mock_no_voice">پاسخ‌های ساختگی، بدون پیام صوتی</string>
+    <string name="developer_options_agent_mock_access_denied">عدم دسترسی (canStartChat=false)</string>
+    <string name="developer_options_agent_mock_offline">آفلاین (chat-allowed در دسترس نیست)</string>
+    <string name="developer_options_open_agent_entry">باز کردن دستیار هوشمند</string>
+
     <!-- Debug-only payment sandbox (feature:payment) -->
     <string name="payment_sandbox_title">سناریوهای پرداخت</string>
     <string name="payment_sandbox_description">هر مورد یک تیکت تازه می‌سازد و کل فلوی پرداخت را با درگاه شبیه‌سازی‌شده اجرا می‌کند. نتیجه (موفق یا ناموفق) از حالت انتخاب‌شده در بالای همین صفحه پیروی می‌کند.</string>
@@ -3381,6 +3411,121 @@
     <string name="disability_pension_exit_confirm_leave">رها می‌کنم</string>
     <string name="disability_pension_exit_confirm_continue">ادامهٔ تکمیل فرم</string>
     <string name="contract_premium_payment_ticket_error">خطا در دریافت شناسه پرداخت</string>
+
+    <!-- Construction Insurance Premium / Building Workshops -->
+    <string name="construction_insurance_title">گواهی حق بیمه ساختمانی</string>
+    <string name="construction_insurance_subtitle">پرونده‌های ساختمانی و گواهی مفاصاحساب</string>
+    <string name="label_full_name">نام و نام خانوادگی</string>
+    <string name="label_national_code">کد ملی</string>
+    <string name="file_number">شماره پرونده</string>
+    <string name="label_request_number">شماره درخواست</string>
+    <string name="label_registration_date">تاریخ ثبت</string>
+    <string name="workshop_number">شماره کارگاه</string>
+    <string name="original_registration_plate">پلاک اصلی</string>
+    <string name="part_plaque">پلاک بخش</string>
+    <string name="sub_registration_plate">پلاک فرعی</string>
+    <string name="block">بلوک</string>
+    <string name="property_construction">نوع ملک</string>
+    <string name="apartment">آپارتمان</string>
+    <string name="trade">تجاری</string>
+    <string name="postalCode">کد پستی</string>
+    <string name="label_address">آدرس</string>
+    <string name="label_calculated_amount">مبلغ محاسبه شده</string>
+    <string name="label_payment_dead_line">مهلت پرداخت</string>
+    <string name="protrusion_fee">عوارض پیش‌آمدگی</string>
+    <string name="application_fee">عوارض پذیره</string>
+    <string name="residential_service_infrastructure_fees">عوارض زیربنای خدمات مسکونی</string>
+    <string name="excess_density_surcharge">عوارض مازاد تراکم</string>
+    <string name="increase_property_value">افزایش ارزش ملک</string>
+    <string name="issuance_fencing_wall_construction_fees">عوارض احداث دیوار و حصار</string>
+    <string name="covered_clause_3_fees">عوارض بند ۳ مشمول</string>
+    <string name="article_100">ماده ۱۰۰</string>
+    <string name="meterage">متراژ</string>
+    <string name="label_debit_number">شماره بدهی</string>
+    <string name="label_payment_type">نوع پرداخت</string>
+    <string name="installment_type">تقسیطی</string>
+    <string name="cash_type">نقدی</string>
+    <string name="branch">شعبه</string>
+    <string name="branch_code">کد شعبه</string>
+    <string name="all_items">همه موارد</string>
+    <string name="btn_search">جستجو</string>
+    <string name="btn_action">عملیات</string>
+    <string name="btn_request_details">جزئیات درخواست</string>
+    <string name="notice_title">نکات مهم پیش از صدور برگ پرداخت</string>
+    <string name="notice_point_1">بر اساس محدودیت‌های تراکنشی بانک مرکزی، پرداخت آنلاین صرفاً برای مبالغ کمتر از ۵۰۰ میلیون ریال امکان‌پذیر است.</string>
+    <string name="notice_point_2">پرداخت اقساط بدهی صرفاً از طریق سامانه خدمات غیرحضوری میسر است و امکان دریافت برگ پرداخت از شعبه وجود ندارد.</string>
+    <string name="notice_point_3">در صورت پرداخت حق بیمه خارج از سامانه (غیرآنلاین)، گواهی مفاصاحساب پس از ۴۸ ساعت با زدن دکمه «گواهی پرداخت حق بیمه» صادر می‌شود.</string>
+    <string name="notice_point_4">چنانچه قصد تقسیط بدهی را دارید، از صدور برگ پرداخت عادی خودداری فرمایید.</string>
+    <string name="no_construction_files_found">هیچ پرونده ساختمانی یافت نشد.</string>
+    <string name="debit_number_allocating">در حال تخصیص شماره بدهی</string>
+    <string name="file_unit">پرونده</string>
+    <string name="construction_insurance_filter_label">فیلتر</string>
+    <string name="construction_insurance_filter_clear">حذف</string>
+    <string name="construction_insurance_search_empty_title">پرونده‌ای با این مشخصات یافت نشد</string>
+    <string name="construction_insurance_search_empty_subtitle">فیلتر را حذف کنید یا مشخصات دیگری را جستجو کنید.</string>
+    <string name="construction_insurance_search_sheet_title">جستجوی پرونده ساختمانی</string>
+
+    <!-- Construction Insurance — عملیات menu + its 4 destination screens -->
+    <string name="action_menu_payment_sheet">صدور و مدیریت برگه پرداخت</string>
+    <string name="action_menu_installment">مدیریت پرداخت اقساط</string>
+    <string name="action_menu_beneficiaries">ذینفعان کارگاه</string>
+
+    <!-- InstallmentLetter row's own عملیات menu + its 2 destination screens -->
+    <string name="action_menu_installment_management">مدیریت اقساط و برگ پرداخت</string>
+    <string name="action_menu_installment_debit_list">بدهی‌های تقسیط‌شده</string>
+    <string name="btn_installment_debit_list">بدهی‌های تقسیط‌شده</string>
+    <string name="installment_management_title">مدیریت اقساط و برگ پرداخت</string>
+    <string name="installment_management_empty">قسطی برای این بدهی یافت نشد.</string>
+    <string name="installment_debit_list_title">بدهی‌های تقسیط‌شده</string>
+    <string name="installment_debit_list_empty">بدهی تقسیط‌شده‌ای یافت نشد.</string>
+    <string name="label_installment_due_date">سررسید</string>
+    <string name="label_installment_amount_payable">مبلغ قابل پرداخت</string>
+    <string name="label_installment_amount_paid">مبلغ پرداختی</string>
+    <string name="label_installment_sub_debit_number">شماره فرعی بدهی</string>
+    <string name="label_installment_paid_count">اقساط پرداخت‌شده</string>
+
+    <string name="view_detail_request_title">جزئیات درخواست</string>
+    <string name="view_detail_section_file_info">اطلاعات کلی پرونده</string>
+    <string name="view_detail_section_request_info">اطلاعات درخواست</string>
+    <string name="view_detail_section_computing_info">اطلاعات محاسبه</string>
+    <string name="sum_of_complications">مجموع عوارض</string>
+
+    <string name="payment_sheet_title">برگ پرداخت و گواهی</string>
+    <string name="label_order_number">شماره ردیف</string>
+    <string name="label_payment_code">شناسه پرداخت</string>
+    <string name="label_payment_sheet_amount">مبلغ برگه پرداخت</string>
+    <string name="label_payment_status">وضعیت</string>
+    <string name="label_payment_date">تاریخ پرداخت</string>
+    <string name="btn_download_certificate">گواهی پرداخت حق بیمه</string>
+    <string name="btn_issue_payment_sheet">صدور برگه پرداخت</string>
+    <string name="issue_payment_sheet_confirm_title">صدور برگه پرداخت</string>
+    <string name="issue_payment_sheet_confirm_message">آیا از صدور برگه پرداخت جدید برای این بدهی اطمینان دارید؟</string>
+    <string name="issue_payment_sheet_confirm_button">تأیید و صدور</string>
+    <string name="payment_sheet_empty">برگه پرداختی برای این بدهی ثبت نشده است.</string>
+    <string name="payment_sheet_issuance_processing_notice">متقاضی محترم، سامانه درحال پردازش اطلاعات می‌باشد. لطفاً دقایقی منتظر بمانید تا پس از انجام عملیات، برگ پرداخت صادر شده در لیست نمایش داده شود.</string>
+    <string name="payment_sheet_request_summary_title">خلاصه درخواست</string>
+    <string name="payment_sheet_list_section_title">برگ‌های پرداخت صادرشده</string>
+    <string name="payment_sheet_item_title">برگ پرداخت شمارۀ %1$s</string>
+    <string name="payment_sheet_status_paid">پرداخت شده</string>
+    <string name="payment_sheet_status_unpaid">پرداخت نشده</string>
+
+    <string name="from_date">از</string>
+    <string name="to_date">تا</string>
+    <string name="installment_letter_title">تقسیط‌نامه‌ها</string>
+    <string name="label_debit_step">مرحله بدهی</string>
+    <string name="label_debit_status">وضعیت بدهی</string>
+    <string name="label_debit_start_date">تاریخ شروع</string>
+    <string name="label_debit_end_date">تاریخ پایان</string>
+    <string name="label_remaining_amount">مانده بدهی</string>
+    <string name="installment_letter_empty">برگه اقساطی یافت نشد.</string>
+
+    <string name="beneficiaries_title">ذینفعان کارگاه</string>
+    <string name="label_owner_type">نوع مالکیت</string>
+    <string name="label_mobile">شماره موبایل</string>
+    <string name="owner_type_owner">مالک</string>
+    <string name="owner_type_applicant">متقاضی</string>
+    <string name="beneficiaries_empty">ذینفعی برای این کارگاه ثبت نشده است.</string>
+    <string name="beneficiaries_count">%1$s نفر</string>
     <!-- Wedding Present (هدیه ازدواج) -->
     <string name="wedding_present_title">هدیه ازدواج</string>
     <string name="wedding_present_subtitle">کمک‌هزینهٔ ازدواج (تعهدات کوتاه‌مدت)</string>
@@ -3419,6 +3564,58 @@
     <string name="error_not_valid_national_id">کد ملی معتبر نیست</string>
     <string name="error_select_check_box">تایید تعهدنامه الزامی است</string>
 
+    <!-- Objection Insurance History (اعتراض به سابقهٔ دارای کسری کارکرد) -->
+    <string name="objection_insurance_title">اعتراض به سابقهٔ دارای کسری کارکرد</string>
+    <string name="objection_insurance_banner">سالی را که روزهای کارکرد آن کمتر از واقعیت ثبت شده انتخاب کنید و کارکرد صحیح هر ماه را اظهار نمایید.</string>
+    <string name="objection_insurance_years_section_title">سال‌های سابقهٔ شما</string>
+    <string name="objection_insurance_years_count">%1$s سال</string>
+    <string name="objection_insurance_staged_section_title">سال‌های ویرایش‌شده</string>
+    <string name="objection_insurance_description_placeholder">دلیل اعتراض خود را بنویسید…</string>
+    <string name="objection_insurance_empty_hint">در هر بار می‌توانید به چند سال اعتراض ثبت کنید. تا اعلام نتیجهٔ این درخواست، امکان ثبت درخواست جدید نیست.</string>
+    <string name="objection_insurance_submit_button">تأیید و ارسال</string>
+    <string name="objection_insurance_workshop_count">%1$s کارگاه</string>
+    <string name="objection_insurance_days_count">%1$s روز</string>
+    <string name="objection_insurance_edited_label">ویرایش‌شده</string>
+    <string name="objection_insurance_workshop_picker_title">انتخاب کارگاه سال %1$s</string>
+    <string name="objection_insurance_detail_registered_label">ثبت‌شده: %1$s روز</string>
+    <string name="objection_insurance_detail_max_days_hint">حداکثر %1$s روز</string>
+    <string name="objection_insurance_detail_input_placeholder">روزهای صحیح را وارد کنید</string>
+    <string name="objection_insurance_detail_reset_button">پاک کردن</string>
+    <string name="objection_insurance_detail_confirm_button">تأیید</string>
+    <string name="objection_insurance_detail_workshop_label">کارگاه</string>
+    <string name="objection_insurance_detail_history_type_label">نوع سابقه</string>
+    <string name="objection_insurance_detail_branch_label">شعبه</string>
+    <string name="objection_insurance_no_change_error">لطفاً حداقل یک ماه را ویرایش کنید.</string>
+    <string name="objection_insurance_no_staged_edits_error">لطفا ابتدا اعتراض سوابق خود را ثبت نمایید</string>
+    <string name="objection_insurance_submit_confirmation_title">تأیید و ارسال درخواست</string>
+    <string name="objection_insurance_submit_confirmation_message">در صورت تایید و ثبت نهایی درخواست، تا زمان رسیدگی کامل به درخواست ثبت شده امکان ثبت درخواست مجدد نمی‌باشد.</string>
+    <string name="objection_insurance_submit_rejected_error">درخواست شما رد شد. لطفاً دوباره تلاش کنید.</string>
+    <string name="objection_insurance_blank_tracking_error">خطا در دریافت اطلاعات</string>
+    <string name="objection_insurance_active_request_title">درخواست در حال بررسی</string>
+    <string name="objection_insurance_active_request_message">کاربر گرامی، در حال حاضر دارای یک درخواست در حال بررسی می‌باشید و امکان ثبت مجدد درخواست وجود ندارد.</string>
+    <string name="objection_insurance_ack_button">متوجه شدم</string>
+    <string name="objection_insurance_success_title">درخواست شما ثبت شد</string>
+    <string name="objection_insurance_success_tracking_label">کد پیگیری درخواست:</string>
+    <string name="objection_insurance_help_title">راهنما</string>
+    <string name="objection_insurance_help_message">برای هر سال کاری که تعداد روزهای بیمهٔ ثبت‌شده آن کمتر از واقعیت است، سال را انتخاب کنید و روزهای صحیح هر ماه را وارد نمایید. پس از تأیید سال‌های موردنظر، درخواست را برای تأمین اجتماعی ارسال کنید.</string>
+    <string name="objection_insurance_detail_title">اظهار کارکرد</string>
+    <string name="objection_insurance_chart_title">نمودار کارکرد سال</string>
+    <string name="objection_insurance_chart_registered_badge">ثبت‌شده %1$s روز</string>
+    <string name="objection_insurance_delta_none">بدون تغییر</string>
+    <string name="objection_insurance_delta_added">+%1$s روز</string>
+    <string name="objection_insurance_delta_reduced">-%1$s روز</string>
+    <string name="objection_insurance_legend_full">کارکرد کامل</string>
+    <string name="objection_insurance_legend_partial">کارکرد ناقص</string>
+    <string name="objection_insurance_legend_added">افزودهٔ شما</string>
+    <string name="objection_insurance_table_header_month">ماه</string>
+    <string name="objection_insurance_table_header_registered">ثبت‌شده</string>
+    <string name="objection_insurance_table_header_declared">اظهار شما</string>
+    <string name="objection_insurance_month_not_registered">ثبت نشده</string>
+    <string name="objection_insurance_detail_validation_error">برای ثبت سابقه، کارکرد حداقل یک ماه را اظهار کنید.</string>
+    <string name="objection_insurance_detail_clear_draft_button">حذف تغییرات</string>
+    <string name="objection_insurance_detail_save_button">ثبت سابقه</string>
+    <string name="objection_insurance_workshop_picker_hint">در این سال بیش از یک کارگاه برای شما سابقه ثبت کرده است. کارگاه مورد اعتراض را انتخاب کنید.</string>
+
     <!-- AI assistant (feature/agent) -->
     <string name="agent_service_unavailable">سرویس دستیار هوشمند در حال حاضر در دسترس نیست.</string>
     <string name="agent_not_allowed_title">دسترسی محدود</string>
@@ -3447,6 +3644,8 @@
     <string name="agent_like">پسندیدن</string>
     <string name="agent_dislike">نپسندیدن</string>
     <string name="agent_share">اشتراک‌گذاری</string>
+    <string name="agent_input_disclaimer">پاسخ‌های دستیار جنبهٔ راهنما دارد و جایگزین مراجع رسمی نیست.</string>
+    <string name="agent_recording_in_progress">در حال ضبط</string>
     <string name="agent_not_allowed_default">دستیار هوشمند برای شما فعال نیست.</string>
     <string name="agent_request_failed">عملیات ناموفق بود</string>
     <string name="agent_offline_error">برای گفتگو با دستیار به اینترنت نیاز دارید.</string>
@@ -3608,5 +3807,87 @@
     <string name="fraction_contract_submit_rate_value">۲۷٪</string>
     <string name="fraction_contract_submit_conclude">انعقاد قرارداد</string>
     <string name="fraction_contract_submit_commitment">اینجانب %1$s دارای کد ملی شماره %2$s با آگاهی کامل از مفاد آئین نامه و مقررات تکمیل سوابق کسری از ماه، و با سلامت کامل عقل، صحت اطلاعات و اسناد مربوطه را تایید می‌نمایم و چنانچه در هر زمان خلاف آن ثابت گردد، قرارداد منعقده باطل بوده و از این نظر هیچ‌گونه حقی نخواهم داشت و ملزم به جبران خسارات احتمالی وارده به سازمان تأمین‌ اجتماعی خواهم بود.\nدرخواست تکمیل سوابق کسری از ماه با نرخ %3$s و تاریخ شروع %4$s را تایید می‌نمایم.</string>
+
+    <!-- Profile Photo Inquiry (دریافت عکس از ثبت احوال) -->
+    <string name="profile_photo_screen_title">دریافت عکس از پایگاه ثبت احوال</string>
+    <string name="profile_photo_info_desc">عکس پروفایل شما از روی کارت ملی هوشمند استعلام می‌شود؛ امکان بارگذاری عکس شخصی وجود ندارد.</string>
+    <string name="profile_photo_full_name_label">نام و نام خانوادگی</string>
+    <string name="profile_photo_national_code_label">کد ملی</string>
+    <string name="profile_photo_insurance_number_label">شماره بیمه</string>
+    <string name="profile_photo_serial_label">کد سریال / کد رهگیری کارت ملی هوشمند</string>
+    <string name="profile_photo_serial_placeholder">مثلاً 1P12863319 یا کد رهگیری</string>
+    <string name="profile_photo_serial_hint">کد ۱۰ رقمی پشت کارت ملی هوشمند یا کد رهگیری مندرج در رسید متقاضی (دفاتر پیشخوان یا پست)</string>
+    <string name="profile_photo_dependants_title">انتخاب افراد تبعی</string>
+    <string name="profile_photo_dependants_subtitle">عکس یکی از افراد تحت تکفل شما استعلام شود.</string>
+    <string name="profile_photo_dependants_placeholder">افراد تبعی</string>
+    <string name="profile_photo_submit">ارسال درخواست</string>
+    <string name="profile_photo_success_title">درخواست شما ثبت شد</string>
+    <string name="profile_photo_success_body">درخواست شما ثبت شد، حداکثر تا ۴۸ ساعت عکس شما از پایگاه ثبت احوال دریافت می‌گردد</string>
+    <string name="profile_photo_error_title">نتیجهٔ پردازش</string>
+    <string name="profile_photo_error_empty_serial">کد سریال/کد رهگیری کارت ملی هوشمند را وارد نمایید</string>
+    <string name="profile_photo_error_select_dependant">فرد تبعی مورد نظر را انتخاب کنید و یا وضعیت انتخاب افراد تبعی را غیر فعال کنید</string>
+    <string name="profile_photo_guide_button">راهنما</string>
+    <string name="profile_photo_guide_title">راهنمای کد سریال و کد رهگیری</string>
+    <string name="profile_photo_guide_smart_card_title">کارت ملی هوشمند (جدید)</string>
+    <string name="profile_photo_guide_smart_card_desc">کد ۱۰ رقمی عمودی درج شده در حاشیه چپ پشت کارت ملی هوشمند (شامل حروف و اعداد انگلیسی مانند 1P12863319 یا 1G50497996)</string>
+    <string name="profile_photo_guide_receipt_title">رسید ثبت‌نام (در انتظار دریافت کارت)</string>
+    <string name="profile_photo_guide_receipt_desc">کد رهگیری ۱۰ رقمی مندرج در برگه رسید متقاضی کارت هوشمند ملی صادره از دفاتر پیشخوان دولت یا پست (مانند 6035130378)</string>
+
+    <!-- Funeral Allowance -->
+    <string name="funeral_allowance_title">کمک هزینه مراسم ترحیم</string>
+    <string name="funeral_allowance_applicant_info">مشخصات متقاضی</string>
+    <string name="funeral_allowance_full_name">نام و نام خانوادگی</string>
+    <string name="funeral_allowance_insurance_number">شماره بیمه</string>
+    <string name="funeral_allowance_account_number">شماره حساب</string>
+    <string name="funeral_allowance_bank_name">نام بانک</string>
+    <string name="funeral_allowance_mobile">تلفن همراه</string>
+    <string name="funeral_allowance_last_branch">آخرین شعبه بیمه‌پردازی</string>
+    <string name="funeral_allowance_deceased_info">مشخصات متوفی</string>
+    <string name="funeral_allowance_deceased_national_code">کد ملی متوفی</string>
+    <string name="funeral_allowance_deceased_national_code_placeholder">کد ملی متوفی را وارد کنید</string>
+    <string name="funeral_allowance_check_eligibility">استعلام شرایط</string>
+    <string name="funeral_allowance_full_name_deceased">نام و نام خانوادگی متوفی</string>
+    <string name="funeral_allowance_deceased_relative">نسبت متوفی</string>
+    <string name="funeral_allowance_submit_request">ثبت درخواست</string>
+    <string name="funeral_allowance_error_invalid_national_id">کد ملی معتبر نیست</string>
+    <string name="funeral_allowance_empty">اطلاعاتی برای نمایش وجود ندارد.</string>
+    <string name="funeral_allowance_not_eligible">شما دارای شرایط دریافت کمک هزینه مراسم ترحیم نمی‌باشید</string>
+    <string name="funeral_allowance_registered_request_title">درخواست ثبت‌شده</string>
+    <string name="funeral_allowance_death_date">تاریخ فوت</string>
+    <string name="funeral_allowance_request_date">تاریخ درخواست</string>
+    <string name="funeral_allowance_request_status">وضعیت درخواست</string>
+    <string name="funeral_allowance_bank_issue_desc">درخواست شما به دلیل مشکل در شماره حساب بانکی، امکان تأیید توسط شعبه را ندارد. لطفاً پس از اصلاح شماره حساب، روی دکمهٔ «مشکل شماره حساب خود را برطرف نموده‌ام» کلیک نمایید.</string>
+    <string name="funeral_allowance_fix_bank_account">مشکل شماره حساب خود را برطرف نموده‌ام</string>
+    <string name="funeral_allowance_dialog_dismiss">متوجه شدم</string>
+    <string name="funeral_allowance_continue_request">ادامه درخواست</string>
+    <string name="funeral_allowance_cancel">انصراف</string>
+    <string name="funeral_allowance_previous_step">مرحله قبلی</string>
+    <string name="funeral_allowance_deceased_inquired_info">اطلاعات استعلام‌شده متوفی</string>
+    <string name="funeral_allowance_national_id">کد ملی</string>
+    <string name="funeral_allowance_relationship_with_insured">نسبت با بیمه‌شده</string>
+    <string name="funeral_allowance_eligibility_banner">شرایط برخورداری از کمک‌هزینه مراسم ترحیم احراز شد. برای ادامه، اطلاعات متوفی را تأیید کنید.</string>
+    <string name="funeral_allowance_national_id_length_hint">۱۰ رقم</string>
+    <string name="funeral_allowance_deceased_national_code_hint">کد ملی متوفی باید در سوابق افراد تبعی شما ثبت شده باشد. با استعلام، رابطه خویشاوندی و تاریخ فوت از ثبت احوال خوانده می‌شود.</string>
+    <string name="funeral_allowance_eligibility_success_title">شرایط برخورداری احراز شد</string>
+    <string name="funeral_allowance_submit_success_title">درخواست شما ثبت شد</string>
+    <string name="funeral_allowance_back_to_services">بازگشت به خدمات</string>
+    <string name="funeral_allowance_exit_confirmation_title">فرم را رها می‌کنید؟</string>
+    <string name="funeral_allowance_exit_confirmation_desc">اطلاعات واردشده ذخیره نشده و در صورت خروج از بین می‌رود.</string>
+    <string name="funeral_allowance_exit_confirmation_confirm">ادامه تکمیل فرم</string>
+    <string name="funeral_allowance_exit_confirmation_dismiss">بی‌خیال، خروج از فرم</string>
+    <string name="funeral_allowance_eligibility_success_desc">بر اساس استعلام انجام‌شده، شما واجد شرایط دریافت کمک‌هزینه مراسم ترحیم هستید. در ادامه اطلاعات متوفی را تأیید و درخواست را ثبت کنید.</string>
+
+    <!-- Bank Account Modal (shown before short-term benefit requests when the user has no registered bank account) -->
+    <string name="no_bank_account_title">انجام درخواست امکان‌پذیر نیست</string>
+    <string name="no_bank_account_desc">شما فاقد شماره حساب بانکی می باشید. لطفا به ثبت شماره حساب بانکی جدید(منوی حساب کاربری) اقدام نمایید.</string>
+    <string name="register_bank_account">ثبت شماره حساب بانکی</string>
+    <string name="later">بعداً</string>
+
+    <!-- ===================== Tamin Services (خدمات) landing screen ===================== -->
+    <string name="tamin_services_title">خدمات</string>
+    <string name="tamin_services_section_title">خدمات %1$s</string>
+    <string name="tamin_services_search_placeholder">جست‌وجو در میان خدمات ...</string>
+    <string name="tamin_services_badge_count">%1$s خدمت</string>
+    <string name="tamin_services_no_results_title">نتیجه‌ای یافت نشد</string>
 
 </resources>

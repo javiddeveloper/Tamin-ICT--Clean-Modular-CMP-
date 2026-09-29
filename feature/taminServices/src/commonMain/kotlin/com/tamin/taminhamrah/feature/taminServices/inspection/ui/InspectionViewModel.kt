@@ -27,7 +27,6 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
@@ -45,17 +44,14 @@ class InspectionViewModel(
     initialState = InspectionUiState()
 ) {
 
-    // One offset paginator per list endpoint (see docs/vault/Pagination.md). The branch/job
-    // paginators stay idle at their default empty state until the request wizard opens and
-    // refreshes them; the inspection paginator loads its first page on init.
     private val inspectionPaginator = Paginator(
-        loadPage = { query -> getInsurancePageUseCase(query).first() },
+        loadPages = { query -> getInsurancePageUseCase(query) },
     )
     private val branchPaginator = Paginator(
-        loadPage = { query -> getBranchPageUseCase(query).first() },
+        loadPages = { query -> getBranchPageUseCase(query) },
     )
     private val jobPaginator = Paginator(
-        loadPage = { query -> getJobPageUseCase(query).first() },
+        loadPages = { query -> getJobPageUseCase(query) },
     )
 
     init {

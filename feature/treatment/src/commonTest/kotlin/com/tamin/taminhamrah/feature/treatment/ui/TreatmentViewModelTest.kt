@@ -232,7 +232,7 @@ class TreatmentViewModelTest {
                 state = awaitItem()
             }
             assertEquals(FeatureStatus.Enabled, state.featureStatuses?.get(FeatureFlag.PRESCRIPTION))
-            assertEquals(FeatureStatus.Enabled, state.featureStatuses?.get(FeatureFlag.DESERVED_TREATMENT_101))
+            assertEquals(FeatureStatus.Enabled, state.featureStatuses?.get(FeatureFlag.DESERVED_TREATMENT_PENSIONER))
             cancelAndIgnoreRemainingEvents()
         }
     }

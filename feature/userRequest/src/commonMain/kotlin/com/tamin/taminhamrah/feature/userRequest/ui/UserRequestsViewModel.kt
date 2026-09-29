@@ -11,12 +11,17 @@ import com.tamin.taminhamrah.mapper.userRequest.toSmartGuidePresentation
 import com.tamin.taminhamrah.mapper.userRequest.toTypePresentation
 import com.tamin.taminhamrah.model.userRequest.SmartGuideSearchParams
 import com.tamin.taminhamrah.model.userRequest.UserRequestSearchParams
+import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.useCases.userRequest.GetSmartGuideListUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestErrorsUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestTypesUseCase
 import com.tamin.taminhamrah.useCases.userRequest.GetUserRequestsUseCase
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import org.jetbrains.compose.resources.getString
 import taminx.feature.userrequest.generated.resources.Res
@@ -77,13 +82,7 @@ class UserRequestsViewModel(
             refCode = cleanRef,
             requestTypeId = cleanTypeId,
         )
-        emit(PartialState.Loading(true))
-        getUserRequestsUseCase(search)
-            .catch { emit(PartialState.Error(it.message)) }
-            .collect { requests ->
-                val presentation = requests.toPresentation()
-                emit(PartialState.RequestsLoaded(presentation))
-            }
+        emitAll(handleLoadRequests(search))
     }
 
     private fun currentSearchParams(): UserRequestSearchParams {
@@ -94,7 +93,17 @@ class UserRequestsViewModel(
         )
     }
 
+    /**
+     * getUserRequests ends in the Room cache flow, so it never completes. BaseViewModel merges intents
+     * with flatMapMerge (16 concurrent flows max); every reload left one more collection running, and
+     * once a screen revisit or search had piled up 16 of them no further intent (e.g. the guide
+     * button) was ever handled. Only the latest search may keep collecting.
+     */
+    private var requestsJob: Job? = null
+
     private fun handleLoadRequests(search: UserRequestSearchParams): Flow<PartialState> = flow {
+        requestsJob?.cancel()
+        requestsJob = currentCoroutineContext()[Job]
         emit(PartialState.Loading(true))
         getUserRequestsUseCase(search)
             .catch { emit(PartialState.Error(it.message)) }
@@ -126,8 +135,12 @@ class UserRequestsViewModel(
             } else {
                 emit(PartialState.ErrorsLoaded(errors, title))
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(PartialState.Error(e.message))
+            // A tap-triggered load must say it failed; state.error isn't rendered on this screen.
+            sendEvent(UserRequestsEvent.ShowToast(e.toSingleLineMessage()))
         }
     }
 
@@ -144,8 +157,12 @@ class UserRequestsViewModel(
             } else {
                 emit(PartialState.SmartGuideLoaded(guides, title))
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(PartialState.Error(e.message))
+            // A tap-triggered load must say it failed; state.error isn't rendered on this screen.
+            sendEvent(UserRequestsEvent.ShowToast(e.toSingleLineMessage()))
         }
     }
 

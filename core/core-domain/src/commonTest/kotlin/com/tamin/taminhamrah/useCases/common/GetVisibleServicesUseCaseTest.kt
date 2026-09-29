@@ -33,7 +33,7 @@ class GetVisibleServicesUseCaseTest {
             MainServiceDN(id = FeatureFlag.IDENTITY_INFO.id, name = "اطلاعات هویتی"),
             MainServiceDN(id = FeatureFlag.DEPENDENTS.id, name = "افراد تبعی"),
             MainServiceDN(id = FeatureFlag.PRESCRIPTION.id, name = "نسخ الکترونیک"),
-            MainServiceDN(id = FeatureFlag.DESERVED_TREATMENT_101.id, name = "استحقاق درمان"),
+            MainServiceDN(id = FeatureFlag.DESERVED_TREATMENT_PENSIONER.id, name = "استحقاق درمان"),
             MainServiceDN(id = FeatureFlag.WORKSHOPS.id, name = "کارگاه‌ها"),
         )
 

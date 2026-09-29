@@ -1,9 +1,12 @@
 package com.tamin.taminhamrah.data.repository.common
 
 
+import com.tamin.taminhamrah.data.local.dao.JobTitlePageDao
 import com.tamin.taminhamrah.data.local.dao.MenuDao
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.data.mapper.toEntity
+import com.tamin.taminhamrah.data.mapper.toPageEntity
+import com.tamin.taminhamrah.data.repository.paging.pageCacheKey
 import com.tamin.taminhamrah.dataSource.commonSource.CommonRemoteDataSource
 import com.tamin.taminhamrah.model.common.BeneficiaryDN
 import com.tamin.taminhamrah.model.common.InsuranceTypeDN
@@ -21,7 +24,8 @@ import com.tamin.taminhamrah.model.request.FilterOperator
 import com.tamin.taminhamrah.model.request.FilterProperty
 import com.tamin.taminhamrah.repository.TokenStoreManager
 import com.tamin.taminhamrah.repository.common.CommonRepository
-import io.ktor.client.statement.readRawBytes
+import com.tamin.taminhamrah.tools.readBytesOrThrow
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -30,6 +34,7 @@ import kotlinx.coroutines.flow.onStart
 class CommonRepositoryImpl(
     private val commonRemoteDataSource: CommonRemoteDataSource,
     private val menuDao: MenuDao,
+    private val jobTitlePageDao: JobTitlePageDao,
     private val tokenStoreManager: TokenStoreManager,
 ) : CommonRepository {
     override fun getBeneficiary(filters: List<ApiFilterDN>): Flow<List<BeneficiaryDN>> = flow {
@@ -53,7 +58,7 @@ class CommonRepositoryImpl(
         .onStart {
             try {
                 val remoteMenu = commonRemoteDataSource.getMainMenu(versionCode, forceUpdate)
-                menuDao.insertMenuItems(remoteMenu.map { it.toDomain().toEntity() })
+                menuDao.replaceAllMenuItems(remoteMenu.map { it.toDomain().toEntity() })
             } catch (e: Exception) {
                 throw e
             }
@@ -62,7 +67,9 @@ class CommonRepositoryImpl(
     override fun getRegistrationDeclarationForm(): Flow<ByteArray> = flow {
         try {
             val statement = commonRemoteDataSource.getRegistrationDeclarationForm()
-            val bytes = statement.execute { response -> response.readRawBytes() }
+            // Status-checked drain: a failed download is its mapped error, never the error body
+            // handed to the saver as if it were the form.
+            val bytes = statement.readBytesOrThrow()
             emit(bytes)
         } catch (e: Exception) {
             throw e
@@ -86,13 +93,28 @@ class CommonRepositoryImpl(
     }
 
     override fun getJobTitlePage(query: ApiQueryParamDN): Flow<PageDN<JobTitleDN>> = flow {
-        val response = commonRemoteDataSource.getJobTitle(query)
-        emit(
-            PageDN(
-                items = response?.list?.map { item -> item.toDomain() } ?: emptyList(),
-                total = response?.total,
-            )
-        )
+        val listKey = query.pageCacheKey()
+        val cached = jobTitlePageDao.getPageSlice(listKey, limit = query.limit, offset = query.start)
+        if (cached.isNotEmpty()) {
+            emit(PageDN(items = cached.map { it.toDomain() }, isFromCache = true))
+        }
+
+        val response = try {
+            commonRemoteDataSource.getJobTitle(query)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            if (cached.isEmpty()) throw e
+            return@flow
+        }
+        val jobs = response?.list?.map { item -> item.toDomain() } ?: emptyList()
+        val rows = jobs.mapIndexed { index, job -> job.toPageEntity(listKey, query.start + index) }
+        if (query.start == 0) {
+            jobTitlePageDao.replacePages(listKey, rows)
+        } else {
+            jobTitlePageDao.upsertPage(rows)
+        }
+        emit(PageDN(items = jobs, total = response?.total))
     }
 
     override fun getRoles(): Flow<List<RoleDN>> = flow {

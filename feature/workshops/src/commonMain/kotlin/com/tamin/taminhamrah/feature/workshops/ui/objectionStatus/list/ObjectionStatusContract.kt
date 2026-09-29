@@ -15,7 +15,6 @@ import com.tamin.taminhamrah.model.workshop.WorkShopObjectionPR
 @Immutable
 data class ObjectionStatusUiState(
     val list: PagedListState<WorkShopObjectionPR> = PagedListState(),
-    val totalCount: Int = 0,
     val identityName: String = "",
     val identityNationalId: String = "",
     val draft: ObjectionStatusFilters = ObjectionStatusFilters(),
@@ -26,7 +25,7 @@ data class ObjectionStatusUiState(
         data object Loading : PartialState
         data object LoadingMore : PartialState
         data class Error(val message: String?) : PartialState
-        data class Loaded(val list: PagedListState<WorkShopObjectionPR>, val total: Int) : PartialState
+        data class Loaded(val list: PagedListState<WorkShopObjectionPR>) : PartialState
         data class DraftChanged(val draft: ObjectionStatusFilters) : PartialState
         data class Applied(val filters: ObjectionStatusFilters) : PartialState
         data class SearchOpenChanged(val isOpen: Boolean) : PartialState

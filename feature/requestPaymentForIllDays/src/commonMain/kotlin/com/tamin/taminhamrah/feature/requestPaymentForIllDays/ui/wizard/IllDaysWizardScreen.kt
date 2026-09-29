@@ -8,6 +8,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
+import com.tamin.taminhamrah.ui.components.BackHandler
 import com.tamin.taminhamrah.ui.components.ErrorStateView
 import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.LoadingButtonIconPosition
@@ -67,6 +69,7 @@ import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.error
 import com.tamin.taminhamrah.ui.components.toast.success
 import com.tamin.taminhamrah.ui.components.taminSurface
+import com.tamin.taminhamrah.ui.theme.ButtonDimens
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -151,6 +154,7 @@ import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 private const val MAX_DOCUMENTS = 5
+private const val CITY_SEARCH_DEBOUNCE_MS = 1000L
 
 @Composable
 fun IllDaysWizardScreen(
@@ -211,6 +215,8 @@ fun IllDaysWizardScreen(
             }
         },
     )
+
+    BackHandler(onBack = { viewModel.sendIntent(IllDaysWizardIntent.Back) })
 
     IllDaysWizardContent(
         state = state,
@@ -433,6 +439,7 @@ private fun IllDaysWizardBottomBar(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(Spacing.smd),
                 ) {
+                    IllDaysStepBackButton(onClick = { onIntent(IllDaysWizardIntent.PreviousStep) })
                     LoadingButton(
                         text = stringResource(Res.string.ill_days_next_step),
                         onClick = { onIntent(IllDaysWizardIntent.NextStep) },
@@ -442,12 +449,6 @@ private fun IllDaysWizardBottomBar(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
                         iconPosition = LoadingButtonIconPosition.TRAILING,
                     )
-                    TaminTopAppBarButton(
-                        icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                        contentDescription = stringResource(Res.string.ill_days_cd_back),
-                        onClick = { onIntent(IllDaysWizardIntent.PreviousStep) },
-                        bordered = true,
-                    )
                 }
             }
             IllDaysWizardStep.Doctor -> {
@@ -455,6 +456,7 @@ private fun IllDaysWizardBottomBar(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(Spacing.smd),
                 ) {
+                    IllDaysStepBackButton(onClick = { onIntent(IllDaysWizardIntent.PreviousStep) })
                     LoadingButton(
                         text = stringResource(Res.string.ill_days_next_step),
                         onClick = { onIntent(IllDaysWizardIntent.NextStep) },
@@ -463,12 +465,6 @@ private fun IllDaysWizardBottomBar(
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_forward),
                         iconPosition = LoadingButtonIconPosition.TRAILING,
                     )
-                    TaminTopAppBarButton(
-                        icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                        contentDescription = stringResource(Res.string.ill_days_cd_back),
-                        onClick = { onIntent(IllDaysWizardIntent.PreviousStep) },
-                        bordered = true,
-                    )
                 }
             }
             IllDaysWizardStep.Documents -> {
@@ -476,6 +472,7 @@ private fun IllDaysWizardBottomBar(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(Spacing.smd),
                 ) {
+                    IllDaysStepBackButton(onClick = { onIntent(IllDaysWizardIntent.PreviousStep) })
                     LoadingButton(
                         text = stringResource(Res.string.ill_days_submit_btn),
                         onClick = { onIntent(IllDaysWizardIntent.Submit) },
@@ -483,15 +480,33 @@ private fun IllDaysWizardBottomBar(
                         isLoading = state.isSubmitting,
                         modifier = Modifier.weight(1f),
                     )
-                    TaminTopAppBarButton(
-                        icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                        contentDescription = stringResource(Res.string.ill_days_cd_back),
-                        onClick = { onIntent(IllDaysWizardIntent.PreviousStep) },
-                        bordered = true,
-                    )
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun IllDaysStepBackButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = LocalTaminColors.current
+    val shape = RoundedCornerShape(CornerRadius.xl)
+    Box(
+        modifier = modifier
+            .size(ButtonDimens.height)
+            .clip(shape)
+            .background(colors.bgSurface)
+            .border(Thickness.border, colors.border, shape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = vectorResource(Res.drawable.ic_tamin_chevron_back),
+            contentDescription = stringResource(Res.string.ill_days_cd_back),
+            tint = colors.textPrimary,
+        )
     }
 }
 
@@ -701,6 +716,7 @@ private fun DoctorStep(
             label = stringResource(Res.string.ill_days_doctor_code_label),
             placeholder = stringResource(Res.string.ill_days_doctor_code_placeholder),
             keyboardType = KeyboardType.Number,
+            maxLength = 10
         )
 
         Column(
@@ -961,9 +977,12 @@ private fun IllDaysWizardPickers(
                 itemLabel = { it.cityName },
                 itemKey = { it.cityCode },
                 searchPlaceholder = stringResource(Res.string.ill_days_wizard_city_search),
-                onSearchQueryChange = { query ->
-                    onIntent(IllDaysWizardIntent.CitySearchQuery(query))
-                },
+                onSearchQueryChange = { onIntent(IllDaysWizardIntent.CitySearchQueryChanged(it)) },
+                searchDebounceMs = CITY_SEARCH_DEBOUNCE_MS,
+                isLoading = state.isCitiesLoading,
+                canLoadMore = state.canLoadMoreCities,
+                isLoadingMore = state.isCitiesLoadingMore,
+                onLoadMore = { onIntent(IllDaysWizardIntent.CityPickerLoadMore) },
                 onItemSelected = { onIntent(IllDaysWizardIntent.CityPicked(it)) },
                 onDismiss = { onIntent(IllDaysWizardIntent.DismissPicker) },
             )

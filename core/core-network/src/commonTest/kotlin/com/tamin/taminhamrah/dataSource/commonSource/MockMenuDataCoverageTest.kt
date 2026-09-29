@@ -31,17 +31,12 @@ class MockMenuDataCoverageTest {
 
     private companion object {
         /**
-         * Pre-existing, documented gaps (`docs/vault/Feature-Flags.md` §5f) — legacy/alias ids for a
-         * feature a sibling id already carries a mock row for, not a flag that resolves to nothing:
-         * `CALCULATE_WAGE_PENSION_109` shares `FeatureNavigation`'s branch with `CALCULATE_WAGE_PENSION`
-         * (id 23, which has a row); `OBJECTION_INSURANCE_HISTORY_45` and `PRESCRIPTION_102` are
-         * likewise alternate ids nothing currently routes to on their own. Real, but not this test's
-         * job to fix — flag it here instead of quietly excluding it from coverage.
+         * Pre-existing, documented gaps (`docs/vault/Feature-Flags.md` §5f) — legacy/alias ids
+         * nothing currently routes to on their own, with no row in `mockMenuData` at all.
          */
         val KnownAliasesWithNoOwnMockRow = setOf(
-            FeatureFlag.CALCULATE_WAGE_PENSION_109,
-            FeatureFlag.OBJECTION_INSURANCE_HISTORY_45,
-            FeatureFlag.PRESCRIPTION_102,
+            FeatureFlag.OBJECTION_INSURANCE_HISTORY_LEGACY,
+            FeatureFlag.PRESCRIPTION_PENSIONER,
         )
     }
 }

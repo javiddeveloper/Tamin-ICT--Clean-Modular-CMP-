@@ -120,11 +120,19 @@ class ShowcaseAgentService : AgentServiceUseCase {
                 isCompleted = payload.string("completed")?.toBooleanStrictOrNull() ?: false
             )
 
-            "error" -> ChatBubbleContent.ServiceError(
-                message = payload.string("text").orEmpty(),
-                canRetryPrompt = true,
-                actionKey = AgentActionKey.SHOWCASE
-            )
+            // `retryable: false` is the shape a disabled service ends in — a note, not a retry.
+            "error" -> {
+                val retryable = payload.string("retryable")?.toBooleanStrictOrNull() ?: true
+                ChatBubbleContent.ServiceError(
+                    message = payload.string("text").orEmpty(),
+                    canRetryPrompt = retryable,
+                    actionKey = AgentActionKey.SHOWCASE.takeIf { retryable }
+                )
+            }
+
+            // A service that fails while running: the dispatcher turns the throw into an error
+            // bubble whose retry re-runs this service with the same payload.
+            "throw" -> throw IllegalStateException(payload.string("text") ?: "showcase service failure")
 
             "suggestions" -> ChatBubbleContent.SuggestedPrompts(payload.strings("prompts"))
 

@@ -111,9 +111,13 @@ data class CompleteEmployerInfoUiState(
     val realWorkshopCode: String = "",
     val provinces: ImmutableList<ProvincePR> = persistentListOf(),
     val isProvincesLoading: Boolean = false,
+    val isProvincesLoadingMore: Boolean = false,
+    val canLoadMoreProvinces: Boolean = false,
     val selectedProvince: ProvincePR? = null,
     val cities: ImmutableList<CityPR> = persistentListOf(),
     val isCitiesLoading: Boolean = false,
+    val isCitiesLoadingMore: Boolean = false,
+    val canLoadMoreCities: Boolean = false,
     val selectedCity: CityPR? = null,
     val branches: ImmutableList<BranchPR> = persistentListOf(),
     val isBranchesLoading: Boolean = false,
@@ -262,10 +266,19 @@ sealed interface CompleteEmployerInfoPartialState {
 
     // Real form partials
     data class RealWorkshopCodeChanged(val code: String) : CompleteEmployerInfoPartialState
-    data class ProvincesLoaded(val provinces: ImmutableList<ProvincePR>) : CompleteEmployerInfoPartialState
+    data class ProvincePagingChanged(
+        val items: ImmutableList<ProvincePR>,
+        val isLoadingFirstPage: Boolean,
+        val isLoadingNextPage: Boolean,
+        val endReached: Boolean,
+    ) : CompleteEmployerInfoPartialState
     data class ProvinceSelected(val province: ProvincePR) : CompleteEmployerInfoPartialState
-    data class CitiesLoading(val isLoading: Boolean) : CompleteEmployerInfoPartialState
-    data class CitiesLoaded(val cities: ImmutableList<CityPR>) : CompleteEmployerInfoPartialState
+    data class CityPagingChanged(
+        val items: ImmutableList<CityPR>,
+        val isLoadingFirstPage: Boolean,
+        val isLoadingNextPage: Boolean,
+        val endReached: Boolean,
+    ) : CompleteEmployerInfoPartialState
     data class CitySelected(val city: CityPR) : CompleteEmployerInfoPartialState
     data class BranchesLoading(val isLoading: Boolean) : CompleteEmployerInfoPartialState
     data class BranchesLoaded(val branches: ImmutableList<BranchPR>) : CompleteEmployerInfoPartialState
@@ -307,7 +320,9 @@ sealed interface CompleteEmployerInfoIntent {
     // Real Form Intents
     data class ChangeRealWorkshopCode(val code: String) : CompleteEmployerInfoIntent
     data class SelectProvince(val province: ProvincePR) : CompleteEmployerInfoIntent
+    data object ProvincePickerLoadMore : CompleteEmployerInfoIntent
     data class SelectCity(val city: CityPR) : CompleteEmployerInfoIntent
+    data object CityPickerLoadMore : CompleteEmployerInfoIntent
     data class SelectBranch(val branch: BranchPR) : CompleteEmployerInfoIntent
     data object SubmitRealForm : CompleteEmployerInfoIntent
 

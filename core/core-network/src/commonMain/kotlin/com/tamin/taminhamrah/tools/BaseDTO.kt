@@ -13,6 +13,7 @@ import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -49,7 +50,14 @@ data class BaseDTO<out T>(
     @SerialName("reason") val reason: String,
     @SerialName("data") val data: T? = null,
     @SerialName("hasError") val hasError: Boolean? = null,
-    @SerialName("problems") val problems: List<ProblemDTO>? = null
+    @SerialName("problems") val problems: List<ProblemDTO>? = null,
+    /**
+     * What a failed reply said, read from the raw body by `LenientReplyConverter` — `data.message`,
+     * validation violations or a bare string. A typed [data] cannot hold any of these, so without
+     * this the server's reason was lost whenever [T] was not an [ErrorCarrier].
+     */
+    @Transient val errorText: String? = null,
+    @Transient val errorCauseText: String? = null,
 ) {
     /**
      * True when the backend flagged this response as failed via the
@@ -90,6 +98,26 @@ fun <T> BaseDTO<T>.extractData(): T {
 }
 
 /**
+ * For endpoints that answer with `"data": null` on success (e.g. DELETE/PUT).
+ * Throws on errors exactly like [extractData], but does not require a body.
+ */
+fun <T> BaseDTO<T>.ensureSuccess() {
+    when {
+        hasProblems -> throwProblemError()
+        status in 200..299 -> Unit
+        else -> handleCommonErrors()
+    }
+}
+
+/**
+ * For calls whose reply has nothing to read: a non-2xx status throws the same status-mapped failure
+ * as [extractData] — server message included — instead of an error that names nothing.
+ */
+fun BaseDTO<*>.requireSuccessStatus() {
+    if (status !in 200..299) handleCommonErrors()
+}
+
+/**
  * Extracts a success message from the response.
  * If data is a primitive (like String), it returns its content.
  * If data is null or an object, it returns the 'reason' field as the message.
@@ -118,12 +146,10 @@ fun BaseDTO<JsonElement?>.extractMessage(): String {
  * it into a generic "something went wrong" string.
  */
 private fun <T> BaseDTO<T>.throwProblemError(): Nothing {
-    val firstProblem = problems?.firstOrNull()
     println("BaseDTO: Business error: family=$family reason=$reason problems=$problems")
     throw TaminErrorUriException(
         uri = ErrorUri.SERVER_PROBLEM,
-        serverMessage = getServerMessage(),
-        errorCode = firstProblem?.errorCode
+        serverMessage = getServerMessage()
     )
 }
 
@@ -157,14 +183,14 @@ private fun <T> BaseDTO<T>.rawErrorText(): String? {
         is JsonPrimitive -> d.contentOrNull
         else -> null
     }
-    return fromData ?: problemMessage ?: reason
+    return fromData ?: errorText ?: problemMessage ?: reason
 }
 
 private fun <T> BaseDTO<T>.errorCause(): String? = when (val d = data) {
     is ErrorCarrier -> d.cause
     is JsonObject -> d["cause"]?.jsonPrimitive?.contentOrNull
     else -> null
-}
+} ?: errorCauseText
 
 /**
  * Same probe as [rawErrorText], but only keeps copy that looks like Arabic script.
@@ -227,11 +253,11 @@ fun <T> BaseDTO<JsonElement?>.extractTypedData(json: Json, deserializer: Deseria
         status in 200..299 && data != null -> json.decodeFromJsonElement(deserializer, data)
         status in 400..599 -> {
             val serverMessage = (data as? JsonObject)?.get("message")?.jsonPrimitive?.contentOrNull
-            val errorPrefix = if (status in 400..499) "CLIENT_ERROR" else "SERVER_ERROR"
-            println("BaseDTO: $errorPrefix: $reason, serverMessage=$serverMessage")
+            val mapped = HttpStatusErrorMapper.map(status = status, rawMessage = serverMessage, cause = errorCause())
+            println("BaseDTO: HTTP $status -> ${mapped.uri}: $reason, serverMessage=$serverMessage")
             throw TaminErrorUriException(
-                uri = ErrorUri.fromString("$errorPrefix: $reason"),
-                serverMessage = serverMessage
+                uri = mapped.uri,
+                serverMessage = serverMessage ?: mapped.userMessage,
             )
         }
         else -> handleCommonErrors()

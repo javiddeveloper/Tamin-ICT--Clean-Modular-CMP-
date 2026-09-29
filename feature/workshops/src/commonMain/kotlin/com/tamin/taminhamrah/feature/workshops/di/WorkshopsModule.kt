@@ -21,6 +21,7 @@ import com.tamin.taminhamrah.feature.workshops.ui.workshopDebit.WorkshopDebitVie
 import com.tamin.taminhamrah.feature.workshops.ui.workshopDebtInquiry.WorkshopDebtInquiryViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.workshopMembers.WorkshopMembersViewModel
 import com.tamin.taminhamrah.feature.workshops.ui.workshopRecentlyAddedMembers.WorkshopRecentlyAddedMembersViewModel
+import com.tamin.taminhamrah.feature.workshops.ui.workshopStackholders.WorkshopStackholdersViewModel
 import com.tamin.taminhamrah.useCases.contracts.UploadImageUseCase
 import com.tamin.taminhamrah.useCases.userRequest.DownloadUserRequestDocumentUseCase
 import kotlinx.coroutines.flow.first
@@ -43,6 +44,7 @@ val workshopsModule = module {
 
     viewModelOf(::WorkshopsViewModel)
     viewModelOf(::WorkshopMembersViewModel)
+    viewModelOf(::WorkshopStackholdersViewModel)
     viewModelOf(::ManagementDebitViewModel)
     viewModelOf(::WorkshopDebtInquiryViewModel)
     viewModelOf(::ObjectionableDebitViewModel)

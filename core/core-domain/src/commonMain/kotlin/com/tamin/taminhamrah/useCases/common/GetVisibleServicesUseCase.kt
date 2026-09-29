@@ -52,7 +52,7 @@ object DedicatedScreenFlags {
     /** Every flag `TreatmentFeatureFlags` gates on. */
     val treatment: Set<FeatureFlag> = setOf(
         FeatureFlag.PRESCRIPTION,
-        FeatureFlag.DESERVED_TREATMENT_101,
+        FeatureFlag.DESERVED_TREATMENT_PENSIONER,
         FeatureFlag.HEALTH_PROFILE,
         FeatureFlag.CONTRACTED_CENTERS,
         FeatureFlag.CURRENT_YEAR_TREATMENT_COSTS,

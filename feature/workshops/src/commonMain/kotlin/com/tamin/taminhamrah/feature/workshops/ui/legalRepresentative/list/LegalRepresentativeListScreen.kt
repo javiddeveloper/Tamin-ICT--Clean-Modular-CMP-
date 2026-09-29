@@ -90,6 +90,7 @@ import taminx.core.core_ui.legal_representative_empty_list_message
 import taminx.core.core_ui.legal_representative_insured_registration
 import taminx.core.core_ui.legal_representative_internet_list
 import taminx.core.core_ui.legal_representative_list_section_label
+import taminx.core.core_ui.legal_representative_list_section_title
 import taminx.core.core_ui.legal_representative_more_details_action
 import taminx.core.core_ui.legal_representative_operations_action
 import taminx.core.core_ui.legal_representative_selected_contracts_label
@@ -138,10 +139,15 @@ fun LegalRepresentativeListScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = stringResource(
-                        Res.string.legal_representative_list_section_label,
-                        uiState.representatives.size,
-                    ),
+                    // No count until the first load lands, so the title doesn't flash "(0)".
+                    text = if (uiState.isLoading && uiState.representatives.isEmpty()) {
+                        stringResource(Res.string.legal_representative_list_section_title)
+                    } else {
+                        stringResource(
+                            Res.string.legal_representative_list_section_label,
+                            uiState.representatives.size,
+                        )
+                    },
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     color = taminColors.textPrimary,
@@ -155,7 +161,10 @@ fun LegalRepresentativeListScreen(
 
             Box(modifier = Modifier.fillMaxSize()) {
                 when {
-                    uiState.isLoading -> LegalRepresentativeListSkeleton(modifier = Modifier.fillMaxSize())
+                    // A reload on returning from add/edit keeps the current list on screen
+                    // instead of swapping it for the skeleton.
+                    uiState.isLoading && uiState.representatives.isEmpty() ->
+                        LegalRepresentativeListSkeleton(modifier = Modifier.fillMaxSize())
 
                     uiState.error != null -> ErrorStateView(
                         message = uiState.error,
@@ -215,21 +224,28 @@ fun LegalRepresentativeListScreen(
             iconTint = taminColors.dangerText,
             iconBackground = taminColors.dangerBorder,
             onDismissRequest = { viewModel.sendIntent(LegalRepresentativeListIntent.CancelDelete) },
+            // Side by side rather than the dialog's default stack. Under RTL the first child sits on
+            // the right, so cancel is on the right and the (wider) delete button on the left.
             confirmButton = {
-                TaminFilledButton(
-                    text = stringResource(Res.string.legal_representative_delete_confirm_action),
-                    onClick = { viewModel.sendIntent(LegalRepresentativeListIntent.ConfirmDelete) },
-                    background = Brush.linearGradient(listOf(taminColors.dangerText, taminColors.dangerText)),
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                )
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                ) {
+                    TaminOutlinedButton(
+                        text = stringResource(Res.string.legal_representative_cancel_action),
+                        onClick = { viewModel.sendIntent(LegalRepresentativeListIntent.CancelDelete) },
+                        modifier = Modifier.weight(1f),
+                    )
+                    TaminFilledButton(
+                        text = stringResource(Res.string.legal_representative_delete_confirm_action),
+                        onClick = { viewModel.sendIntent(LegalRepresentativeListIntent.ConfirmDelete) },
+                        enabled = !uiState.isDeleting,
+                        background = Brush.linearGradient(listOf(taminColors.dangerText, taminColors.dangerText)),
+                        modifier = Modifier.weight(1.4f),
+                    )
+                }
             },
-            dismissButton = {
-                TaminOutlinedButton(
-                    text = stringResource(Res.string.legal_representative_cancel_action),
-                    onClick = { viewModel.sendIntent(LegalRepresentativeListIntent.CancelDelete) },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            },
+            dismissButton = {},
         )
     }
 }

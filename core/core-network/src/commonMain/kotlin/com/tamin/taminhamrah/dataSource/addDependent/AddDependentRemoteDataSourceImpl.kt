@@ -14,11 +14,17 @@ import com.tamin.taminhamrah.model.request.ApiQueryParamDN
 import com.tamin.taminhamrah.tools.apiQueryBuilder.ApiQueryBuilder
 import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.extractData
-import com.tamin.taminhamrah.tools.safeCall
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
+import kotlinx.coroutines.CancellationException
+import io.ktor.serialization.JsonConvertException
+import io.ktor.client.plugins.HttpRequestTimeoutException
+import io.ktor.client.network.sockets.ConnectTimeoutException
+import io.ktor.client.network.sockets.SocketTimeoutException
+import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
+import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 
 class AddDependentRemoteDataSourceImpl(
     private val apiService: AddDependentApiService,
@@ -26,61 +32,241 @@ class AddDependentRemoteDataSourceImpl(
     private val errorParser: ErrorParser
 ) : AddDependentRemoteDataSource {
 
-    override suspend fun getDependentInfo(): List<DependentInfoDTO> =
-        errorParser.safeCall("getDependentInfo") {
+    override suspend fun getDependentInfo(): List<DependentInfoDTO> {
+        return try {
             apiService.getDependentInfo().extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
+    }
 
-    override suspend fun getActiveBranches(): List<BranchDTO> =
-        errorParser.safeCall("getActiveBranches") {
+    override suspend fun getActiveBranches(): List<BranchDTO> {
+        return try {
             apiService.getActiveBranches().extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
+    }
 
     override suspend fun getFamilyRelationships(
         filter: List<ApiFilterDN>
-    ): List<FamilyRelationshipDTO> = errorParser.safeCall("getFamilyRelationships") {
-        val parameters = if (filter.isEmpty()) {
-            emptyMap()
-        } else {
-            mapOf("query" to apiQueryBuilder.buildFilterJson(filter))
+    ): List<FamilyRelationshipDTO> {
+        return try {
+            val parameters = if (filter.isEmpty()) {
+                emptyMap()
+            } else {
+                mapOf("query" to apiQueryBuilder.buildFilterJson(filter))
+            }
+            apiService.getFamilyRelationships(parameters).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
-        apiService.getFamilyRelationships(parameters).extractData()
     }
 
     override suspend fun getFamilyRelationshipsFromProxy(
         filter: List<ApiFilterDN>
-    ): List<FamilyRelationshipProxyDTO> = errorParser.safeCall("getFamilyRelationshipsFromProxy") {
-        val parameters = apiQueryBuilder.buildQuery(
-            ApiQueryParamDN(page = 1, filters = filter)
-        )
-        apiService.getFamilyRelationshipsFromProxy(parameters).extractData().list.orEmpty()
+    ): List<FamilyRelationshipProxyDTO> {
+        return try {
+            val parameters = apiQueryBuilder.buildQuery(
+                ApiQueryParamDN(page = 1, filters = filter)
+            )
+            apiService.getFamilyRelationshipsFromProxy(parameters).extractData().list.orEmpty()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
     }
 
     override suspend fun inquiryRegistry(
         dependentNationalId: String,
         birthDateTimeStamp: String,
         dependencyCode: String
-    ): RegistryDataDTO = errorParser.safeCall("inquiryRegistry") {
-        apiService.inquiryRegistry(
-            dependentNationalId,
-            birthDateTimeStamp,
-            dependencyCode
-        ).extractData()
+    ): RegistryDataDTO {
+        return try {
+            apiService.inquiryRegistry(
+                dependentNationalId,
+                birthDateTimeStamp,
+                dependencyCode
+            ).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
     }
 
     override suspend fun inquiryEducationCode(
         nationalId: String,
         educationCode: String
-    ): String = errorParser.safeCall("inquiryEducationCode") {
-        apiService.inquiryEducationCode(nationalId, educationCode).extractData()
+    ): String {
+        return try {
+            apiService.inquiryEducationCode(nationalId, educationCode).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
     }
 
     override suspend fun uploadImage(
         imageBytes: ByteArray,
         fileName: String,
         mimeType: String
-    ): UploadImageResponseDTO = errorParser.safeCall("uploadImage") {
-        apiService.uploadImage(createUploadImageRequest(imageBytes, fileName, mimeType))
+    ): UploadImageResponseDTO {
+        return try {
+            apiService.uploadImage(createUploadImageRequest(imageBytes, fileName, mimeType))
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
+        }
     }
 
     private fun createUploadImageRequest(
@@ -98,13 +284,63 @@ class AddDependentRemoteDataSourceImpl(
         )
     }
 
-    override suspend fun addNewDependent(request: RequestAddDependentDTO): GeneralResponseDTO =
-        errorParser.safeCall("addNewDependent") {
+    override suspend fun addNewDependent(request: RequestAddDependentDTO): GeneralResponseDTO {
+        return try {
             apiService.addNewDependent(request).extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
+    }
 
-    override suspend fun refreshDependents(): GeneralResponseDTO =
-        errorParser.safeCall("refreshDependents") {
+    override suspend fun refreshDependents(): GeneralResponseDTO {
+        return try {
             apiService.refreshDependents().extractData()
+        } catch (e: TaminErrorUriException) {
+            throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: Exception) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
+            )
         }
+    }
 }

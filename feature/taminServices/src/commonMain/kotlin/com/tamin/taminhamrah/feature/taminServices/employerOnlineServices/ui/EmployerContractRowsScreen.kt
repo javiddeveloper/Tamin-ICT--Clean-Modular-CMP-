@@ -34,8 +34,8 @@ import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contra
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.contract.EmployerOnlineServicesUiState
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.EmployerContractRowCard
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.EmployerContractRowsHeader
+import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.EmployerContractRowsSkeleton
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.EmployerOnlineServicesErrorView
-import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.EmployerOnlineServicesListSkeleton
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.components.EmployerWorkshopInfoCard
 import com.tamin.taminhamrah.model.workshop.WorkshopContractRowPR
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
@@ -105,7 +105,7 @@ internal fun EmployerContractRowsScreen(
 
             when {
                 uiState.isLoading && rows.rows.isEmpty() -> item {
-                    EmployerOnlineServicesListSkeleton()
+                    EmployerContractRowsSkeleton()
                 }
 
                 error != null && rows.rows.isEmpty() -> item {

@@ -9,6 +9,7 @@ import com.tamin.taminhamrah.feature.profile.ui.contactUs.ContactUsViewModel
 import com.tamin.taminhamrah.feature.profile.ui.identity.IdentityInViewModel
 import com.tamin.taminhamrah.feature.profile.ui.versionHistory.VersionHistoryViewModel
 import com.tamin.taminhamrah.feature.profile.ui.saveEvents.SaveEventsViewModel
+import com.tamin.taminhamrah.feature.profile.ui.editPhoto.EditProfilePhotoViewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
@@ -21,7 +22,7 @@ val profileModule = module {
     viewModelOf(::DependentsListViewModel)
     viewModelOf(::ActiveRelationViewModel)
     viewModelOf(::ContactUsViewModel)
-    viewModelOf(::DependentsListViewModel)
     viewModelOf(::SaveEventsViewModel)
+    viewModelOf(::EditProfilePhotoViewModel)
 }
 

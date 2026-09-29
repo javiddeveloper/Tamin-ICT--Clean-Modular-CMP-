@@ -121,6 +121,7 @@ fun ContractRowsContent(
                     icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                     contentDescription = null,
                     onClick = onBack,
+                    bordered = true,
                 )
             },
             action = {
@@ -128,6 +129,7 @@ fun ContractRowsContent(
                     icon = vectorResource(Res.drawable.ic_tamin_search),
                     contentDescription = stringResource(Res.string.workshop_search),
                     onClick = { onIntent(ContractRowsIntent.PickerOpenChanged(isOpen = true)) },
+                    bordered = true,
                 )
             },
         ) {
@@ -160,12 +162,13 @@ fun ContractRowsContent(
                             Res.string.contract_rows_filter_workshop,
                             applied.workshopId.toPersianDigits(),
                         ),
-                        // The service's own total, not how much of it has been paged in. The
+                        // The service's own total less the repeats the list dropped, not how much of it has
+                        // been paged in. The
                         // design's chip counts the whole result too, and a number that climbs
                         // while the user scrolls reads as the first one having been wrong.
                         countText = stringResource(
                             Res.string.contract_rows_count,
-                            list.total.toString().toPersianDigits(),
+                            list.distinctTotal.toString().toPersianDigits(),
                         ),
                         // Only after the screen moved the user itself; a tab they chose needs no
                         // explanation.
@@ -215,6 +218,8 @@ fun ContractRowsContent(
                     actionLabel = stringResource(Res.string.contract_rows_pick_workshop),
                     onAction = { onIntent(ContractRowsIntent.PickerOpenChanged(isOpen = true)) },
                     showIconTile = true,
+                    actionBackground = colors.buttonGradient,
+                    actionIcon = vectorResource(Res.drawable.ic_tamin_search),
                 )
             },
         ) { row, itemModifier ->

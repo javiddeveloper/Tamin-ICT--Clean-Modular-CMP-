@@ -5,7 +5,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PersonalInfoDTO(
-    @SerialName("request") val request: RequestDTO?= null ,
+    // `request` is not modeled: nothing reads it, and its `personal` is a Jackson identity ref — an
+    // int or the whole object depending on order — so decoding it could only fail. ignoreUnknownKeys skips it.
     @SerialName("creationTime") val creationTime: Long?= null ,
     @SerialName("endDate") val endDate: Long?= null ,
     @SerialName("lastModificationTime") val lastModificationTime: Long?= null ,

@@ -92,7 +92,11 @@ data class WorkshopContractRowDTO(
     @SerialName("nationalCode") val nationalCode: String? = null,
     @SerialName("tel") val tel: String? = null,
     @SerialName("postalCode") val postalCode: String? = null,
-    @SerialName("workshop") val workshop: EmployerWorkshopDTO? = null,
+    /**
+     * Not [EmployerWorkshopDTO]: this endpoint sends `character` / `workshopStatus` as bare strings
+     * ("01"), which that class models as objects — decoding threw on every row.
+     */
+    @SerialName("workshop") val workshop: WorkshopContractInfoDTO? = null,
 )
 
 /**

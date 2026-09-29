@@ -43,6 +43,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 
 /**
@@ -117,9 +118,9 @@ class EmployerOnlineServicesViewModel(
      */
     private val contractRowsPaginator = Paginator<WorkshopContractRowDN>(
         config = PaginationConfig(pageSize = WORKSHOP_PAGE_SIZE),
-        loadPage = { query ->
-            val page = getWorkshopContractRowsUseCase(contractRowsWorkshopId, contractRowsBranchCode, query.page)
-            PageDN(items = page.items, total = page.total)
+        // Offline-first: collect the whole flow (cached page, then network page) — not `.first()`.
+        loadPages = { query ->
+            getWorkshopContractRowsUseCase(contractRowsWorkshopId, contractRowsBranchCode, query.page)
         },
     )
 
@@ -129,10 +130,12 @@ class EmployerOnlineServicesViewModel(
      */
     private val workshopsWithoutContractPaginator = Paginator<WorkshopWithoutContractDN>(
         config = PaginationConfig(pageSize = WORKSHOP_PAGE_SIZE),
-        loadPage = { query ->
-            val page = getWorkshopsWithoutContractUseCase(query.page)
-            workshopsWithoutContractTotal = page.total
-            PageDN(items = page.items, total = page.total)
+        // Offline-first: collect the whole flow (cached page, then network page) — not `.first()`.
+        // A cached page has no total, so the count tile keeps the last known one.
+        loadPages = { query ->
+            getWorkshopsWithoutContractUseCase(query.page).onEach { page ->
+                page.total?.let { workshopsWithoutContractTotal = it }
+            }
         },
     )
 
@@ -260,10 +263,13 @@ class EmployerOnlineServicesViewModel(
     private fun retry(source: EmployerOnlineServicesErrorSource): Flow<PartialState> = when (source) {
         EmployerOnlineServicesErrorSource.IDENTITY -> loadIdentity()
         EmployerOnlineServicesErrorSource.AGREEMENTS -> flow<PartialState> { agreementsPaginator.retry() }
+        // Loading brackets the retry so the screen swaps the error for the skeleton while it runs.
         EmployerOnlineServicesErrorSource.CONTRACT_ROWS -> flow<PartialState> {
             contractRowsPaginator.retry()
             emit(contractRowsPagingPartialState())
         }
+            .onStart { emit(PartialState.Loading(true)) }
+            .onCompletion { emit(PartialState.Loading(false)) }
         EmployerOnlineServicesErrorSource.REQUEST_TICKET -> requestTicket()
         EmployerOnlineServicesErrorSource.VERIFY_CODE -> verifyCode()
         EmployerOnlineServicesErrorSource.STEP2_CONTENT -> uiState.value.agreementRequest.let {

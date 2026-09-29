@@ -26,8 +26,20 @@ import com.tamin.taminhamrah.useCases.inspection.SubmitInspectionUseCase
 import com.tamin.taminhamrah.feature.taminServices.inspection.ui.InspectionViewModel
 import com.tamin.taminhamrah.feature.taminServices.workshopInspection.ui.WorkshopInspectionViewModel
 import com.tamin.taminhamrah.feature.taminServices.employerOnlineServices.ui.EmployerOnlineServicesViewModel
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.ConstructionInsuranceViewModel
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.viewDetail.ui.ViewDetailRequestViewModel
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.beneficiaries.ui.BeneficiariesViewModel
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.paymentSheet.ui.PaymentSheetViewModel
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.installmentManagement.ui.InstallmentLetterViewModel
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.installmentManagement.installmentAndPaymentSheet.ui.InstallmentManagementViewModel
+import com.tamin.taminhamrah.feature.taminServices.constructionInsurance.installmentManagement.installmentDebitList.ui.InstallmentDebitListViewModel
 import com.tamin.taminhamrah.feature.taminServices.verifier.ConstructionWorkersPaymentVerifier
 import com.tamin.taminhamrah.repository.payment.PaymentVerifier
+import com.tamin.taminhamrah.feature.taminServices.funeralAllowance.FuneralAllowanceViewModel
+import com.tamin.taminhamrah.useCases.funeralAllowance.ConfirmFuneralAccountCorrectionUseCase
+import com.tamin.taminhamrah.useCases.funeralAllowance.GetFuneralAllowanceInfoUseCase
+import com.tamin.taminhamrah.useCases.funeralAllowance.SubmitFuneralAllowanceRequestUseCase
+import com.tamin.taminhamrah.useCases.funeralAllowance.ValidateDeceasedUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.qualifier.named
@@ -68,5 +80,19 @@ val TaminServicesModule = module {
     // خدمات غیرحضوری کارفرمایان — use cases (GetUserProfileUseCase, GetEmployerAgreementsUseCase)
     // are already provided by core-domain's DomainModule.
     viewModelOf(::EmployerOnlineServicesViewModel)
+
+    viewModelOf(::ConstructionInsuranceViewModel)
+    viewModelOf(::ViewDetailRequestViewModel)
+    viewModelOf(::BeneficiariesViewModel)
+    viewModelOf(::PaymentSheetViewModel)
+    viewModelOf(::InstallmentLetterViewModel)
+    viewModelOf(::InstallmentManagementViewModel)
+    viewModelOf(::InstallmentDebitListViewModel)
+
+    viewModelOf(::FuneralAllowanceViewModel)
+    factoryOf(::GetFuneralAllowanceInfoUseCase)
+    factoryOf(::ValidateDeceasedUseCase)
+    factoryOf(::SubmitFuneralAllowanceRequestUseCase)
+    factoryOf(::ConfirmFuneralAccountCorrectionUseCase)
 }
 

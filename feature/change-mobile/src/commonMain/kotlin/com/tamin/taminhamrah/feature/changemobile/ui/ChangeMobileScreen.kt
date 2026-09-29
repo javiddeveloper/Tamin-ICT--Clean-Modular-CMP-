@@ -1,6 +1,7 @@
 package com.tamin.taminhamrah.feature.changemobile.ui
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -17,6 +18,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -35,6 +37,7 @@ import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
 import com.tamin.taminhamrah.ui.collectWithLifecycleAware
 import com.tamin.taminhamrah.ui.components.AnimatedRingHeaderIcon
 import com.tamin.taminhamrah.ui.components.DecorativeBackgroundCircle
+import com.tamin.taminhamrah.ui.components.LoadingButton
 import com.tamin.taminhamrah.ui.components.StepIndicator
 import com.tamin.taminhamrah.ui.components.StepIndicatorModel
 import com.tamin.taminhamrah.ui.components.StepState
@@ -44,6 +47,10 @@ import com.tamin.taminhamrah.ui.pushBack
 import com.tamin.taminhamrah.ui.pushForward
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toparea.TopAreaState
+import com.tamin.taminhamrah.ui.toparea.collapseWhileImeVisible
+import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
+import com.tamin.taminhamrah.ui.toparea.topAreaHide
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
@@ -51,9 +58,13 @@ import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import taminx.core.core_ui.Res
 import taminx.core.core_ui.ic_mobile
+import taminx.core.core_ui.ic_send
 import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.profile_change_mobile
+import taminx.core.core_ui.profile_change_mobile_back_to_account
+import taminx.core.core_ui.profile_change_mobile_confirm_and_continue
 import taminx.core.core_ui.profile_change_mobile_subtitle
+import taminx.core.core_ui.profile_get_otp_code
 
 @Composable
 fun ChangeMobileScreen(
@@ -124,58 +135,39 @@ fun ChangeMobileContent(
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier
 ) {
-    val taminColors = LocalTaminColors.current
+    // Folds from each step's own drag; reset whenever the step changes so a step that arrives
+    // already scrolled (e.g. going back) doesn't inherit a collapsed header.
+    val topArea = rememberMeasuredTopAreaState { probeState ->
+        ChangeMobileHeader(onBack = {}, profileGradientBrush = profileGradientBrush, topAreaState = probeState)
+    }
+    LaunchedEffect(currentStep) { topArea.expandFully() }
+    // The mobile/OTP field's keyboard must not leave the header stuck mid-fold: collapse it fully
+    // the moment the IME appears, expand it fully the moment it hides.
+    topArea.collapseWhileImeVisible()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
-            TaminTopAppBar(
-                title = stringResource(Res.string.profile_change_mobile),
-                background = profileGradientBrush,
-                bottomPadding = Spacing.xl,
-                shape = RoundedCornerShape(
-                    bottomStart = 40.dp,
-                    bottomEnd = 40.dp
-                ),
-                navigationIcon = {
-                    TaminTopAppBarButton(
-                        icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
-                        contentDescription = null,
-                        onClick = onBack,
-                        bordered = true
-                    )
-                }
-            ) {
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    DecorativeBackgroundCircle(
-                        size = 190.dp,
-                        xOffset = 450.dp,
-                        yOffset = (-150).dp
-                    )
-
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        AnimatedRingHeaderIcon(icon = vectorResource(Res.drawable.ic_mobile))
-                        Spacer(modifier = Modifier.height(Spacing.md))
-                        Text(
-                            text = stringResource(Res.string.profile_change_mobile_subtitle),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = taminColors.textHeaderSubtitle
-                        )
-                    }
-                }
-            }
+            ChangeMobileHeader(
+                onBack = onBack,
+                profileGradientBrush = profileGradientBrush,
+                topAreaState = topArea,
+            )
+        },
+        bottomBar = {
+            ChangeMobileBottomBar(
+                currentStep = currentStep,
+                uiState = uiStateState.value,
+                onIntent = onIntent,
+                onFinish = onNavigateBack,
+            )
         }
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = padding.calculateTopPadding())
-                .navigationBarsPadding()
-                .imePadding()
+                .padding(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding())
         ) {
             val currentStepIndex = currentStep.index
             val steps = remember(currentStepIndex) {
@@ -233,19 +225,125 @@ fun ChangeMobileContent(
                     ChangeMobileStep.EnterMobile -> {
                         EnterMobileStep(
                             uiState = uiStateState.value,
+                            topAreaState = topArea,
                             onIntent = onIntent
                         )
                     }
 
                     ChangeMobileStep.VerifyOtp -> {
-                        VerifyOtpStep(uiStateState.value, onIntent)
+                        VerifyOtpStep(uiStateState.value, topArea, onIntent)
                     }
 
                     ChangeMobileStep.Success -> {
-                        SuccessStep(uiStateState.value, onNavigateBack)
+                        SuccessStep(uiStateState.value, topArea)
                     }
                 }
             }
+        }
+    }
+}
+
+/**
+ * Its own composable rather than a lambda inside `Scaffold`: a `topBar` lambda re-executes on
+ * every recomposition, which on this screen is every keystroke in the mobile/OTP fields.
+ */
+@Composable
+private fun ChangeMobileHeader(
+    onBack: () -> Unit,
+    profileGradientBrush: Brush,
+    topAreaState: TopAreaState,
+) {
+    val taminColors = LocalTaminColors.current
+
+    TaminTopAppBar(
+        title = stringResource(Res.string.profile_change_mobile),
+        background = profileGradientBrush,
+        bottomPadding = Spacing.xl,
+        shape = RoundedCornerShape(
+            bottomStart = 40.dp,
+            bottomEnd = 40.dp
+        ),
+        navigationIcon = {
+            TaminTopAppBarButton(
+                icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
+                contentDescription = null,
+                onClick = onBack,
+                bordered = true
+            )
+        }
+    ) {
+        // Only this furniture folds away as a step scrolls; the title row above stays put so the
+        // bar reads the same as the rest of the app once collapsed.
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .topAreaHide(topAreaState),
+        ) {
+            DecorativeBackgroundCircle(
+                size = 190.dp,
+                xOffset = 450.dp,
+                yOffset = (-150).dp
+            )
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                AnimatedRingHeaderIcon(
+                    icon = vectorResource(Res.drawable.ic_mobile),
+                    animated = !topAreaState.isMeasureProbe,
+                )
+                Spacer(modifier = Modifier.height(Spacing.md))
+                Text(
+                    text = stringResource(Res.string.profile_change_mobile_subtitle),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = taminColors.textHeaderSubtitle
+                )
+            }
+        }
+    }
+}
+
+/** The current step's submit action, pinned to the bottom of the scaffold instead of scrolling with it. */
+@Composable
+private fun ChangeMobileBottomBar(
+    currentStep: ChangeMobileStep,
+    uiState: ChangeMobileUiState,
+    onIntent: (ChangeMobileIntent) -> Unit,
+    onFinish: () -> Unit,
+) {
+    val colors = LocalTaminColors.current
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(colors.bgPage)
+            .navigationBarsPadding()
+            .imePadding()
+            .padding(horizontal = Spacing.page, vertical = Spacing.md),
+    ) {
+        when (currentStep) {
+            ChangeMobileStep.EnterMobile -> LoadingButton(
+                text = stringResource(Res.string.profile_get_otp_code),
+                onClick = { onIntent(ChangeMobileIntent.GetOtpCode) },
+                enabled = uiState.newMobile.isNotEmpty() && !uiState.isLoading,
+                isLoading = uiState.isLoading && uiState.newMobile.isNotEmpty(),
+                icon = vectorResource(Res.drawable.ic_send),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            ChangeMobileStep.VerifyOtp -> LoadingButton(
+                text = stringResource(Res.string.profile_change_mobile_confirm_and_continue),
+                onClick = { onIntent(ChangeMobileIntent.VerifyOtp) },
+                enabled = !uiState.isLoading && uiState.otpCode.length == 5,
+                isLoading = uiState.isLoading,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            ChangeMobileStep.Success -> LoadingButton(
+                text = stringResource(Res.string.profile_change_mobile_back_to_account),
+                onClick = onFinish,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }

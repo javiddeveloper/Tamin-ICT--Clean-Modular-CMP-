@@ -13,9 +13,9 @@ import com.tamin.taminhamrah.model.common.FeatureFlag
 object TreatmentFeatureFlags {
     val records = FeatureFlag.PRESCRIPTION
     val prescriptions = FeatureFlag.PRESCRIPTION
-    val insuranceCard = FeatureFlag.DESERVED_TREATMENT_101
-    val miscClaims = FeatureFlag.DESERVED_TREATMENT_101
-    val approvals = FeatureFlag.DESERVED_TREATMENT_101
+    val insuranceCard = FeatureFlag.DESERVED_TREATMENT_PENSIONER
+    val miscClaims = FeatureFlag.DESERVED_TREATMENT_PENSIONER
+    val approvals = FeatureFlag.DESERVED_TREATMENT_PENSIONER
     val healthProfile = FeatureFlag.HEALTH_PROFILE
     val contractedCenters = FeatureFlag.CONTRACTED_CENTERS
     val currentYearCosts = FeatureFlag.CURRENT_YEAR_TREATMENT_COSTS

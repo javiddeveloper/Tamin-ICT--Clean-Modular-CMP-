@@ -98,6 +98,8 @@ sealed interface HomeIntent {
     object OnLastRequestsSeeAllClick : HomeIntent
     /** One row of «آخرین درخواست‌ها»؛ gated by `HOME_LAST_REQUESTS`. */
     data class OnLastRequestClick(val refCode: String) : HomeIntent
+    /** The header's support icon — dials 1420, same as پروفایل › پشتیبانی. */
+    object OnSupportClick : HomeIntent
 }
 
 sealed interface HomeEvent {

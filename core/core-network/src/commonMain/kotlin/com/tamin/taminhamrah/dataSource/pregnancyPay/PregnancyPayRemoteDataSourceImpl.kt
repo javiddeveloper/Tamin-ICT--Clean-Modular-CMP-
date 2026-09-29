@@ -1,5 +1,7 @@
 package com.tamin.taminhamrah.dataSource.pregnancyPay
 
+import kotlinx.coroutines.CancellationException
+import io.ktor.serialization.JsonConvertException
 import com.tamin.taminhamrah.apiService.pregnancyPay.PregnancyPayApiService
 import com.tamin.taminhamrah.model.pregnancyPay.PregnancyMainInfoDTO
 import com.tamin.taminhamrah.model.pregnancyPay.PregnancyOptionListDTO
@@ -9,6 +11,9 @@ import com.tamin.taminhamrah.tools.errorHandling.ErrorParser
 import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
 import com.tamin.taminhamrah.tools.errorHandling.TaminErrorUriException
 import com.tamin.taminhamrah.tools.extractData
+import io.ktor.client.plugins.HttpRequestTimeoutException
+import io.ktor.client.network.sockets.ConnectTimeoutException
+import io.ktor.client.network.sockets.SocketTimeoutException
 
 class PregnancyPayRemoteDataSourceImpl(
     private val pregnancyPayApiService: PregnancyPayApiService,
@@ -21,6 +26,24 @@ class PregnancyPayRemoteDataSourceImpl(
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -34,6 +57,24 @@ class PregnancyPayRemoteDataSourceImpl(
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -47,6 +88,24 @@ class PregnancyPayRemoteDataSourceImpl(
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -62,6 +121,24 @@ class PregnancyPayRemoteDataSourceImpl(
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)
@@ -85,6 +162,24 @@ class PregnancyPayRemoteDataSourceImpl(
             result
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(
                 TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR)

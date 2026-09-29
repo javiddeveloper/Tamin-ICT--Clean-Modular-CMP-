@@ -3,17 +3,12 @@ package com.tamin.taminhamrah.ui.components
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,7 +17,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -35,30 +29,20 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.Res
-import taminx.core.core_ui.ic_tamin_copy
 import taminx.core.core_ui.ic_tamin_verified
 
 
 private val LeaderDashOn = 3.dp
 private val LeaderDashOff = 3.dp
-private val CodeChipCorner = 9.dp
-private val CodeChipBorderWidth = 1.4.dp
 private val CodeChipDashOn = 3.dp
 private val CodeChipDashOff = 3.dp
-private val CodeChipPaddingStart = 6.dp
-private val CodeChipPaddingEnd = 8.dp
-private val CodeChipPaddingVertical = 5.dp
-private val CodeChipGap = 7.dp
-private val CodeIconSize = 14.dp
 private val LeadingIconSize = 15.dp
-private val CodeLetterSpacing = 1.sp
 
 private val StampRingSize = 54.dp
 private val StampRingInnerSize = 39.dp
@@ -119,36 +103,11 @@ fun RowScope.TrackingCodeRow(
                 )
             },
     )
-    Row(
-        modifier = modifier
-            .clip(RoundedCornerShape(CodeChipCorner))
-            .background(colors.blueBg)
-            .dashedOutline(colors.blueText, CodeChipCorner, CodeChipBorderWidth)
-            .clickable(onClick = onCopy)
-            .padding(
-                start = CodeChipPaddingStart,
-                end = CodeChipPaddingEnd,
-                top = CodeChipPaddingVertical,
-                bottom = CodeChipPaddingVertical,
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(CodeChipGap),
-    ) {
-        Icon(
-            imageVector = vectorResource(Res.drawable.ic_tamin_copy),
-            contentDescription = null,
-            tint = colors.blueText,
-            modifier = Modifier.size(CodeIconSize),
-        )
-        NumericText(
-            text = code.toPersianDigits(),
-            style = MaterialTheme.typography.titleSmall.copy(
-                letterSpacing = CodeLetterSpacing,
-                fontWeight = FontWeight.SemiBold,
-            ),
-            color = colors.blueText,
-        )
-    }
+    CopyCodeChip(
+        text = code.toPersianDigits(),
+        onCopy = onCopy,
+        modifier = modifier,
+    )
 }
 
 /**

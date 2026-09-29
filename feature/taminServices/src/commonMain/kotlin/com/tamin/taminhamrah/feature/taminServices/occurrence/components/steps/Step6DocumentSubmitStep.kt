@@ -101,6 +101,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
+import kotlinx.collections.immutable.toImmutableList
 
 /** Matches OrotezProtezViewModel's document constraints — kept in sync since occurrence has no equivalent ViewModel-side check (see [handlePicked] doc). */
 private const val MAX_DOCUMENT_SIZE_BYTES = 2 * 1024 * 1024
@@ -434,11 +435,8 @@ internal fun Step6DocumentSubmitStep(
     if (uiState.dialogs.showDocTypeSheet) {
         OccurrenceSelectionBottomSheet(
             title = stringResource(Res.string.occurrence_sheet_doc_type_title),
-            options = step.docTypes.map {
-                OccurrenceSheetOption(
-                    id = it.id.toString(),
-                    title = it.title
-                )
+            options = remember(step.docTypes) {
+                step.docTypes.map { OccurrenceSheetOption(id = it.id.toString(), title = it.title) }.toImmutableList()
             },
             selectedId = null,
             onSelect = { option ->

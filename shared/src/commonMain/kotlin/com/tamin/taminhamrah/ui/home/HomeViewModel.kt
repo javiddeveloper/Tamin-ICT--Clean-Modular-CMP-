@@ -108,7 +108,10 @@ class HomeViewModel(
                 handleFeatureClick(intent.flag)
             }
             is HomeIntent.OnHistorySummaryClick -> {
-                handleFeatureClick(FeatureFlag.WAGE_AND_HISTORY)
+                handleFeatureClick(FeatureFlag.COMBINED_RECORD)
+            }
+            is HomeIntent.OnSupportClick -> {
+                sendEvent(HomeEvent.NavigateToWeb("tel:1420"))
             }
             is HomeIntent.OnStoryChannelClick -> {
                 handleGatedSectionClick(FeatureFlag.STORIES_AND_SAVE_EVENTS) {

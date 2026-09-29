@@ -78,6 +78,7 @@ internal fun EmployerOnlineServicesHeader(
                     icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                     contentDescription = null,
                     onClick = onBackClicked,
+                    bordered = true
                 )
             },
             action = {
@@ -85,6 +86,7 @@ internal fun EmployerOnlineServicesHeader(
                     icon = vectorResource(Res.drawable.ic_tamin_search),
                     contentDescription = stringResource(Res.string.edict_search_title),
                     onClick = onSearchClicked,
+                    bordered = true
                 )
             },
         ) {

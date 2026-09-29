@@ -16,20 +16,23 @@ import com.tamin.taminhamrah.model.common.InsuranceTypePR
 import com.tamin.taminhamrah.model.common.ProvincePR
 import com.tamin.taminhamrah.model.contracts.BranchDN
 import com.tamin.taminhamrah.model.historyObjection.SaveNotExistRequestDN
+import com.tamin.taminhamrah.model.request.ApiQueryParamDN
+import com.tamin.taminhamrah.query.city.CityByProvinceQuery
 import com.tamin.taminhamrah.tools.errorHandling.toSingleLineMessage
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetConfig
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetItem
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetType
 import com.tamin.taminhamrah.useCases.contracts.GetBranchesUseCase
-import com.tamin.taminhamrah.useCases.common.GetCitiesByProvinceUseCase
+import com.tamin.taminhamrah.useCases.common.GetCitiesByProvincePageUseCase
 import com.tamin.taminhamrah.useCases.common.GetInsuranceTypesUseCase
-import com.tamin.taminhamrah.useCases.common.GetProvincesUseCase
+import com.tamin.taminhamrah.useCases.common.GetProvincesPageUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.GetHistoryObjectionNotExistRequestsUseCase
 import com.tamin.taminhamrah.useCases.historyObjection.SaveHistoryObjectionNotExistRequestUseCase
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import com.tamin.taminhamrah.util.currentTimeMillis
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
@@ -53,10 +56,12 @@ import taminx.core.core_ui.search_hint
 
 /** The end date must be at least this many days before today — see [dateRangeErrorMessage]. */
 private const val MIN_DAYS_BETWEEN_END_DATE_AND_TODAY = 60
+private const val ALL_PROVINCES_PAGE_SIZE = 100
+private const val ALL_CITIES_PAGE_SIZE = 200
 
 class HistoryObjectionStepperViewModel(
-    private val getProvincesUseCase: GetProvincesUseCase,
-    private val getCitiesByProvinceUseCase: GetCitiesByProvinceUseCase,
+    private val getProvincesUseCase: GetProvincesPageUseCase,
+    private val getCitiesByProvinceUseCase: GetCitiesByProvincePageUseCase,
     private val getBranchesUseCase: GetBranchesUseCase,
     private val getInsuranceTypesUseCase: GetInsuranceTypesUseCase,
     private val getHistoryObjectionNotExistRequestsUseCase: GetHistoryObjectionNotExistRequestsUseCase,
@@ -253,9 +258,13 @@ class HistoryObjectionStepperViewModel(
         emit(PartialState.BottomSheetStateChanged(config = null, target = null))
         emit(PartialState.CitiesLoading(true))
         try {
-            getCitiesByProvinceUseCase(province.provinceCode).collect { result ->
-                emit(PartialState.CitiesLoaded(result.cities.toCityPresentation().toPersistentList(), isStale = result.isStale))
+            val query = ApiQueryParamDN(filters = CityByProvinceQuery.filters(province.provinceCode), limit = ALL_CITIES_PAGE_SIZE)
+            getCitiesByProvinceUseCase(province.provinceCode, query).collect { page ->
+                // A cached page flags the list as possibly outdated; the network page that follows clears it.
+                emit(PartialState.CitiesLoaded(page.items.toCityPresentation().toPersistentList(), isStale = page.isFromCache))
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
         } finally {
@@ -271,6 +280,8 @@ class HistoryObjectionStepperViewModel(
             getBranchesUseCase(city.cityCode).collect { page ->
                 emit(PartialState.BranchesLoaded(page.items.toPersistentList()))
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
         } finally {
@@ -297,6 +308,8 @@ class HistoryObjectionStepperViewModel(
         try {
             saveHistoryObjectionNotExistRequestUseCase(request).first()
             emit(PartialState.SubmitSucceeded)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
         } finally {
@@ -368,6 +381,8 @@ class HistoryObjectionStepperViewModel(
                     emitAll(loadEditModeCitiesAndBranches(editData.provinceCode, editData.cityCode))
                 }
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             emit(PartialState.Error(e.toSingleLineMessage()))
         }
@@ -375,22 +390,39 @@ class HistoryObjectionStepperViewModel(
     }
 
     private fun loadProvinces(): Flow<PartialState> = flow {
-        val provinces = getProvincesUseCase().first().toProvincePresentation()
-        emit(PartialState.ProvincesLoaded(provinces.toPersistentList()))
+        try {
+            getProvincesUseCase(ApiQueryParamDN(limit = ALL_PROVINCES_PAGE_SIZE)).collect { page ->
+                emit(PartialState.ProvincesLoaded(page.items.toProvincePresentation().toPersistentList()))
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.toSingleLineMessage()))
+        }
     }
 
     private fun loadInsuranceTypes(): Flow<PartialState> = flow {
-        val insuranceTypes = getInsuranceTypesUseCase().first().toInsuranceTypePresentation()
-        emit(PartialState.InsuranceTypesLoaded(insuranceTypes.toPersistentList()))
+        try {
+            val insuranceTypes = getInsuranceTypesUseCase().first().toInsuranceTypePresentation()
+            emit(PartialState.InsuranceTypesLoaded(insuranceTypes.toPersistentList()))
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emit(PartialState.Error(e.toSingleLineMessage()))
+        }
     }
 
     private fun loadEditModeCitiesAndBranches(provinceCode: String?, cityCode: String?): Flow<PartialState> = flow {
         if (provinceCode != null) {
             emit(PartialState.CitiesLoading(true))
             try {
-                getCitiesByProvinceUseCase(provinceCode).collect { result ->
-                    emit(PartialState.CitiesLoaded(result.cities.toCityPresentation().toPersistentList(), isStale = result.isStale))
+                val query = ApiQueryParamDN(filters = CityByProvinceQuery.filters(provinceCode), limit = ALL_CITIES_PAGE_SIZE)
+                getCitiesByProvinceUseCase(provinceCode, query).collect { page ->
+                    // A cached page flags the list as possibly outdated; the network page that follows clears it.
+                    emit(PartialState.CitiesLoaded(page.items.toCityPresentation().toPersistentList(), isStale = page.isFromCache))
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 emit(PartialState.Error(e.toSingleLineMessage()))
             } finally {
@@ -403,6 +435,8 @@ class HistoryObjectionStepperViewModel(
                 getBranchesUseCase(cityCode).collect { page ->
                     emit(PartialState.BranchesLoaded(page.items.toPersistentList()))
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 emit(PartialState.Error(e.toSingleLineMessage()))
             } finally {
@@ -456,7 +490,12 @@ class HistoryObjectionStepperViewModel(
             editRequestNumber = partialState.editRequestNumber,
             editRowIndex = partialState.editRowIndex,
         )
-        is PartialState.Loading -> currentState.copy(isLoading = partialState.isLoading, error = null)
+        // Clear the error when a load starts, not when it ends — otherwise the Loading(false) that
+        // follows a failure wipes the error it just reported.
+        is PartialState.Loading -> currentState.copy(
+            isLoading = partialState.isLoading,
+            error = if (partialState.isLoading) null else currentState.error,
+        )
         is PartialState.Submitting -> currentState.copy(isSubmitting = partialState.isSubmitting)
         PartialState.SubmitSucceeded -> currentState.copy(hasSubmitted = true)
         is PartialState.Error -> currentState.copy(error = partialState.message)

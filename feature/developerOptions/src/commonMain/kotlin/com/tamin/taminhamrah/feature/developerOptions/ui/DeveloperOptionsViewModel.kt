@@ -32,6 +32,11 @@ class DeveloperOptionsViewModel(
                 sendIntent(DeveloperOptionsIntent.OnPaymentMockModeUpdated(mode))
             }
         }
+        viewModelScope.launch {
+            developerOptionsRepository.observeAgentMockMode().collect { mode ->
+                sendIntent(DeveloperOptionsIntent.OnAgentMockModeUpdated(mode))
+            }
+        }
     }
 
     override fun handleIntent(intent: DeveloperOptionsIntent): Flow<PartialState> {
@@ -66,6 +71,14 @@ class DeveloperOptionsViewModel(
                 emit(PartialState.SetPaymentMockMode(intent.mode))
             }
 
+            is DeveloperOptionsIntent.OnAgentMockModeSelected -> flow {
+                developerOptionsRepository.setAgentMockMode(intent.mode)
+            }
+
+            is DeveloperOptionsIntent.OnAgentMockModeUpdated -> flow {
+                emit(PartialState.SetAgentMockMode(intent.mode))
+            }
+
             is DeveloperOptionsIntent.OnResetClicked -> flow {
                 developerOptionsRepository.clearOverride(intent.key)
                 emit(PartialState.SetEditingKey(null))
@@ -82,6 +95,7 @@ class DeveloperOptionsViewModel(
         is PartialState.SetItems -> currentState.copy(items = partialState.items)
         is PartialState.SetEditingKey -> currentState.copy(editingKey = partialState.key)
         is PartialState.SetPaymentMockMode -> currentState.copy(paymentMockMode = partialState.mode)
+        is PartialState.SetAgentMockMode -> currentState.copy(agentMockMode = partialState.mode)
     }
 
     override fun createErrorState(message: String): PartialState = PartialState.Error(message)

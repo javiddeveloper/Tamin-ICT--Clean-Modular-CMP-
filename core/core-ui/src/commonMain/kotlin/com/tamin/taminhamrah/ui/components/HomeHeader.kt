@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
@@ -42,6 +43,8 @@ import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
 import com.tamin.taminhamrah.ui.theme.shimmer
+import com.tamin.taminhamrah.ui.toparea.TopAreaState
+import com.tamin.taminhamrah.ui.toparea.topAreaHide
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
@@ -83,6 +86,12 @@ fun HomeHeader(
     modifier: Modifier = Modifier,
     onSupportClick: () -> Unit = {},
     onShieldClick: () -> Unit = {},
+    // Folds the name + status-chips row away entirely as the caller's scroll collapses this
+    // header, the same split ActiveRelationHeader/HistoryJobInfoHeader use: the shield/title/
+    // support row above is never wrapped in a topArea behavior, so it stays fixed at a constant
+    // height and is the one thing (besides the caller's ask-bar) still visible once collapsed.
+    // Null keeps this header fully static, same as before TopArea existed.
+    topAreaState: TopAreaState? = null,
 ) {
     val colors = LocalTaminColors.current
     val isDark = colors == DarkTaminColors
@@ -123,52 +132,64 @@ fun HomeHeader(
             )
         }
 
-        Box(modifier = Modifier.padding(top = Spacing.xs)) {
-            Text(
-                text = fullName ?: "نام و نام خانوادگی",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = if (fullName == null) Color.Transparent else colors.onGradient,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-
-            if (fullName == null) {
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .clip(RoundedCornerShape(CornerRadius.x2l))
-                        .shimmer(
-                            colorBase = Color.White.copy(alpha = 0.14f),
-                            colorHighlight = Color.White.copy(alpha = 0.32f),
-                        )
-                )
-            }
-        }
-
-        val darmanLabel = when (hasDarmanCoverage) {
-            true -> stringResource(Res.string.home_chip_darman_covered)
-            false -> stringResource(Res.string.home_chip_darman_uncovered)
-            null -> null
-        }
-        val relationLabel = when (hasActiveRelation) {
-            true -> stringResource(Res.string.home_chip_relation_active)
-            false -> stringResource(Res.string.home_chip_relation_inactive)
-            null -> null
-        }
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                .let { base ->
+                    // clipToBounds sits outside topAreaHide so it clips to the *shrinking*
+                    // reported size as this block folds, not its natural full height --
+                    // otherwise the still-fading pixels would overflow past the fixed row above.
+                    if (topAreaState != null) base.clipToBounds().topAreaHide(topAreaState) else base
+                },
+            verticalArrangement = Arrangement.spacedBy(Spacing.md),
         ) {
-            when (hasActiveRelation) {
-                true, false -> relationLabel?.let { HeaderStatusChip(text = it, dot = true, isPositive = hasActiveRelation) }
-                null -> HeaderStatusChip(text = stringResource(Res.string.home_chip_relation_active), dot = true, isPositive = true, isLoading = true)
+            Box(modifier = Modifier.padding(top = Spacing.xs)) {
+                Text(
+                    text = fullName ?: "نام و نام خانوادگی",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = if (fullName == null) Color.Transparent else colors.onGradient,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+
+                if (fullName == null) {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .clip(RoundedCornerShape(CornerRadius.x2l))
+                            .shimmer(
+                                colorBase = Color.White.copy(alpha = 0.14f),
+                                colorHighlight = Color.White.copy(alpha = 0.32f),
+                            )
+                    )
+                }
             }
-            when (hasDarmanCoverage) {
-                true, false -> darmanLabel?.let { HeaderStatusChip(text = it, dot = false, isPositive = hasDarmanCoverage) }
-                null -> HeaderStatusChip(text = stringResource(Res.string.home_chip_darman_covered), dot = false, isPositive = true, isLoading = true)
+
+            val darmanLabel = when (hasDarmanCoverage) {
+                true -> stringResource(Res.string.home_chip_darman_covered)
+                false -> stringResource(Res.string.home_chip_darman_uncovered)
+                null -> null
+            }
+            val relationLabel = when (hasActiveRelation) {
+                true -> stringResource(Res.string.home_chip_relation_active)
+                false -> stringResource(Res.string.home_chip_relation_inactive)
+                null -> null
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            ) {
+                when (hasActiveRelation) {
+                    true, false -> relationLabel?.let { HeaderStatusChip(text = it, dot = true, isPositive = hasActiveRelation) }
+                    null -> HeaderStatusChip(text = stringResource(Res.string.home_chip_relation_active), dot = true, isPositive = true, isLoading = true)
+                }
+                when (hasDarmanCoverage) {
+                    true, false -> darmanLabel?.let { HeaderStatusChip(text = it, dot = false, isPositive = hasDarmanCoverage) }
+                    null -> HeaderStatusChip(text = stringResource(Res.string.home_chip_darman_covered), dot = false, isPositive = true, isLoading = true)
+                }
             }
         }
     }

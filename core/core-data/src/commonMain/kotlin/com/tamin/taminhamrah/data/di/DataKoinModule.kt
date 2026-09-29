@@ -61,12 +61,18 @@ import com.tamin.taminhamrah.data.repository.InspectionRepositoryImpl
 import com.tamin.taminhamrah.repository.inspection.InspectionRepository
 import com.tamin.taminhamrah.data.repository.occurrence.OccurrenceRepositoryImpl
 import com.tamin.taminhamrah.repository.occurrence.OccurrenceRepository
+import com.tamin.taminhamrah.data.repository.funeralAllowance.FuneralAllowanceRepositoryImpl
+import com.tamin.taminhamrah.repository.funeralAllowance.FuneralAllowanceRepository
 import com.tamin.taminhamrah.data.repository.historyObjection.HistoryObjectionRepositoryImpl
 import com.tamin.taminhamrah.repository.historyObjection.HistoryObjectionRepository
+import com.tamin.taminhamrah.data.repository.objectionInsurance.ObjectionInsuranceRepositoryImpl
+import com.tamin.taminhamrah.repository.objectionInsurance.ObjectionInsuranceRepository
 import com.tamin.taminhamrah.data.repository.employerInfo.EmployerInfoRepositoryImpl
 import com.tamin.taminhamrah.repository.employerInfo.EmployerInfoRepository
 import com.tamin.taminhamrah.data.repository.workersPayment.WorkersPaymentRepositoryImpl
 import com.tamin.taminhamrah.repository.workersPayment.WorkersPaymentRepository
+import com.tamin.taminhamrah.data.repository.constructionInsurance.ConstructionInsuranceRepositoryImpl
+import com.tamin.taminhamrah.repository.constructionInsurance.ConstructionInsuranceRepository
 import com.tamin.taminhamrah.repository.home.HomeRepository
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
@@ -103,6 +109,7 @@ val dataKoinModule = module {
     singleOf(::OccurrenceRepositoryImpl) { bind<OccurrenceRepository>() }
     singleOf(::InspectionRepositoryImpl) { bind<InspectionRepository>() }
     singleOf(::HistoryObjectionRepositoryImpl) { bind<HistoryObjectionRepository>() }
+    singleOf(::ObjectionInsuranceRepositoryImpl) { bind<ObjectionInsuranceRepository>() }
     singleOf(::EmployerInfoRepositoryImpl) { bind<EmployerInfoRepository>() }
     singleOf(::PregnancyPayRepositoryImpl) { bind<PregnancyPayRepository>() }
     singleOf(::InquiryEducationRepositoryImpl) { bind<InquiryEducationRepository>() }
@@ -111,4 +118,6 @@ val dataKoinModule = module {
     singleOf(::WeddingPresentRepositoryImpl) { bind<WeddingPresentRepository>() }
     singleOf(::StoryRepositoryImpl) { bind<StoryRepository>() }
     single<HomeRepository> { HomeRepositoryImpl(get(), get(), get(), get(), get(), get()) }
+    singleOf(::ConstructionInsuranceRepositoryImpl) { bind<ConstructionInsuranceRepository>() }
+    singleOf(::FuneralAllowanceRepositoryImpl) { bind<FuneralAllowanceRepository>() }
 }

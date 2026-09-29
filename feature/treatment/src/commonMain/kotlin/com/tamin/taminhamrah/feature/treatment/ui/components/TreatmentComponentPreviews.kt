@@ -214,6 +214,7 @@ private fun TimelineChromePreview() {
                 background = taminHeroGradient(LocalTaminColors.current.treatmentHubStops),
                 navigationIcon = {
                     TaminTopAppBarButton(
+                        bordered = true,
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                         contentDescription = "برگشت",
                         onClick = {},
@@ -340,6 +341,7 @@ private fun MedicalCentersPreview() {
                 background = taminHeroGradient(colors.treatmentHubStops),
                 navigationIcon = {
                     TaminTopAppBarButton(
+                        bordered = true,
                         icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                         contentDescription = "برگشت",
                         onClick = {},

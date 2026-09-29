@@ -42,6 +42,7 @@ intentChannel (UNLIMITED)
 Details that bite:
 
 - **`flatMapMerge` means intents run concurrently, not sequentially.** If ordering matters, enforce it yourself inside `handleIntent`. It also means two quick taps can start two in-flight requests — guard with `if (state.isLoading) return@flow` where a duplicate submission would be harmful.
+- **Do not read `uiState` to decide the next partial inside a `merge`d producer.** `merge` buffers, so a partial just `emit`ted is not reduced yet. `ContractFlowViewModel`'s registration gate keeps its own facts (`preflightFacts`) and decides from those.
 - `catch` is applied per intent, so one failure does not tear down the pipeline. The default error message is `"خطای نامشخص"`.
 - `eventChannel` is `BUFFERED` and consumed via `receiveAsFlow`, so it has a single consumer.
 - `doAsyncTask` sets no custom dispatcher (there is a `// todo` in the source about this) — move IO work to an appropriate dispatcher yourself.
@@ -55,6 +56,6 @@ Good examples to copy: `feature/profile/.../ui/identity/contract/IdentityInContr
 
 `turbine` is available in `commonTest` of every feature module automatically (via `TaminHamrahKmpFeaturePlugin`) — use it to assert on `uiState` and `events`.
 
-⚠️ **`getString(Res.string...)` inside a ViewModel's `handleIntent`/validation path is unreliable under `testDebugUnitTest`**, even with `:feature:orotez-protez`'s own Robolectric setup (`unitTests.isIncludeAndroidResources = true` + a staged `robolectric-android-all` jar) copied verbatim into the module. The exception it throws gets caught by the `flatMapMerge.catch` in `BaseViewModel` and turned into the generic error `PartialState` instead of the specific one you emitted before/after the `getString` call — confirmed independently in `IssuanceCertificateViewModel` and again while building `:feature:pregnancyPay`. Neither `:feature:orotez-protez`'s nor `:feature:pregnancyPay`'s test suites assert on the specific message/partial state produced by such a call; they only assert on surrounding, `getString`-independent behavior (e.g. "step didn't advance"). Before writing a test that depends on one, run it first — don't assume Robolectric fixes it.
+⚠️ **`getString(Res.string...)` inside a ViewModel's `handleIntent`/validation path is unavailable in JVM unit tests.** The call throws, `flatMapMerge.catch` turns that into the generic error `PartialState`, and the specific message is lost. Inject `resolveString: suspend (StringResource) -> String = { getString(it) }` and stub it in tests (`GirlSurvivorViewModel`, `ContractFlowViewModel`). Do not register that parameter with `viewModelOf` — Koin tries to resolve the suspend function and creation crashes. Construct the ViewModel in the module and leave `resolveString` off so the default is used.
 
 Related: [[Overview]] · [[Navigation]] · [[Adding-a-Feature]]

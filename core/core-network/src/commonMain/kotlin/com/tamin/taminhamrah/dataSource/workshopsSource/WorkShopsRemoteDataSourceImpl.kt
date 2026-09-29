@@ -1,5 +1,7 @@
 package com.tamin.taminhamrah.dataSource.workshopsSource
 
+import kotlinx.coroutines.CancellationException
+import io.ktor.serialization.JsonConvertException
 import com.tamin.taminhamrah.apiService.WorkShopsApiService
 import com.tamin.taminhamrah.model.BaseUrlKey
 import com.tamin.taminhamrah.model.personal.pdfDownload.InputStreamDTO
@@ -64,6 +66,9 @@ import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
+import io.ktor.client.plugins.HttpRequestTimeoutException
+import io.ktor.client.network.sockets.ConnectTimeoutException
+import io.ktor.client.network.sockets.SocketTimeoutException
 
 /** `serviceName` the `request-ticket` endpoint expects for the Employer → Online Services flow. */
 private const val EMPLOYER_ESERVICES_AGREEMENT = "employerEservicesAgreement"
@@ -453,12 +458,30 @@ internal class WorkShopsRemoteDataSourceImpl(
 
     /**
      * The one error contract every call in this source shares: business failures keep the server's
-     * own message, anything else (transport, serialization) surfaces as a connection error.
+     * own message, a reply that cannot be read is a server error, anything else a connection error.
      */
     private suspend fun <T> call(block: suspend () -> T): T = try {
         block()
     } catch (e: TaminErrorUriException) {
         throw errorParser.parseGeneralError(e)
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: JsonConvertException) {
+        throw errorParser.parseGeneralError(
+            TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+        )
+    } catch (e: HttpRequestTimeoutException) {
+        throw errorParser.parseGeneralError(
+            TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+        )
+    } catch (e: ConnectTimeoutException) {
+        throw errorParser.parseGeneralError(
+            TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+        )
+    } catch (e: SocketTimeoutException) {
+        throw errorParser.parseGeneralError(
+            TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+        )
     } catch (e: Exception) {
         throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
     }
@@ -470,6 +493,24 @@ internal class WorkShopsRemoteDataSourceImpl(
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
@@ -489,6 +530,24 @@ internal class WorkShopsRemoteDataSourceImpl(
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
@@ -504,6 +563,24 @@ internal class WorkShopsRemoteDataSourceImpl(
             response.extractData()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
@@ -519,6 +596,24 @@ internal class WorkShopsRemoteDataSourceImpl(
             response.extractMessage()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
@@ -529,6 +624,24 @@ internal class WorkShopsRemoteDataSourceImpl(
             apiService.validateLegalTicket(ticket).extractMessage()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
@@ -539,6 +652,24 @@ internal class WorkShopsRemoteDataSourceImpl(
             apiService.submitLegalRepresentative(ticket, request).extractMessage()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }
@@ -549,6 +680,24 @@ internal class WorkShopsRemoteDataSourceImpl(
             apiService.deleteLegalRepresentative(ticket, stackId).extractMessage()
         } catch (e: TaminErrorUriException) {
             throw errorParser.parseGeneralError(e)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: JsonConvertException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.INTERNAL_ERROR)
+            )
+        } catch (e: HttpRequestTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: ConnectTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
+        } catch (e: SocketTimeoutException) {
+            throw errorParser.parseGeneralError(
+                TaminErrorUriException(ErrorUri.SERVICE_TIMEOUT)
+            )
         } catch (e: Exception) {
             throw errorParser.parseGeneralError(TaminErrorUriException(ErrorUri.NO_CONNECTION_ERROR))
         }

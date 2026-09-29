@@ -17,6 +17,12 @@ import com.tamin.taminhamrah.useCases.pension.GetPensionerIdUseCase
 import com.tamin.taminhamrah.useCases.pension.SendEdictPensionerToMyInboxUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import org.jetbrains.compose.resources.StringResource
+import com.tamin.taminhamrah.tools.errorHandling.ErrorUri
+import com.tamin.taminhamrah.tools.errorHandling.taminErrorUriOrNull
+import taminx.core.core_ui.Res
+import taminx.core.core_ui.edict_error_not_found_for_year
+import taminx.core.core_ui.edict_error_pdf_download
 
 class EdictViewModel(
     private val getEdictPensionerUseCase: GetEdictPensionerUseCase,
@@ -59,7 +65,7 @@ class EdictViewModel(
                         } catch (e: Exception) {
                             val msg = e.toSingleLineMessage()
                             emit(PartialState.Error(msg))
-                            sendEvent(EdictEvent.ShowToast(msg))
+                            sendEvent(e.toEdictToast(Res.string.edict_error_not_found_for_year))
                         }
                     }
                 } catch (e: Exception) {
@@ -91,7 +97,7 @@ class EdictViewModel(
                 } catch (e: Exception) {
                     val msg = e.toSingleLineMessage()
                     emit(PartialState.Error(msg))
-                    sendEvent(EdictEvent.ShowToast(msg))
+                    sendEvent(e.toEdictToast(Res.string.edict_error_not_found_for_year))
                 }
             }
             is EdictIntent.RequestSendToInbox -> {
@@ -136,7 +142,7 @@ class EdictViewModel(
                     val msg = e.toSingleLineMessage()
                     emit(PartialState.Error(msg))
                     emit(PartialState.ViewerDownloadFailed)
-                    sendEvent(EdictEvent.ShowToast(msg))
+                    sendEvent(e.toEdictToast(Res.string.edict_error_pdf_download))
                 }
             }
             is EdictIntent.DismissPdfViewer -> {
@@ -182,7 +188,7 @@ class EdictViewModel(
                 } catch (e: Exception) {
                     val msg = e.toSingleLineMessage()
                     emit(PartialState.Error(msg))
-                    sendEvent(EdictEvent.ShowToast(msg))
+                    sendEvent(e.toEdictToast(Res.string.edict_error_not_found_for_year))
                 }
             }
             is EdictIntent.ClearDateFilter -> {
@@ -203,7 +209,7 @@ class EdictViewModel(
                 } catch (e: Exception) {
                     val msg = e.toSingleLineMessage()
                     emit(PartialState.Error(msg))
-                    sendEvent(EdictEvent.ShowToast(msg))
+                    sendEvent(e.toEdictToast(Res.string.edict_error_not_found_for_year))
                 }
             }
             is EdictIntent.DismissNoPensionerDialog -> {
@@ -263,4 +269,15 @@ class EdictViewModel(
 
     private fun defaultEdictStartDate(): String =
         "${PersianDateFormatter.currentJalaliYear()}01"
+
+    /**
+     * The old app's rule for edict reads: a server error means there is no edict (or no file) for
+     * that choice, so it gets its own words instead of the generic server copy.
+     */
+    private fun Exception.toEdictToast(onServerError: StringResource): EdictEvent =
+        if (taminErrorUriOrNull() == ErrorUri.INTERNAL_ERROR) {
+            EdictEvent.ShowToastRes(onServerError)
+        } else {
+            EdictEvent.ShowToast(toSingleLineMessage())
+        }
 }

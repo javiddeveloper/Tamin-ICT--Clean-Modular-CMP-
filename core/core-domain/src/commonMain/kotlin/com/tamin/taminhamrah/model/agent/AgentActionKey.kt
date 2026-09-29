@@ -157,7 +157,7 @@ fun AgentActionKey.toFeatureFlag(): FeatureFlag? = when (this) {
     AgentActionKey.HISTORY_JOB_INFOS,
     AgentActionKey.HISTORY_JOB_INFOS_LAST,
     AgentActionKey.HISTORY_SERVICES,
-    AgentActionKey.HISTORY_SERVICES_LAST -> FeatureFlag.WAGE_AND_HISTORY
+    AgentActionKey.HISTORY_SERVICES_LAST -> FeatureFlag.COMBINED_RECORD
 
     // Pension
     AgentActionKey.PENSION_INQUIRY_ALL,
@@ -173,7 +173,7 @@ fun AgentActionKey.toFeatureFlag(): FeatureFlag? = when (this) {
 
     AgentActionKey.BOOKLET -> FeatureFlag.DESERVED_TREATMENT
 
-    AgentActionKey.TREATMENT_COST -> FeatureFlag.DESERVED_TREATMENT_101
+    AgentActionKey.TREATMENT_COST -> FeatureFlag.DESERVED_TREATMENT_PENSIONER
 
     // Wedding Gift
     AgentActionKey.WEDDING_PRESENT,
@@ -216,7 +216,7 @@ fun AgentActionKey.toFeatureFlag(): FeatureFlag? = when (this) {
     AgentActionKey.LAW -> FeatureFlag.LAWS
 
     // Disability / survivor pension
-    AgentActionKey.DISABILITY_PENSION -> FeatureFlag.DISABILITY_PENSION
+    AgentActionKey.DISABILITY_PENSION -> FeatureFlag.DISABILITY_PENSION_PENSIONER
     AgentActionKey.PENSION_SURVIVOR -> FeatureFlag.REQUEST_PENSION_BY_SURVIVOR
 
     // Illness

@@ -62,6 +62,26 @@ import androidx.room.TypeConverters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 
+import com.tamin.taminhamrah.data.local.entity.ConstructionFileEntity
+import com.tamin.taminhamrah.data.local.entity.ConstructionFilePageEntity
+import com.tamin.taminhamrah.data.local.entity.ContractAffairPageEntity
+import com.tamin.taminhamrah.data.local.dao.ContractAffairDao
+import com.tamin.taminhamrah.data.local.dao.InspectionDao
+import com.tamin.taminhamrah.data.local.dao.ConstructionInsurancePageDao
+import com.tamin.taminhamrah.data.local.dao.EmployerServicesPageDao
+import com.tamin.taminhamrah.data.local.dao.JobTitlePageDao
+import com.tamin.taminhamrah.data.local.entity.JobTitlePageEntity
+import com.tamin.taminhamrah.data.local.entity.WorkshopContractRowPageEntity
+import com.tamin.taminhamrah.data.local.entity.WorkshopWithoutContractPageEntity
+import com.tamin.taminhamrah.data.local.entity.ConstructionBeneficiaryPageEntity
+import com.tamin.taminhamrah.data.local.entity.InstallmentConstructionPageEntity
+import com.tamin.taminhamrah.data.local.entity.InstallmentDebitPageEntity
+import com.tamin.taminhamrah.data.local.entity.InstallmentLetterPageEntity
+import com.tamin.taminhamrah.data.local.entity.InspectionBranchPageEntity
+import com.tamin.taminhamrah.data.local.entity.InspectionJobPageEntity
+import com.tamin.taminhamrah.data.local.entity.InspectionPerformedPageEntity
+import com.tamin.taminhamrah.data.local.dao.ConstructionFileDao
+
 @Database(
     entities = [
         TestEntity::class,
@@ -97,9 +117,24 @@ import kotlinx.coroutines.IO
         HistoryJobInfoEntity::class,
         HistoryYearEntity::class,
         HistoryWageRowEntity::class,
+        ConstructionFileEntity::class,
+        ConstructionFilePageEntity::class,
+        ContractAffairPageEntity::class,
+        InspectionPerformedPageEntity::class,
+        InspectionBranchPageEntity::class,
+        InspectionJobPageEntity::class,
+        ConstructionBeneficiaryPageEntity::class,
+        InstallmentLetterPageEntity::class,
+        InstallmentDebitPageEntity::class,
+        InstallmentConstructionPageEntity::class,
+        WorkshopWithoutContractPageEntity::class,
+        WorkshopContractRowPageEntity::class,
+        JobTitlePageEntity::class,
         HomeContentEntity::class,
     ],
-    version = 4,
+    // v5: FeatureFlag ids changed; cached home_content stored the old flagId.
+    // v6: construction_file_pages added (ConstructionFilePageEntity).
+    version = 6,
 )
 @ConstructedBy(TaminXDatabaseConstructor::class)
 @TypeConverters(TaminHamrahConverters::class)
@@ -120,9 +155,14 @@ expect abstract class TaminXDatabase : RoomDatabase {
     abstract fun agentChatDao(): AgentChatDao
     abstract fun versionHistoryDao(): VersionHistoryDao
     abstract fun historyJobInfoDao(): HistoryJobInfoDao
-
     abstract fun historyCacheDao(): HistoryCacheDao
     abstract fun homeContentDao(): HomeContentDao
+    abstract fun constructionFileDao(): ConstructionFileDao
+    abstract fun contractAffairDao(): ContractAffairDao
+    abstract fun inspectionDao(): InspectionDao
+    abstract fun constructionInsurancePageDao(): ConstructionInsurancePageDao
+    abstract fun employerServicesPageDao(): EmployerServicesPageDao
+    abstract fun jobTitlePageDao(): JobTitlePageDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT")

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,10 +16,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -183,7 +186,14 @@ fun SettlementRequestContent(
 ) {
     val step = state.step
     val colors = LocalTaminColors.current
-    Column(modifier = modifier.fillMaxSize()) {
+    // The form's image previews — the documents step's and the conditions' image. Up here, outside the
+    // steps, so going on to the next step
+    // and back does not throw them away with the panel.
+    val documentPreviews = remember { mutableStateMapOf<String, ByteArray>() }
+    // Rises with the keyboard: the steps' scroll area shrinks to what is left above it, and the field
+    // being typed in is scrolled into that space instead of sitting behind the keyboard. The footer's
+    // navigation-bar padding sees the inset already consumed here, so it does not pad a second time.
+    Column(modifier = modifier.fillMaxSize().imePadding()) {
         SettlementHeader(
             step = step,
             workshopName = contract?.card?.name,
@@ -246,6 +256,7 @@ fun SettlementRequestContent(
                     types = state.documentTypes,
                     isUploading = state.isUploading,
                     isError = SettlementField.DOCUMENTS in state.errors,
+                    previewCache = documentPreviews,
                     onIntent = onIntent,
                 )
 
@@ -268,6 +279,7 @@ fun SettlementRequestContent(
                         gross = gross,
                         isUploading = state.isUploading,
                         errors = state.errors,
+                        previewCache = documentPreviews,
                         onIntent = onIntent,
                     )
                 }
@@ -337,6 +349,7 @@ private fun SettlementHeader(
                 icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                 contentDescription = null,
                 onClick = onBack,
+                bordered = true,
             )
         },
         action = {
@@ -344,6 +357,7 @@ private fun SettlementHeader(
                 icon = vectorResource(Res.drawable.ic_tamin_cross),
                 contentDescription = null,
                 onClick = onClose,
+                bordered = true,
             )
         },
     ) {
@@ -596,6 +610,7 @@ private fun SettlementDocumentsStep(
     types: ImmutableList<WorkshopDocumentType>,
     isUploading: Boolean,
     isError: Boolean,
+    previewCache: SnapshotStateMap<String, ByteArray>,
     onIntent: (SettlementRequestIntent) -> Unit,
 ) {
     SettlementHint(stringResource(Res.string.settlement_documents_hint))
@@ -610,6 +625,7 @@ private fun SettlementDocumentsStep(
         isUploading = isUploading,
         isError = isError,
         acceptsPdf = true,
+        previewCache = previewCache,
     )
 }
 

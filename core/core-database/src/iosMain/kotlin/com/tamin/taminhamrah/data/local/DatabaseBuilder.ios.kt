@@ -20,6 +20,12 @@ import platform.Foundation.NSHomeDirectory
 import com.tamin.taminhamrah.data.local.dao.HistoryCacheDao
 import com.tamin.taminhamrah.data.local.dao.HistoryJobInfoDao
 import com.tamin.taminhamrah.data.local.dao.VersionHistoryDao
+import com.tamin.taminhamrah.data.local.dao.ConstructionFileDao
+import com.tamin.taminhamrah.data.local.dao.ContractAffairDao
+import com.tamin.taminhamrah.data.local.dao.InspectionDao
+import com.tamin.taminhamrah.data.local.dao.ConstructionInsurancePageDao
+import com.tamin.taminhamrah.data.local.dao.EmployerServicesPageDao
+import com.tamin.taminhamrah.data.local.dao.JobTitlePageDao
 
 @Suppress("ACTUAL_ANNOTATIONS_NOT_MATCH_EXPECT")
 actual abstract class TaminXDatabase : RoomDatabase() {
@@ -40,6 +46,12 @@ actual abstract class TaminXDatabase : RoomDatabase() {
     actual abstract fun historyJobInfoDao(): HistoryJobInfoDao
     actual abstract fun historyCacheDao(): HistoryCacheDao
     actual abstract fun versionHistoryDao(): VersionHistoryDao
+    actual abstract fun constructionFileDao(): ConstructionFileDao
+    actual abstract fun contractAffairDao(): ContractAffairDao
+    actual abstract fun inspectionDao(): InspectionDao
+    actual abstract fun constructionInsurancePageDao(): ConstructionInsurancePageDao
+    actual abstract fun employerServicesPageDao(): EmployerServicesPageDao
+    actual abstract fun jobTitlePageDao(): JobTitlePageDao
 }
 
 fun getDatabaseBuilder(): RoomDatabase.Builder<TaminXDatabase> {

@@ -5,7 +5,7 @@ import com.tamin.taminhamrah.data.feature.FeatureManagerImpl
 import com.tamin.taminhamrah.data.mapper.toDomain
 import com.tamin.taminhamrah.dataSource.commonSource.mockMenuData
 import com.tamin.taminhamrah.model.common.FeatureFlag
-import com.tamin.taminhamrah.model.common.FeatureStatus
+import com.tamin.taminhamrah.model.common.featureStatusOf
 import com.tamin.taminhamrah.useCases.common.DedicatedScreenFlags
 import com.tamin.taminhamrah.useCases.common.GetVisibleServicesUseCase
 import com.tamin.taminhamrah.useCases.common.ServiceCatalogAudience
@@ -34,12 +34,10 @@ class RealMenuFeatureCoverageTest {
     }
 
     /**
-     * Every real menu row is `ACTIVE` except id 42 (`OBJECTION_INSURANCE_HISTORY`), which is
-     * deliberately `TEMPORARY_DISABLED` in the mock. Every flag *with a row at all* must resolve to
-     * exactly that — `Enabled` across the board is what a flag missing from the menu would *also*
-     * look like from `isFeatureEnabled()` alone, so this reads the full `FeatureStatus`, not just a
-     * boolean. [KnownAliasesWithNoOwnMockRow] genuinely have no row (see that constant) and resolve
-     * `Disabled(null)`, which is correct for them, not a coverage gap.
+     * `FeatureManagerImpl.getFeatureStatus()` must agree, flag by flag, with what the real menu's
+     * own row actually says (`featureStatusOf()`, the same helper the home screen uses against an
+     * already-loaded menu) — not a fallback that happens to look the same for most rows. A flag with
+     * no row at all resolves `Disabled(null)`, which is correct for it, not a coverage gap.
      */
     @Test
     fun `every FeatureFlag resolves the real menu's own status, not a fallback`() = runTest {
@@ -47,14 +45,8 @@ class RealMenuFeatureCoverageTest {
 
         FeatureFlag.entries.forEach { flag ->
             val status = manager.getFeatureStatus(flag).first()
-            when {
-                flag in KnownAliasesWithNoOwnMockRow ->
-                    assertTrue(status is FeatureStatus.Disabled, "expected $flag (no mock row) to be Disabled, was $status")
-                flag == FeatureFlag.OBJECTION_INSURANCE_HISTORY ->
-                    assertTrue(status is FeatureStatus.TemporaryDisabled, "expected $flag to be TemporaryDisabled, was $status")
-                else ->
-                    assertTrue(status is FeatureStatus.Enabled, "expected $flag to be Enabled, was $status")
-            }
+            val expected = realMenu.featureStatusOf(flag)
+            assertEquals(expected, status, "expected $flag to resolve $expected (the real menu's own row), was $status")
         }
     }
 
@@ -84,13 +76,12 @@ class RealMenuFeatureCoverageTest {
         /**
          * Kept in sync with `MockMenuDataCoverageTest` (core-network) by hand — different modules'
          * test source sets aren't visible to each other. Pre-existing, documented gaps
-         * (`docs/vault/Feature-Flags.md` §5f): legacy/alias ids nothing currently routes to on
-         * their own, with no row in `mockMenuData` at all.
+         * (`docs/vault/Feature-Flags.md` §5f): legacy/alias ids nothing currently routes to on their
+         * own, with no row in `mockMenuData` at all.
          */
         val KnownAliasesWithNoOwnMockRow = setOf(
-            FeatureFlag.CALCULATE_WAGE_PENSION_109,
-            FeatureFlag.OBJECTION_INSURANCE_HISTORY_45,
-            FeatureFlag.PRESCRIPTION_102,
+            FeatureFlag.OBJECTION_INSURANCE_HISTORY_LEGACY,
+            FeatureFlag.PRESCRIPTION_PENSIONER,
         )
     }
 }

@@ -39,6 +39,19 @@ data class PagedListState<T>(
      */
     val total: Int = 0,
 ) {
+    /**
+     * The count to print beside the list: [total] less the repeats [items] has already dropped.
+     *
+     * The service counts every row it holds, including a row identical to one already shown — the
+     * same workshop under two agreements — which [loaded] keeps off the list. Printing [total] put
+     * ۹ over a list of ۱. Every repeat that has arrived is known and comes off here; one still on
+     * a page not yet paged in comes off when that page lands. So a list that fits one page, or has
+     * been scrolled to its end, prints exactly the rows it shows, and a longer one never counts a
+     * row the list has hidden. Never fewer than are shown, whatever the service reports.
+     */
+    val distinctTotal: Int
+        get() = (total - (receivedCount - items.size).coerceAtLeast(0)).coerceAtLeast(items.size)
+
     /** Nothing has arrived yet — the skeleton stands in for the list. */
     val isFirstLoad: Boolean get() = isLoading && items.isEmpty()
 

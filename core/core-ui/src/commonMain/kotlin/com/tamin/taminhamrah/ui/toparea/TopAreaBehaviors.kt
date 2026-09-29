@@ -85,6 +85,13 @@ fun Modifier.topAreaHide(
     }
 }
 
+/** Grows a child from zero up to [height] as [state] folds -- the inverse of [topAreaHide]. */
+fun Modifier.topAreaReveal(state: TopAreaState, height: Dp): Modifier = layout { measurable, constraints ->
+    val revealedPx = (height.roundToPx() * state.progress).roundToInt().coerceAtLeast(0)
+    val placeable = measurable.measure(constraints.copy(minHeight = 0, maxHeight = revealedPx))
+    layout(placeable.width, revealedPx) { placeable.place(0, 0) }
+}
+
 /** Feeds the top area's real rendered height into [state], for [topAreaContentSpacer] to track. */
 fun Modifier.reportTopAreaHeight(state: TopAreaState): Modifier =
     onSizeChanged { state.measuredHeightPx = it.height }
@@ -101,6 +108,26 @@ fun Modifier.topAreaContentSpacer(state: TopAreaState): Modifier = layout { meas
         Constraints.fixed(constraints.maxWidth, state.measuredHeightPx.coerceAtLeast(0)),
     )
     layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+}
+
+/**
+ * Shifts this child up by [overlap] to overlap the previous sibling's bottom edge -- e.g. a
+ * summary/stats card riding up into the reserved bottom space of a folding hero header above it --
+ * while reporting a height reduced by that same amount, so a parent measuring total column height
+ * (typically via [reportTopAreaHeight]) sees the true visual footprint instead of double-counting
+ * the overlap as reserved space.
+ *
+ * Previously re-declared file-local in three screens (`LegalRepresentativeWorkshopsScreen`,
+ * `ObjectionStatusScreen`, `EmployerOnlineServicesScreen`) per this file's own precedent of
+ * extracting on a fourth use -- `CalculateWagePensionScreen` is that fourth use.
+ */
+fun Modifier.straddlePreviousSibling(overlap: Dp): Modifier = layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints)
+    val overlapPx = overlap.roundToPx()
+    val reportedHeight = (placeable.height - overlapPx).coerceAtLeast(0)
+    layout(placeable.width, reportedHeight) {
+        placeable.placeRelative(0, -overlapPx)
+    }
 }
 
 /**

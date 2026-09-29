@@ -13,7 +13,7 @@ files an objection against it. Not to be confused with the two neighbouring serv
 | Persian | Meaning | Where it lives |
 |---|---|---|
 | اعتراض به سوابق ناموجود | a period is **missing entirely** | `:feature:history-objection`, flag `10` |
-| اعتراض به سابقه کسری دار | a recorded period is **short or wrong** | flag `42`, not implemented |
+| اعتراض به سابقه کسری دار | a recorded period is **short or wrong** | `:feature:objectionInsurance`, flags `42`/`45` — see [[Objection-Insurance]] |
 | اعتراض به بدهی | employer objects to a **debt** | `:feature:workshops` → `ui/objectionableDebit` (filing — backend layers exist, no UI yet); status tracked separately at `ui/objectionStatus`, flag `1006` — see [[Debt-Objection-Status]] |
 
 ## Status: full CRUD on `historyprotest-services` wired end-to-end

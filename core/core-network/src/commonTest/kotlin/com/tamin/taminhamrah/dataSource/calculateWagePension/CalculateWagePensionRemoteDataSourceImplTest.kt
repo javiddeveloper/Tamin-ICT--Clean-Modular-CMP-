@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.dataSource.calculateWagePension
 
+import com.tamin.taminhamrah.tools.FakeIOException
 import com.tamin.taminhamrah.apiService.calculateWagePension.CalculateWagePensionApiService
 import com.tamin.taminhamrah.model.calculateWagePension.MultipleWorkshopPersonalInfoDTO
 import com.tamin.taminhamrah.model.calculateWagePension.MultipleWorkshopResultDTO
@@ -11,6 +12,9 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import io.ktor.client.plugins.HttpRequestTimeoutException
+import io.ktor.client.network.sockets.ConnectTimeoutException
+import io.ktor.client.network.sockets.SocketTimeoutException
 
 class CalculateWagePensionRemoteDataSourceImplTest {
 
@@ -63,14 +67,35 @@ class CalculateWagePensionRemoteDataSourceImplTest {
         }
         assertEquals("NO_CONNECTION_ERROR", error.title)
     }
+
+    /** The old app told these apart: "زمان درخواست به پایان رسید", not "check your internet". */
+    @Test
+    fun `timeouts read as timeouts, not as a lost connection`() = runTest {
+        val timeouts = listOf(
+            HttpRequestTimeoutException("https://eservices.tamin.ir/api/x", 60_000),
+            ConnectTimeoutException("connect timed out"),
+            SocketTimeoutException("Read timed out"),
+        )
+        for (timeout in timeouts) {
+            val dataSource = CalculateWagePensionRemoteDataSourceImpl(
+                apiService = FakeCalculateWagePensionApiService(error = timeout),
+                errorParser = FakeErrorParser()
+            )
+
+            val error = assertFailsWith<TaminApiException> { dataSource.getPersonalInfo() }
+            assertEquals("SERVICE_TIMEOUT", error.title, timeout::class.simpleName)
+        }
+    }
 }
 
 private class FakeCalculateWagePensionApiService(
-    private val shouldThrow: Boolean = false
+    private val shouldThrow: Boolean = false,
+    private val error: Throwable? = null,
 ) : CalculateWagePensionApiService {
 
     override suspend fun getPersonalInfo(): BaseDTO<MultipleWorkshopPersonalInfoDTO> {
-        if (shouldThrow) throw IllegalStateException("network")
+        error?.let { throw it }
+        if (shouldThrow) throw FakeIOException()
         return success(
             MultipleWorkshopPersonalInfoDTO(
                 organizationId = "12345",
@@ -84,7 +109,7 @@ private class FakeCalculateWagePensionApiService(
         branchCode: String,
         insuranceNumber: String
     ): BaseDTO<MultipleWorkshopResultDTO> {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         return success(MultipleWorkshopResultDTO(result = 1))
     }
 
@@ -92,7 +117,7 @@ private class FakeCalculateWagePensionApiService(
         branchCode: String,
         insuranceNumber: String
     ): BaseDTO<MultipleWorkshopResultDTO> {
-        if (shouldThrow) throw IllegalStateException("network")
+        if (shouldThrow) throw FakeIOException()
         return success(MultipleWorkshopResultDTO(result = 25_000_000))
     }
 

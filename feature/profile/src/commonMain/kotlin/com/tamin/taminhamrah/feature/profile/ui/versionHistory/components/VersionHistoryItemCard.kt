@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -39,8 +38,11 @@ import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.model.versionHistory.VersionHistoryPR
 import com.tamin.taminhamrah.ui.components.NumericText
 import com.tamin.taminhamrah.ui.components.TaminDivider
+import com.tamin.taminhamrah.ui.theme.CornerRadius
+import com.tamin.taminhamrah.ui.theme.IconSize
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.theme.Thickness
 import com.tamin.taminhamrah.util.toPersianDigits
 import org.jetbrains.compose.resources.stringResource
 import taminx.core.core_ui.Res
@@ -62,13 +64,13 @@ internal fun VersionHistoryItemCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(CornerRadius.cardCompact))
             .clickable { onToggleExpand() },
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(CornerRadius.cardCompact),
         colors = CardDefaults.cardColors(
             containerColor = taminColors.bgSurface
         ),
-        border = BorderStroke(1.dp, taminColors.border)
+        border = BorderStroke(Thickness.border, taminColors.border)
     ) {
         Column(
             modifier = Modifier.fillMaxWidth()
@@ -81,16 +83,33 @@ internal fun VersionHistoryItemCard(
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // Expand/Collapse Chevron Button
+                    Box(
+                        modifier = Modifier
+                            .size(IconSize.large)
+                            .background(taminColors.blueBg, RoundedCornerShape(CornerRadius.lg))
+                            .border(Thickness.border, taminColors.blueBorder, RoundedCornerShape(CornerRadius.lg)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = null,
+                            tint = taminColors.blueText,
+                            modifier = Modifier
+                                .size(IconSize.medium)
+                                .rotate(rotationState)
+                        )
+                    }
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
                     ) {
                         Text(
                             text = stringResource(Res.string.profile_version_history_version_prefix, item.versionName.toPersianDigits()),
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = taminColors.blueText
                         )
@@ -100,26 +119,10 @@ internal fun VersionHistoryItemCard(
                         }
                     }
 
-                    // Expand/Collapse Chevron Button
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .background(taminColors.bgPage, RoundedCornerShape(10.dp))
-                            .border(1.dp, taminColors.border, RoundedCornerShape(10.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowDown,
-                            contentDescription = null,
-                            tint = taminColors.textSecondary,
-                            modifier = Modifier
-                                .size(24.dp)
-                                .rotate(rotationState)
-                        )
-                    }
+
                 }
 
-                Spacer(modifier = Modifier.height(Spacing.xs))
+                Spacer(modifier = Modifier.height(Spacing.sm))
 
                 Text(
                     text = stringResource(Res.string.profile_version_history_release_date, item.releaseDate),
@@ -148,9 +151,9 @@ internal fun VersionHistoryItemCard(
                     if (item.newFeatures.isNotEmpty()) {
                         Text(
                             text = stringResource(Res.string.profile_version_history_new_features),
-                            style = MaterialTheme.typography.titleSmall,
+                            style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
-                            color = taminColors.teal
+                            color = taminColors.textMuted
                         )
                         Spacer(modifier = Modifier.height(Spacing.sm))
 
@@ -170,9 +173,9 @@ internal fun VersionHistoryItemCard(
                     if (item.debug.isNotEmpty()) {
                         Text(
                             text = stringResource(Res.string.profile_version_history_bug_fixes_and_improvements),
-                            style = MaterialTheme.typography.titleSmall,
+                            style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
-                            color = taminColors.orangeText
+                            color = taminColors.textMuted
                         )
                         Spacer(modifier = Modifier.height(Spacing.sm))
 
@@ -190,7 +193,7 @@ internal fun VersionHistoryItemCard(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(4.dp)
+                    .height(Thickness.accent)
                     .background(taminColors.blueText)
             )
         }
@@ -214,8 +217,8 @@ private fun ChangesRow(
         // Number Badge
         Box(
             modifier = Modifier
-                .size(24.dp)
-                .background(taminColors.blueBg, CircleShape),
+                .size(IconSize.medium)
+                .background(taminColors.blueBg, RoundedCornerShape(CornerRadius.md)),
             contentAlignment = Alignment.Center
         ) {
             NumericText(
@@ -238,8 +241,9 @@ private fun LatestBadge(modifier: Modifier = Modifier) {
     val taminColors = LocalTaminColors.current
     Box(
         modifier = modifier
-            .background(taminColors.greenBg, RoundedCornerShape(12.dp))
-            .padding(horizontal = 10.dp, vertical = 4.dp),
+            .background(taminColors.greenBg, RoundedCornerShape(CornerRadius.full))
+            .border(Thickness.border, taminColors.greenBorder, RoundedCornerShape(CornerRadius.full))
+            .padding(horizontal = Spacing.smPlus, vertical = Spacing.xs),
         contentAlignment = Alignment.Center
     ) {
         Text(

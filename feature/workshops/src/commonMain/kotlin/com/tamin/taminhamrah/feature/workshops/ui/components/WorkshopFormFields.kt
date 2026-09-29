@@ -17,13 +17,20 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import com.tamin.taminhamrah.feature.workshops.ui.WorkshopConstants
 import com.tamin.taminhamrah.feature.workshops.ui.model.PersonSearch
 import com.tamin.taminhamrah.feature.workshops.ui.theme.WorkshopDimens
@@ -157,7 +164,15 @@ fun WorkshopFieldSlot(
     errorText: String? = null,
     content: @Composable () -> Unit,
 ) {
-    val caption = if (isRequired) "$label *" else label
+    val danger = LocalTaminColors.current.dangerText
+    // The star in red, the way TaminStyledTextField marks its own required label — a form mixing
+    // typed fields and pickers otherwise showed two different stars side by side.
+    val caption = remember(label, isRequired, danger) {
+        buildAnnotatedString {
+            append(label)
+            if (isRequired) withStyle(SpanStyle(color = danger)) { append(" *") }
+        }
+    }
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(WorkshopDimens.fieldLabelGap),
@@ -179,6 +194,9 @@ fun WorkshopFieldSlot(
  * A thin adapter over [TaminStyledTextField] rather than a field of its own: that one already
  * carries the label, the placeholder, the character restriction, the length cap and the inline
  * error state, and every other form in the app is drawn with it.
+ *
+ * A digits-only field is right-aligned: a bare number carries no direction and would otherwise
+ * start from the left, away from its label and placeholder on the RTL page.
  */
 @Composable
 fun WorkshopTextField(
@@ -195,6 +213,10 @@ fun WorkshopTextField(
     errorText: String? = null,
     /** Passed through; None, the default, draws the value as typed. */
     visualTransformation: VisualTransformation = VisualTransformation.None,
+    /** The field's fill. The surface colour, the default, suits a field on the page background. */
+    containerColor: Color = LocalTaminColors.current.bgSurface,
+    /** Passed through; null, the default, keeps the field's own size. */
+    textStyle: TextStyle? = null,
 ) {
     TaminStyledTextField(
         value = value,
@@ -209,6 +231,13 @@ fun WorkshopTextField(
         errorText = errorText,
         modifier = modifier,
         visualTransformation = visualTransformation,
+        textFieldBg = containerColor,
+        textAlign = if (inputRestriction == InputRestriction.DigitsOnly) {
+            TextAlign.Right
+        } else {
+            TextAlign.Unspecified
+        },
+        textStyle = textStyle,
     )
 }
 
@@ -337,6 +366,7 @@ fun WorkshopSearchAction(onClick: () -> Unit) {
         icon = vectorResource(Res.drawable.ic_tamin_search),
         contentDescription = stringResource(Res.string.workshop_search),
         onClick = onClick,
+        bordered = true,
     )
 }
 
@@ -353,6 +383,11 @@ fun PersonSearchPanel(
     onSearch: () -> Unit,
     onClear: () -> Unit,
     modifier: Modifier = Modifier,
+    /**
+     * Offers the شماره بیمه field. True — the default — is کارکنان's two-field search; ذینفعان
+     * passes false, because its service has no insurance-number column to filter on.
+     */
+    showsInsuranceNumber: Boolean = true,
 ) {
     val tenDigits = stringResource(Res.string.workshop_ten_digits)
     WorkshopSearchCard(onSearch = onSearch, onClear = onClear, modifier = modifier) {
@@ -365,17 +400,19 @@ fun PersonSearchPanel(
             placeholder = tenDigits,
             maxLength = WorkshopConstants.NATIONAL_ID_LENGTH,
         )
-        WorkshopTextField(
-            label = stringResource(Res.string.member_insurance_number),
-            value = search.insuranceNumber,
-            onValueChange = {
-                onSearchChange(
-                    search.copy(insuranceNumber = it.digitsOnly()),
-                )
-            },
-            placeholder = tenDigits,
-            maxLength = WorkshopConstants.INSURANCE_NUMBER_LENGTH,
-        )
+        if (showsInsuranceNumber) {
+            WorkshopTextField(
+                label = stringResource(Res.string.member_insurance_number),
+                value = search.insuranceNumber,
+                onValueChange = {
+                    onSearchChange(
+                        search.copy(insuranceNumber = it.digitsOnly()),
+                    )
+                },
+                placeholder = tenDigits,
+                maxLength = WorkshopConstants.INSURANCE_NUMBER_LENGTH,
+            )
+        }
     }
 }
 

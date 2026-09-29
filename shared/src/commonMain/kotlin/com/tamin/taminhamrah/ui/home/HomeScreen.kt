@@ -69,6 +69,11 @@ import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.ShimmerBlock
 import com.tamin.taminhamrah.ui.theme.ShimmerSize
 import com.tamin.taminhamrah.ui.theme.Spacing
+import com.tamin.taminhamrah.ui.toparea.TopAreaState
+import com.tamin.taminhamrah.ui.toparea.driveTopArea
+import com.tamin.taminhamrah.ui.toparea.rememberMeasuredTopAreaState
+import com.tamin.taminhamrah.ui.toparea.reportTopAreaHeight
+import com.tamin.taminhamrah.ui.toparea.topAreaContentSpacer
 import com.tamin.taminhamrah.util.PersianDateFormatter
 import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.stringResource
@@ -171,6 +176,9 @@ fun HomeScreen(
         onRetryHistorySummary = remember(viewModel) {
             { viewModel.sendIntent(HomeIntent.LoadHistorySummary) }
         },
+        onSupportClick = remember(viewModel) {
+            { viewModel.sendIntent(HomeIntent.OnSupportClick) }
+        },
         storyRail = {
             // «تازه‌ها» sits directly above the campaigns, as on the design, and is full-bleed for
             // the same reason: a row that scrolls has to be able to run a ring off the screen edge.
@@ -209,8 +217,25 @@ private fun HomeScreenContent(
     /** Anywhere on خلاصهٔ سابقه — the card, its year pill and «جزئیات ماه‌به‌ماه» all open سوابق. */
     onHistorySummaryClick: () -> Unit = {},
     onRetryHistorySummary: () -> Unit = {},
+    onSupportClick: () -> Unit = {},
     storyRail: @Composable () -> Unit = {},
 ) {
+    // Folds HomeHeader's name + status-chips row from the column's own drag, snapping on release --
+    // same TopArea pattern as CalculateWagePensionScreen / HistoryJobInfoScreen /
+    // TaminServicesScreen. HomeHeader's shield/title/support row stays fixed (same shape as
+    // HistoryJobInfoHeader's persistent title bar), and HomeAgentAskBar is never wrapped in a
+    // topArea behavior, so once fully collapsed only that fixed row and the ask-bar remain visible.
+    // See docs/vault/TopArea-System.md.
+    val topArea = rememberMeasuredTopAreaState(key = uiState.isAgentEnabled) { topAreaState ->
+        HomeTopArea(
+            uiState = uiState,
+            onNavigateToAgent = onNavigateToAgent,
+            onSupportClick = onSupportClick,
+            topAreaState = topAreaState,
+        )
+    }
+    val scrollState = rememberScrollState()
+
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.TopCenter
@@ -222,56 +247,17 @@ private fun HomeScreenContent(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
+                .driveTopArea(topArea, scrollState)
+                .verticalScroll(scrollState)
                 .padding(horizontal = HomeContentPadding)
                 // Bottom padding so last item scrolls fully above the floating blur bar
                 .windowInsetsPadding(WindowInsets.navigationBars)
                 .padding(bottom = 100.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Header + AI ask-bar. The bar straddles the header's bottom edge the way the profile
-            // screen's status card does: the header sits in a Column with a trailing spacer that
-            // reserves the bar's lower half, and the bar is bottom-aligned in the Box over it.
-            Box(modifier = Modifier.ignoreHorizontalPadding(HomeContentPadding)) {
-                Column {
-                    HomeHeader(
-                        // null here means "still loading" to HomeHeader (it shows a shimmer) — that
-                        // is only true while homeContent itself hasn't arrived yet. Once it has, a
-                        // blank/unavailable name is resolved to the localized fallback text right
-                        // here rather than in core-data, which has no Compose-resources access.
-                        fullName = uiState.homeContent?.let {
-                            it.userInfo?.fullName?.takeIf { name -> name.isNotBlank() }
-                                ?: stringResource(Res.string.home_header_fallback_name)
-                        },
-                        hasDarmanCoverage = uiState.homeContent?.userInfo?.hasDarmanCoverage,
-                        hasActiveRelation = uiState.homeContent?.userInfo?.hasActiveRelation,
-                    )
-                    if (uiState.isAgentEnabled != false) {
-                        Spacer(modifier = Modifier.height(HomeAskBarOverlap))
-                    }
-                }
-                when (uiState.isAgentEnabled) {
-                    // Not known yet: the bar's own footprint shimmers rather than the header
-                    // jumping once the menu answers.
-                    null -> ShimmerBlock(
-                        cornerRadius = CornerRadius.max,
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(horizontal = HomeContentPadding)
-                            .fillMaxWidth()
-                            .height(ButtonDimens.height),
-                    )
-                    true -> HomeAgentAskBar(
-                        hint = stringResource(Res.string.home_ask_agent_hint),
-                        contentDescription = stringResource(Res.string.home_ask_agent_cd),
-                        onClick = onNavigateToAgent,
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(horizontal = HomeContentPadding),
-                    )
-                    false -> Unit
-                }
-            }
+            // Reserves the floating top area's live height as leading space -- a fixed padding
+            // here wouldn't scroll away with the rest of the column.
+            Spacer(modifier = Modifier.topAreaContentSpacer(topArea))
 
             if (uiState.isAgentEnabled != false) {
                 Row(
@@ -405,6 +391,78 @@ private fun HomeScreenContent(
                     Text(stringResource(Res.string.retry))
                 }
             }
+        }
+
+        // The floating top area sits on top so the column passes underneath it as it scrolls away.
+        HomeTopArea(
+            uiState = uiState,
+            onNavigateToAgent = onNavigateToAgent,
+            onSupportClick = onSupportClick,
+            topAreaState = topArea,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .reportTopAreaHeight(topArea),
+        )
+    }
+}
+
+/**
+ * The screen's floating top area: [HomeHeader] (whose shield/title/support row stays fixed, same
+ * as `HistoryJobInfoHeader`'s persistent title bar -- only its name + status-chips row folds away)
+ * plus [HomeAgentAskBar], which is never wrapped in a topArea behavior and stays fully shown --
+ * riding up by [HomeAskBarOverlap] to straddle the header's seam exactly as before.
+ */
+@Composable
+private fun HomeTopArea(
+    uiState: HomeUiState,
+    onNavigateToAgent: () -> Unit,
+    onSupportClick: () -> Unit,
+    topAreaState: TopAreaState,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier.fillMaxWidth()) {
+        Column {
+            HomeHeader(
+                // null here means "still loading" to HomeHeader (it shows a shimmer) — that
+                // is only true while homeContent itself hasn't arrived yet. Once it has, a
+                // blank/unavailable name is resolved to the localized fallback text right
+                // here rather than in core-data, which has no Compose-resources access.
+                fullName = uiState.homeContent?.let {
+                    it.userInfo?.fullName?.takeIf { name -> name.isNotBlank() }
+                        ?: stringResource(Res.string.home_header_fallback_name)
+                },
+                hasDarmanCoverage = uiState.homeContent?.userInfo?.hasDarmanCoverage,
+                hasActiveRelation = uiState.homeContent?.userInfo?.hasActiveRelation,
+                // Only the name + chips row folds inside HomeHeader; the shield/title/support row
+                // stays fixed, same shape as HistoryJobInfoHeader's persistent title bar.
+                topAreaState = topAreaState,
+                onSupportClick = onSupportClick,
+            )
+            if (uiState.isAgentEnabled != false) {
+                Spacer(modifier = Modifier.height(HomeAskBarOverlap))
+            }
+        }
+        when (uiState.isAgentEnabled) {
+            // Not known yet: the bar's own footprint shimmers rather than the header jumping once
+            // the menu answers.
+            null -> ShimmerBlock(
+                cornerRadius = CornerRadius.max,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(horizontal = HomeContentPadding)
+                    .fillMaxWidth()
+                    .height(ButtonDimens.height),
+            )
+            true -> HomeAgentAskBar(
+                hint = stringResource(Res.string.home_ask_agent_hint),
+                contentDescription = stringResource(Res.string.home_ask_agent_cd),
+                onClick = onNavigateToAgent,
+                animated = !topAreaState.isMeasureProbe,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(horizontal = HomeContentPadding),
+            )
+            false -> Unit
         }
     }
 }

@@ -113,6 +113,8 @@ fun SegmentedInputField(
      * shorter box passes a smaller value rather than every screen getting one.
      */
     verticalPadding: Dp = Spacing.md,
+    /** False draws Latin characters as typed, for codes printed in Latin (the smart-card serial). */
+    formatAsPersianDigits: Boolean = true,
     valueFilter: (String) -> String = { raw ->
         raw.filter { it.isDigit() || it.isPersianDigit() }.take(slotCount)
     },
@@ -205,7 +207,8 @@ fun SegmentedInputField(
                                         isCursor = isCursor,
                                         textColor = colors.textPrimary,
                                         placeholderColor = colors.textMuted,
-                                        blinkState = blinkState
+                                        blinkState = blinkState,
+                                        formatAsPersianDigits = formatAsPersianDigits,
                                     )
                                     if (i != slotCount - 1) {
                                         val spacing = if (i in groupBreaks) groupSpacing else slotSpacing
@@ -333,7 +336,8 @@ private fun DigitSlot(
     isCursor: Boolean,
     textColor: Color,
     placeholderColor: Color,
-    blinkState: State<Float>
+    blinkState: State<Float>,
+    formatAsPersianDigits: Boolean,
 ) {
     AnimatedContent(
         targetState = digit,
@@ -354,8 +358,13 @@ private fun DigitSlot(
         ) {
             if (currentDigit != null) {
                 Text(
-                    text = currentDigit.toString().toPersianDigits(),
-                    style = MaterialTheme.typography.titleLarge,
+                    text = if (formatAsPersianDigits) currentDigit.toString().toPersianDigits() else currentDigit.toString(),
+                    // Replacing the theme's `ss01` keeps ASCII digits Latin (see Type.kt).
+                    style = if (formatAsPersianDigits) {
+                        MaterialTheme.typography.titleLarge
+                    } else {
+                        MaterialTheme.typography.titleLarge.copy(fontFeatureSettings = "tnum")
+                    },
                     color = textColor
                 )
             } else {

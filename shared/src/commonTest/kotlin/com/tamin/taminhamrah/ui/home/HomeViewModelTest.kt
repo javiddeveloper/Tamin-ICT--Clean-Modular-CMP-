@@ -357,7 +357,7 @@ class HomeViewModelTest {
         advanceUntilIdle()
         collector.cancel()
 
-        assertEquals(listOf<HomeEvent>(HomeEvent.NavigateToService(FeatureFlag.WAGE_AND_HISTORY)), events)
+        assertEquals(listOf<HomeEvent>(HomeEvent.NavigateToService(FeatureFlag.COMBINED_RECORD)), events)
     }
 
     /** The same gate every card goes through: a service switched off explains itself, not opens. */
@@ -373,6 +373,21 @@ class HomeViewModelTest {
         collector.cancel()
 
         assertEquals(listOf<HomeEvent>(HomeEvent.ShowMessage("سرویس غیرفعال است")), events)
+    }
+
+    /** Same number پروفایل › پشتیبانی dials. */
+    @Test
+    fun `tapping the header support icon dials 1420`() = runTest(testDispatcher) {
+        val viewModel = createViewModel()
+        advanceUntilIdle()
+
+        val events = mutableListOf<HomeEvent>()
+        val collector = launch { viewModel.events.toList(events) }
+        viewModel.sendIntent(HomeIntent.OnSupportClick)
+        advanceUntilIdle()
+        collector.cancel()
+
+        assertEquals(listOf<HomeEvent>(HomeEvent.NavigateToWeb("tel:1420")), events)
     }
 
     // ─── تازه‌ها / آخرین درخواست‌ها — client-only flags ─────────────────────────────────────────

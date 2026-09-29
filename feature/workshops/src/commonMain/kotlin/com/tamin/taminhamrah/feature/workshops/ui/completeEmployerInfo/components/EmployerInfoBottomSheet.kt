@@ -15,6 +15,7 @@ import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetConfig
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetItem
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetStyle
 import com.tamin.taminhamrah.ui.components.bottomsheet.TaminBottomSheetType
+import com.tamin.taminhamrah.ui.components.bottomsheet.TaminSearchableListSheet
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
 import com.tamin.taminhamrah.ui.theme.Spacing
 import kotlinx.collections.immutable.ImmutableList
@@ -26,7 +27,10 @@ import taminx.core.core_ui.employer_info_sheet_city
 import taminx.core.core_ui.employer_info_sheet_province
 
 /**
- * The four pickers, drawn by core-ui's shared [TaminBottomSheet].
+ * The company-type and branch pickers, drawn by core-ui's shared [TaminBottomSheet].
+ *
+ * Province and city are searched/paginated against the server and render through
+ * [EmployerLocationPickerSheet] ([TaminSearchableListSheet]) instead — see that composable.
  *
  * The design's sheet differs from that component's default look — page-colored, centred title, no
  * close button, rows grouped in a bordered card, and a tap that selects and closes rather than
@@ -40,50 +44,38 @@ fun EmployerInfoBottomSheet(
     onDismiss: () -> Unit,
     selectedCompanyType: CompanyTypePR?,
     onSelectCompanyType: (CompanyTypePR) -> Unit,
-    provinces: ImmutableList<ProvincePR>,
-    isProvincesLoading: Boolean = false,
-    selectedProvince: ProvincePR?,
-    onSelectProvince: (ProvincePR) -> Unit,
-    cities: ImmutableList<CityPR>,
-    isCitiesLoading: Boolean = false,
-    selectedCity: CityPR?,
-    onSelectCity: (CityPR) -> Unit,
     branches: ImmutableList<BranchPR>,
     isBranchesLoading: Boolean = false,
     selectedBranch: BranchPR?,
     onSelectBranch: (BranchPR) -> Unit,
 ) {
-    if (activeBottomSheet == null) return
+    if (activeBottomSheet == null || activeBottomSheet == ActiveBottomSheet.PROVINCE || activeBottomSheet == ActiveBottomSheet.CITY) return
 
     val title = stringResource(
         when (activeBottomSheet) {
             ActiveBottomSheet.COMPANY_TYPE -> Res.string.employer_info_company_type_label
-            ActiveBottomSheet.PROVINCE -> Res.string.employer_info_sheet_province
-            ActiveBottomSheet.CITY -> Res.string.employer_info_sheet_city
             ActiveBottomSheet.BRANCH -> Res.string.employer_info_sheet_branch
+            ActiveBottomSheet.PROVINCE, ActiveBottomSheet.CITY -> return
         }
     )
 
     // Code and label together: the code decides which row reads as selected, the label is drawn.
     val rows: List<Pair<String, String>> = when (activeBottomSheet) {
         ActiveBottomSheet.COMPANY_TYPE -> COMPANY_TYPES.map { it.code to stringResource(it.titleRes) }
-        ActiveBottomSheet.PROVINCE -> provinces.map { it.provinceCode to it.provinceName }
-        ActiveBottomSheet.CITY -> cities.map { it.cityCode to it.cityName }
         ActiveBottomSheet.BRANCH -> branches.map { it.code to it.name }
+        ActiveBottomSheet.PROVINCE, ActiveBottomSheet.CITY -> return
     }
 
     val selectedCode = when (activeBottomSheet) {
         ActiveBottomSheet.COMPANY_TYPE -> selectedCompanyType?.code
-        ActiveBottomSheet.PROVINCE -> selectedProvince?.provinceCode
-        ActiveBottomSheet.CITY -> selectedCity?.cityCode
         ActiveBottomSheet.BRANCH -> selectedBranch?.code
+        ActiveBottomSheet.PROVINCE, ActiveBottomSheet.CITY -> return
     }
 
     val isLoading = when (activeBottomSheet) {
         ActiveBottomSheet.COMPANY_TYPE -> false
-        ActiveBottomSheet.PROVINCE -> isProvincesLoading && provinces.isEmpty()
-        ActiveBottomSheet.CITY -> isCitiesLoading && cities.isEmpty()
         ActiveBottomSheet.BRANCH -> isBranchesLoading && branches.isEmpty()
+        ActiveBottomSheet.PROVINCE, ActiveBottomSheet.CITY -> return
     }
 
     TaminBottomSheet(
@@ -102,9 +94,8 @@ fun EmployerInfoBottomSheet(
             if (index != null) {
                 when (activeBottomSheet) {
                     ActiveBottomSheet.COMPANY_TYPE -> COMPANY_TYPES.getOrNull(index)?.let(onSelectCompanyType)
-                    ActiveBottomSheet.PROVINCE -> provinces.getOrNull(index)?.let(onSelectProvince)
-                    ActiveBottomSheet.CITY -> cities.getOrNull(index)?.let(onSelectCity)
                     ActiveBottomSheet.BRANCH -> branches.getOrNull(index)?.let(onSelectBranch)
+                    ActiveBottomSheet.PROVINCE, ActiveBottomSheet.CITY -> Unit
                 }
             }
         },
@@ -129,12 +120,64 @@ fun EmployerInfoBottomSheet(
     )
 }
 
-/** The shared sheet keys its own search affordance off the type; these three are searchable. */
+/** The shared sheet keys its own search affordance off the type; branch is searchable. */
 private fun ActiveBottomSheet.sheetType(): TaminBottomSheetType = when (this) {
-    ActiveBottomSheet.PROVINCE -> TaminBottomSheetType.PROVINCE
-    ActiveBottomSheet.CITY -> TaminBottomSheetType.CITY
     ActiveBottomSheet.BRANCH -> TaminBottomSheetType.BRANCH
     ActiveBottomSheet.COMPANY_TYPE -> TaminBottomSheetType.CUSTOM
+    ActiveBottomSheet.PROVINCE, ActiveBottomSheet.CITY -> TaminBottomSheetType.CUSTOM
+}
+
+/**
+ * Province and city, paginated against the server via [TaminSearchableListSheet]. Neither
+ * `proxy/models/province/` nor `special-insured-services/cities` has a working name filter (the
+ * city one 404s — see [com.tamin.taminhamrah.feature.workshops.ui.completeEmployerInfo.CompleteEmployerInfoViewModel.cityBaseQuery]),
+ * so both search boxes fall back to filtering whatever page has already loaded rather than
+ * hitting the server.
+ */
+@Composable
+fun EmployerLocationPickerSheet(
+    activeBottomSheet: ActiveBottomSheet?,
+    onDismiss: () -> Unit,
+    provinces: ImmutableList<ProvincePR>,
+    isProvincesLoading: Boolean,
+    canLoadMoreProvinces: Boolean,
+    isProvincesLoadingMore: Boolean,
+    onProvinceLoadMore: () -> Unit,
+    onSelectProvince: (ProvincePR) -> Unit,
+    cities: ImmutableList<CityPR>,
+    isCitiesLoading: Boolean,
+    canLoadMoreCities: Boolean,
+    isCitiesLoadingMore: Boolean,
+    onCityLoadMore: () -> Unit,
+    onSelectCity: (CityPR) -> Unit,
+) {
+    when (activeBottomSheet) {
+        ActiveBottomSheet.PROVINCE -> TaminSearchableListSheet(
+            title = stringResource(Res.string.employer_info_sheet_province),
+            items = provinces,
+            itemLabel = { it.provinceName },
+            itemKey = { it.provinceCode },
+            isLoading = isProvincesLoading,
+            canLoadMore = canLoadMoreProvinces,
+            isLoadingMore = isProvincesLoadingMore,
+            onLoadMore = onProvinceLoadMore,
+            onItemSelected = onSelectProvince,
+            onDismiss = onDismiss,
+        )
+        ActiveBottomSheet.CITY -> TaminSearchableListSheet(
+            title = stringResource(Res.string.employer_info_sheet_city),
+            items = cities,
+            itemLabel = { it.cityName },
+            itemKey = { it.cityCode },
+            isLoading = isCitiesLoading,
+            canLoadMore = canLoadMoreCities,
+            isLoadingMore = isCitiesLoadingMore,
+            onLoadMore = onCityLoadMore,
+            onItemSelected = onSelectCity,
+            onDismiss = onDismiss,
+        )
+        ActiveBottomSheet.COMPANY_TYPE, ActiveBottomSheet.BRANCH, null -> Unit
+    }
 }
 
 private const val SHEET_SHIMMER_ROWS = 6

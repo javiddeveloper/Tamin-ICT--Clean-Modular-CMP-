@@ -62,7 +62,7 @@ private val ShimmerRowHeight = 18.dp
 internal fun RetirementIntroContent(
     insured: RetirementInsuredPR?,
     isLoading: Boolean,
-    isAgeEligible: Boolean,
+    isAgeConfirmed: Boolean,
     hasExistingRequest: Boolean,
     onOpenTrack: () -> Unit,
     modifier: Modifier = Modifier,
@@ -76,7 +76,7 @@ internal fun RetirementIntroContent(
             if (loading) RetirementInsuredShimmer() else RetirementInsuredCard(insured!!)
         }
 
-        if (isAgeEligible) {
+        if (isAgeConfirmed) {
             BannerCard(
                 message = stringResource(Res.string.retirement_pension_age_gate_passed),
                 type = BannerType.Success,

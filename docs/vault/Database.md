@@ -37,7 +37,9 @@ com.tamin.taminhamrah.data.local.AppDatabase / MyDatabase / TestDatabase
 com.omooooori… / com.riox432…                          ← leftovers from the original template
 ```
 
-⚠️ Any Entity change generates the next version's JSON in the schema folder, and that file must be committed. The active schema is currently at `TaminXDatabase/4.json` (`TaminXDatabase` `@Database version = 4`; version 4 added `agent_sessions.agentState` / `agentHistory`). Migration is destructive (`fallbackToDestructiveMigration`), so a version bump wipes the local cache. Do not ignore `core/core-database/schemas/` — Room schema files belong in git.
+⚠️ Any Entity change generates the next version's JSON in the schema folder, and that file must be committed. The active schema is currently at `TaminXDatabase/6.json` (`TaminXDatabase` `@Database version = 6`; version 5 changed `FeatureFlag` ids, so cached `home_content` rows stored under the old `flagId`s needed to be dropped; version 6 added `construction_file_pages`).
+
+⚠️ **Adding or changing an entity without bumping `version`** rewrites the existing `N.json` in place. Existing installs then crash on open with Room's identity-hash check (destructive fallback does not cover a same-version mismatch). The build also fails in `:core:core-database:copyRoomSchemas` with *"Inconsistency detected exporting Room schema files"* once the debug and release KSP outputs for the same version differ. The fix is to bump `version`, not to delete the build directory. Migration is destructive (`fallbackToDestructiveMigration`), so a version bump wipes the local cache. Do not ignore `core/core-database/schemas/` — Room schema files belong in git.
 
 ## What the database is for
 

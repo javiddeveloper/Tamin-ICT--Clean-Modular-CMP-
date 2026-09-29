@@ -138,6 +138,16 @@ fun ColumnScope.WorkshopQuickPickList(
      * default — keeps the spinner ردیف‌های پیمان shows.
      */
     shimmerLoadingMore: Boolean = false,
+    /**
+     * Draws an unpicked row as an outline alone, with no fill. False — the default — keeps the
+     * filled chip rows.
+     */
+    outlineUnselected: Boolean = false,
+    /**
+     * Draws each unselected row as a bordered surface card, the way the document-type sheet lists its
+     * choices, for a sheet on the page color. False — the default — keeps the gray chip rows.
+     */
+    cardRows: Boolean = false,
 ) {
     val listState = rememberLazyListState()
     listState.OnLoadMore(
@@ -171,7 +181,9 @@ fun ColumnScope.WorkshopQuickPickList(
                 codeLabel = workshop.codeLabel,
                 isSelected = workshop.workshopId == selectedWorkshopId &&
                     (selectedBranchCode.isBlank() || workshop.branchCode == selectedBranchCode),
+                outlineUnselected = outlineUnselected,
                 onPick = { onPick(workshop.workshopId, workshop.branchCode) },
+                cardRows = cardRows,
             )
         }
         if (workshops.isLoadingMore) {
@@ -197,22 +209,28 @@ private fun WorkshopQuickPickRow(
     name: String,
     codeLabel: String,
     isSelected: Boolean,
+    outlineUnselected: Boolean,
     onPick: () -> Unit,
     modifier: Modifier = Modifier,
+    cardRows: Boolean = false,
 ) {
     val colors = LocalTaminColors.current
-    val shape = remember { RoundedCornerShape(CornerRadius.md) }
+    val shape = remember(cardRows) { RoundedCornerShape(if (cardRows) CornerRadius.lg else CornerRadius.md) }
     Row(
         modifier = modifier
             .fillMaxWidth()
             .clip(shape)
             .clickable(onClick = onPick)
-            .background(if (isSelected) colors.blueBg else colors.chipBg)
             .then(
-                if (isSelected) {
-                    Modifier.border(Thickness.border, colors.blueBorder, shape)
-                } else {
-                    Modifier
+                when {
+                    isSelected -> Modifier
+                        .background(colors.blueBg)
+                        .border(Thickness.border, colors.blueBorder, shape)
+                    cardRows -> Modifier
+                        .background(colors.bgSurface)
+                        .border(Thickness.border, colors.border, shape)
+                    outlineUnselected -> Modifier.border(Thickness.border, colors.border, shape)
+                    else -> Modifier.background(colors.chipBg)
                 },
             )
             .padding(horizontal = Spacing.lg, vertical = Spacing.md),

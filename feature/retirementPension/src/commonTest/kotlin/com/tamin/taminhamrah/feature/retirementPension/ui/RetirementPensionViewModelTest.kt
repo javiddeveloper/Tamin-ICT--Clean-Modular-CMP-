@@ -15,7 +15,6 @@ import com.tamin.taminhamrah.feature.retirementPension.ui.contract.RetirementPen
 import com.tamin.taminhamrah.feature.retirementPension.ui.contract.RetirementScreen
 import com.tamin.taminhamrah.feature.retirementPension.ui.contract.RetirementStep
 import com.tamin.taminhamrah.model.pension.authenticationTicket.AuthenticationTicketDN
-import com.tamin.taminhamrah.model.pension.checkRetirementStatus.RetirementStatusDN
 import com.tamin.taminhamrah.model.pension.retirement.JobDN
 import com.tamin.taminhamrah.model.pension.retirement.RETIREMENT_REQUEST_STATUS_CREATED
 import com.tamin.taminhamrah.model.pension.retirement.RetirementBranchInfoPR
@@ -41,7 +40,6 @@ import com.tamin.taminhamrah.useCases.user.GetInsuredActiveBranchUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -111,8 +109,8 @@ class RetirementPensionViewModelTest {
         assertFalse(state.isIntroLoading)
         assertTrue(state.isAgeEligible)
         assertNotNull(state.insured)
-        assertEquals("علی محمدی", state.insured?.fullName)
-        assertEquals("12345678", state.insured?.insuranceNumber)
+        assertEquals("علی محمدی", state.insured.fullName)
+        assertEquals("12345678", state.insured.insuranceNumber)
         assertEquals("45,3,5", state.rawAge)
     }
 
@@ -139,6 +137,22 @@ class RetirementPensionViewModelTest {
 
         val state = viewModel.uiState.value
         assertTrue(state.isAgeEligible, "Age 42 must be eligible per old_android statutory minimum")
+    }
+
+    /** Offline, the unanswered age read as "age conditions met" and nothing was said. */
+    @Test
+    fun init_whenTheAgeCallFails_reportsItAndClaimsNoAgePass() = runTest(testDispatcher) {
+        pensionRepository.shouldThrowError = true
+
+        val viewModel = createViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertFalse(state.isAgeConfirmed)
+        assertNull(state.dialog, "An unanswered age is not a refusal")
+        viewModel.events.test {
+            assertTrue(awaitItem() is RetirementPensionEvent.ShowError)
+        }
     }
 
     @Test
