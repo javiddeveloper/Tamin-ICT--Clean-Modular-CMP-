@@ -33,8 +33,15 @@ import com.tamin.taminhamrah.feature.taminServices.navigateToOccurrence
 import com.tamin.taminhamrah.feature.taminServices.navigateToSendInsuranceHistoryToInstitutions
 import com.tamin.taminhamrah.feature.taminServices.navigateToWorkersPaymentInfo
 import com.tamin.taminhamrah.feature.taminServices.navigateToWorkshopInspection
+import com.tamin.taminhamrah.feature.treatment.navigateToMedicalConfirmations
 import com.tamin.taminhamrah.feature.treatment.navigateToPrescriptionDetail
 import com.tamin.taminhamrah.feature.treatment.navigateToPrescriptions
+import com.tamin.taminhamrah.feature.treatment.navigateToTreatment
+import com.tamin.taminhamrah.feature.treatment.navigateToTreatmentCosts
+import com.tamin.taminhamrah.feature.myinbox.navigateToMyInbox
+import com.tamin.taminhamrah.feature.profile.ProfileRoute
+import com.tamin.taminhamrah.feature.changemobile.navigateToChangeMobile
+import com.tamin.taminhamrah.feature.userRequest.navigateToUserRequests
 import com.tamin.taminhamrah.feature.taminServices.navigateToFuneralAllowance
 import com.tamin.taminhamrah.feature.weddingPresent.navigateToWeddingPresent
 import com.tamin.taminhamrah.feature.weddingPresent.navigateToWeddingPresentCalculate
@@ -67,12 +74,38 @@ fun NavController.navigateToDeepLink(key: DeepLinkKey, args: Map<String, String>
             return true
         }
     }
+    // TREATMENT_COSTS and CONFIRMATION_MEDICAL_AUTHORITIES share DESERVED_TREATMENT_PENSIONER
+    // with the plain DESERVED_TREATMENT key (treatment_card), so only the key — not the flag —
+    // tells the three apart. The flag has already been checked by the gate either way.
+    when (key) {
+        DeepLinkKey.TREATMENT_COSTS -> {
+            beforeOpen()
+            navigateToTreatmentCosts()
+            return true
+        }
+        DeepLinkKey.CONFIRMATION_MEDICAL_AUTHORITIES -> {
+            beforeOpen()
+            navigateToMedicalConfirmations()
+            return true
+        }
+        else -> Unit
+    }
     return navigateToFeature(key.flag, beforeOpen)
 }
 
 fun NavController.navigateToFeature(flag: FeatureFlag, beforeOpen: () -> Unit = {}): Boolean {
     val open: () -> Unit = when (flag) {
         FeatureFlag.AGENT -> screen { navigateToAgent() }
+        FeatureFlag.IDENTITY_INFO -> screen { navigate(ProfileRoute.Identity()) }
+        FeatureFlag.ACTIVE_RELATION -> screen { navigate(ProfileRoute.ActiveRelation) }
+        FeatureFlag.BANK_ACCOUNT_LIST -> screen { navigate(ProfileRoute.BankAccount) }
+        FeatureFlag.DEPENDENTS -> screen { navigate(ProfileRoute.DependentsList) }
+        FeatureFlag.MY_ELECTRONIC_FILE -> screen { navigate(ProfileRoute.ElectronicFile) }
+        FeatureFlag.CHANGE_MOBILE -> screen { navigateToChangeMobile() }
+        FeatureFlag.PERSONAL_INBOX -> screen { navigateToMyInbox() }
+        FeatureFlag.MY_REQUESTS -> screen { navigateToUserRequests() }
+        // «کارت بیمه» — the درمان tab's own hub, for the insured audience.
+        FeatureFlag.DESERVED_TREATMENT -> screen { navigateToTreatment() }
         // «کلیه سوابق» — the one history row left after «سوابق تلفیقی» and «سوابق و دستمزد»
         // were merged into it.
         FeatureFlag.COMBINED_RECORD -> screen { navigateToHistory() }
@@ -119,6 +152,11 @@ fun NavController.navigateToFeature(flag: FeatureFlag, beforeOpen: () -> Unit = 
         FeatureFlag.OBJECTION_INSURANCE_HISTORY_LEGACY -> screen { navigateToObjectionInsurance() }
         FeatureFlag.INQUIRY_EDUCATION -> screen { navigateToInquiryEducation() }
         FeatureFlag.FRACTION_CONTRACT -> return false
+        // No screen built for these yet — same as FRACTION_CONTRACT above, not an oversight.
+        FeatureFlag.VIEW_SHORT_TERM -> return false
+        FeatureFlag.CALCULATE_WAGE_ILL_DAYS -> return false
+        FeatureFlag.CALCULATE_WAGE_PREGNANCY -> return false
+        FeatureFlag.INSTALLMENT_DEBT -> return false
         FeatureFlag.WEDDING_PRESENT -> screen { navigateToWeddingPresent() }
         FeatureFlag.CALCULATE_MARRIAGE_ALLOWANCE -> screen { navigateToWeddingPresentCalculate() }
         FeatureFlag.REQUEST_FOR_PREGNANCY_PAY -> screen { navigateToPregnancyPay() }

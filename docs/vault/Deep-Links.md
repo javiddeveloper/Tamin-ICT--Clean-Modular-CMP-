@@ -61,7 +61,7 @@ It applies exactly the rule a menu tap on the home screen applies, so a link can
 - **Stories** — like the assistant, the viewer calls `LocalDeepLinkHandler` with `DeepLinkSource.APP_CONTENT` and `onOpened = close`, so the viewer closes only if the gate lets the link through.
 - **Assistant** — markdown buttons and `DeepLink` bubbles call the handler with `DeepLinkSource.AGENT`. The flag is checked **on tap**, not when the answer arrived, because answers are cached and a flag may change later.
 
-`navigateToFeature(flag, beforeOpen)` returns `false` when the app has no screen for a flag yet, or only an empty placeholder (currently `FRACTION_CONTRACT`, whose phase 2 UI is not built). The host then shows «این سرویس در حال حاضر در دسترس نیست» for links and for menu taps alike, and `beforeOpen` (e.g. closing the story viewer) does not run.
+`navigateToFeature(flag, beforeOpen)` returns `false` when the app has no screen for a flag yet, or only an empty placeholder — currently `FRACTION_CONTRACT`, `VIEW_SHORT_TERM`, `CALCULATE_WAGE_ILL_DAYS`, `CALCULATE_WAGE_PREGNANCY` and `INSTALLMENT_DEBT`, whose UI is not built. The host then shows «این سرویس در حال حاضر در دسترس نیست» for links and for menu taps alike, and `beforeOpen` (e.g. closing the story viewer) does not run.
 
 The server still sends `TOOLBAR_TITLE` in `@key?TOOLBAR_TITLE=…` links; it is ignored, the title comes from the menu.
 
@@ -71,7 +71,13 @@ The server still sends `TOOLBAR_TITLE` in `@key?TOOLBAR_TITLE=…` links; it is 
 2. Add an entry to `DeepLinkKey` with the backend's key and the flag.
 3. Add a case to `DeepLinkParserTest` / `ResolveDeepLinkUseCaseTest` if the key has special behaviour (alias, arguments).
 
-Aliases: `insurance_payment` and `cancel_contract` point at the contracts flag, because their own screens need a contract the user picks first (native `AgentNavKeys.ALIASES`).
+Aliases: `insurance_payment`, `cancel_contract` and `insurance_registration` point at the contracts flag, and `add_dependent`/`cancel_dependent` at the dependents flag, because their own screens need something (a contract, a dependent) only the list screen supplies (native `AgentNavKeys.ALIASES`).
+
+A key can also share a flag with another key on purpose, when the two are genuinely the same
+access check rather than a missing argument: `treatment_card`, `treatment_costs` and
+`confirmation_medical_authorities` all read `DESERVED_TREATMENT_PENSIONER`, so
+`navigateToDeepLink` special-cases the *key* (not the flag) for the latter two before falling
+through to `navigateToFeature(key.flag)`, the same shape as the `prescription_detail` special case.
 
 ## Known gaps
 

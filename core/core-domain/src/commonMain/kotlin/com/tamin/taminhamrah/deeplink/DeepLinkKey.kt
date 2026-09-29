@@ -9,15 +9,44 @@ import com.tamin.taminhamrah.model.common.FeatureFlag
  * (the assistant, a story, a notification, the OS). Keys are the ones the backend already uses in
  * the assistant's markdown links (`[label](@key)`), so the same link works in every channel.
  *
- * Several keys may share a flag. That is deliberate for entries such as [INSURANCE_PAYMENT] and
- * [CANCEL_CONTRACT]: their own screens need a contract the user picks first, so a link can only
- * safely land on the contract list, which is where that choice is made.
+ * Several keys may share a flag. That is deliberate for entries such as [INSURANCE_PAYMENT],
+ * [CANCEL_CONTRACT] and [INSURANCE_REGISTRATION] (a contract the user picks first, so a link can
+ * only safely land on the contract list) and [ADD_DEPENDENT]/[CANCEL_DEPENDENT] (a dependent only
+ * the dependents list can supply). [TREATMENT_COSTS] and [CONFIRMATION_MEDICAL_AUTHORITIES] are a
+ * different case: they share [FeatureFlag.DESERVED_TREATMENT_PENSIONER] with [DESERVED_TREATMENT]
+ * because that is genuinely the same access check, not a missing argument — `navigateToDeepLink`
+ * tells the three destinations apart by the key itself.
  */
 enum class DeepLinkKey(val key: String, val flag: FeatureFlag) {
     IDENTITY_INFO_INQUIRY("identity_info_inquiry", FeatureFlag.IDENTITY_INFO),
     ACTIVE_RELATION_INQUIRY("active_relation_inquiry", FeatureFlag.ACTIVE_RELATION),
     BANK_ACCOUNT_LIST("bank_account_list", FeatureFlag.BANK_ACCOUNT_LIST),
+    /** old_android's own alias: the declaration form lives on the same screen as the list. */
+    BANK_ACCOUNT_DECLARATION("bank_account_declaration", FeatureFlag.BANK_ACCOUNT_LIST),
     DEPENDENTS_LIST("dependents_list", FeatureFlag.DEPENDENTS),
+    /**
+     * old_android aliases both to `contract_list`-equivalent for the same reason as
+     * [INSURANCE_PAYMENT]/[CANCEL_CONTRACT]: add/cancel are actions reached from the dependents
+     * list, which is the only screen that supplies which dependent they act on.
+     */
+    ADD_DEPENDENT("add_dependent", FeatureFlag.DEPENDENTS),
+    CANCEL_DEPENDENT("cancel_dependent", FeatureFlag.DEPENDENTS),
+    EDIT_PHONE_NUMBER("edit_phone_number", FeatureFlag.CHANGE_MOBILE),
+    INBOX("inbox", FeatureFlag.PERSONAL_INBOX),
+    MY_REQUEST_LIST("my_request_list", FeatureFlag.MY_REQUESTS),
+    /** «کارت بیمه» — the درمان tab's own hub, for the insured audience. */
+    TREATMENT_CARD("treatment_card", FeatureFlag.DESERVED_TREATMENT),
+    /** «خسارت متفرقه» on the درمان hub. Shares [FeatureFlag.DESERVED_TREATMENT_PENSIONER] with
+     * [DESERVED_TREATMENT] and [CONFIRMATION_MEDICAL_AUTHORITIES]; `navigateToDeepLink` special-cases
+     * the key (not just the flag) to land on the right one of the three. */
+    TREATMENT_COSTS("treatment_costs", FeatureFlag.DESERVED_TREATMENT_PENSIONER),
+    /** «تاییدیه‌های پزشکی» on the درمان hub — see [TREATMENT_COSTS]'s note on the shared flag. */
+    CONFIRMATION_MEDICAL_AUTHORITIES("confirmation_medical_authorities", FeatureFlag.DESERVED_TREATMENT_PENSIONER),
+    /**
+     * old_android's `InsuranceRegistrationFragment` starts a contract without knowing which type —
+     * that only becomes known once picked from the list, the same reasoning as [INSURANCE_PAYMENT].
+     */
+    INSURANCE_REGISTRATION("insurance_registration", FeatureFlag.CONTRACTS),
     MERGE_HISTORY("merge_history", FeatureFlag.COMBINED_RECORD),
     WAGE_AND_HISTORY("wage_and_history", FeatureFlag.COMBINED_RECORD),
     ALL_HISTORY_INSURANCE("all_history_insurance", FeatureFlag.COMBINED_RECORD),

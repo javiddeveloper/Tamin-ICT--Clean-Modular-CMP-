@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.myinbox
 
+import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.tamin.taminhamrah.feature.myinbox.ui.MyInboxScreen
@@ -16,4 +17,9 @@ fun NavGraphBuilder.myInboxScreen(
             onNavigateBack = onNavigateBack
         )
     }
+}
+
+/** «صندوق شخصی» — e.g. from an assistant link. */
+fun NavController.navigateToMyInbox() {
+    navigate(MyInboxRoute)
 }
