@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.tamin.taminhamrah.ui.components.coloredShadow
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.IconSize
@@ -32,7 +31,7 @@ fun BeneficiariesSkeleton(modifier: Modifier = Modifier) {
         modifier = modifier
             .verticalScroll(rememberScrollState())
             .padding(horizontal = Spacing.page, vertical = Spacing.md),
-        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
         repeat(PLACEHOLDER_CARDS) {
             BeneficiaryCardSkeleton()
@@ -47,18 +46,12 @@ private fun BeneficiaryCardSkeleton(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .coloredShadow(
-                color = colors.shadowSubtle,
-                borderRadius = CornerRadius.card,
-                blurRadius = 20.dp,
-                offsetY = 8.dp,
-            )
             .taminSurface(),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(Spacing.lg),
+                .padding(Spacing.md),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -67,12 +60,12 @@ private fun BeneficiaryCardSkeleton(modifier: Modifier = Modifier) {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 ShimmerBlock(
-                    modifier = Modifier.size(IconSize.xlarge),
-                    cornerRadius = IconSize.xlarge / 2,
+                    modifier = Modifier.size(IconSize.large),
+                    cornerRadius = IconSize.large / 2,
                 )
                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.xxs)) {
                     ShimmerBlock(
-                        modifier = Modifier.width(100.dp).height(16.dp),
+                        modifier = Modifier.width(100.dp).height(14.dp),
                         cornerRadius = CornerRadius.sm,
                     )
                     ShimmerBlock(

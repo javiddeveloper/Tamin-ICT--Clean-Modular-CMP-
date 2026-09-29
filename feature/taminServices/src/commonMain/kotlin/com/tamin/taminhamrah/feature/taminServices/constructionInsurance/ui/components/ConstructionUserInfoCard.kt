@@ -1,5 +1,6 @@
 package com.tamin.taminhamrah.feature.taminServices.constructionInsurance.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,7 +21,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tamin.taminhamrah.ui.PreviewRtlTheme
 import com.tamin.taminhamrah.ui.PreviewRtlThemeContent
-import com.tamin.taminhamrah.ui.components.coloredShadow
 import com.tamin.taminhamrah.ui.theme.CornerRadius
 import com.tamin.taminhamrah.ui.theme.Elevation
 import com.tamin.taminhamrah.ui.theme.LocalTaminColors
@@ -43,17 +43,12 @@ fun ConstructionUserInfoCard(
 
     val taminColors = LocalTaminColors.current
 
+    // Flat (no shadow) — the 1dp border alone separates it from the page, like the other cards here.
     Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .coloredShadow(
-                color = taminColors.shadowSubtle,
-                borderRadius = CornerRadius.lg,
-                blurRadius = Elevation.md,
-                offsetY = Spacing.xs
-            ),
-        shape = RoundedCornerShape(CornerRadius.lg),
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(CornerRadius.xl),
         color = taminColors.bgSurface,
+        border = BorderStroke(1.dp, taminColors.border),
         tonalElevation = Elevation.none
     ) {
         Row(
@@ -106,7 +101,8 @@ private fun InfoColumn(
             text = value,
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold,
-            color = taminColors.textPrimary
+            // Same value color as the name/national-code card on تکمیل اطلاعات کارفرمایی (EmployerInfoHero).
+            color = taminColors.blueText
         )
         Text(
             text = label,

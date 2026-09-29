@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -45,6 +44,7 @@ import taminx.core.core_ui.btn_search
 import taminx.core.core_ui.construction_insurance_subtitle
 import taminx.core.core_ui.construction_insurance_title
 import taminx.core.core_ui.ic_info
+import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.ic_tamin_search
 import taminx.core.core_ui.notice_title
 
@@ -83,7 +83,7 @@ internal fun ConstructionInsuranceHeader(
             background = gradient,
             navigationIcon = {
                 TaminTopAppBarButton(
-                    icon = Icons.AutoMirrored.Filled.ArrowBack,
+                    icon = vectorResource(Res.drawable.ic_tamin_chevron_back),
                     contentDescription = stringResource(Res.string.action_back),
                     onClick = onBackClicked,
                     bordered = true,
@@ -95,11 +95,13 @@ internal fun ConstructionInsuranceHeader(
                         icon = vectorResource(Res.drawable.ic_info),
                         contentDescription = stringResource(Res.string.notice_title),
                         onClick = onInfoClicked,
+                        bordered = true,
                     )
                     TaminTopAppBarButton(
                         icon = vectorResource(Res.drawable.ic_tamin_search),
                         contentDescription = stringResource(Res.string.btn_search),
                         onClick = onSearchClicked,
+                        bordered = true,
                     )
                 }
             },

@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material.icons.filled.Settings
@@ -57,7 +56,6 @@ import com.tamin.taminhamrah.ui.components.TaminFilledButton
 import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.components.coloredShadow
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.ToasterState
@@ -76,7 +74,9 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.action_back
+import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.btn_action
 import taminx.core.core_ui.btn_installment_debit_list
 import taminx.core.core_ui.deferred_installment_rial
@@ -185,7 +185,7 @@ fun InstallmentLetterScreen(
                 title = stringResource(CoreRes.string.installment_letter_title),
                 navigationIcon = {
                     TaminTopAppBarButton(
-                        icon = Icons.AutoMirrored.Filled.ArrowBack,
+                        icon = vectorResource(CoreRes.drawable.ic_tamin_chevron_back),
                         contentDescription = stringResource(CoreRes.string.action_back),
                         onClick = onBackClicked,
                         bordered = true,
@@ -298,12 +298,6 @@ private fun InstallmentLetterCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .coloredShadow(
-                color = colors.shadowSubtle,
-                borderRadius = CornerRadius.card,
-                blurRadius = 20.dp,
-                offsetY = 8.dp
-            )
             .taminSurface()
             .padding(Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(Spacing.md),
@@ -401,6 +395,8 @@ private fun InstallmentLetterCard(
                     text = stringResource(CoreRes.string.btn_action),
                     onClick = { menuOpen = true },
                     icon = Icons.Default.Settings,
+                    // End = icon placed first in the Row, i.e. on the right edge under RTL.
+                    iconPosition = IconPosition.End,
                     height = ButtonHeight,
                     textStyle = MaterialTheme.typography.labelMedium,
                     background = Brush.linearGradient(listOf(TaminNavy300, TaminNavy900)),

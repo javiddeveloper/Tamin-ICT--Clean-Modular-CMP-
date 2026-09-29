@@ -16,9 +16,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.PriorityHigh
 import androidx.compose.material.icons.outlined.Verified
 import androidx.compose.material3.MaterialTheme
@@ -59,7 +59,6 @@ import com.tamin.taminhamrah.ui.components.TaminOutlinedButton
 import com.tamin.taminhamrah.ui.components.TaminPdfViewer
 import com.tamin.taminhamrah.ui.components.TaminTopAppBar
 import com.tamin.taminhamrah.ui.components.TaminTopAppBarButton
-import com.tamin.taminhamrah.ui.components.coloredShadow
 import com.tamin.taminhamrah.ui.components.taminSurface
 import com.tamin.taminhamrah.ui.components.toast.LocalToaster
 import com.tamin.taminhamrah.ui.components.toast.ToasterState
@@ -72,7 +71,9 @@ import com.tamin.taminhamrah.ui.toPriceFormat
 import com.tamin.taminhamrah.util.toFormattedDate
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import taminx.core.core_ui.action_back
+import taminx.core.core_ui.ic_tamin_chevron_back
 import taminx.core.core_ui.action_cancel
 import taminx.core.core_ui.btn_download_certificate
 import taminx.core.core_ui.btn_issue_payment_sheet
@@ -154,7 +155,7 @@ fun PaymentSheetScreen(
                 title = stringResource(CoreRes.string.payment_sheet_title),
                 navigationIcon = {
                     TaminTopAppBarButton(
-                        icon = Icons.AutoMirrored.Filled.ArrowBack,
+                        icon = vectorResource(CoreRes.drawable.ic_tamin_chevron_back),
                         contentDescription = stringResource(CoreRes.string.action_back),
                         onClick = onBackClicked,
                         bordered = true,
@@ -235,11 +236,15 @@ fun PaymentSheetScreen(
         TaminConfirmationDialog(
             title = stringResource(CoreRes.string.issue_payment_sheet_confirm_title),
             description = stringResource(CoreRes.string.payment_sheet_issuance_processing_notice),
-            icon = Icons.Outlined.PriorityHigh,
+            icon = Icons.Filled.Check,
+            iconTint = LocalTaminColors.current.greenText,
+            iconBackground = LocalTaminColors.current.greenBg,
             confirmButton = {
                 TaminFilledButton(
                     text = stringResource(CoreRes.string.objection_document_got_it),
                     onClick = { onIntent(PaymentSheetIntent.DismissIssuanceNotice) },
+                    background = LocalTaminColors.current.buttonGradient,
+                    shadowColor = LocalTaminColors.current.shadowPrimary,
                     modifier = Modifier.fillMaxWidth(),
                 )
             },
@@ -253,23 +258,35 @@ fun PaymentSheetScreen(
             title = stringResource(CoreRes.string.issue_payment_sheet_confirm_title),
             description = stringResource(CoreRes.string.issue_payment_sheet_confirm_message),
             icon = Icons.Outlined.PriorityHigh,
+            // Both buttons share one row: in RTL the first child sits on the right, so انصراف is
+            // right and تایید و صدور left. The dialog itself stacks confirm/dismiss vertically.
             confirmButton = {
-                TaminFilledButton(
-                    text = stringResource(CoreRes.string.issue_payment_sheet_confirm_button),
-                    onClick = {
-                        showIssueConfirm = false
-                        onIntent(PaymentSheetIntent.IssuePaymentSheet)
-                    },
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                )
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                ) {
+                    TaminOutlinedButton(
+                        text = stringResource(CoreRes.string.action_cancel),
+                        onClick = { showIssueConfirm = false },
+                        modifier = Modifier.weight(1f),
+                    )
+                    // A bit wider than انصراف so the primary action reads first.
+                    Box(modifier = Modifier.weight(1.5f)) {
+                        TaminFilledButton(
+                            text = stringResource(CoreRes.string.issue_payment_sheet_confirm_button),
+                            onClick = {
+                                showIssueConfirm = false
+                                onIntent(PaymentSheetIntent.IssuePaymentSheet)
+                            },
+                            // Same gradient as the صدور برگه پرداخت button that opened this dialog.
+                            background = LocalTaminColors.current.buttonGradient,
+                            shadowColor = LocalTaminColors.current.shadowPrimary,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                }
             },
-            dismissButton = {
-                TaminOutlinedButton(
-                    text = stringResource(CoreRes.string.action_cancel),
-                    onClick = { showIssueConfirm = false },
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            },
+            dismissButton = {},
             onDismissRequest = { showIssueConfirm = false },
         )
     }
@@ -311,12 +328,6 @@ private fun PaymentSheetCard(item: PaymentSheetConstructionFilePR, modifier: Mod
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .coloredShadow(
-                color = colors.shadowSubtle,
-                borderRadius = CornerRadius.card,
-                blurRadius = 20.dp,
-                offsetY = 8.dp
-            )
             .taminSurface()
             .padding(Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(Spacing.md),
@@ -437,14 +448,8 @@ private fun PaymentSheetSummaryCard(buildingRequest: BuildingRequestSummaryPR, m
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .coloredShadow(
-                color = colors.shadowSubtle,
-                borderRadius = CornerRadius.card,
-                blurRadius = 20.dp,
-                offsetY = 8.dp,
-            )
             .taminSurface()
-            .padding(horizontal = Spacing.lg),
+            .padding(horizontal = Spacing.lg, vertical = Spacing.md),
     ) {
         DetailRow(
             label = stringResource(CoreRes.string.label_calculated_amount),
